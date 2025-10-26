@@ -10,7 +10,7 @@ This project is structured in three different main folders, each containing thei
 - [Knowledge Graph construction and validation](kg_construction_and_validation): SQL to RDF pipeline implementation and handover workflows validation system for MatInf databases
 - [Ontologies](ontologies): CRC1625 ontology employed for representing the CRC1625 and MatInf data (`crc.ttl`), alongside all other ontologies employed (`pmd_core`, `oce` and `ChEBI`, indirectly through `oce`). Diagrams of the ontology are also present in the folder.
 - [Virtuoso](virtuoso): Mountpoints for the (optional) `virtuoso` docker container.
-- [Performance test plots](performance_test_results): Perofrmance test output files and notebook used for generating the figures in the paper.
+- [Supplemental materials](supplemental_materials): This folder contains the performance test output log, all paper figures and code used to generate them, and additional figures (e.g., CPU and memory usage traces)
 
 <div align="center">
 
