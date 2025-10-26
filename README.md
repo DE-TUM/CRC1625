@@ -14,7 +14,7 @@ This project is structured in three different main folders, each containing thei
 
 <div align="center">
 
-[<img src="./kg_viz.webp" width="600" />](A visualization of the KG)
+[<img src="./kg_viz.webp" width="600" />](kg_viz.webp)
 
 </div>
 
