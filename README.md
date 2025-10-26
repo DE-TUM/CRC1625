@@ -8,14 +8,13 @@ Welcome to the repository for the ontology and KG implementation for the [CRC 16
 
 This project is structured in three different main folders, each containing their respective **documentation**:
 - [Knowledge Graph construction and validation](kg_construction_and_validation): SQL to RDF pipeline implementation and handover workflows validation system for MatInf databases
-- [Ontologies](ontologies): CRC1625 ontology employed for representing the CRC1625 and MatInf data (`crc.ttl`), alongside all other ontologies employed (`pmd_core`, `oce` and `CheBI`, indirectly through `oce`). Diagrams of the ontology are also present in the folder.
+- [Ontologies](ontologies): CRC1625 ontology employed for representing the CRC1625 and MatInf data (`crc.ttl`), alongside all other ontologies employed (`pmd_core`, `oce` and `ChEBI`, indirectly through `oce`). Diagrams of the ontology are also present in the folder.
 - [Virtuoso](virtuoso): Mountpoints for the (optional) `virtuoso` docker container.
 - [Performance test plots](performance_test_results): Perofrmance test output files and notebook used for generating the figures in the paper.
 
 
 <div align="center">
 
-[<img src="./header_image.svg" width="600" />](header_image.svg)
 [<img src="./kg_viz.webp" width="600" />](header_image.svg)
 
 </div>
