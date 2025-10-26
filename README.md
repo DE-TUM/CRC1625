@@ -13,12 +13,11 @@ This project is structured in three different main folders, each containing thei
 - [Performance test plots](performance_test_results): Perofrmance test output files and notebook used for generating the figures in the paper.
 
 
-<div align="center">
-
-[<img src="./kg_viz.webp" width="600" />](header_image.svg)
-
-</div>
+## Licensing
+All code and any other supplemental materials is licensed under the GNU Affero General Public License v3.0
 
 <div align="center">
-    <img src="https://img.shields.io/badge/We_love-Pommi-blue"/>
+
+[<img src="./kg_viz.webp" width="600" />](A visualization of the KG)
+
 </div>

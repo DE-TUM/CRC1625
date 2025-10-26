@@ -52,10 +52,3 @@ The following CLI applications are offered, offering documentation with the `-h 
 The following Python modules and APIs are also available:
 - `create_synthetic_records.py`: Creates a synthetic MatInf database that follows specified counts and probabilities of containing different objects.
 - `workflows_validation/validation.py`: Manages the in-memory and RDF-backed representations of workflow models and their instances, and performs validation on the MatInf data using them.
-
-## Licensing
-This software is licensed under the GNU General Public License v3.0
-
-<div align="center">
-    <img src="https://img.shields.io/badge/We_love-Pommi-blue"/>
-</div>
