@@ -1,7 +1,7 @@
 """
 Validates the correct behavior of the Handover workflows validation API
 
-To do so, it will load existing graph dumps and (workflow model, workflow instance) pairs from ./workflows_validation/validation_test
+To do so, it will load existing graph dumps and (workflow model, workflow instance) pairs from ./handover_workflows_validation/validation_test
 Each pair contains a specific configuration for which we know the validation results of every step. These can be found in
 the different run_* functions.
 
@@ -43,7 +43,7 @@ def run_test(path: str,
     """
     Runs a validation test.
     :param path Expects the base path containing *exclusively* the name of the workflow (e.g.,
-    `workflows_validation/validation_test/workflow_config_files/incorrect_activities/step_1`), to which
+    `handover_workflows_validation/validation_test/workflow_config_files/incorrect_activities/step_1`), to which
     `workflow_model.ttl` and `_workflow_instance.ttl` will be appended to load the respective files.
 
     :param step_validities Contains a dictionary of step name -> sample id -> validity, which indicates whether a given
@@ -86,7 +86,7 @@ def run_test(path: str,
         """)
 
 def run_incorrect_activities_tests(store: RDFDatastore):
-    run_test(os.path.join(module_dir,'workflows_validation/validation_test/workflow_config_files/incorrect_activities/step_1'),
+    run_test(os.path.join(module_dir,'handover_workflows_validation/validation_test/workflow_config_files/incorrect_activities/step_1'),
              {
                  'step_1': {sample_name_to_id['Sample1']: False},
                  'step_2': {sample_name_to_id['Sample1']: True},
@@ -96,7 +96,7 @@ def run_incorrect_activities_tests(store: RDFDatastore):
                  'step_6': {sample_name_to_id['AnnealedSample1Piece1']: True, sample_name_to_id['AnnealedSample1Piece2']: True}
              }, store)
 
-    run_test(os.path.join(module_dir, 'workflows_validation/validation_test/workflow_config_files/incorrect_activities/step_2'),
+    run_test(os.path.join(module_dir, 'handover_workflows_validation/validation_test/workflow_config_files/incorrect_activities/step_2'),
              {
                  'step_1': {sample_name_to_id['Sample1']: True},
                  'step_2': {sample_name_to_id['Sample1']: False},
@@ -106,7 +106,7 @@ def run_incorrect_activities_tests(store: RDFDatastore):
                  'step_6': {sample_name_to_id['AnnealedSample1Piece1']: True, sample_name_to_id['AnnealedSample1Piece2']: True}
              }, store)
 
-    run_test(os.path.join(module_dir, 'workflows_validation/validation_test/workflow_config_files/incorrect_activities/step_3'),
+    run_test(os.path.join(module_dir, 'handover_workflows_validation/validation_test/workflow_config_files/incorrect_activities/step_3'),
              {
                  'step_1': {sample_name_to_id['Sample1']: True},
                  'step_2': {sample_name_to_id['Sample1']: True},
@@ -116,7 +116,7 @@ def run_incorrect_activities_tests(store: RDFDatastore):
                  'step_6': {sample_name_to_id['AnnealedSample1Piece1']: True, sample_name_to_id['AnnealedSample1Piece2']: True}
              }, store)
 
-    run_test(os.path.join(module_dir, 'workflows_validation/validation_test/workflow_config_files/incorrect_activities/step_4'),
+    run_test(os.path.join(module_dir, 'handover_workflows_validation/validation_test/workflow_config_files/incorrect_activities/step_4'),
              {
                  'step_1': {sample_name_to_id['Sample1']: True},
                  'step_2': {sample_name_to_id['Sample1']: True},
@@ -125,7 +125,7 @@ def run_incorrect_activities_tests(store: RDFDatastore):
                  'step_5': {sample_name_to_id['AnnealedSample1']: True},
                  'step_6': {sample_name_to_id['AnnealedSample1Piece1']: True, sample_name_to_id['AnnealedSample1Piece2']: True}
              }, store)
-    run_test(os.path.join(module_dir, 'workflows_validation/validation_test/workflow_config_files/incorrect_activities/step_5'),
+    run_test(os.path.join(module_dir, 'handover_workflows_validation/validation_test/workflow_config_files/incorrect_activities/step_5'),
              {
                  'step_1': {sample_name_to_id['Sample1']: True},
                  'step_2': {sample_name_to_id['Sample1']: True},
@@ -135,7 +135,7 @@ def run_incorrect_activities_tests(store: RDFDatastore):
                  'step_6': {sample_name_to_id['AnnealedSample1Piece1']: True, sample_name_to_id['AnnealedSample1Piece2']: True}
              }, store)
 
-    run_test(os.path.join(module_dir, 'workflows_validation/validation_test/workflow_config_files/incorrect_activities/step_6'),
+    run_test(os.path.join(module_dir, 'handover_workflows_validation/validation_test/workflow_config_files/incorrect_activities/step_6'),
              {
                  'step_1': {sample_name_to_id['Sample1']: True},
                  'step_2': {sample_name_to_id['Sample1']: True},
@@ -146,7 +146,7 @@ def run_incorrect_activities_tests(store: RDFDatastore):
              }, store)
 
 def run_incorrect_projects_tests(store: RDFDatastore):
-    run_test(os.path.join(module_dir, 'workflows_validation/validation_test/workflow_config_files/incorrect_projects/step_1'),
+    run_test(os.path.join(module_dir, 'handover_workflows_validation/validation_test/workflow_config_files/incorrect_projects/step_1'),
              {
                  'step_1': {sample_name_to_id['Sample1']: False},
                  'step_2': {sample_name_to_id['Sample1']: True},
@@ -156,7 +156,7 @@ def run_incorrect_projects_tests(store: RDFDatastore):
                  'step_6': {sample_name_to_id['AnnealedSample1Piece1']: True, sample_name_to_id['AnnealedSample1Piece2']: True}
              }, store)
 
-    run_test(os.path.join(module_dir, 'workflows_validation/validation_test/workflow_config_files/incorrect_projects/step_2'),
+    run_test(os.path.join(module_dir, 'handover_workflows_validation/validation_test/workflow_config_files/incorrect_projects/step_2'),
              {
                  'step_1': {sample_name_to_id['Sample1']: True},
                  'step_2': {sample_name_to_id['Sample1']: False},
@@ -166,7 +166,7 @@ def run_incorrect_projects_tests(store: RDFDatastore):
                  'step_6': {sample_name_to_id['AnnealedSample1Piece1']: True, sample_name_to_id['AnnealedSample1Piece2']: True}
              }, store)
 
-    run_test(os.path.join(module_dir, 'workflows_validation/validation_test/workflow_config_files/incorrect_projects/step_3'),
+    run_test(os.path.join(module_dir, 'handover_workflows_validation/validation_test/workflow_config_files/incorrect_projects/step_3'),
              {
                  'step_1': {sample_name_to_id['Sample1']: True},
                  'step_2': {sample_name_to_id['Sample1']: True},
@@ -176,7 +176,7 @@ def run_incorrect_projects_tests(store: RDFDatastore):
                  'step_6': {sample_name_to_id['AnnealedSample1Piece1']: True, sample_name_to_id['AnnealedSample1Piece2']: True}
              }, store)
 
-    run_test(os.path.join(module_dir, 'workflows_validation/validation_test/workflow_config_files/incorrect_projects/step_4'),
+    run_test(os.path.join(module_dir, 'handover_workflows_validation/validation_test/workflow_config_files/incorrect_projects/step_4'),
              {
                  'step_1': {sample_name_to_id['Sample1']: True},
                  'step_2': {sample_name_to_id['Sample1']: True},
@@ -185,7 +185,7 @@ def run_incorrect_projects_tests(store: RDFDatastore):
                  'step_5': {sample_name_to_id['AnnealedSample1']: True},
                  'step_6': {sample_name_to_id['AnnealedSample1Piece1']: True, sample_name_to_id['AnnealedSample1Piece2']: True}
              }, store)
-    run_test(os.path.join(module_dir, 'workflows_validation/validation_test/workflow_config_files/incorrect_projects/step_5'),
+    run_test(os.path.join(module_dir, 'handover_workflows_validation/validation_test/workflow_config_files/incorrect_projects/step_5'),
              {
                  'step_1': {sample_name_to_id['Sample1']: True},
                  'step_2': {sample_name_to_id['Sample1']: True},
@@ -195,7 +195,7 @@ def run_incorrect_projects_tests(store: RDFDatastore):
                  'step_6': {sample_name_to_id['AnnealedSample1Piece1']: True, sample_name_to_id['AnnealedSample1Piece2']: True}
              }, store)
 
-    run_test(os.path.join(module_dir, 'workflows_validation/validation_test/workflow_config_files/incorrect_projects/step_6'),
+    run_test(os.path.join(module_dir, 'handover_workflows_validation/validation_test/workflow_config_files/incorrect_projects/step_6'),
              {
                  'step_1': {sample_name_to_id['Sample1']: True},
                  'step_2': {sample_name_to_id['Sample1']: True},
@@ -206,7 +206,7 @@ def run_incorrect_projects_tests(store: RDFDatastore):
              }, store)
 
 def run_incorrect_numbers_of_activities_tests(store: RDFDatastore):
-    run_test(os.path.join(module_dir, 'workflows_validation/validation_test/workflow_config_files/incorrect_numbers_of_activities/step_5'),
+    run_test(os.path.join(module_dir, 'handover_workflows_validation/validation_test/workflow_config_files/incorrect_numbers_of_activities/step_5'),
              {
                  'step_1': {sample_name_to_id['Sample1']: True},
                  'step_2': {sample_name_to_id['Sample1']: True},
@@ -236,7 +236,7 @@ if __name__ == "__main__":
         store.start_oxigraph()
 
     store.clear_triples()
-    store.upload_file(os.path.join(module_dir, "workflows_validation/validation_test/validation_test_triples.ttl"))
+    store.upload_file(os.path.join(module_dir, "handover_workflows_validation/validation_test/validation_test_triples.ttl"))
 
     ontology_files: list[dict[str, str]] = [
         {
@@ -261,7 +261,7 @@ if __name__ == "__main__":
     try:
         logging.info("Testing example correct workflow...")
         run_test(os.path.join(module_dir,
-                              'workflows_validation/validation_test/workflow_config_files/example_workflow_valid'),
+                              'handover_workflows_validation/validation_test/workflow_config_files/example_workflow_valid'),
                  {
                      'step_1': {sample_name_to_id['Sample1']: True},
                      'step_2': {sample_name_to_id['Sample1']: True},
