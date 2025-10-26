@@ -1,0 +1,29 @@
+SELECT
+  (COUNT(?sample_w_measurement) as ?count_w)
+  (COUNT(?sample) as ?total_samples)
+  (xsd:decimal(COUNT(?sample_w_measurement)) / xsd:decimal(COUNT(?sample)) as ?chance_to_have_measurement_in_sample_piece)
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+{
+    {
+        SELECT DISTINCT ?sample_w_measurement WHERE {
+            ?sample_w_measurement a :MaterialsLibrary.
+
+            ?sample_w_measurement pmdco:characteristic ?measurement.
+
+      		MINUS { ?measurement a pmdco:ChemicalComposition. } # Exclude the 342 EDX compositions
+      		# It's a sample piece
+            ?another_sample pmdco:composedOf ?sample_w_measurement.
+        }
+    }
+
+    UNION
+
+    {
+        SELECT ?sample WHERE {
+            ?sample a :MaterialsLibrary.
+
+            # It's a sample piece
+            ?another_sample pmdco:composedOf ?sample.
+        }
+    }
+}

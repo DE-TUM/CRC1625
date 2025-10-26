@@ -1,0 +1,12 @@
+# For SQL access keywords: https://github.com/redmer/yarrrml-json-schema/blob/main/src/yarrrml-json-schema.json
+prefixes: {prefixes}
+
+sources:
+  sql_source: {sources}
+
+mappings:
+  sample_elements:
+    sources: sql_source
+    s: materials_library:$(SampleId)
+    po:
+      - [:temporaryDatatypeProperty, $(Element), xsd:string]

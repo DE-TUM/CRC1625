@@ -1,0 +1,22 @@
+# For SQL access keywords: https://github.com/redmer/yarrrml-json-schema/blob/main/src/yarrrml-json-schema.json
+prefixes: {prefixes}
+
+sources:
+  sql_source: {sources}
+
+mappings:
+  sample_to_substrate:
+    sources: sql_source
+    s: materials_library:$(MLId)
+    po:
+      - [pmdco:characteristic, substrate:$(SubstrateName)~iri]
+  substrate_metadata:
+    sources: sql_source
+    s: substrate:$(SubstrateName)
+    po:
+      - [a, :Substrate~iri]
+      - [:internalID, $(SubstrateObjectId), xsd:integer]
+      - [prov:wasAttributedTo, user:$(createdBy)~iri]
+      - [:creationDate, $(created), xsd:dateTime]
+      - [rdfs:label, $(ObjectName), xsd:string]
+      - [rdfs:comment, $(ObjectDescription), xsd:string]

@@ -1,0 +1,11 @@
+prefixes: {prefixes}
+
+sources:
+  sql_source: {sources}
+
+mappings:
+  idea_to_req_for_synthesis:
+    sources: sql_source
+    s: idea_or_experiment_plan:$(sourceObjectID)
+    po:
+      - [pmdco:output, request_for_synthesis:$(targetObjectID)~iri]

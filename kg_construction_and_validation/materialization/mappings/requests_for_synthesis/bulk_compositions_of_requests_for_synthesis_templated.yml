@@ -1,0 +1,25 @@
+prefixes: {prefixes}
+
+sources:
+  sql_source: {sources}
+
+mappings:
+  request_for_synthesis_characteristic:
+    sources: sql_source
+    s: request_for_synthesis:$(ObjectId)
+    po:
+      - [pmdco:characteristic, bulk_composition:request_for_synthesis_$(ObjectId)~iri]
+
+  bulk_composition:
+    sources: sql_source
+    s: bulk_composition:request_for_synthesis_$(ObjectId)
+    po:
+      - [a, pmdco:ChemicalComposition~iri]
+      - [pmdco:composedOf, bulk_composition:request_for_synthesis_$(ObjectId)_$(ElementName)~iri]
+
+  element_of_bulk_composition:
+    sources: sql_source
+    s: bulk_composition:request_for_synthesis_$(ObjectId)_$(ElementName)
+    po:
+      - [a, :CompositionElement~iri]
+      - [pmdco:value, $(ValuePercent), xsd:double]

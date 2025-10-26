@@ -1,0 +1,22 @@
+SELECT
+  (COUNT(?handover_w_measurement) as ?count_w)
+  (COUNT(?handover) as ?total_handovers)
+  (xsd:decimal(COUNT(?handover_w_measurement)) / xsd:decimal(COUNT(?handover)) as ?chance_to_have_measurement_in_handover)
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+{
+    {
+        SELECT ?handover_w_measurement WHERE {
+            ?handover_w_measurement a :Handover.
+
+            ?handover_w_measurement pmdco:subordinateProcess ?activity.
+        }
+    }
+
+    UNION
+
+    {
+        SELECT ?handover WHERE {
+            ?handover a :Handover.
+        }
+    }
+}

@@ -1,0 +1,12 @@
+# For SQL access keywords: https://github.com/redmer/yarrrml-json-schema/blob/main/src/yarrrml-json-schema.json
+prefixes: {prefixes}
+
+sources:
+  sql_source: {sources}
+
+mappings:
+  sample_to_substrate:
+    sources: sql_source
+    s: materials_library:$(sourceObjectID)
+    po:
+      - [pmdco:composedOf, materials_library:$(targetObjectID)~iri]

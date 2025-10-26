@@ -1,0 +1,13 @@
+# For SQL access keywords: https://github.com/redmer/yarrrml-json-schema/blob/main/src/yarrrml-json-schema.json
+prefixes: {prefixes}
+
+sources:
+  sql_source: {sources}
+
+mappings:
+  user_ids:
+    sources: sql_source
+    s: user:$(Id)
+    po:
+      - [a, pmdco:Operator~iri]
+      - [:internalID, $(Id), xsd:integer]

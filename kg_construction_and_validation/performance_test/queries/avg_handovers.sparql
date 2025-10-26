@@ -1,0 +1,17 @@
+SELECT (AVG(?count) AS ?avgHandovers) FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph> WHERE {
+  {
+    {
+        SELECT ?sample (COUNT(?handover) AS ?count) WHERE {
+          ?sample a :MaterialsLibrary.
+
+          ?workflow_instance pmdco:input ?sample.
+          ?workflow_instance pmdco:subordinateProcess ?first_handover_group.
+
+          ?first_handover_group pmdco:nextProcess*/pmdco:subordinateProcess/pmdco:nextProcess* ?handover.
+
+          ?handover a :Handover. # Trick not to include the handover groups in the property path
+
+        } GROUP BY ?sample
+    }
+  }
+}

@@ -1,0 +1,25 @@
+DELETE {
+  GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
+    ?s ?p {old_iri} .
+    {old_iri} ?p ?o .
+  }
+}
+INSERT {
+  GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
+    ?s ?p {new_iri} .
+    {new_iri} ?p ?o .
+  }
+}
+WHERE {
+  {
+    GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
+      ?s ?p {old_iri} .
+    }
+  }
+  UNION
+  {
+    GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
+      {old_iri} ?p ?o .
+    }
+  }
+}

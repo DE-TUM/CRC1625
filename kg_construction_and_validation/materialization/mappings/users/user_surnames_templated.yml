@@ -1,0 +1,12 @@
+# For SQL access keywords: https://github.com/redmer/yarrrml-json-schema/blob/main/src/yarrrml-json-schema.json
+prefixes: {prefixes}
+
+sources:
+  sql_source: {sources}
+
+mappings:
+  user_surnames:
+    sources: sql_source
+    s: user:$(UserId)
+    po:
+      - [foaf:surname, $(ClaimValue), xsd:string]

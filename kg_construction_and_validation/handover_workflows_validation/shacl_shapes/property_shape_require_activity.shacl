@@ -1,0 +1,9 @@
+  sh:property [
+    sh:path (pmdco:subordinateProcess [ sh:zeroOrMorePath pmdco:nextProcess ] pmdco:subordinateProcess) ;
+    sh:qualifiedValueShape [
+      sh:class {activity_class} ;
+    ] ;
+
+    sh:qualifiedMinCount 1 ;
+    sh:message "Could not find {measurement_name} measurements in the handover group"
+  ] ;

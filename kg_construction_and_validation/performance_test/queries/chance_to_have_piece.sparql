@@ -1,0 +1,24 @@
+SELECT
+  (COUNT(?sample_w_piece) as ?count_w)
+  (COUNT(?sample) as ?total_samples)
+  (xsd:decimal(COUNT(?sample_w_piece)) / xsd:decimal(COUNT(?sample)) as ?chance_to_have_piece)
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+WHERE {
+    {
+        SELECT DISTINCT ?sample_w_piece WHERE {
+            ?sample_w_piece a :MaterialsLibrary.
+            ?sample_w_piece pmdco:composedOf ?piece.
+
+            # It's a "main" sample
+            FILTER NOT EXISTS {
+                ?another_sample pmdco:composedOf ?sample_w_piece.
+            }
+        }
+    }
+    UNION
+    {
+        SELECT ?sample WHERE {
+            ?sample a :MaterialsLibrary.
+        }
+    }
+}

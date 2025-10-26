@@ -1,0 +1,17 @@
+SELECT (COUNT(*) AS ?benchmark_count)
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+WHERE {
+    SELECT ?user ?name ?givenName ?surname ?project WHERE {
+      ?user a pmdco:Operator. # Class that all users belong to, we can exclude it as there are no other entities with foaf:name, etc.
+
+      # Name, given name and surname
+      ?user foaf:name ?name.
+      OPTIONAL { # Some users don't have these. OPTIONAL makes these triple patterns not exclude those users if they don't have them
+        ?user foaf:givenName ?givenName.
+        ?user foaf:surname ?surname.
+      }
+
+      # The project they belong to (A06, B01...)
+      ?user :memberOfProject ?project.
+    }
+}

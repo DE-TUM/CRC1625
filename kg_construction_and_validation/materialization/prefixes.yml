@@ -1,0 +1,41 @@
+  # External TLOs/MLOs
+  chebi:  http://purl.obolibrary.org/obo/chebi/
+  pmdco:  https://w3id.org/pmd/co/
+  pmd:    https://w3id.org/pmd/co/
+
+  # External prefixes 
+  owl:    http://www.w3.org/2002/07/owl#
+  rdf:    http://www.w3.org/1999/02/22-rdf-syntax-ns#
+  rdfs:   http://www.w3.org/2000/01/rdf-schema#
+  xml:    http://www.w3.org/XML/1998/namespace
+  xsd:    http://www.w3.org/2001/XMLSchema#
+  foaf:   http://xmlns.com/foaf/0.1/
+  prov:   http://www.w3.org/ns/prov#
+  prov-o: http://www.w3.org/ns/prov-o#
+
+  # Our ontology's prefixes
+  # All entities are split into different namespaces for readability, loosely
+  # matching their types in the ontology
+  # General for all predicates and classes
+  "" :    https://crc1625.mdi.ruhr-uni-bochum.de/
+
+  # Users and projects
+  user:       https://crc1625.mdi.ruhr-uni-bochum.de/user/
+  project:    https://crc1625.mdi.ruhr-uni-bochum.de/project/
+
+  # MLs, measurement areas and compositions
+  materials_library:  https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/
+  substrate:          https://crc1625.mdi.ruhr-uni-bochum.de/substrate/
+  measurement:        https://crc1625.mdi.ruhr-uni-bochum.de/measurement/
+  measurement_type:   https://crc1625.mdi.ruhr-uni-bochum.de/measurement_type/
+  measurement_area:   https://crc1625.mdi.ruhr-uni-bochum.de/measurement_area/
+  bulk_composition:   https://crc1625.mdi.ruhr-uni-bochum.de/bulk_composition/
+  EDX_composition:    https://crc1625.mdi.ruhr-uni-bochum.de/EDX_composition/
+
+  # Workflows
+  idea_or_experiment_plan:    https://crc1625.mdi.ruhr-uni-bochum.de/idea_or_experiment_plan/
+  request_for_synthesis:      https://crc1625.mdi.ruhr-uni-bochum.de/request_for_synthesis/
+  workflow_instance:          https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/
+  workflow_model:             https://crc1625.mdi.ruhr-uni-bochum.de/workflow_model/
+  handover:                   https://crc1625.mdi.ruhr-uni-bochum.de/handover/
+  activity:                   https://crc1625.mdi.ruhr-uni-bochum.de/activity/

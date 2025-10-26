@@ -1,0 +1,16 @@
+prefixes: {prefixes}
+
+sources:
+  sql_source: {sources}
+
+mappings:
+  idea:
+    sources: sql_source
+    s: idea_or_experiment_plan:$(ObjectId)
+    po:
+      - [a, :IdeaOrExperimentPlan~iri]
+      - [:internalID, $(ObjectId), xsd:integer]
+      - [prov:wasAssociatedWith, user:$(createdBy)~iri]
+      - [:creationDate, $(created), xsd:dateTime]
+      - [rdfs:label, $(ObjectName), xsd:string]
+      - [rdfs:comment, $(ObjectDescription), xsd:string]

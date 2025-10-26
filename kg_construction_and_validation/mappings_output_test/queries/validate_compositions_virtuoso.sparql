@@ -1,0 +1,52 @@
+# Ensures that MLs 1 and 2 have 342 unique MAs, 2 unique compositions and 2 unique composition elements, each with sound metadata.
+SELECT ?ML ?ma ?edx_composition (COUNT(?composition_element) AS ?comp_elements) WHERE {
+    GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
+        ?ML a :MaterialsLibrary.
+        ?ma a :MeasurementArea.
+
+        ?ML pmdco:composedOf ?ma.
+
+    	?edx_composition a pmdco:ChemicalComposition.
+        ?ma pmdco:characteristic ?edx_composition.
+
+        FILTER NOT EXISTS { # The compositions should only be attached to one measurement
+            ?other_ma a :MeasurementArea.
+            ?other_ML a :MaterialsLibrary.
+
+            ?other_ML pmdco:composedOf ?ma.
+            FILTER(?other_ML != ?ML)
+        }
+
+        FILTER NOT EXISTS { # The compositions are unique too
+            ?other_ma a :MeasurementArea.
+
+            ?other_ma pmdco:characteristic ?edx_composition.
+            FILTER(?other_ma != ?ma)
+        }
+
+        ?edx_measurement a/rdfs:subClassOf pmdco:ValueObject.
+        ?edx_measurement pmdco:characteristic ?edx_composition.
+        ?edx_composition pmdco:characteristic ?composition_element.
+
+        FILTER NOT EXISTS { # The compositions should only be attached to one measurement
+            ?other_measurement a/rdfs:subClassOf pmdco:ValueObject.
+            ?other_measurement pmdco:characteristic ?edx_composition.
+
+            FILTER(?other_measurement != ?edx_measurement)
+        }
+
+        FILTER NOT EXISTS { # The composition elements should also be unique
+            ?other_comp a pmdco:ChemicalComposition.
+            ?other_comp pmdco:characteristic ?composition_element.
+            FILTER(?other_comp != ?edx_composition)
+        }
+
+        # Tolerance and positions are always hardcoded to the same value
+        ?edx_composition :tolerance 3.0.
+        ?edx_composition :x_position 1.0.
+        ?edx_composition :y_position 2.0.
+
+        # Same for comp. element concentrations, they are always 50%
+        ?composition_element pmdco:value 5e+01.
+    }
+} GROUP BY ?ML ?ma ?edx_composition

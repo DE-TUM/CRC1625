@@ -1,0 +1,11 @@
+prefixes: {prefixes}
+
+sources:
+  sql_source: {sources}
+
+mappings:
+  sample_to_measurement_area:
+    sources: sql_source
+    s: EDX_composition:$(CompositionId)_in_MA_$(MeasurementArea)
+    po:
+      - [:$(propertyname), $(value), xsd:float] # TODO improve

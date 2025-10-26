@@ -1,0 +1,19 @@
+# For SQL access keywords: https://github.com/redmer/yarrrml-json-schema/blob/main/src/yarrrml-json-schema.json
+prefixes: {prefixes}
+
+sources:
+  sql_source: {sources}
+
+mappings:
+  project_ids:
+    sources: sql_source
+    s: project:$(ClaimValue)
+    po:
+      - [a, :Project~iri]
+      - [rdfs:label, $(ClaimValue), xsd:string]
+
+  memberships_of_projects:
+    sources: sql_source
+    s: user:$(UserId)
+    po:
+      - [:memberOfProject, project:$(ClaimValue)~iri]

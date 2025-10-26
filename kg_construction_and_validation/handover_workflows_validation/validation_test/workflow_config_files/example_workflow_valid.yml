@@ -1,0 +1,142 @@
+# Name of the workflow
+example_workflow:
+  options:
+      # Allow groups of handovers in other projects or projects that don't meet the activities criteria,
+      # as long as when ignoring them the ordering of valid steps remains the same
+      #
+      # If false, there should only be as many handover groups
+      # Example:
+      #   There is a sample with three handovers
+      #     Handover 1: EDX in S
+      #     Handover 2: Storage back in A01, no measurements performed
+      #     Handover 3: SECCM in C01
+      #   The workflow indicates a step_1 with EDX required and a step_2 with SECCM required
+      # A value of 'true' will ignore the second handover and indicate that it is valid
+      # A value of 'false' will try to compare step_2 with Handover 2 and fail
+      allow_intermediate_handover_groups: false
+
+      # The initial step where the workflow starts.
+      # The order indicated by the subsequent steps will be followed,
+      # so they can be written in the file in any order
+      initial_step_name: step_1
+
+
+  steps:
+    step_1:
+      # If False, this step will be skipped. This can be used to temporarily disable steps that are yet not
+      # designed
+      enabled: true
+
+      # There can be multiple next steps, indicating that it
+      # branches into a given number of possible steps (OR)
+      next_steps: [step_2]
+
+      # Sample IDs to which this step in the workflow is applied to. Each sample
+      # will follow a copy of this workflow starting from the current step.
+      #
+      # If the sample was also present in an immediately preceding step, then the validation is resumed on this step at
+      # its next handover group. If it was new, then the validation will start from this step at its first handover group.
+      #
+      # You can omit the previous sample IDs and change them at will, for e.g. only validating its pieces from now on
+      applies_to_samples: [ 1 ]
+
+      step_description: |
+        Initial work of Sample 1
+
+      # A list of one or more projects the handovers group is allowed to be in.
+      # If there are multiple projects, then any handover group that took place in any of the projects will be valid
+      # Normally, there should only be one project in the list, indicating that the handover group must happen on only
+      # one specific project
+      projects: [A01]
+
+      # Allowed activities: APT, Bandgap, FIM, LEIS, Resistance, SDC, SECCM, SEM,
+      #                     TEM, Thickness, XPS, XRD, EDX, Others
+      required_activities: [Others]
+
+      # Allow other activities to be performed within the step
+      #
+      # If false, only the required activities should be present
+      allow_other_activities: false
+
+
+    step_2:
+      enabled: true
+
+      next_steps: [step_3]
+
+      applies_to_samples: [ 1 ]
+
+      step_description: |
+        Handovers 1 and 2
+
+      projects: [S]
+
+      required_activities: [SEM, EDX]
+
+      allow_other_activities: false
+
+
+    step_3:
+      enabled: true
+
+      next_steps: [step_4]
+
+      applies_to_samples: [ 1 ]
+
+      step_description: |
+        Handover 3
+
+      projects: [C01]
+
+      required_activities: [SECCM]
+
+      allow_other_activities: false
+
+
+    step_4:
+      enabled: true
+
+      next_steps: [step_5]
+
+      applies_to_samples: [ 2 ]
+
+      step_description: |
+        Initial work of annealed sample 1
+
+      projects: [A01]
+
+      required_activities: [Others]
+
+      allow_other_activities: false
+
+
+    step_5:
+      enabled: true
+
+      next_steps: [step_6]
+
+      applies_to_samples: [ 2 ]
+
+      step_description: |
+        Handovers 4 and 5
+
+      projects: [S]
+
+      required_activities: [SEM, EDX]
+
+      allow_other_activities: false
+
+
+    step_6:
+      enabled: true
+
+      applies_to_samples: [ 3, 4 ]
+
+      step_description: |
+        Handover 6
+
+      projects: [C01]
+
+      required_activities: [SECCM]
+
+      allow_other_activities: false

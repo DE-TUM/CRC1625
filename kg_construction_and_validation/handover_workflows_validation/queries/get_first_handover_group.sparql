@@ -1,0 +1,11 @@
+SELECT ?first_handover_group WHERE {
+	GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
+		?workflow_instance a :HandoverWorkflowInstance.
+		?MLOrSample a/rdfs:subClassOf* pmdco:EngineeredMaterial.
+
+		?workflow_instance pmdco:input ?MLOrSample.
+		?MLOrSample :internalID {object_id}.
+
+		?workflow_instance pmdco:subordinateProcess ?first_handover_group.
+	}
+}

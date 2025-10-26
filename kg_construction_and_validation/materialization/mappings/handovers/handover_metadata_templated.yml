@@ -1,0 +1,19 @@
+prefixes: {prefixes}
+
+sources:
+  sql_source: {sources}
+
+mappings:
+  handover_metadata:
+    sources: sql_source
+    s: handover:$(HandoverId)
+    po:
+      - [a, :Handover~iri]
+      - [:internalID, $(HandoverId), xsd:integer]
+      - [prov:wasAttributedTo, user:$(createdBy)~iri]
+      - [:creationDate, $(created), xsd:dateTime]
+      - [rdfs:label, $(ObjectName), xsd:string]
+      - [rdfs:comment, $(ObjectDescription), xsd:string]
+      # Extra fields for handover
+      - [:acceptedDate, $(DestinationConfirmed), xsd:dateTime]
+      - [prov:wasAssociatedWith, user:$(DestinationUserId)~iri]

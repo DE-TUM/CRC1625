@@ -1,0 +1,17 @@
+SELECT (COUNT(*) AS ?benchmark_count)
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+WHERE {
+    SELECT ?ML ?externalID ?internalID ?creationDate ?user  ?substrate_label
+    WHERE
+    {
+      ?ML a :MaterialsLibrary.
+
+      ?ML :internalID ?internalID.
+      ?ML :creationDate ?creationDate.
+      ?ML prov:wasAttributedTo ?user.
+
+      ?ML pmdco:characteristic ?substrate.
+      ?substrate a :Substrate.
+      ?substrate rdfs:label ?substrate_label.
+    }
+}

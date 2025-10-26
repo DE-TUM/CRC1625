@@ -1,0 +1,11 @@
+SELECT (COUNT(*) AS ?benchmark_count)
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+WHERE {
+    SELECT ?user ?name (COUNT(?item) AS ?itemCount) WHERE {
+      ?item a :MaterialsLibrary. # Narrow them down to MLs
+      ?item prov:wasAttributedTo ?user.
+      ?user foaf:name ?name.
+    }
+    GROUP BY ?user ?name # Aggregate the results by users and their names, and COUNT the remaining free variable (the items they appear as authors of)
+    #ORDER BY DESC(?itemCount) # And order them based on that count, in DESCending order
+}

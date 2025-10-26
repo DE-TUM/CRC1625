@@ -1,0 +1,18 @@
+# Handovers where an XRD measurement was taken, alongside the sample
+SELECT (COUNT(*) AS ?benchmark_count)
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+WHERE {
+    SELECT DISTINCT ?sample ?handover_of_group
+    WHERE {
+      ?workflow_instance pmdco:input ?sample.
+      ?workflow_instance pmdco:subordinateProcess ?first_handover_group.
+      ?first_handover_group pmdco:nextProcess* ?handover_group. # All handover groups
+
+      ?handover_group pmdco:subordinateProcess ?first_handover_of_group.
+      ?first_handover_of_group pmdco:nextProcess* ?handover_of_group. # All handovers
+
+      ?handover_of_group pmdco:subordinateProcess ?activity. # All activities
+
+      ?activity a :XRDProcess.
+    }
+}

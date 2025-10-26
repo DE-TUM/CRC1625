@@ -1,0 +1,540 @@
+@prefix : <https://crc1625.mdi.ruhr-uni-bochum.de#> .
+@prefix crc: <https://crc1625.mdi.ruhr-uni-bochum.de/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix obda: <https://w3id.org/obda/vocabulary#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix chebi: <http://purl.obolibrary.org/obo/chebi/> .
+@prefix pmdco: <https://w3id.org/pmd/co/> .
+@prefix prov-o: <http://www.w3.org/ns/prov-o#> .
+@base <https://crc1625.mdi.ruhr-uni-bochum.de#> .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de> rdf:type owl:Ontology ;
+                                          owl:imports <https://w3id.org/pmd/co/2.0.8> ;
+                                          <http://purl.org/dc/terms/title> "CRC 1625 Ontology"@en ;
+                                          rdfs:comment "CRC 1625 Ontology"@en .
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject
+crc:allowedProject rdf:type owl:ObjectProperty ;
+                   rdfs:domain crc:HandoverWorkflowModelStep ;
+                   rdfs:range crc:Project ;
+                   rdfs:comment "Indicates that the handover group that the Handover workflow model step is checking is allowed to take place in the given group" ;
+                   rdfs:label "Allowed project" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject
+crc:assignedObject rdf:type owl:ObjectProperty ;
+                   rdfs:subPropertyOf owl:topObjectProperty ;
+                   rdfs:domain crc:HandoverWorkflowInstanceAssignment ;
+                   rdfs:range crc:MaterialsLibrary ;
+                   rdfs:comment "Indicates that the Handover workflow assignment is related to the target materials library or sample" ;
+                   rdfs:label "Assigned object" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/handoverWorkflowModelInstanceOf
+crc:handoverWorkflowModelInstanceOf rdf:type owl:ObjectProperty ;
+                                    rdfs:domain crc:HandoverWorkflowInstance ;
+                                    rdfs:range crc:HandoverWorkflowModel ;
+                                    rdfs:comment "Indicates that the Handover workflow model instance is an instantiation of the Handover workflow model" ;
+                                    rdfs:label "Handover workflow model instance of" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment
+crc:hasAssignment rdf:type owl:ObjectProperty ;
+                  rdfs:domain crc:HandoverWorkflowModelInstance ;
+                  rdfs:range crc:HandoverWorkflowInstanceAssignment ;
+                  rdfs:comment "Indicates that the Handover workflow model instance has an assignment of samples to a Handover workflow model step further described in the target entity" ;
+                  rdfs:label "Has assignment" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/memberOfProject
+crc:memberOfProject rdf:type owl:ObjectProperty ;
+                    rdfs:domain pmdco:Person ;
+                    rdfs:range crc:Project ;
+                    rdfs:label "Member of project"@en .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/nextProcessAcrossGroups
+crc:nextProcessAcrossGroups rdf:type owl:ObjectProperty ;
+                            rdfs:subPropertyOf pmdco:nextProcess ;
+                            rdfs:comment "Connection between two processes that took place in two different groups each. Only used as an intermediate step during materialization." ;
+                            rdfs:label "next process across groups" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep
+crc:relatesToHandoverWorkflowStep rdf:type owl:ObjectProperty ;
+                                  rdfs:domain crc:HandoverWorkflowInstanceAssignment ;
+                                  rdfs:range crc:HandoverWorkflowModelStep ;
+                                  rdfs:comment "Indicates that the handover Handover workflow assignment is related to the target Handover workflow model step" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/requiresActivity
+crc:requiresActivity rdf:type owl:ObjectProperty ;
+                     rdfs:domain crc:HandoverWorkflowModelStep ;
+                     rdfs:range crc:CharacterizationActivityModel ;
+                     rdfs:comment "Indicates that the handover group that the Handover workflow model step is checking must contain a given activity within its handovers. The type of measurement is indicated by the targeted entity's class, by also belonging to one of the *Process classes (e.g. FIMProcess)" ;
+                     rdfs:label "Requires activity" .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/acceptedDate
+crc:acceptedDate rdf:type owl:DatatypeProperty ;
+                 rdfs:subPropertyOf owl:topDataProperty ;
+                 rdfs:domain prov:Activity ;
+                 rdfs:range xsd:dateTime ;
+                 rdfs:comment "The date a handover was accepted in the RDMS bt the destination user. Note that it does not need to match with its creation date" ;
+                 rdfs:label "Accepted date" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/allowIntermediateHandoverGroups
+crc:allowIntermediateHandoverGroups rdf:type owl:DatatypeProperty ;
+                                    rdfs:domain crc:HandoverWorkflowModel ;
+                                    rdfs:range xsd:boolean ;
+                                    rdfs:comment "Indicates if the validation of the Handover workflow model allows intermediate, non-compliant handover groups on an otherwise valid handover group chain while validating. If true, the validation system will attempt to keep validating the current Handover workflow model step on the next handover group if the current handover group was non-compliant." ;
+                                    rdfs:label "Allow intermediate handover groups" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/allowsOtherActivities
+crc:allowsOtherActivities rdf:type owl:DatatypeProperty ;
+                          rdfs:domain crc:HandoverWorkflowModelStep ;
+                          rdfs:range xsd:boolean ;
+                          rdfs:comment "Indicates that the handover group that the Handover workflow model step is validating is allowed to have activities other than the ones indicated by requiresActivity. If false, the presence of other activities will cause the validation to fail in this step." ;
+                          rdfs:label "Allows other activities" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/creationDate
+crc:creationDate rdf:type owl:DatatypeProperty ;
+                 rdfs:subPropertyOf owl:topDataProperty ;
+                 rdfs:domain [ rdf:type owl:Class ;
+                               owl:unionOf ( prov:Activity
+                                             prov:Entity
+                                           )
+                             ] ;
+                 rdfs:range xsd:dateTime ;
+                 rdfs:comment "The creation date of an RDMS object"@en ;
+                 rdfs:label "Creation date"@en .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/externalID
+crc:externalID rdf:type owl:DatatypeProperty ;
+               rdfs:subPropertyOf owl:topDataProperty ;
+               rdfs:domain [ rdf:type owl:Class ;
+                             owl:unionOf ( prov:Activity
+                                           prov:Entity
+                                         )
+                           ] ;
+               rdfs:range xsd:integer .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/internalID
+crc:internalID rdf:type owl:DatatypeProperty ;
+               rdfs:subPropertyOf owl:topDataProperty ;
+               rdfs:domain [ rdf:type owl:Class ;
+                             owl:unionOf ( prov:Activity
+                                           prov:Entity
+                                         )
+                           ] ;
+               rdfs:range xsd:integer .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/isHandoverWorkflowStepEnabled
+crc:isHandoverWorkflowStepEnabled rdf:type owl:DatatypeProperty ;
+                                  rdfs:domain crc:HandoverWorkflowModelStep ;
+                                  rdfs:range xsd:boolean ;
+                                  rdfs:comment "Indicates if the current Handover workflow model step is to be validated by the system. If false, the system will keep checking the current handover group from the next Handover workflow model step." ;
+                                  rdfs:label "Is Handover workflow step enabled" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/percentage
+crc:percentage rdf:type owl:DatatypeProperty .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/resistance
+crc:resistance rdf:type owl:DatatypeProperty ;
+               rdfs:subPropertyOf owl:topDataProperty ;
+               rdfs:domain pmdco:ChemicalComposition ;
+               rdfs:range xsd:double ;
+               rdfs:comment "Measured resistance in a specific measurement area of a sample" ;
+               rdfs:label "Resistance" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/temporaryDatatypeProperty
+crc:temporaryDatatypeProperty rdf:type owl:DatatypeProperty ;
+                              rdfs:subPropertyOf owl:topDataProperty ;
+                              rdfs:comment "Property used exclusively during the mapping of SQL to RDF, deleted via a post-processing script after executing the Ontop mappings" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/tolerance
+crc:tolerance rdf:type owl:DatatypeProperty ;
+              rdfs:subPropertyOf owl:topDataProperty ;
+              rdfs:domain pmdco:ChemicalComposition ;
+              rdfs:range xsd:double ;
+              rdfs:comment "Measured tolerance in a specific measurement area of a sample" ;
+              rdfs:label "Tolerance" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/x_position
+crc:x_position rdf:type owl:DatatypeProperty ;
+               rdfs:subPropertyOf owl:topDataProperty ;
+               rdfs:domain pmdco:ChemicalComposition ;
+               rdfs:range xsd:double ;
+               rdfs:comment "X coordinate within a sample on which a composition was taken for a particular measurement area" ;
+               rdfs:label "X position" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/y_position
+crc:y_position rdf:type owl:DatatypeProperty ;
+               rdfs:subPropertyOf owl:topDataProperty ;
+               rdfs:domain pmdco:ChemicalComposition ;
+               rdfs:range xsd:double ;
+               rdfs:comment "X coordinate within a sample on which a composition was taken for a particular measurement area" ;
+               rdfs:label "Y position" .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de#CharacterizationActivity
+:CharacterizationActivity rdf:type owl:Class ;
+                          rdfs:subClassOf pmdco:Process ;
+                          rdfs:comment """A process that represents to the act of applying a measurement technique on an object in the CRC. Further specified by its subclasses.
+
+Note: Not to be confused with prov:Activity, which acts as the superclass of Process.
+
+An entity of this class or any of its subclasses indicates the nature of its measurements by also belonging to one of the *Process classes (e.g. FIMProcess)""" ;
+                          rdfs:label "Characterization activity" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/APTProcess
+crc:APTProcess rdf:type owl:Class ;
+               rdfs:subClassOf crc:UnidentifiableProcess ,
+                               pmdco:AnalysingProcess ;
+               rdfs:comment "A process where APT measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." ;
+               rdfs:label "APT Process" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/BandgapProcess
+crc:BandgapProcess rdf:type owl:Class ;
+                   rdfs:subClassOf crc:UnidentifiableProcess ,
+                                   pmdco:AnalysingProcess ;
+                   rdfs:comment "A process where Bandgap measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/BulkComposition
+crc:BulkComposition rdf:type owl:Class ;
+                    rdfs:subClassOf pmdco:ChemicalObject ;
+                    rdfs:comment "The composition of a Materials Library as a whole"@en ;
+                    rdfs:label "Bulk Composition"@en .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance
+crc:CharacterizationActivityInstance rdf:type owl:Class ;
+                                     rdfs:subClassOf :CharacterizationActivity ,
+                                                     crc:ProcessInstance ;
+                                     rdfs:comment """A process that has as output a series of measurements of the same nature (e.g. EDX, TEM, FIM...) within the same handover of a sample in time, that results in one or more files being uploaded to the RDMS.
+
+This is an additional abstraction that acts as a subordinate process of a handover, and has as outputs one or more measurements corresponding to the same type of measurement  (e.g., for EDX, EDX_raw and EDX_csv files).""" ;
+                                     rdfs:label "Characterization activity instance" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel
+crc:CharacterizationActivityModel rdf:type owl:Class ;
+                                  rdfs:subClassOf :CharacterizationActivity ,
+                                                  crc:ProcessModel ;
+                                  rdfs:comment """A process indicating that a Handover workflow model step desires a set of measurements of the same time.
+
+An entity of this type indicates the type of its measurements by belonging to a unidentifiable process class. This will be used by e.g. the Handover workflows validation system to correctly validate measurements assigned to handovers.""" ;
+                                  rdfs:label "Characterization activity model" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/CompositionElement
+crc:CompositionElement rdf:type owl:Class ;
+                       rdfs:subClassOf pmdco:ChemicalComposition ;
+                       rdfs:comment "The composition of a Materials Library measured on a specific measurement area of a sample, relating to a specific element" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess
+crc:EDXMicroscopyProcess rdf:type owl:Class ;
+                         rdfs:subClassOf crc:UnidentifiableProcess ,
+                                         pmdco:MicroscopyProcess ;
+                         rdfs:comment "A process where EDX measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." ;
+                         rdfs:label "EDX Microscopy Process" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/FIMProcess
+crc:FIMProcess rdf:type owl:Class ;
+               rdfs:subClassOf crc:UnidentifiableProcess ,
+                               pmdco:AnalysingProcess ;
+               rdfs:comment "A process where FIM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/Handover
+crc:Handover rdf:type owl:Class ;
+             rdfs:subClassOf crc:IdentifiableProcess ;
+             rdfs:comment "The process of handing an object (for now, samples) from one person to another. This represents the transfer of physical objects between members of the same or different projects within the CRC to perform different analysis." .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/HandoverGroup
+crc:HandoverGroup rdf:type owl:Class ;
+                  rdfs:subClassOf crc:ProcessInstance ,
+                                  crc:UnidentifiableProcess ;
+                  rdfs:comment "Abstraction that has as subordinate process a chain or one or more handovers that took place consecutively within the same CRC project (i.e., all destination users belong to the sam eproject)" ;
+                  rdfs:label "Handover group" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflow
+crc:HandoverWorkflow rdf:type owl:Class ;
+                     rdfs:subClassOf pmdco:Process ;
+                     rdfs:comment """A process composed of a series of processing steps as part of the work of the CRC, which involve the act of physically moving a sample to be studied to another person and/or project. 
+Its subclasses narrow its application."""@en ;
+                     rdfs:label "Handover workflow" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance
+crc:HandoverWorkflowInstance rdf:type owl:Class ;
+                             rdfs:subClassOf crc:HandoverWorkflow ,
+                                             crc:ProcessInstance ;
+                             rdfs:comment """The beginning of a series of processes belonging to the same sample in the RDMS.
+
+An instance of this entity will contain a three-layer hierarchy of consecutive HandoverGroup instances, each containing a series of consecutive Handover instances, which finally can contain Activity Instance entities with measurements as their outputs."""@en ;
+                             rdfs:label "Handover workflow instance"@en .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment
+crc:HandoverWorkflowInstanceAssignment rdf:type owl:Class ;
+                                       rdfs:subClassOf crc:ProcessModel ,
+                                                       crc:UnidentifiableProcess ;
+                                       rdfs:comment "A process that indicates an assignment of one or more samples to a step in an entity of type HandoverWorkflowModel. A HandoverWorkflowModelInstance will contain one or more HandoverWorkflowInstanceAssignment instances to completely link a HandoverWorkflowModel to existing objects in the RDMS." ;
+                                       rdfs:label "Handover workflow instance assignment" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel
+crc:HandoverWorkflowModel rdf:type owl:Class ;
+                          rdfs:subClassOf crc:HandoverWorkflow ,
+                                          crc:ProcessModel ;
+                          rdfs:comment """The beginning of a series of processes that need to be performed. 
+
+
+An instance of this entity will contain a two-layer hierarchy of consecutive HandoverWorkflowModelStep instances that correspond to hypothetical handover groups of a given sample. Each step will contain zero or more Activity Model instances that dictate the desired measurements that the sample should contain, among other metadata, and that are taken at the time of any of the handovers within its corresponding handover group.
+
+Note that a Handover workflow Model instance dictates the processing steps, but are not linked to a specific samples - they instead act as templates that can be reused at will and assigned to different groups of samples. An entity of type HandoverWorkflowModelInstance will thus completely characterize a HandoverWorkflowModel by being able to apply it to existing objects in the RDMS during validation."""@en ;
+                          rdfs:label "Handover workflow model"@en .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelInstance
+crc:HandoverWorkflowModelInstance rdf:type owl:Class ;
+                                  rdfs:subClassOf crc:HandoverWorkflowModel ;
+                                  rdfs:comment """The beginning of a series of HandoverWorkflowModelStep instances. Each HandoverWorkflowModelStep instance indicates an assignment of one or more samples to a step in the same entity of type WorkflowModel. 
+
+
+An entity of this class will thus completely characterize a WorkflowModel by being able to apply it to existing objects in the RDMS during validation.""" ;
+                                  rdfs:label "Handover workflow model instance" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep
+crc:HandoverWorkflowModelStep rdf:type owl:Class ;
+                              rdfs:subClassOf crc:ProcessModel ,
+                                              crc:UnidentifiableProcess ;
+                              rdfs:comment "A step in a Handover workflow model, with a set of attributes indicating its settings, and references to Activity Models and projects" ;
+                              rdfs:label "Handover workflow model step" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/IdeaOrExperimentPlan
+crc:IdeaOrExperimentPlan rdf:type owl:Class ;
+                         rdfs:subClassOf crc:IdentifiableProcess ;
+                         rdfs:comment "An idea or experiment plan that may kickstart a Handover Workflow Model, requests for synthesis of samples and eventually a Handover Workflow Instance for one or more Materials Libraries"@en ;
+                         rdfs:label "Idea or experiment plan"@en .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/IdentifiableProcess
+crc:IdentifiableProcess rdf:type owl:Class ;
+                        rdfs:subClassOf crc:ProcessInstance ;
+                        rdfs:comment "A process that is identified by an ID in the RDMS" ;
+                        rdfs:label "Identifiable process" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/LEISProcess
+crc:LEISProcess rdf:type owl:Class ;
+                rdfs:subClassOf crc:UnidentifiableProcess ,
+                                pmdco:AnalysingProcess ;
+                rdfs:comment "A process where LEIS measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary
+crc:MaterialsLibrary rdf:type owl:Class ;
+                     rdfs:subClassOf pmdco:EngineeredMaterial ;
+                     rdfs:comment "A complete thin-film Materials Library, composed of 342 measurement areas to be analyzed or treated in any way."@en ;
+                     rdfs:label "Materials Library"@en .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/MeasurementArea
+crc:MeasurementArea rdf:type owl:Class ;
+                    rdfs:subClassOf pmdco:EngineeredMaterial ;
+                    rdfs:comment "One of the 342 defined locations of a materials library, which may be part of the materials library (thin film) itself, or a sample (piece) of it." ;
+                    rdfs:label "Measurement area" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance
+crc:ProcessInstance rdf:type owl:Class ;
+                    rdfs:subClassOf pmdco:Process ;
+                    rdfs:comment "A process that refers to a real event in the CRC / RDMS database, such a handover, or an abstraction over it (activities, virtual handovers and handover groups). Thus, it can be identifiable or not." ;
+                    rdfs:label "Process Instance"@en .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel
+crc:ProcessModel rdf:type owl:Class ;
+                 rdfs:subClassOf crc:UnidentifiableProcess ;
+                 rdfs:comment "A process that does not refer to a real event in the CRC / RDMS database, and instead refers to an entity within a Handover Workflow Model, such as a Handover workflow model step, an activity required by it or a Handover workflow step assignment."@en ;
+                 rdfs:label "Process Model"@en .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/Project
+crc:Project rdf:type owl:Class ;
+            rdfs:subClassOf pmdco:Organization ;
+            rdfs:comment "One of the projects of the CRC (e.g. A01, B03...)" ;
+            rdfs:label "Project"@en .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/RequestForSynthesis
+crc:RequestForSynthesis rdf:type owl:Class ;
+                        rdfs:subClassOf pmdco:ValueObject ;
+                        rdfs:comment """A request for the synthesis of a Materials Library / Sample with a desired composition.
+
+Note that other parameters will be modelled in the future."""@en ;
+                        rdfs:label "Request for synthesis"@en .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/ResistanceProcess
+crc:ResistanceProcess rdf:type owl:Class ;
+                      rdfs:subClassOf crc:UnidentifiableProcess ,
+                                      pmdco:AnalysingProcess ;
+                      rdfs:comment "A process where Resistance measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/SDCProcess
+crc:SDCProcess rdf:type owl:Class ;
+               rdfs:subClassOf crc:UnidentifiableProcess ,
+                               pmdco:AnalysingProcess ;
+               rdfs:comment "A process where SDC measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess
+crc:SECCMProcess rdf:type owl:Class ;
+                 rdfs:subClassOf crc:UnidentifiableProcess ,
+                                 pmdco:AnalysingProcess ;
+                 rdfs:comment "A process where SECCM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess
+crc:SEMProcess rdf:type owl:Class ;
+               rdfs:subClassOf crc:UnidentifiableProcess ,
+                               pmdco:AnalysingProcess ;
+               rdfs:comment "A process where SEM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/Sample
+crc:Sample rdf:type owl:Class ;
+           owl:equivalentClass pmdco:Sample ;
+           rdfs:subClassOf pmdco:EngineeredMaterial ;
+           rdfs:comment "A physical piece of a materials library, containing a subset of its 342 measurement areas." ;
+           rdfs:label "Sample" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/Substrate
+crc:Substrate rdf:type owl:Class ;
+              rdfs:subClassOf pmdco:ValueObject ;
+              rdfs:comment "The subtrate that conforms the bottom layer of material of a Materials Library / Sample"@en ;
+              rdfs:label "Substrate"@en .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisReport
+crc:SynthesisReport rdf:type owl:Class ;
+                    rdfs:subClassOf pmdco:Document ;
+                    rdfs:comment "A synthesis Report for a Sample"@en ;
+                    rdfs:label "Synthesis Report"@en .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/TEMProcess
+crc:TEMProcess rdf:type owl:Class ;
+               rdfs:subClassOf crc:UnidentifiableProcess ,
+                               pmdco:AnalysingProcess ;
+               rdfs:comment "A process where TEM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/ThicknessProcess
+crc:ThicknessProcess rdf:type owl:Class ;
+                     rdfs:subClassOf crc:UnidentifiableProcess ,
+                                     pmdco:AnalysingProcess ;
+                     rdfs:comment "A process where Thickness measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess
+crc:UnidentifiableProcess rdf:type owl:Class ;
+                          rdfs:subClassOf pmdco:Process ;
+                          rdfs:comment "A process that is not identified by an ID in the RDMS" ;
+                          rdfs:label "Unidentifiable process" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/VirtualHandover
+crc:VirtualHandover rdf:type owl:Class ;
+                    rdfs:subClassOf crc:ProcessInstance ,
+                                    crc:UnidentifiableProcess ;
+                    rdfs:comment "A handover to which all measurements of a sample that were uploaded to the RDMS before any actual handover was logged. It will always act as the first handover of the chain on every sample, and may be part of a handover group alone or with other handovers." ;
+                    rdfs:label "Virtual handover" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess
+crc:XPSProcess rdf:type owl:Class ;
+               rdfs:subClassOf crc:UnidentifiableProcess ,
+                               pmdco:AnalysingProcess ;
+               rdfs:comment "A process where XPS measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/XRDProcess
+crc:XRDProcess rdf:type owl:Class ;
+               rdfs:subClassOf crc:UnidentifiableProcess ,
+                               pmdco:AnalysingProcess ;
+               rdfs:comment "A process where XRD measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/externalID
+crc:externalID rdf:type owl:Class .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/internalID
+crc:internalID rdf:type owl:Class .
+
+
+###  https://w3id.org/pmd/co/Organization
+pmdco:Organization rdf:type owl:Class .
+
+
+###  https://w3id.org/pmd/co/Person
+pmdco:Person rdf:type owl:Class .
+
+
+#################################################################
+#    Annotations
+#################################################################
+
+crc:externalID rdfs:comment "External ID assigned to a Materials Library / Sample" ;
+               rdfs:label "External ID"@en .
+
+
+crc:internalID rdfs:comment "internal ID (AKA object ID or Type ID) of an entity in the RDMS"@en ;
+               rdfs:label "Internal ID"@en .
+
+
+###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi

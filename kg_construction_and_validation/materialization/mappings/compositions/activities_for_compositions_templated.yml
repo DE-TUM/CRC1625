@@ -1,0 +1,20 @@
+prefixes: {prefixes}
+
+sources:
+  sql_source: {sources}
+
+mappings:
+  handover_to_activity_for_composition:
+    sources: sql_source
+    s: handover:$(HandoverId)
+    po:
+      - [pmdco:subordinateProcess, activity:EDX_activity_for_handover_$(HandoverId)~iri]
+
+
+  activity_metadata_and_link_to_composition:
+    sources: sql_source
+    s: activity:EDX_activity_for_handover_$(HandoverId)
+    po:
+      - [a, :CharacterizationActivityInstance~iri]
+      - [a, :EDXMicroscopyProcess~iri]
+      - [pmdco:output, EDX_composition:$(CompositionEpoch)_in_MA_$(MeasurementArea)~iri]

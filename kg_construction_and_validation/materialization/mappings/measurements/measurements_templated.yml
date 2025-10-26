@@ -1,0 +1,33 @@
+prefixes: {prefixes}
+
+sources:
+  sql_source: {sources}
+
+mappings:
+  sample_to_measurement:
+    sources: sql_source
+    s: materials_library:$(MLId)
+    po:
+      - [pmdco:characteristic, measurement:$(MeasurementId)~iri]
+
+  measurement_metadata:
+    sources: sql_source
+    s: measurement:$(MeasurementId)
+    po:
+      - [a, pmdco:ValueObject~iri]
+      - [a, :measurement_type/$(TypeId)~iri] # TODO better, in ontology
+      - [:internalID, $(MeasurementId), xsd:integer]
+      - [prov:wasAttributedTo, user:$(createdBy)~iri]
+      - [:creationDate, $(created), xsd:dateTime]
+      - [rdfs:label, $(ObjectName), xsd:string]
+      - [rdfs:comment, $(ObjectDescription), xsd:string]
+      - [pmdco:value, $(ObjectFilePath), xsd:string]
+
+  measurement_type:
+    sources: sql_source
+    s: measurement_type:$(TypeId)
+    po:
+      - [rdfs:subClassOf, pmdco:ValueObject~iri]
+      - [rdfs:subClassOf, pmdco:Measurement~iri]
+      - [rdfs:label, $(TypeName), xsd:string]
+      - [:internalID, $(TypeId), xsd:integer]

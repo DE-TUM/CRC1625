@@ -1,0 +1,43 @@
+PREFIX chebi: <http://purl.obolibrary.org/obo/chebi/>
+PREFIX pmd: <https://w3id.org/pmd/co/>
+
+# External prefixes (Materials Ontologies)
+PREFIX chebi: <http://purl.obolibrary.org/obo/chebi/>
+PREFIX pmdco:   <https://w3id.org/pmd/co/>
+PREFIX pmd:   <https://w3id.org/pmd/co/>
+
+# External prefixes 
+PREFIX owl:     <http://www.w3.org/2002/07/owl#>
+PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xml:     <http://www.w3.org/XML/1998/namespace>
+PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
+PREFIX foaf:    <http://xmlns.com/foaf/0.1/>
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+
+# Our ontology's prefixes
+# All entities are split into different namespaces for readability, loosely
+# matching their types in the ontology
+# General prefix for all predicates and classes
+PREFIX : <https://crc1625.mdi.ruhr-uni-bochum.de/>
+
+# Users and projects
+PREFIX user:    <https://crc1625.mdi.ruhr-uni-bochum.de/user/>
+PREFIX project:    <https://crc1625.mdi.ruhr-uni-bochum.de/project/>
+
+# MLs, measurement areas and compositions
+PREFIX materials_library: <https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/>
+PREFIX substrate: <https://crc1625.mdi.ruhr-uni-bochum.de/substrate/>
+PREFIX measurement: <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/>
+PREFIX measurement_type: <https://crc1625.mdi.ruhr-uni-bochum.de/measurement_type/>
+PREFIX measurement_area: <https://crc1625.mdi.ruhr-uni-bochum.de/measurement_area/>
+PREFIX bulk_composition: <https://crc1625.mdi.ruhr-uni-bochum.de/bulk_composition/>
+PREFIX EDX_composition: <https://crc1625.mdi.ruhr-uni-bochum.de/EDX_composition/>
+
+# Workflows
+PREFIX idea_or_experiment_plan: <https://crc1625.mdi.ruhr-uni-bochum.de/idea_or_experiment_plan/>
+PREFIX request_for_synthesis: <https://crc1625.mdi.ruhr-uni-bochum.de/request_for_synthesis/>
+PREFIX workflow_instance: <https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/>
+PREFIX workflow_model: <https://crc1625.mdi.ruhr-uni-bochum.de/workflow_model/>
+PREFIX handover: <https://crc1625.mdi.ruhr-uni-bochum.de/handover/>
+PREFIX activity: <https://crc1625.mdi.ruhr-uni-bochum.de/activity/>

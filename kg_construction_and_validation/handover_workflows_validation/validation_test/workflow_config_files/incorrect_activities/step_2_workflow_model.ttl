@@ -1,0 +1,95 @@
+@prefix ns1: <https://crc1625.mdi.ruhr-uni-bochum.de/> .
+@prefix ns2: <https://w3id.org/pmd/co/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_model_f530b9ba-cd7b-5e9d-b225-2ea571a455f7> a ns1:HandoverWorkflowModel ;
+    rdfs:label "example_workflow"^^xsd:string ;
+    ns1:allowIntermediateHandoverGroups false ;
+    ns2:subordinateProcess <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_0332ba19-1258-5c83-8d74-2e67f88704e4_for_workflow_model_f530b9ba-cd7b-5e9d-b225-2ea571a455f7> .
+
+ns1:APT_activity_for_workflow_step_6bd1f3a6-e36f-5246-b2a9-ab1712f75eab a ns1:APTProcess,
+        ns1:CharacterizationActivityModel .
+
+ns1:EDX_activity_for_workflow_step_8fa2a784-be62-523c-bd31-23a1c1c7de77 a ns1:CharacterizationActivityModel,
+        ns1:EDXMicroscopyProcess .
+
+ns1:Others_activity_for_workflow_step_0332ba19-1258-5c83-8d74-2e67f88704e4 a ns1:CharacterizationActivityModel,
+        ns2:AnalysingProcess .
+
+ns1:Others_activity_for_workflow_step_e58c9416-5974-54cc-a9a5-7e248e2255ab a ns1:CharacterizationActivityModel,
+        ns2:AnalysingProcess .
+
+ns1:SECCM_activity_for_workflow_step_6bd1f3a6-e36f-5246-b2a9-ab1712f75eab a ns1:CharacterizationActivityModel,
+        ns1:SECCMProcess .
+
+ns1:SECCM_activity_for_workflow_step_73672754-256a-5bee-b56d-d9807c84e994 a ns1:CharacterizationActivityModel,
+        ns1:SECCMProcess .
+
+ns1:SECCM_activity_for_workflow_step_e94ccd03-32b4-58dc-bfd8-1018e516314e a ns1:CharacterizationActivityModel,
+        ns1:SECCMProcess .
+
+ns1:SEM_activity_for_workflow_step_8fa2a784-be62-523c-bd31-23a1c1c7de77 a ns1:CharacterizationActivityModel,
+        ns1:SEMProcess .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_0332ba19-1258-5c83-8d74-2e67f88704e4_for_workflow_model_f530b9ba-cd7b-5e9d-b225-2ea571a455f7> a ns1:HandoverWorkflowModelStep ;
+    rdfs:label "step_1"^^xsd:string ;
+    rdfs:comment """Initial work of Sample 1
+"""^^xsd:string ;
+    ns1:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/A01> ;
+    ns1:allowsOtherActivities false ;
+    ns1:isHandoverWorkflowStepEnabled true ;
+    ns1:requiresActivity ns1:Others_activity_for_workflow_step_0332ba19-1258-5c83-8d74-2e67f88704e4 ;
+    ns2:nextProcess <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_6bd1f3a6-e36f-5246-b2a9-ab1712f75eab_for_workflow_model_f530b9ba-cd7b-5e9d-b225-2ea571a455f7> .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_6bd1f3a6-e36f-5246-b2a9-ab1712f75eab_for_workflow_model_f530b9ba-cd7b-5e9d-b225-2ea571a455f7> a ns1:HandoverWorkflowModelStep ;
+    rdfs:label "step_2"^^xsd:string ;
+    rdfs:comment """Handovers 1 and 2
+"""^^xsd:string ;
+    ns1:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/S> ;
+    ns1:allowsOtherActivities true ;
+    ns1:isHandoverWorkflowStepEnabled true ;
+    ns1:requiresActivity ns1:APT_activity_for_workflow_step_6bd1f3a6-e36f-5246-b2a9-ab1712f75eab,
+        ns1:SECCM_activity_for_workflow_step_6bd1f3a6-e36f-5246-b2a9-ab1712f75eab ;
+    ns2:nextProcess <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_e94ccd03-32b4-58dc-bfd8-1018e516314e_for_workflow_model_f530b9ba-cd7b-5e9d-b225-2ea571a455f7> .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_73672754-256a-5bee-b56d-d9807c84e994_for_workflow_model_f530b9ba-cd7b-5e9d-b225-2ea571a455f7> a ns1:HandoverWorkflowModelStep ;
+    rdfs:label "step_6"^^xsd:string ;
+    rdfs:comment """Handover 6
+"""^^xsd:string ;
+    ns1:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/C01> ;
+    ns1:allowsOtherActivities false ;
+    ns1:isHandoverWorkflowStepEnabled true ;
+    ns1:requiresActivity ns1:SECCM_activity_for_workflow_step_73672754-256a-5bee-b56d-d9807c84e994 .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_8fa2a784-be62-523c-bd31-23a1c1c7de77_for_workflow_model_f530b9ba-cd7b-5e9d-b225-2ea571a455f7> a ns1:HandoverWorkflowModelStep ;
+    rdfs:label "step_5"^^xsd:string ;
+    rdfs:comment """Handovers 4 and 5
+"""^^xsd:string ;
+    ns1:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/S> ;
+    ns1:allowsOtherActivities false ;
+    ns1:isHandoverWorkflowStepEnabled true ;
+    ns1:requiresActivity ns1:EDX_activity_for_workflow_step_8fa2a784-be62-523c-bd31-23a1c1c7de77,
+        ns1:SEM_activity_for_workflow_step_8fa2a784-be62-523c-bd31-23a1c1c7de77 ;
+    ns2:nextProcess <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_73672754-256a-5bee-b56d-d9807c84e994_for_workflow_model_f530b9ba-cd7b-5e9d-b225-2ea571a455f7> .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_e58c9416-5974-54cc-a9a5-7e248e2255ab_for_workflow_model_f530b9ba-cd7b-5e9d-b225-2ea571a455f7> a ns1:HandoverWorkflowModelStep ;
+    rdfs:label "step_4"^^xsd:string ;
+    rdfs:comment """Initial work of annealed sample 1
+"""^^xsd:string ;
+    ns1:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/A01> ;
+    ns1:allowsOtherActivities false ;
+    ns1:isHandoverWorkflowStepEnabled true ;
+    ns1:requiresActivity ns1:Others_activity_for_workflow_step_e58c9416-5974-54cc-a9a5-7e248e2255ab ;
+    ns2:nextProcess <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_8fa2a784-be62-523c-bd31-23a1c1c7de77_for_workflow_model_f530b9ba-cd7b-5e9d-b225-2ea571a455f7> .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_e94ccd03-32b4-58dc-bfd8-1018e516314e_for_workflow_model_f530b9ba-cd7b-5e9d-b225-2ea571a455f7> a ns1:HandoverWorkflowModelStep ;
+    rdfs:label "step_3"^^xsd:string ;
+    rdfs:comment """Handover 3
+"""^^xsd:string ;
+    ns1:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/C01> ;
+    ns1:allowsOtherActivities false ;
+    ns1:isHandoverWorkflowStepEnabled true ;
+    ns1:requiresActivity ns1:SECCM_activity_for_workflow_step_e94ccd03-32b4-58dc-bfd8-1018e516314e ;
+    ns2:nextProcess <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_e58c9416-5974-54cc-a9a5-7e248e2255ab_for_workflow_model_f530b9ba-cd7b-5e9d-b225-2ea571a455f7> .
+

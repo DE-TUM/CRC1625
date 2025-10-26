@@ -1,0 +1,41 @@
+prefixes: {prefixes}
+
+sources:
+  sql_source: {sources}
+
+mappings:
+  sample_to_measurement_area:
+    sources: sql_source
+    s: materials_library:$(MLId)
+    po:
+      - [pmdco:composedOf, measurement_area:ma_for_ML_$(MLId)_in_MA_$(MeasurementArea)~iri]
+
+  measurement_area:
+    sources: sql_source
+    s: measurement_area:ma_for_ML_$(MLId)_in_MA_$(MeasurementArea)
+    po:
+      - [a, :MeasurementArea~iri]
+      - [pmdco:characteristic, EDX_composition:$(CompositionEpoch)_in_MA_$(MeasurementArea)~iri]
+      - [pmdco:value, $(MeasurementArea), xsd:integer]
+
+  composition:
+    sources: sql_source
+    s: EDX_composition:$(CompositionEpoch)_in_MA_$(MeasurementArea)
+    po:
+      - [a, pmdco:ChemicalComposition~iri]
+      - [pmdco:characteristic, EDX_composition:$(CompositionEpoch)_in_MA_$(MeasurementArea)_element_$(ElementName)~iri]
+
+  composition_element:
+    sources: sql_source
+    s: EDX_composition:$(CompositionEpoch)_in_MA_$(MeasurementArea)_element_$(ElementName)
+    po:
+      - [a, :CompositionElement~iri]
+      - [:temporaryDatatypeProperty, $(ElementName), xsd:string]
+      - [pmdco:value, $(ValuePercent), xsd:double]
+
+  measurement_link_to_composition:
+    sources: sql_source
+    s: measurement:$(OriginalMeasurementId)
+    po:
+      - [pmdco:characteristic, EDX_composition:$(CompositionEpoch)_in_MA_$(MeasurementArea)~iri]
+

@@ -1,0 +1,11 @@
+prefixes: {prefixes}
+
+sources:
+  sql_source: {sources}
+
+mappings:
+  handover_chain:
+    sources: sql_source
+    s: handover:$(HandoverId)
+    po:
+      - [pmdco:nextProcess, handover:$(NextHandoverId)~iri]

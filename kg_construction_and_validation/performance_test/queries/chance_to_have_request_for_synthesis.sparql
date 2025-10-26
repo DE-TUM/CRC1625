@@ -1,0 +1,31 @@
+SELECT
+  (COUNT(?sample_w_req) as ?count_w)
+  (COUNT(?sample) as ?total_samples)
+  (xsd:decimal(COUNT(?sample_w_req)) / xsd:decimal(COUNT(?sample)) as ?chance_to_have_request_for_synthesis)
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+WHERE {
+    {
+        SELECT DISTINCT ?sample_w_req WHERE {
+            ?sample_w_req a :MaterialsLibrary
+
+            # It's a main sample
+            FILTER NOT EXISTS {
+                ?another_sample pmdco:composedOf ?sample_w_req.
+            }
+
+            ?sample_w_req prov:wasDerivedFrom ?req.
+            ?req a :RequestForSynthesis.
+		}
+    }
+    UNION
+    {
+        SELECT ?sample WHERE {
+            ?sample a :MaterialsLibrary.
+
+      		# It's a main sample
+            FILTER NOT EXISTS {
+                ?another_sample pmdco:composedOf ?sample.
+            }
+        }
+    }
+}

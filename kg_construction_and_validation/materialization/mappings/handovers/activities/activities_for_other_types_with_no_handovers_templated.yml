@@ -1,0 +1,19 @@
+prefixes: {prefixes}
+
+sources:
+  sql_source: {sources}
+
+mappings:
+  handover_to_activity:
+    sources: sql_source
+    s: handover:initial_work_for_ML_$(MLId)
+    po:
+      - [pmdco:subordinateProcess, activity:misc_activity_for_initial_work_for_ML_$(MLId)~iri]
+
+  activity:
+    sources: sql_source
+    s: activity:misc_activity_for_initial_work_for_ML_$(MLId)
+    po:
+      - [a, :CharacterizationActivityInstance~iri]
+      - [a, pmdco:AnalysingProcess~iri]
+      - [pmdco:output, measurement:$(MeasurementId)~iri]

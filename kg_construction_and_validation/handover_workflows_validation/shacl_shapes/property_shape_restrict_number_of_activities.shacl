@@ -1,0 +1,11 @@
+  sh:property [
+    sh:path (pmdco:subordinateProcess [ sh:zeroOrMorePath pmdco:nextProcess ] pmdco:subordinateProcess) ;
+
+    sh:qualifiedValueShape [
+      sh:class :CharacterizationActivityInstance ;
+    ] ;
+
+    sh:qualifiedMinCount {number_of_activities} ;
+    sh:qualifiedMaxCount {number_of_activities} ;
+    sh:message "There is a different number of activities done in the handover group. We expected {number_of_activities}"
+  ] ;

@@ -1,0 +1,106 @@
+# Name of the workflow
+example_workflow:
+  options:
+    allow_intermediate_handover_groups: false
+    initial_step_name: step_1
+
+
+  steps:
+    step_1:
+      enabled: true
+
+      next_steps: [ step_2 ]
+
+      applies_to_samples: [ 1 ]
+
+      step_description: |
+        Initial work of Sample 1
+
+      projects: [ A01 ]
+
+      required_activities: [ Others ]
+
+      allow_other_activities: false
+
+
+    step_2:
+      enabled: true
+
+      next_steps: [ step_3 ]
+
+      applies_to_samples: [ 1 ]
+
+      step_description: |
+        Handovers 1 and 2
+
+      projects: [ S ]
+
+      required_activities: [ SEM, EDX ]
+
+      allow_other_activities: false
+
+
+    step_3:
+      enabled: true
+
+      next_steps: [ step_4 ]
+
+      applies_to_samples: [ 1 ]
+
+      step_description: |
+        Handover 3
+
+      projects: [ C01 ]
+
+      required_activities: [ SECCM ]
+
+      allow_other_activities: false
+
+
+    step_4:
+      enabled: true
+
+      next_steps: [ step_5 ]
+
+      applies_to_samples: [ 2 ]
+
+      step_description: |
+        Initial work of annealed sample 1
+
+      projects: [ A01 ]
+
+      required_activities: [ Others ]
+
+      allow_other_activities: false
+
+
+    step_5:
+      enabled: true
+
+      next_steps: [ step_6 ]
+
+      applies_to_samples: [ 2 ]
+
+      step_description: |
+        Handovers 4 and 5
+
+      projects: [ S ]
+
+      required_activities: [ SEM ] # Removed EDX
+
+      allow_other_activities: false # It will fail due to not allowing other activities
+
+
+    step_6:
+      enabled: true
+
+      applies_to_samples: [ 3, 4 ]
+
+      step_description: |
+        Handover 6
+
+      projects: [ C01 ]
+
+      required_activities: [ SECCM ]
+
+      allow_other_activities: false

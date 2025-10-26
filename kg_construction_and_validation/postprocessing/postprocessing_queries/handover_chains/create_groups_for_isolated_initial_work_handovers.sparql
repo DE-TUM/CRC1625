@@ -1,0 +1,41 @@
+DELETE {
+  GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
+    ?workflow_instance pmdco:subordinateProcess ?initial_work_handover.
+  }
+}
+INSERT {
+  GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
+    ?handover_group a :HandoverGroup.
+    ?handover_group pmdco:subordinateProcess ?initial_work_handover.
+    ?handover_group rdfs:label ?handover_group_label.
+    ?handover_group prov:wasAssociatedWith ?project.
+
+    ?workflow_instance pmdco:subordinateProcess ?handover_group.
+  }
+} WHERE {
+  GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
+    ?workflow_instance pmdco:input ?sample.
+    ?workflow_instance pmdco:subordinateProcess ?initial_work_handover.
+
+    ?initial_work_handover a :VirtualHandover.
+
+    # Required metadata for the handover group
+    ?sample :internalID ?sample_id.
+    ?initial_work_handover prov:wasAssociatedWith ?user.
+    ?user :memberOfProject ?project.
+    ?project rdfs:label ?project_label.
+
+    BIND(IRI(CONCAT(
+        "https://crc1625.mdi.ruhr-uni-bochum.de/handover/handovers_in_project_",
+        STR(?project_label),
+        "_initial_work_for_ML_",
+        STR(?sample_id)
+    )) AS ?handover_group)
+
+    BIND(CONCAT(
+        "Initial work handover group within the ",
+        STR(?project_label),
+        " project"
+    ) AS ?handover_group_label)
+  }
+}

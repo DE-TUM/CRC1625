@@ -1,0 +1,45 @@
+SELECT (AVG(?n_intermediate_pieces) AS ?max_piece_depth)
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+WHERE {
+    # All paths between a "main" sample and a piece with no further pieces
+    {
+        SELECT ?sample ?endPiece (COUNT(?intermediatePiece) AS ?n_intermediate_pieces) WHERE {
+            ?sample a :MaterialsLibrary.
+            ?sample pmdco:composedOf+ ?endPiece.
+
+            # It needs to have at least one intermediate piece
+            ?sample pmdco:composedOf+ ?intermediatePiece.
+            ?intermediatePiece pmdco:composedOf+ ?endPiece.
+
+            # It's a "main" sample
+            FILTER NOT EXISTS {
+                ?another_sample pmdco:composedOf ?sample.
+            }
+        } GROUP BY ?sample ?endPiece
+    }
+
+    UNION
+
+    # Also take into account samples with only one piece
+    {
+        SELECT ?sample (COUNT(?end_piece) AS ?n_intermediate_pieces) WHERE {
+            ?sample a :MaterialsLibrary.
+            ?sample pmdco:composedOf ?end_piece.
+
+            FILTER NOT EXISTS {
+                ?another_sample pmdco:composedOf ?sample.
+            }
+
+            FILTER NOT EXISTS {
+                ?end_piece pmdco:composedOf ?sample.
+            }
+
+            # Exclude those with multiple pieces
+            FILTER NOT EXISTS {
+                ?sample pmdco:composedOf ?another_piece.
+
+                FILTER (?another_piece != ?end_piece)
+            }
+        } GROUP BY ?sample ?endPiece
+    }
+}

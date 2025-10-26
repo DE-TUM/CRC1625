@@ -1,0 +1,99 @@
+SELECT ?start ?start_id ?start_date ?end ?end_id ?group ?sample_id
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+WHERE {
+     # Two or more handovers, where both are non-virtual handovers
+     {
+        # There any intermediate handovers in the way, or none
+        ?start pmdco:nextProcess+ ?end .
+
+        # start is a handover and thus has an ID
+        ?start :internalID ?start_id.
+        ?end :internalID ?end_id.
+
+        ?start :creationDate ?start_date.
+
+        ?start prov:wasAssociatedWith ?user_start.
+        ?user_start :memberOfProject ?group.
+
+        # Ensure they are the start and end of the chain
+        MINUS {
+            ?hnd_before_start pmdco:nextProcess ?start.
+        }
+
+        MINUS {
+            ?end pmdco:nextProcess ?hnd_after_end.
+        }
+    }
+
+    UNION
+
+  	# Two or more handovers, where the first handover is an initial work handover
+    {
+        # There any intermediate handovers in the way, or none
+        ?start pmdco:nextProcess+ ?end .
+
+        # start It's an initial work handover and thus has no ID, but we can get the sample it belongs to
+        ?workflow_instance pmdco:subordinateProcess ?start.
+        ?workflow_instance pmdco:input ?materials_library.
+        ?materials_library :internalID ?sample_id.
+
+        ?end :internalID ?end_id.
+
+        ?start :creationDate ?start_date.
+
+        ?start prov:wasAssociatedWith ?user_start.
+        ?user_start :memberOfProject ?group.
+
+        # Ensure they are the start and end of the chain
+        MINUS {
+            ?hnd_before_start pmdco:nextProcess ?start.
+        }
+
+        MINUS {
+            ?end pmdco:nextProcess ?hnd_after_end.
+        }
+    }
+
+    UNION
+
+  	# Isolated handovers, virtual or not
+    {
+    	VALUES ?start_type { :Handover :VirtualHandover }
+
+        ?hnd a ?start_type.
+
+        # start It's an initial work handover and thus has no ID, but we can get the sample it belongs to
+        OPTIONAL {
+      		?workflow_instance pmdco:subordinateProcess ?hnd .
+        	?workflow_instance pmdco:input ?materials_library.
+        	?materials_library :internalID ?sample_id.
+  		}
+
+      	OPTIONAL {
+  			?hnd :internalID ?hnd_id
+  		}
+
+
+        ?hnd :creationDate ?hnd_date.
+
+        ?hnd prov:wasAssociatedWith ?user_hnd.
+        ?user_hnd :memberOfProject ?group.
+
+        # Ensure that it is isolated
+        MINUS {
+            ?hnd_before pmdco:nextProcess ?hnd.
+        }
+
+        MINUS {
+            ?hnd pmdco:nextProcess ?hnd_after.
+        }
+
+    	BIND(?hnd AS ?start)
+    	BIND(?hnd AS ?end)
+
+    	BIND(?hnd_id AS ?start_id)
+    	BIND(?hnd_id AS ?end_id)
+
+    	BIND(?hnd_date AS ?start_date)
+    }
+}

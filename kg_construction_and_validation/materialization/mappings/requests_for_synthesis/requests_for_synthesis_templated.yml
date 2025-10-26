@@ -1,0 +1,16 @@
+prefixes: {prefixes}
+
+sources:
+  sql_source: {sources}
+
+mappings:
+  sample_to_substrate:
+    sources: sql_source
+    s: request_for_synthesis:$(ObjectId)
+    po:
+      - [a, :RequestForSynthesis~iri]
+      - [:internalID, $(ObjectId), xsd:integer]
+      - [prov:wasAttributedTo, user:$(createdBy)~iri]
+      - [:creationDate, user:$(created)~iri]
+      - [rdfs:label, $(ObjectName), xsd:string]
+      - [rdfs:comment, $(ObjectDescription), xsd:string]

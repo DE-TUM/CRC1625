@@ -1,0 +1,18 @@
+DELETE {
+  GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
+    ?workflow_instance pmdco:subordinateProcess ?initial_work_handover.
+  }
+}
+INSERT {
+  GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
+    ?workflow_instance pmdco:subordinateProcess ?handover_group.
+  }
+} WHERE {
+  GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
+    ?workflow_instance pmdco:input ?sample.
+    ?workflow_instance pmdco:subordinateProcess ?initial_work_handover.
+
+    ?handover_group a :HandoverGroup. # Not the workflow instance again
+    ?handover_group pmdco:subordinateProcess ?initial_work_handover.
+  }
+}
