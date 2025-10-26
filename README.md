@@ -12,12 +12,11 @@ This project is structured in three different main folders, each containing thei
 - [Virtuoso](virtuoso): Mountpoints for the (optional) `virtuoso` docker container.
 - [Performance test plots](performance_test_results): Perofrmance test output files and notebook used for generating the figures in the paper.
 
-
-## Licensing
-All code and any other supplemental materials is licensed under the GNU Affero General Public License v3.0
-
 <div align="center">
 
 [<img src="./kg_viz.webp" width="600" />](A visualization of the KG)
 
 </div>
+
+## Licensing
+All code and any other supplemental materials is licensed under the GNU Affero General Public License v3.0
