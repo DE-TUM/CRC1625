@@ -6,7 +6,7 @@ sources:
 mappings:
   sample_to_measurement:
     sources: sql_source
-    s: materials_library:$(MLId)
+    s: object:$(MLId)
     po:
       - [pmdco:characteristic, measurement:$(MeasurementId)~iri]
 

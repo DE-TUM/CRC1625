@@ -8,4 +8,4 @@ mappings:
     sources: sql_source
     s: idea_or_experiment_plan:$(sourceObjectID)
     po:
-      - [pmdco:output, materials_library:$(targetObjectID)~iri]
+      - [pmdco:output, object:$(targetObjectID)~iri]

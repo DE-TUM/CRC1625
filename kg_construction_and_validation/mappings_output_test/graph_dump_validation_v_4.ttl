@@ -1,8 +1,8 @@
 @prefix : <https://crc1625.mdi.ruhr-uni-bochum.de/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix handover: <https://crc1625.mdi.ruhr-uni-bochum.de/handover/> .
-@prefix materials_library: <https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/> .
-@prefix pmd: <https://w3id.org/pmd/co/> .
+@prefix object: <https://crc1625.mdi.ruhr-uni-bochum.de/object/> .
+@prefix pmdco: <https://w3id.org/pmd/co/> .
 @prefix project: <https://crc1625.mdi.ruhr-uni-bochum.de/project/> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -22,35 +22,35 @@ project:C01 a :Project ;
 project:A01_B01 a :Project ;
     rdfs:label "A01_B01" .
 
-user:1 a pmd:Operator ;
+user:1 a pmdco:Operator ;
     foaf:givenName "User" ;
     foaf:name "UserA01" ;
     foaf:surname "A01" ;
     :internalID 1 ;
     :memberOfProject project:A01 .
 
-user:2 a pmd:Operator ;
+user:2 a pmdco:Operator ;
     foaf:givenName "User" ;
     foaf:name "UserB01" ;
     foaf:surname "B01" ;
     :internalID 2 ;
     :memberOfProject project:B01 .
 
-user:3 a pmd:Operator ;
+user:3 a pmdco:Operator ;
     foaf:givenName "User" ;
     foaf:name "UserC01" ;
     foaf:surname "C01" ;
     :internalID 3 ;
     :memberOfProject project:C01 .
 
-user:7 a pmd:Operator ;
+user:7 a pmdco:Operator ;
     foaf:givenName "User" ;
     foaf:name "UserA01_B01" ;
     foaf:surname "A01_B01" ;
     :internalID 7 ;
     :memberOfProject project:A01_B01 .
 
-materials_library:1 a :MaterialsLibrary ;
+object:1 a pmdco:EngineeredMaterial ;
     rdfs:label "Sample1" ;
     rdfs:comment "Sample1" ;
     prov:wasAttributedTo user:1 ;
@@ -59,31 +59,31 @@ materials_library:1 a :MaterialsLibrary ;
     :internalID 1 .
 
 workflow_instance:1 a :HandoverWorkflowInstance ;
-    pmd:input materials_library:1 ;
-    pmd:subordinateProcess handover:handovers_in_project_A01_initial_work_for_ML_1 .
+    pmdco:input object:1 ;
+    pmdco:subordinateProcess handover:handovers_in_project_A01_initial_work_for_ML_1 .
 
 handover:handovers_in_project_A01_initial_work_for_ML_1 a :HandoverGroup ;
     rdfs:label "Initial work handover group within the A01 project" ;
     prov:wasAssociatedWith project:A01 ;
-    pmd:nextProcess handover:handovers_in_project_B01_6_9 ;
-    pmd:subordinateProcess handover:initial_work_for_ML_1 .
+    pmdco:nextProcess handover:handovers_in_project_B01_6_9 ;
+    pmdco:subordinateProcess handover:initial_work_for_ML_1 .
 
 handover:handovers_in_project_B01_6_9 a :HandoverGroup ;
     rdfs:label "Consecutive handovers within the B01 project" ;
     prov:wasAssociatedWith project:B01 ;
-    pmd:nextProcess handover:handovers_in_project_C01_10_10 ;
-    pmd:subordinateProcess handover:6 .
+    pmdco:nextProcess handover:handovers_in_project_C01_10_10 ;
+    pmdco:subordinateProcess handover:6 .
 
 handover:handovers_in_project_C01_10_10 a :HandoverGroup ;
     rdfs:label "Consecutive handovers within the C01 project" ;
     prov:wasAssociatedWith project:C01 ;
-    pmd:nextProcess handover:handovers_in_project_B01_11_14 ;
-    pmd:subordinateProcess handover:10 .
+    pmdco:nextProcess handover:handovers_in_project_B01_11_14 ;
+    pmdco:subordinateProcess handover:10 .
 
 handover:handovers_in_project_B01_11_14 a :HandoverGroup ;
     rdfs:label "Consecutive handovers within the B01 project" ;
     prov:wasAssociatedWith project:B01 ;
-    pmd:subordinateProcess handover:11 .
+    pmdco:subordinateProcess handover:11 .
 
 handover:initial_work_for_ML_1 a :VirtualHandover ;
     rdfs:label "Initial work for ML 1" ;
@@ -100,7 +100,7 @@ handover:6 a :Handover ;
     :acceptedDate "2025-02-07T08:43:52.533000"^^xsd:dateTime ;
     :creationDate "2025-02-07T08:43:52.533000"^^xsd:dateTime ;
     :internalID 6 ;
-    pmd:nextProcess handover:7 .
+    pmdco:nextProcess handover:7 .
 
 handover:7 a :Handover ;
     rdfs:label "Sample1 Handover 2" ;
@@ -110,7 +110,7 @@ handover:7 a :Handover ;
     :acceptedDate "2025-02-08T08:43:52.533000"^^xsd:dateTime ;
     :creationDate "2025-02-08T08:43:52.533000"^^xsd:dateTime ;
     :internalID 7 ;
-    pmd:nextProcess handover:8 .
+    pmdco:nextProcess handover:8 .
 
 handover:8 a :Handover ;
     rdfs:label "Sample1 Handover 3" ;
@@ -120,7 +120,7 @@ handover:8 a :Handover ;
     :acceptedDate "2025-02-09T08:43:52.533000"^^xsd:dateTime ;
     :creationDate "2025-02-09T08:43:52.533000"^^xsd:dateTime ;
     :internalID 8 ;
-    pmd:nextProcess handover:9 .
+    pmdco:nextProcess handover:9 .
 
 handover:9 a :Handover ;
     rdfs:label "Sample1 Handover 4" ;
@@ -148,7 +148,7 @@ handover:11 a :Handover ;
     :acceptedDate "2025-02-12T08:43:52.533000"^^xsd:dateTime ;
     :creationDate "2025-02-12T08:43:52.533000"^^xsd:dateTime ;
     :internalID 11 ;
-    pmd:nextProcess handover:12 .
+    pmdco:nextProcess handover:12 .
 
 handover:12 a :Handover ;
     rdfs:label "Sample1 Handover 7" ;
@@ -158,7 +158,7 @@ handover:12 a :Handover ;
     :acceptedDate "2025-02-13T08:43:52.533000"^^xsd:dateTime ;
     :creationDate "2025-02-13T08:43:52.533000"^^xsd:dateTime ;
     :internalID 12 ;
-    pmd:nextProcess handover:13 .
+    pmdco:nextProcess handover:13 .
 
 handover:13 a :Handover ;
     rdfs:label "Sample1 Handover 8" ;
@@ -168,7 +168,7 @@ handover:13 a :Handover ;
     :acceptedDate "2025-02-14T08:43:52.533000"^^xsd:dateTime ;
     :creationDate "2025-02-14T08:43:52.533000"^^xsd:dateTime ;
     :internalID 13 ;
-    pmd:nextProcess handover:14 .
+    pmdco:nextProcess handover:14 .
 
 handover:14 a :Handover ;
     rdfs:label "Sample1 Handover 9" ;

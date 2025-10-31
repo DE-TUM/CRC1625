@@ -7,6 +7,6 @@ sources:
 mappings:
   sample_elements:
     sources: sql_source
-    s: materials_library:$(SampleId)
+    s: object:$(SampleId)
     po:
       - [:temporaryDatatypeProperty, $(Element), xsd:string]

@@ -2,8 +2,7 @@ SELECT (COUNT(*) AS ?benchmark_count)
 FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 WHERE {
     SELECT ?user ?name ?ML ?ML_label ?ML_comment WHERE {
-      # Look for exclusively MLs
-      ?ML a :MaterialsLibrary.
+      ?ML a/rdfs:subClassOf* :MaterialsLibrary.
       # Get their label and comment
       ?ML rdfs:label ?ML_label.
       OPTIONAL { ?ML rdfs:comment ?ML_comment. } # Make it optional. Some have no comment at all

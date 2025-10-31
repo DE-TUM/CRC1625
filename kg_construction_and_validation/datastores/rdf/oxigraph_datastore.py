@@ -150,7 +150,7 @@ class OxigraphRDFDatastore(RDFDatastore):
                 "": "https://crc1625.mdi.ruhr-uni-bochum.de/",
                 "user": "https://crc1625.mdi.ruhr-uni-bochum.de/user/",
                 "project": "https://crc1625.mdi.ruhr-uni-bochum.de/project/",
-                "materials_library": "https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/",
+                "materials_library": "https://crc1625.mdi.ruhr-uni-bochum.de/object/",
                 "substrate": "https://crc1625.mdi.ruhr-uni-bochum.de/substrate/",
                 "measurement": "https://crc1625.mdi.ruhr-uni-bochum.de/measurement/",
                 "measurement_type": "https://crc1625.mdi.ruhr-uni-bochum.de/measurement_type/",

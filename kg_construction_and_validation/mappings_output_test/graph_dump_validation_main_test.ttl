@@ -27,7 +27,7 @@
 @prefix activity: <https://crc1625.mdi.ruhr-uni-bochum.de/activity/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix handover: <https://crc1625.mdi.ruhr-uni-bochum.de/handover/> .
-@prefix materials_library: <https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/> .
+@prefix object: <https://crc1625.mdi.ruhr-uni-bochum.de/object/> .
 @prefix measurement: <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/> .
 @prefix measurement_area: <https://crc1625.mdi.ruhr-uni-bochum.de/measurement_area/> .
 @prefix measurement_type: <https://crc1625.mdi.ruhr-uni-bochum.de/measurement_type/> .
@@ -42,19 +42,19 @@
 
 # Workflow instances
 workflow_instance:1 a :HandoverWorkflowInstance ;
-    pmdco:input materials_library:1 ;
+    pmdco:input object:1 ;
     pmdco:subordinateProcess handover:handovers_in_project_A01_initial_work_for_ML_1 .
 
 workflow_instance:2 a :HandoverWorkflowInstance ;
-    pmdco:input materials_library:2 ;
+    pmdco:input object:2 ;
     pmdco:subordinateProcess handover:handovers_in_project_A01_initial_work_704 .
 
 workflow_instance:3 a :HandoverWorkflowInstance ;
-    pmdco:input materials_library:3 ;
+    pmdco:input object:3 ;
     pmdco:subordinateProcess handover:handovers_in_project_A01_initial_work_for_ML_3 .
 
 workflow_instance:4 a :HandoverWorkflowInstance ;
-    pmdco:input materials_library:4 ;
+    pmdco:input object:4 ;
     pmdco:subordinateProcess handover:handovers_in_project_A01_initial_work_for_ML_4 .
 
 
@@ -93,13 +93,13 @@ project:C01 a :Project ;
 
 
 # Samples
-materials_library:1 a :MaterialsLibrary ;
+object:1 a :MaterialsLibrary, pmdco:EngineeredMaterial ;
     rdfs:label "Sample1" ;
     rdfs:comment "Sample1" ;
     prov:wasAttributedTo user:1 ;
     :creationDate "2025-02-05T08:43:52.533000"^^xsd:dateTime ;
     :externalID 99999 ;
-    pmdco:composedOf materials_library:2 ;
+    pmdco:composedOf object:2 ;
     :internalID 1 ;
     pmdco:characteristic measurement:11,
         measurement:12,
@@ -449,14 +449,14 @@ materials_library:1 a :MaterialsLibrary ;
         measurement_area:ma_for_ML_1_in_MA_98,
         measurement_area:ma_for_ML_1_in_MA_99 .
 
-materials_library:2 a :MaterialsLibrary ;
+object:2 a :Sample, pmdco:EngineeredMaterial ;
     rdfs:label "AnnealedSample1" ;
     rdfs:comment "AnnealedSample1" ;
     prov:wasAttributedTo user:1 ;
     :creationDate "2025-02-05T08:43:52.533000"^^xsd:dateTime ;
     :externalID 99999 ;
-    pmdco:composedOf materials_library:3,
-        materials_library:4 ;
+    pmdco:composedOf object:3,
+        object:4 ;
     :internalID 2 ;
     pmdco:characteristic measurement:15,
         measurement:16,
@@ -805,7 +805,7 @@ materials_library:2 a :MaterialsLibrary ;
         measurement_area:ma_for_ML_2_in_MA_98,
         measurement_area:ma_for_ML_2_in_MA_99 .
 
-materials_library:3 a :MaterialsLibrary ;
+object:3 a :StressChip, pmdco:EngineeredMaterial ;
     rdfs:label "AnnealedSample1Piece1" ;
     rdfs:comment "AnnealedSample1Piece1" ;
     prov:wasAttributedTo user:1 ;
@@ -815,7 +815,7 @@ materials_library:3 a :MaterialsLibrary ;
     pmdco:characteristic measurement:18,
         substrate:Dummy%20Substrate .
 
-materials_library:4 a :MaterialsLibrary ;
+object:4 a pmdco:EngineeredMaterial ;
     rdfs:label "AnnealedSample1Piece2" ;
     rdfs:comment "AnnealedSample1Piece2" ;
     prov:wasAttributedTo user:1 ;

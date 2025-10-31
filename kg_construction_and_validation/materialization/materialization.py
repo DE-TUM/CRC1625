@@ -86,6 +86,8 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                             (os.path.join(module_dir, "mappings/samples/sample_elements_templated.yml"), False),
                             (os.path.join(module_dir, "mappings/samples/substrates_templated.yml"), False),
                             (os.path.join(module_dir, "mappings/samples/sample_pieces_templated.yml"), False),
+                            (os.path.join(module_dir, "mappings/samples/physical_sample_types_templated.yml"), False),
+                            (os.path.join(module_dir, "mappings/samples/computational_sample_types_templated.yml"), False),
 
                             (os.path.join(module_dir, "mappings/requests_for_synthesis/requests_for_synthesis_templated.yml"), False),
                             (os.path.join(module_dir, "mappings/requests_for_synthesis/requests_for_synthesis_to_sample_templated.yml"), False),

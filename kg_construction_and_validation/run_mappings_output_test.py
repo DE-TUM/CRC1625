@@ -37,8 +37,8 @@ prefixes = open(os.path.join(module_dir, 'mappings_output_test/queries/prefixes_
 validate_compositions_query_oxigraph = prefixes + open(os.path.join(module_dir, 'mappings_output_test/queries/validate_compositions_oxigraph.sparql')).read()
 validate_compositions_query_virtuoso = prefixes + open(os.path.join(module_dir, 'mappings_output_test/queries/validate_compositions_virtuoso.sparql')).read()
 
-ML_1 = "https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/1"
-ML_2 = "https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/2"
+ML_1 = "https://crc1625.mdi.ruhr-uni-bochum.de/object/1"
+ML_2 = "https://crc1625.mdi.ruhr-uni-bochum.de/object/2"
 
 test_files = {
     'v': os.path.join(module_dir, 'mappings_output_test/graph_dump_validation_main_test.ttl'),

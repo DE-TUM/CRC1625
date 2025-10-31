@@ -3,4 +3,4 @@ SELECT SampleId,
 FROM Sample
 JOIN ObjectInfo ON ObjectInfo.ObjectId = Sample.SampleId
 CROSS APPLY STRING_SPLIT(SUBSTRING(Elements, 2, LEN(Elements) - 2), '-')
-WHERE ObjectInfo.TypeId = 6 /* Only samples, exclude the compositions */
+WHERE ObjectInfo.TypeId IN (6, 99) /* Only samples, exclude the compositions */

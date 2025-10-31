@@ -4,7 +4,7 @@ WHERE {
     SELECT ?ML ?externalID ?internalID ?creationDate ?user  ?substrate_label
     WHERE
     {
-      ?ML a :MaterialsLibrary.
+      ?ML a/rdfs:subClassOf* :MaterialsLibrary.
 
       ?ML :internalID ?internalID.
       ?ML :creationDate ?creationDate.

@@ -24,7 +24,7 @@
   project:    https://crc1625.mdi.ruhr-uni-bochum.de/project/
 
   # MLs, measurement areas and compositions
-  materials_library:  https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/
+  object:  https://crc1625.mdi.ruhr-uni-bochum.de/object/
   substrate:          https://crc1625.mdi.ruhr-uni-bochum.de/substrate/
   measurement:        https://crc1625.mdi.ruhr-uni-bochum.de/measurement/
   measurement_type:   https://crc1625.mdi.ruhr-uni-bochum.de/measurement_type/
@@ -39,3 +39,7 @@
   workflow_model:             https://crc1625.mdi.ruhr-uni-bochum.de/workflow_model/
   handover:                   https://crc1625.mdi.ruhr-uni-bochum.de/handover/
   activity:                   https://crc1625.mdi.ruhr-uni-bochum.de/activity/
+
+  # YARRRML
+  idlab-fn: "http://example.com/idlab/function/"
+  grel: "http://users.ugent.be/~bjdmeest/function/grel.ttl#"

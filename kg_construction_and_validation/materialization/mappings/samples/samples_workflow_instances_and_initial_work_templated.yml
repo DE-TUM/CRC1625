@@ -7,9 +7,9 @@ sources:
 mappings:
   samples_metadata:
     sources: sql_source
-    s: materials_library:$(SampleId)
+    s: object:$(SampleId)
     po:
-      - [a, :MaterialsLibrary~iri]
+      - [a, pmdco:EngineeredMaterial~iri]
       - [:internalID, $(SampleId), xsd:integer]
       - [:externalID, $(externalID), xsd:integer]
       - [prov:wasAttributedTo, user:$(createdBy)~iri]
@@ -22,7 +22,7 @@ mappings:
     s: workflow_instance:$(SampleId)
     po:
       - [a, :HandoverWorkflowInstance~iri]
-      - [pmdco:input, materials_library:$(SampleId)~iri]
+      - [pmdco:input, object:$(SampleId)~iri]
       - [pmdco:subordinateProcess, handover:initial_work_for_ML_$(SampleId)~iri]
 
   initial_work_handover:

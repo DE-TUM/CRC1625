@@ -7,7 +7,7 @@ sources:
 mappings:
   sample_to_substrate:
     sources: sql_source
-    s: materials_library:$(MLId)
+    s: object:$(MLId)
     po:
       - [pmdco:characteristic, substrate:$(SubstrateName)~iri]
   substrate_metadata:

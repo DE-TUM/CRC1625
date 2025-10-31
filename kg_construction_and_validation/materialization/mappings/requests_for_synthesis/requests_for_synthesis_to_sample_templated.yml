@@ -6,6 +6,6 @@ sources:
 mappings:
   sample_to_substrate:
     sources: sql_source
-    s: materials_library:$(targetObjectID)
+    s: object:$(targetObjectID)
     po:
       - [prov:wasDerivedFrom, request_for_synthesis:$(sourceObjectID)~iri]

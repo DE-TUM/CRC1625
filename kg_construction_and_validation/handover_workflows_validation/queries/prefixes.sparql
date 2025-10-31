@@ -26,7 +26,7 @@ PREFIX user:    <https://crc1625.mdi.ruhr-uni-bochum.de/user/>
 PREFIX project:    <https://crc1625.mdi.ruhr-uni-bochum.de/project/>
 
 # MLs, measurement areas and compositions
-PREFIX materials_library: <https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/>
+PREFIX object: <https://crc1625.mdi.ruhr-uni-bochum.de/object/>
 PREFIX substrate: <https://crc1625.mdi.ruhr-uni-bochum.de/substrate/>
 PREFIX measurement: <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/>
 PREFIX measurement_type: <https://crc1625.mdi.ruhr-uni-bochum.de/measurement_type/>

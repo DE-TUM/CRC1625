@@ -6,7 +6,7 @@ sources:
 mappings:
   sample_to_measurement_area:
     sources: sql_source
-    s: materials_library:$(MLId)
+    s: object:$(MLId)
     po:
       - [pmdco:composedOf, measurement_area:ma_for_ML_$(MLId)_in_MA_$(MeasurementArea)~iri]
 

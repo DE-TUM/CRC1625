@@ -20,31 +20,31 @@
 
 
 # Samples
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/1> <https://crc1625.mdi.ruhr-uni-bochum.de/internalID> 1 .
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/1> <http://www.w3.org/2000/01/rdf-schema#label> "Sample 1" .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/1> <https://crc1625.mdi.ruhr-uni-bochum.de/internalID> 1 .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/1> <http://www.w3.org/2000/01/rdf-schema#label> "Sample 1" .
 
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/2> <https://crc1625.mdi.ruhr-uni-bochum.de/internalID> 2 .
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/2> <http://www.w3.org/2000/01/rdf-schema#label> "Annealed Sample 1" .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/Sample> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/2> <https://crc1625.mdi.ruhr-uni-bochum.de/internalID> 2 .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/2> <http://www.w3.org/2000/01/rdf-schema#label> "Annealed Sample 1" .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/3> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/3> <https://crc1625.mdi.ruhr-uni-bochum.de/internalID> 3 .
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/3> <http://www.w3.org/2000/01/rdf-schema#label> "Annealed Sample 1 (Piece 1 of 2)" .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/3> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/Sample> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/3> <https://crc1625.mdi.ruhr-uni-bochum.de/internalID> 3 .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/3> <http://www.w3.org/2000/01/rdf-schema#label> "Annealed Sample 1 (Piece 1 of 2)" .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/4> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/4> <https://crc1625.mdi.ruhr-uni-bochum.de/internalID> 4 .
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/4> <http://www.w3.org/2000/01/rdf-schema#label> "Annealed Sample 1 (Piece 2 of 2)" .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/4> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/Sample> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/4> <https://crc1625.mdi.ruhr-uni-bochum.de/internalID> 4 .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/4> <http://www.w3.org/2000/01/rdf-schema#label> "Annealed Sample 1 (Piece 2 of 2)" .
 
 
 ######################################
 
 
 # Pieces of samples
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/1> <https://crc1625.mdi.ruhr-uni-bochum.de/hasPiece> <https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/2> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/2> <https://crc1625.mdi.ruhr-uni-bochum.de/hasPiece> <https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/3> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/2> <https://crc1625.mdi.ruhr-uni-bochum.de/hasPiece> <https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/4> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/1> <https://crc1625.mdi.ruhr-uni-bochum.de/hasPiece> <https://crc1625.mdi.ruhr-uni-bochum.de/object/2> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/2> <https://crc1625.mdi.ruhr-uni-bochum.de/hasPiece> <https://crc1625.mdi.ruhr-uni-bochum.de/object/3> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/2> <https://crc1625.mdi.ruhr-uni-bochum.de/hasPiece> <https://crc1625.mdi.ruhr-uni-bochum.de/object/4> .
 
 
 ######################################
@@ -171,21 +171,21 @@
 # Workflow instances
 
 <https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/Sample1WorkflowInstance> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/Sample1WorkflowInstance> <https://w3id.org/pmd/co/input> <https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/Sample1WorkflowInstance> <https://w3id.org/pmd/co/input> <https://crc1625.mdi.ruhr-uni-bochum.de/object/1> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/Sample1WorkflowInstance> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Sample_1> .
 
 <https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/AnnealedSample1WorkflowInstance> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/AnnealedSample1WorkflowInstance> <https://w3id.org/pmd/co/input> <https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/2> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/AnnealedSample1WorkflowInstance> <https://w3id.org/pmd/co/input> <https://crc1625.mdi.ruhr-uni-bochum.de/object/2> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/AnnealedSample1WorkflowInstance> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Annealed_Sample_1> .
 
 
 <https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/AnnealedSample1Piece1WorkflowInstance> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/AnnealedSample1Piece1WorkflowInstance> <https://w3id.org/pmd/co/input> <https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/3> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/AnnealedSample1Piece1WorkflowInstance> <https://w3id.org/pmd/co/input> <https://crc1625.mdi.ruhr-uni-bochum.de/object/3> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/AnnealedSample1Piece1WorkflowInstance> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Annealed_Sample_1_Piece_1> .
 
 
 <https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/AnnealedSample1Piece2WorkflowInstance> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/AnnealedSample1Piece2WorkflowInstance> <https://w3id.org/pmd/co/input> <https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/4> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/AnnealedSample1Piece2WorkflowInstance> <https://w3id.org/pmd/co/input> <https://crc1625.mdi.ruhr-uni-bochum.de/object/4> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/AnnealedSample1Piece2WorkflowInstance> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Annealed_Sample_1_Piece_2> .
 
 
@@ -194,19 +194,19 @@
 
 # Measurements
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/1> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/photo_of_sample_1> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/1> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/sem_of_sample_1> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/1> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/edx_of_sample_1> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/1> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/seccm_of_sample_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/1> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/photo_of_sample_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/1> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/sem_of_sample_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/1> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/edx_of_sample_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/1> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/seccm_of_sample_1> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/2> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/photo_of_annealed_sample_1> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/2> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/sem_of_annealed_sample_1> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/2> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/edx_of_annealed_sample_1> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/2> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/seccm_of_annealed_sample_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/2> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/photo_of_annealed_sample_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/2> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/sem_of_annealed_sample_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/2> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/edx_of_annealed_sample_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/2> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/seccm_of_annealed_sample_1> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/3> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/seccm_of_annealed_sample_1_piece_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/3> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/seccm_of_annealed_sample_1_piece_1> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/materials_library/4> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/seccm_of_annealed_sample_1_piece_2> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/4> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/seccm_of_annealed_sample_1_piece_2> .
 
 
 ######################################

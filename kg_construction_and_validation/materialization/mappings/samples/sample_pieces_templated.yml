@@ -7,6 +7,6 @@ sources:
 mappings:
   sample_to_substrate:
     sources: sql_source
-    s: materials_library:$(sourceObjectID)
+    s: object:$(sourceObjectID)
     po:
-      - [pmdco:composedOf, materials_library:$(targetObjectID)~iri]
+      - [pmdco:composedOf, object:$(targetObjectID)~iri]
