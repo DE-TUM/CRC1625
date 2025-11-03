@@ -22,14 +22,14 @@ mappings:
     sources: sql_source
     s: EDX_composition:$(CompositionEpoch)_in_MA_$(MeasurementArea)
     po:
-      - [a, pmdco:ChemicalComposition~iri]
+      - [a, :VolumeComposition~iri]
       - [pmdco:characteristic, EDX_composition:$(CompositionEpoch)_in_MA_$(MeasurementArea)_element_$(ElementName)~iri]
 
   composition_element:
     sources: sql_source
     s: EDX_composition:$(CompositionEpoch)_in_MA_$(MeasurementArea)_element_$(ElementName)
     po:
-      - [a, :CompositionElement~iri]
+      - [a,pmdco:ChemicalObject~iri]
       - [:temporaryDatatypeProperty, $(ElementName), xsd:string]
       - [pmdco:value, $(ValuePercent), xsd:double]
 

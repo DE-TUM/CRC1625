@@ -12,7 +12,7 @@ SELECT (MAX(?n_measurements) AS ?max_measurements_in_handovers) FROM <https://cr
 
         # Exclude EDX compositions, we only consider the CSV file
         FILTER NOT EXISTS {
-            ?measurement a pmdco:ChemicalComposition.
+            ?measurement a :VolumeComposition.
         }
     } GROUP BY ?handover
 }

@@ -4,7 +4,7 @@ SELECT (AVG(?n_measurements) AS ?max_measurements_in_sample_pieces) FROM <https:
 
     ?sample_w_measurement pmdco:characteristic ?measurement.
 
-    MINUS { ?measurement a pmdco:ChemicalComposition. } # Exclude the 342 EDX compositions
+    MINUS { ?measurement a :VolumeComposition. } # Exclude the 342 EDX compositions
     # It's a sample piece
     ?another_sample pmdco:composedOf ?sample_w_measurement.
   } GROUP BY ?sample_w_measurement

@@ -10,7 +10,7 @@ WHERE {
       ?measurement_area pmdco:value ?measurement_area_position.
 
       ?measurement_area a :MeasurementArea.
-      ?composition a pmdco:ChemicalComposition.
+      ?composition a :VolumeComposition.
     }
     GROUP BY ?ML ?measurement_area_position
     ORDER BY DESC(?composition_count)

@@ -14,12 +14,12 @@ mappings:
     sources: sql_source
     s: bulk_composition:request_for_synthesis_$(ObjectId)
     po:
-      - [a, pmdco:ChemicalComposition~iri]
+      - [a, :VolumeComposition~iri]
       - [pmdco:composedOf, bulk_composition:request_for_synthesis_$(ObjectId)_$(ElementName)~iri]
 
   element_of_bulk_composition:
     sources: sql_source
     s: bulk_composition:request_for_synthesis_$(ObjectId)_$(ElementName)
     po:
-      - [a, :CompositionElement~iri]
+      - [a,pmdco:ChemicalObject~iri]
       - [pmdco:value, $(ValuePercent), xsd:double]

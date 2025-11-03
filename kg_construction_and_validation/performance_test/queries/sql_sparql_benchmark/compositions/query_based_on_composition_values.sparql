@@ -22,6 +22,6 @@ WHERE {
 
       ?ML a/rdfs:subClassOf* pmdco:EngineeredMaterial. # ML or sample
       ?measurement_area a :MeasurementArea.
-      ?composition a pmdco:ChemicalComposition.
+      ?composition a :VolumeComposition.
     }
 }

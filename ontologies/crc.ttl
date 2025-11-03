@@ -259,12 +259,6 @@ An entity of this type indicates the type of its measurements by belonging to a 
                                   rdfs:label "Characterization activity model" .
 
 
-###  https://crc1625.mdi.ruhr-uni-bochum.de/CompositionElement
-crc:CompositionElement rdf:type owl:Class ;
-                       rdfs:subClassOf pmdco:ChemicalComposition ;
-                       rdfs:comment "The composition of a Materials Library measured on a specific measurement area of a sample, relating to a specific element" .
-
-
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/ComputationalSample
 crc:ComputationalSample rdf:type owl:Class ;
                         rdfs:subClassOf pmdco:DigitalEntity .
@@ -479,6 +473,11 @@ crc:Substrate rdf:type owl:Class ;
               rdfs:label "Substrate"@en .
 
 
+###  https://crc1625.mdi.ruhr-uni-bochum.de/SurfaceComposition
+crc:SurfaceComposition rdf:type owl:Class ;
+                       rdfs:subClassOf pmdco:ChemicalComposition .
+
+
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisReport
 crc:SynthesisReport rdf:type owl:Class ;
                     rdfs:subClassOf pmdco:Document ;
@@ -513,6 +512,11 @@ crc:VirtualHandover rdf:type owl:Class ;
                                     crc:UnidentifiableProcess ;
                     rdfs:comment "A handover to which all measurements of a sample that were uploaded to the RDMS before any actual handover was logged. It will always act as the first handover of the chain on every sample, and may be part of a handover group alone or with other handovers." ;
                     rdfs:label "Virtual handover" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/VolumeComposition
+crc:VolumeComposition rdf:type owl:Class ;
+                      rdfs:subClassOf pmdco:ChemicalComposition .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess

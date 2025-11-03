@@ -6,7 +6,7 @@ SELECT ?ML ?ma ?edx_composition (COUNT(?composition_element) AS ?comp_elements) 
 
         ?ML pmdco:composedOf ?ma.
 
-    	?edx_composition a pmdco:ChemicalComposition.
+    	?edx_composition a :VolumeComposition.
         ?ma pmdco:characteristic ?edx_composition.
 
         FILTER NOT EXISTS { # The compositions should only be attached to one measurement
@@ -36,7 +36,7 @@ SELECT ?ML ?ma ?edx_composition (COUNT(?composition_element) AS ?comp_elements) 
         }
 
         FILTER NOT EXISTS { # The composition elements should also be unique
-            ?other_comp a pmdco:ChemicalComposition.
+            ?other_comp a :VolumeComposition.
             ?other_comp pmdco:characteristic ?composition_element.
             FILTER(?other_comp != ?edx_composition)
         }
