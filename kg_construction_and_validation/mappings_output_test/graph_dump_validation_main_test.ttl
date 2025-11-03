@@ -877,7 +877,7 @@ handover:initial_work_for_ML_1 a :VirtualHandover ;
     prov:wasAssociatedWith user:1 ;
     prov:wasAttributedTo user:1 ;
     :creationDate "2025-02-05T08:43:52.533000"^^xsd:dateTime ;
-    pmdco:subordinateProcess activity:misc_activity_for_initial_work_for_ML_1 .
+    pmdco:subordinateProcess activity:Photo_activity_for_initial_work_for_ML_1 .
 
 handover:initial_work_for_ML_2 a :VirtualHandover ;
     rdfs:label "Initial work for ML 2" ;
@@ -947,7 +947,7 @@ handover:704 a :Handover ; # It has a different ID because it was added after th
     :acceptedDate "2025-02-07T08:42:52.533000"^^xsd:dateTime ;
     :creationDate "2025-02-07T08:42:52.533000"^^xsd:dateTime ;
     :internalID 704 ;
-    pmdco:subordinateProcess activity:misc_activity_for_handover_704 .
+    pmdco:subordinateProcess activity:Photo_activity_for_handover_704 .
 
 handover:9 a :Handover ;
     rdfs:label "AnnealedSample1 Handover 1" ;
@@ -976,8 +976,8 @@ handover:10 a :Handover ;
 
 # Activities
 # ML 1
-activity:misc_activity_for_initial_work_for_ML_1 a :CharacterizationActivityInstance,
-        pmdco:AnalysingProcess ;
+activity:Photo_activity_for_initial_work_for_ML_1 a :CharacterizationActivityInstance,
+        :PhotoProcess ;
     pmdco:output measurement:11 .
 
 activity:SEM_activity_for_handover_6 a :CharacterizationActivityInstance,
@@ -1335,8 +1335,8 @@ activity:SECCM_activity_for_handover_8 a :CharacterizationActivityInstance,
     pmdco:output measurement:14 .
 
 # ML 2
-activity:misc_activity_for_handover_704 a :CharacterizationActivityInstance,
-        pmdco:AnalysingProcess ;
+activity:Photo_activity_for_handover_704 a :CharacterizationActivityInstance,
+        :PhotoProcess ;
     pmdco:output measurement:15 .
 
 activity:SEM_activity_for_handover_9 a :CharacterizationActivityInstance,

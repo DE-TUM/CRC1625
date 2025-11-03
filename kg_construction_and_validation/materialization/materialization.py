@@ -105,9 +105,11 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                             # SQL templates
                             {
                                 "{measurement_ids}": [
+                                    "12",
                                     "13, 15, 19, 53, 78, 79",
                                     "17, 31, 44, 55, 56, 97",
                                     "30",
+                                    "18",
                                     "48",
                                     "27, 38, 39, 40",
                                     "24",
@@ -117,16 +119,20 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                     "26",
                                     "57, 58, 85",
                                     "50, 59, 60, 86, 87",
-                                    "47"
+                                    "47",
+                                    "147",
+                                    "96, 98, 107, 139"
                                 ]
                             },
 
                             # Additional YARRRML templates
                             {
                                 "{measurement_name}": [
+                                    "Photo",
                                     "EDX",
                                     "XRD",
                                     "XPS",
+                                    "Annealing",
                                     "LEIS",
                                     "Thickness",
                                     "SEM",
@@ -136,12 +142,16 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                     "TEM",
                                     "SDC",
                                     "SECCM",
-                                    "FIM"
+                                    "FIM",
+                                    "PSM",
+                                    "Report"
                                 ],
                                 "{measurement_class_name}": [
+                                    "PhotoProcess",
                                     "EDXMicroscopyProcess",
                                     "XRDProcess",
                                     "XPSProcess",
+                                    "AnnealingProcess",
                                     "LEISProcess",
                                     "ThicknessProcess",
                                     "SEMProcess",
@@ -151,16 +161,20 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                     "TEMProcess",
                                     "SDCProcess",
                                     "SECCMProcess",
-                                    "FIMProcess"
+                                    "FIMProcess",
+                                    "PSMProcess",
+                                    "ReportProcess"
                                 ]
                             }, False),
                             (os.path.join(module_dir, "mappings/handovers/activities/activities_prior_to_first_handover_templated.yml"),
                             # SQL templates
                             {
                                 "{measurement_ids}": [
+                                    "12",
                                     "13, 15, 19, 53, 78, 79",
                                     "17, 31, 44, 55, 56, 97",
                                     "30",
+                                    "18",
                                     "48",
                                     "27, 38, 39, 40",
                                     "24",
@@ -170,16 +184,20 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                     "26",
                                     "57, 58, 85",
                                     "50, 59, 60, 86, 87",
-                                    "47"
+                                    "47",
+                                    "147",
+                                    "96, 98, 107, 139"
                                 ]
                             },
 
                             # Additional YARRRML templates
                             {
                                 "{measurement_name}": [
+                                    "Photo",
                                     "EDX",
                                     "XRD",
                                     "XPS",
+                                    "Annealing",
                                     "LEIS",
                                     "Thickness",
                                     "SEM",
@@ -189,12 +207,16 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                     "TEM",
                                     "SDC",
                                     "SECCM",
-                                    "FIM"
+                                    "FIM",
+                                    "PSM",
+                                    "Report"
                                 ],
                                 "{measurement_class_name}": [
+                                    "PhotoProcess",
                                     "EDXMicroscopyProcess",
                                     "XRDProcess",
                                     "XPSProcess",
+                                    "AnnealingProcess",
                                     "LEISProcess",
                                     "ThicknessProcess",
                                     "SEMProcess",
@@ -204,16 +226,20 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                     "TEMProcess",
                                     "SDCProcess",
                                     "SECCMProcess",
-                                    "FIMProcess"
+                                    "FIMProcess",
+                                    "PSMProcess",
+                                    "ReportProcess"
                                 ]
                             }, False),
                             (os.path.join(module_dir, "mappings/handovers/activities/activities_with_no_handovers_templated.yml"),
                             # SQL templates
                             {
                                 "{measurement_ids}": [
+                                    "12",
                                     "13, 15, 19, 53, 78, 79",
                                     "17, 31, 44, 55, 56, 97",
                                     "30",
+                                    "18",
                                     "48",
                                     "27, 38, 39, 40",
                                     "24",
@@ -223,16 +249,20 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                     "26",
                                     "57, 58, 85",
                                     "50, 59, 60, 86, 87",
-                                    "47"
+                                    "47",
+                                    "147",
+                                    "96, 98, 107, 139"
                                 ]
                             },
 
                             # Additional YARRRML templates
                             {
                                 "{measurement_name}": [
+                                    "Photo",
                                     "EDX",
                                     "XRD",
                                     "XPS",
+                                    "Annealing",
                                     "LEIS",
                                     "Thickness",
                                     "SEM",
@@ -242,12 +272,16 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                     "TEM",
                                     "SDC",
                                     "SECCM",
-                                    "FIM"
+                                    "FIM",
+                                    "PSM",
+                                    "Report"
                                 ],
                                 "{measurement_class_name}": [
+                                    "PhotoProcess",
                                     "EDXMicroscopyProcess",
                                     "XRDProcess",
                                     "XPSProcess",
+                                    "AnnealingProcess",
                                     "LEISProcess",
                                     "ThicknessProcess",
                                     "SEMProcess",
@@ -257,7 +291,9 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                     "TEMProcess",
                                     "SDCProcess",
                                     "SECCMProcess",
-                                    "FIMProcess"
+                                    "FIMProcess",
+                                    "PSMProcess",
+                                    "ReportProcess"
                                 ]
                             }, False),
 

@@ -390,6 +390,16 @@ crc:NoGradientSample rdf:type owl:Class ;
                      rdfs:subClassOf crc:Sample .
 
 
+###  https://crc1625.mdi.ruhr-uni-bochum.de/PSMProcess
+crc:PSMProcess rdf:type owl:Class ;
+               rdfs:subClassOf pmdco:AnalysingProcess .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/PhotoProcess
+crc:PhotoProcess rdf:type owl:Class ;
+                 rdfs:subClassOf pmdco:AnalysingProcess .
+
+
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance
 crc:ProcessInstance rdf:type owl:Class ;
                     rdfs:subClassOf pmdco:Process ;
@@ -409,6 +419,11 @@ crc:Project rdf:type owl:Class ;
             rdfs:subClassOf pmdco:Organization ;
             rdfs:comment "One of the projects of the CRC (e.g. A01, B03...)" ;
             rdfs:label "Project"@en .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/ReportProcess
+crc:ReportProcess rdf:type owl:Class ;
+                  rdfs:subClassOf pmdco:AnalysingProcess .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/RequestForSynthesis
