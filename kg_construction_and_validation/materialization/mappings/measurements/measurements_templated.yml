@@ -4,12 +4,6 @@ sources:
   sql_source: {sources}
 
 mappings:
-  sample_to_measurement:
-    sources: sql_source
-    s: object:$(MLId)
-    po:
-      - [pmdco:characteristic, measurement:$(MeasurementId)~iri]
-
   measurement_metadata:
     sources: sql_source
     s: measurement:$(MeasurementId)

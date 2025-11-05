@@ -64,6 +64,9 @@ ontology_files = [
     }
 ]
 
+
+
+
 # List of mappings to execute
 # Each entry consists of either of the two:
 #   - A simple mapping, indicated as a tuple of (path_to_untemplated_file, use_rmlstreamer)
@@ -85,17 +88,16 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                             (os.path.join(module_dir, "mappings/samples/samples_workflow_instances_and_initial_work_templated.yml"), False),
                             (os.path.join(module_dir, "mappings/samples/sample_elements_templated.yml"), False),
                             (os.path.join(module_dir, "mappings/samples/substrates_templated.yml"), False),
-                            (os.path.join(module_dir, "mappings/samples/sample_pieces_templated.yml"), False),
                             (os.path.join(module_dir, "mappings/samples/physical_sample_types_templated.yml"), False),
                             (os.path.join(module_dir, "mappings/samples/computational_sample_types_templated.yml"), False),
 
                             (os.path.join(module_dir, "mappings/requests_for_synthesis/requests_for_synthesis_templated.yml"), False),
-                            (os.path.join(module_dir, "mappings/requests_for_synthesis/requests_for_synthesis_to_sample_templated.yml"), False),
                             (os.path.join(module_dir, "mappings/requests_for_synthesis/bulk_compositions_of_requests_for_synthesis_templated.yml"), False),
 
                             (os.path.join(module_dir, "mappings/ideas/ideas_templated.yml"), False),
-                            (os.path.join(module_dir, "mappings/ideas/ideas_to_samples_templated.yml"), False),
-                            (os.path.join(module_dir, "mappings/ideas/ideas_to_requests_for_synthesis_templated.yml"), False),
+
+                            (os.path.join(module_dir, "mappings/publications_and_lit_references/publications_templated.yml"), False),
+                            (os.path.join(module_dir, "mappings/publications_and_lit_references/literature_references_templated.yml"), False),
 
                             (os.path.join(module_dir, "mappings/handovers/handover_metadata_templated.yml"), False),
                             (os.path.join(module_dir, "mappings/handovers/handover_chains_templated.yml"), False),
@@ -302,6 +304,8 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                             (os.path.join(module_dir, "mappings/handovers/activities/activities_for_other_types_with_no_handovers_templated.yml"), False),
 
                             (os.path.join(module_dir, "mappings/measurements/measurements_templated.yml"), False),
+
+                            (os.path.join(module_dir, "mappings/generic_relations/object_to_object_templated.yml"), False),
 
                             (os.path.join(module_dir, "mappings/compositions/compositions_metadata_templated.yml"), True),
                             (os.path.join(module_dir, "mappings/compositions/activities_for_compositions_templated.yml"), True),

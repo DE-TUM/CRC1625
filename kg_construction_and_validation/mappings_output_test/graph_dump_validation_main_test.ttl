@@ -105,7 +105,7 @@ object:1 a :MaterialsLibrary, pmdco:EngineeredMaterial ;
         measurement:12,
         measurement:13,
         measurement:14,
-        substrate:Dummy%20Substrate ;
+        substrate:5 ;
     pmdco:composedOf measurement_area:ma_for_ML_1_in_MA_1, # Follows alphabetical order
         measurement_area:ma_for_ML_1_in_MA_10,
         measurement_area:ma_for_ML_1_in_MA_100,
@@ -461,7 +461,7 @@ object:2 a :Sample, pmdco:EngineeredMaterial ;
     pmdco:characteristic measurement:15,
         measurement:16,
         measurement:17,
-        substrate:Dummy%20Substrate ;
+        substrate:5 ;
     pmdco:composedOf measurement_area:ma_for_ML_2_in_MA_1, # Follows alphabetical order
         measurement_area:ma_for_ML_2_in_MA_10,
         measurement_area:ma_for_ML_2_in_MA_100,
@@ -813,7 +813,7 @@ object:3 a :StressChip, pmdco:EngineeredMaterial ;
     :externalID 99999 ;
     :internalID 3 ;
     pmdco:characteristic measurement:18,
-        substrate:Dummy%20Substrate .
+        substrate:5 .
 
 object:4 a pmdco:EngineeredMaterial ;
     rdfs:label "AnnealedSample1Piece2" ;
@@ -823,7 +823,7 @@ object:4 a pmdco:EngineeredMaterial ;
     :externalID 99999 ;
     :internalID 4 ;
     pmdco:characteristic measurement:19,
-        substrate:Dummy%20Substrate .
+        substrate:5 .
 
 # Handover groups
 # ML 1
@@ -1700,7 +1700,7 @@ activity:SECCM_activity_for_initial_work_for_ML_4 a :CharacterizationActivityIns
     pmdco:output measurement:19 .
 
 # Substrates
-substrate:Dummy%20Substrate a :Substrate ;
+substrate:5 a :Substrate ;
     rdfs:label "Dummy Substrate" ;
     rdfs:comment "Dummy Substrate" ;
     prov:wasAttributedTo user:1 ;

@@ -371,6 +371,11 @@ crc:LEISProcess rdf:type owl:Class ;
                 rdfs:comment "A process where LEIS measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
 
 
+###  https://crc1625.mdi.ruhr-uni-bochum.de/LiteratureReference
+crc:LiteratureReference rdf:type owl:Class ;
+                        rdfs:subClassOf pmdco:Document .
+
+
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary
 crc:MaterialsLibrary rdf:type owl:Class ;
                      rdfs:subClassOf pmdco:EngineeredMaterial ;
@@ -387,7 +392,8 @@ crc:MeasurementArea rdf:type owl:Class ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/NoGradientSample
 crc:NoGradientSample rdf:type owl:Class ;
-                     rdfs:subClassOf crc:Sample .
+                     rdfs:subClassOf crc:MaterialsLibrary ;
+                     rdfs:comment "From Satyakam" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/PSMProcess
@@ -419,6 +425,11 @@ crc:Project rdf:type owl:Class ;
             rdfs:subClassOf pmdco:Organization ;
             rdfs:comment "One of the projects of the CRC (e.g. A01, B03...)" ;
             rdfs:label "Project"@en .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/Publication
+crc:Publication rdf:type owl:Class ;
+                rdfs:subClassOf pmdco:Document .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/ReportProcess
@@ -473,7 +484,7 @@ crc:Sample rdf:type owl:Class ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/StressChip
 crc:StressChip rdf:type owl:Class ;
-               rdfs:subClassOf crc:Sample .
+               rdfs:subClassOf crc:MaterialsLibrary .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/StripeSample

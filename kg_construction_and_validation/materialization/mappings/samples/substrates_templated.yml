@@ -5,14 +5,9 @@ sources:
   sql_source: {sources}
 
 mappings:
-  sample_to_substrate:
-    sources: sql_source
-    s: object:$(MLId)
-    po:
-      - [pmdco:characteristic, substrate:$(SubstrateName)~iri]
   substrate_metadata:
     sources: sql_source
-    s: substrate:$(SubstrateName)
+    s: substrate:$(SubstrateObjectId)
     po:
       - [a, :Substrate~iri]
       - [:internalID, $(SubstrateObjectId), xsd:integer]

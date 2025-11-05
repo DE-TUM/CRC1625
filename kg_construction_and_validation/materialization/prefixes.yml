@@ -23,9 +23,11 @@
   user:       https://crc1625.mdi.ruhr-uni-bochum.de/user/
   project:    https://crc1625.mdi.ruhr-uni-bochum.de/project/
 
-  # MLs, measurement areas and compositions
+  # Objects, measurements, measurement areas and compositions
   object:  https://crc1625.mdi.ruhr-uni-bochum.de/object/
   substrate:          https://crc1625.mdi.ruhr-uni-bochum.de/substrate/
+  publication:          https://crc1625.mdi.ruhr-uni-bochum.de/publication/
+  literature_reference: https://crc1625.mdi.ruhr-uni-bochum.de/literature_reference/
   measurement:        https://crc1625.mdi.ruhr-uni-bochum.de/measurement/
   measurement_type:   https://crc1625.mdi.ruhr-uni-bochum.de/measurement_type/
   measurement_area:   https://crc1625.mdi.ruhr-uni-bochum.de/measurement_area/

@@ -6,6 +6,6 @@ sources:
 mappings:
   idea:
     sources: sql_source
-    s: idea_or_experiment_plan:$(sourceObjectID)
+    s: $(sourceIRI)
     po:
-      - [pmdco:output, object:$(targetObjectID)~iri]
+      - [$(relation), $(targetIRI)~iri]

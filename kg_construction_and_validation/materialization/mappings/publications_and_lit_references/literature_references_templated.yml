@@ -1,0 +1,16 @@
+prefixes: {prefixes}
+
+sources:
+  sql_source: {sources}
+
+mappings:
+  literature_reference:
+    sources: sql_source
+    s: literature_reference:$(ObjectId)
+    po:
+      - [a, :LiteratureReference~iri]
+      - [:internalID, $(ObjectId), xsd:integer]
+      - [prov:wasAssociatedWith, user:$(createdBy)~iri]
+      - [:creationDate, $(created), xsd:dateTime]
+      - [rdfs:label, $(ObjectName), xsd:string]
+      - [rdfs:comment, $(ObjectDescription), xsd:string]
