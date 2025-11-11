@@ -15,19 +15,20 @@ mappings:
     s: measurement_area:ma_for_ML_$(MLId)_in_MA_$(MeasurementArea)
     po:
       - [a, :MeasurementArea~iri]
-      - [pmdco:characteristic, EDX_composition:$(CompositionEpoch)_in_MA_$(MeasurementArea)~iri]
+      - [pmdco:characteristic, EDX_composition:$(CompositionId)_in_MA_$(MeasurementArea)~iri]
       - [pmdco:value, $(MeasurementArea), xsd:integer]
 
   composition:
     sources: sql_source
-    s: EDX_composition:$(CompositionEpoch)_in_MA_$(MeasurementArea)
+    s: EDX_composition:$(CompositionId)_in_MA_$(MeasurementArea)
     po:
       - [a, :VolumeComposition~iri]
-      - [pmdco:characteristic, EDX_composition:$(CompositionEpoch)_in_MA_$(MeasurementArea)_element_$(ElementName)~iri]
+      - [:internalID, $(CompositionId), xsd:integer]
+      - [pmdco:characteristic, EDX_composition:$(CompositionId)_in_MA_$(MeasurementArea)_element_$(ElementName)~iri]
 
   composition_element:
     sources: sql_source
-    s: EDX_composition:$(CompositionEpoch)_in_MA_$(MeasurementArea)_element_$(ElementName)
+    s: EDX_composition:$(CompositionId)_in_MA_$(MeasurementArea)_element_$(ElementName)
     po:
       - [a,pmdco:ChemicalObject~iri]
       - [:temporaryDatatypeProperty, $(ElementName), xsd:string]
@@ -37,5 +38,5 @@ mappings:
     sources: sql_source
     s: measurement:$(OriginalMeasurementId)
     po:
-      - [pmdco:characteristic, EDX_composition:$(CompositionEpoch)_in_MA_$(MeasurementArea)~iri]
+      - [pmdco:characteristic, EDX_composition:$(CompositionId)_in_MA_$(MeasurementArea)~iri]
 

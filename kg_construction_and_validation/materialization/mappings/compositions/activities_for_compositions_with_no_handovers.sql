@@ -1,6 +1,6 @@
 SELECT
 ObjectLinkObject.ObjectId AS MLId,
-FORMAT(compositionInfo._created, 'yyyyMMddHHmmssfff') AS CompositionEpoch,
+compositionInfo.ObjectId AS CompositionId,
 compositionLocation.Value AS MeasurementArea
 FROM ObjectLinkObject
 /* Composition information */

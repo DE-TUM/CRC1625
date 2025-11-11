@@ -1,4 +1,4 @@
-SELECT FORMAT(compositionInfo._created, 'yyyyMMddHHmmssfff') AS CompositionId,
+SELECT compositionInfo.ObjectId AS CompositionId,
     CASE
         WHEN compositionMetadata.propertyname = 'x' THEN 'x_position'
         WHEN compositionMetadata.propertyname = 'y' THEN 'y_position'

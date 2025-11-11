@@ -1,5 +1,5 @@
 SELECT
-FORMAT(compositionInfo._created, 'yyyyMMddHHmmssfff') AS CompositionEpoch,
+compositionInfo.ObjectId AS CompositionId,
 handoverData.HandoverId,
 compositionLocation.Value AS MeasurementArea
 FROM ObjectLinkObject

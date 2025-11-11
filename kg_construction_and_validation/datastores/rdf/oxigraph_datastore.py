@@ -103,6 +103,10 @@ class OxigraphRDFDatastore(RDFDatastore):
             headers={"Accept": "text/ntriples"}
         )
 
+        g = Graph()
+        g.parse(data=response.text, format="nt")
+        g.serialize(destination=output_file+"arrea", format="turtle")
+
         if response.status_code == 200:
             with open(output_file, "w", encoding="utf-8") as f:
                 f.write(response.text)

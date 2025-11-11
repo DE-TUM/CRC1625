@@ -1,8 +1,7 @@
 SELECT
 ObjectLinkObject.ObjectId AS MLId,
 ObjectLinkObject.LinkedObjectId AS CompositionId,
-FORMAT(compositionInfo._created, 'yyyy-MM-ddTHH:mm:ss.fff') AS CompositionDate,
-FORMAT(compositionInfo._created, 'yyyyMMddHHmmssfff') AS CompositionEpoch,
+compositionInfo.ObjectId AS CompositionId,
 originalMeasurement.ObjectId AS OriginalMeasurementId,
 compositionValues.ElementName,
 FORMAT(compositionValues.ValuePercent, '0.0000') AS ValuePercent, /* Fixed to a string with 4 decimal places, to avoid weird formatting errors */

@@ -17,4 +17,4 @@ mappings:
     po:
       - [a, :CharacterizationActivityInstance~iri]
       - [a, :EDXMicroscopyProcess~iri]
-      - [pmdco:output, EDX_composition:$(CompositionEpoch)_in_MA_$(MeasurementArea)~iri]
+      - [pmdco:output, EDX_composition:$(CompositionId)_in_MA_$(MeasurementArea)~iri]
