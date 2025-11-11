@@ -19,8 +19,13 @@ JOIN (
     JOIN Handover ON ObjectInfo.objectId = Handover.handoverid
     WHERE ObjectInfo.typeId = -1
 ) handoverData ON linkingMLs.ObjectId = handoverData.MLId
-WHERE
-measurementData.TypeId NOT IN (12) /* Photo */
+WHERE NOT EXISTS ( /* Exclude measurements that are already linked to a handover */
+    SELECT 1
+    FROM ObjectLinkObject
+    JOIN ObjectInfo s on ObjectLinkObject.ObjectId = s.ObjectId
+    WHERE s.TypeId = -1 AND ObjectLinkObject.LinkedObjectId = measurementData.ObjectId
+)
+AND measurementData.TypeId NOT IN (12) /* Photo */
 AND measurementData.TypeId NOT IN (13, 15, 19, 53, 78, 79) /* EDX */
 AND measurementData.TypeId NOT IN (17, 31, 44, 55, 56, 97) /* XRD */
 AND measurementData.TypeId NOT IN (30) /* XPS */
@@ -38,11 +43,12 @@ AND measurementData.TypeId NOT IN (47) /* FIM */
 AND measurementData.TypeId NOT IN (147) /* PSM */
 AND measurementData.TypeId NOT IN (96, 98, 107, 139) /* Report */
 AND measurementData.TypeId NOT IN (
+    3, 4, /* Literature reference or publication */
     5, /* Substrate */
-    6, /* Sample (pieces) */
+    6, 99, /* Object (MLs, samples, computational samples) */
     83, /* Request for synthesis */
     89, /* Ideas or experiment plans */
-    8 /* Composition */
+    8, 125 /* Volume or surface composition */
 )
 AND sampleData.TypeId = 6
 /* Get only the handover that has the maximum date among those

@@ -9,6 +9,12 @@ The module is callable as a CLI application, allowing to execute all or one of t
 test_files and test_names variables
 
 This test can be run on either an Oxigraph or Virtuoso instance. *All* datastore contents will be cleared
+
+How to add a test:
+    1. Store the synthetic DB .bak file (you can use the existing ones as the base) in datastores/sql/db_dumps/
+    2. Add an entry to the args for datastores/sql/sql_db.py
+    3. Store the corresponding KG dump as a .ttl file under mappings_output_test/
+    4. Include references to both in this file under test_files, test_names and the main function's args
 """
 
 import argparse
@@ -46,6 +52,7 @@ test_files = {
     'v_2': os.path.join(module_dir, 'mappings_output_test/graph_dump_validation_v_2.ttl'),
     'v_3': os.path.join(module_dir, 'mappings_output_test/graph_dump_validation_v_3.ttl'),
     'v_4': os.path.join(module_dir, 'mappings_output_test/graph_dump_validation_v_4.ttl'),
+    'v_5': os.path.join(module_dir, 'mappings_output_test/graph_dump_validation_v_5.ttl'),
 }
 
 test_names = {
@@ -53,7 +60,9 @@ test_names = {
     'v_1': 'Handover chain test: Group consisting of initial work handover together with other handovers',
     'v_2': 'Handover chain test: User belonging multiple projects',
     'v_3': 'Handover chain test: Isolated handover surrounded by two handover groups of size 2, belonging to the same project',
-    'v_4': 'Handover chain test: Isolated handover surrounded by two handover groups of size 4, belonging to the same project'
+    'v_4': 'Handover chain test: Isolated handover surrounded by two handover groups of size 4, belonging to the same project',
+    'v_5': 'Handover chain test: Manually linked measurements to handovers'
+
 }
 
 def validate_compositions(datastore_choice: RDFDatastore):
@@ -184,9 +193,9 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--test",
-        choices=["all", "v", "v_1", "v_2", "v_3", "v_4"],
+        choices=["all", "v", "v_1", "v_2", "v_3", "v_4", "v_5"],
         required=True,
-        help="Test to run. Possible values: 'all', 'v', 'v_1', 'v_2', 'v_3', 'v_4'"
+        help="Test to run. Possible values: 'all', 'v', 'v_1', 'v_2', 'v_3', 'v_4', 'v_5'"
     )
 
     args = parser.parse_args()

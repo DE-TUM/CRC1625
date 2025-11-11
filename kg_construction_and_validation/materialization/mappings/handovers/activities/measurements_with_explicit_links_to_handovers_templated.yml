@@ -1,0 +1,19 @@
+prefixes: {prefixes}
+
+sources:
+  sql_source: {sources}
+
+mappings:
+  handover_to_activity:
+    sources: sql_source
+    s: handover:$(HandoverId)
+    po:
+      - [pmdco:subordinateProcess, activity:{measurement_name}_activity_for_handover_$(HandoverId)~iri]
+
+  activity:
+    sources: sql_source
+    s: activity:{measurement_name}_activity_for_handover_$(HandoverId)
+    po:
+      - [a, :CharacterizationActivityInstance~iri]
+      - [a, :{measurement_class_name}~iri]
+      - [pmdco:output, measurement:$(MeasurementId)~iri]

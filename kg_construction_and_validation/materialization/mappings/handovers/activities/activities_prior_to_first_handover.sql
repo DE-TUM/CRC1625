@@ -17,6 +17,12 @@ JOIN (
         GROUP BY SampleObjectId
     ) MinH ON H.SampleObjectId = MinH.SampleObjectId AND O._created = MinH.min_created
 ) InitialHandover ON linkingMLs.ObjectId = InitialHandover.SampleObjectId
-WHERE measurementData.TypeId IN ({measurement_ids})
+WHERE NOT EXISTS ( /* Exclude measurements that are already linked to a handover */
+    SELECT 1
+    FROM ObjectLinkObject
+    JOIN ObjectInfo s on ObjectLinkObject.ObjectId = s.ObjectId
+    WHERE s.TypeId = -1 AND ObjectLinkObject.LinkedObjectId = measurementData.ObjectId
+)
+AND measurementData.TypeId IN ({measurement_ids})
 AND sampleData.TypeId = 6
 AND measurementData._created < InitialHandover._created

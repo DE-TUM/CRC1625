@@ -28,11 +28,12 @@ AND measurementData.TypeId NOT IN (47) /* FIM */
 AND measurementData.TypeId NOT IN (147) /* PSM */
 AND measurementData.TypeId NOT IN (96, 98, 107, 139) /* Report */
 AND measurementData.TypeId NOT IN (
+    3, 4, /* Literature reference or publication */
     5, /* Substrate */
-    6, /* Sample (pieces) */
+    6, 99, /* Object (MLs, samples, computational samples) */
     83, /* Request for synthesis */
     89, /* Ideas or experiment plans */
-    8 /* Composition */
+    8, 125 /* Volume or surface composition */
 )
 AND sampleData.TypeId = 6
 AND InitialHandover.HandoverId IS NULL

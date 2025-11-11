@@ -19,7 +19,13 @@ JOIN (
     JOIN Handover ON ObjectInfo.objectId = Handover.handoverid
     WHERE ObjectInfo.typeId = -1
 ) handoverData ON linkingMLs.ObjectId = handoverData.MLId
-WHERE   measurementData.TypeId IN ({measurement_ids})
+WHERE NOT EXISTS ( /* Exclude measurements that are already linked to a handover */
+    SELECT 1
+    FROM ObjectLinkObject
+    JOIN ObjectInfo s on ObjectLinkObject.ObjectId = s.ObjectId
+    WHERE s.TypeId = -1 AND ObjectLinkObject.LinkedObjectId = measurementData.ObjectId
+)
+AND measurementData.TypeId IN ({measurement_ids})
 AND sampleData.TypeId = 6
 /* Get only the handover that has the maximum date among those
    that have a creation date earlier than the measurement's creation date */

@@ -104,6 +104,7 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                             (os.path.join(module_dir, "mappings/handovers/initial_work_handover_to_first_handover_templated.yml"), False),
 
                             (os.path.join(module_dir, "mappings/handovers/activities/activities_templated.yml"),
+
                             # SQL templates
                             {
                                 "{measurement_ids}": [
@@ -234,6 +235,72 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                 ]
                             }, False),
                             (os.path.join(module_dir, "mappings/handovers/activities/activities_with_no_handovers_templated.yml"),
+                            # SQL templates
+                            {
+                                "{measurement_ids}": [
+                                    "12",
+                                    "13, 15, 19, 53, 78, 79",
+                                    "17, 31, 44, 55, 56, 97",
+                                    "30",
+                                    "18",
+                                    "48",
+                                    "27, 38, 39, 40",
+                                    "24",
+                                    "14, 16, 33",
+                                    "41, 80, 81, 82",
+                                    "20",
+                                    "26",
+                                    "57, 58, 85",
+                                    "50, 59, 60, 86, 87",
+                                    "47",
+                                    "147",
+                                    "96, 98, 107, 139"
+                                ]
+                            },
+
+                            # Additional YARRRML templates
+                            {
+                                "{measurement_name}": [
+                                    "Photo",
+                                    "EDX",
+                                    "XRD",
+                                    "XPS",
+                                    "Annealing",
+                                    "LEIS",
+                                    "Thickness",
+                                    "SEM",
+                                    "Resistance",
+                                    "Bandgap",
+                                    "APT",
+                                    "TEM",
+                                    "SDC",
+                                    "SECCM",
+                                    "FIM",
+                                    "PSM",
+                                    "Report"
+                                ],
+                                "{measurement_class_name}": [
+                                    "PhotoProcess",
+                                    "EDXMicroscopyProcess",
+                                    "XRDProcess",
+                                    "XPSProcess",
+                                    "AnnealingProcess",
+                                    "LEISProcess",
+                                    "ThicknessProcess",
+                                    "SEMProcess",
+                                    "ResistanceProcess",
+                                    "BandgapProcess",
+                                    "APTProcess",
+                                    "TEMProcess",
+                                    "SDCProcess",
+                                    "SECCMProcess",
+                                    "FIMProcess",
+                                    "PSMProcess",
+                                    "ReportProcess"
+                                ]
+                            }, False),
+
+                            (os.path.join(module_dir, "mappings/handovers/activities/measurements_with_explicit_links_to_handovers_templated.yml"),
                             # SQL templates
                             {
                                 "{measurement_ids}": [

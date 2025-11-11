@@ -96,6 +96,7 @@ class MSSQLDB():
             'v_2': 'docker_compose_validation_db_subtest_2.yml',
             'v_3': 'docker_compose_validation_db_subtest_3.yml',
             'v_4': 'docker_compose_validation_db_subtest_4.yml',
+            'v_5': 'docker_compose_validation_db_subtest_5.yml',
             'c': 'docker_compose_clear_db.yml'
         }
 
@@ -113,6 +114,7 @@ class MSSQLDB():
                         - 'v_2': Validation DB dump, subtest 2
                         - 'v_3': Validation DB dump, subtest 3
                         - 'v_4': Validation DB dump, subtest 4
+                        - 'v_5': Validation DB dump, subtest 5
                         
                         Other DB dumps:
                         - 'c': Clear DB dump, containing no data. Used for the performance tests
