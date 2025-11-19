@@ -44,11 +44,15 @@ workflow_model_details_query = prefixes + open(os.path.join(module_dir, 'queries
 workflow_instance_details_query = prefixes + open(os.path.join(module_dir, 'queries/workflow_instance_details.sparql'), 'r').read()
 get_label_query = prefixes + open(os.path.join(module_dir, 'queries/get_label.sparql'), 'r').read()
 get_activity_type_query = prefixes + open(os.path.join(module_dir, 'queries/get_activity_type.sparql'), 'r').read()
+get_workflow_model_names_and_creators_query = prefixes + open(os.path.join(module_dir, 'queries/get_workflow_model_names_and_creators.sparql'), 'r').read()
+get_workflow_model_names_from_user_query = prefixes + open(os.path.join(module_dir, 'queries/get_workflow_model_names_from_user.sparql'), 'r').read()
+
 
 crc_prefix = Namespace("https://crc1625.mdi.ruhr-uni-bochum.de/")
 crc_workflow_prefix = Namespace("https://crc1625.mdi.ruhr-uni-bochum.de/workflow/")
 crc_project_prefix = Namespace("https://crc1625.mdi.ruhr-uni-bochum.de/project/")
 crc_sample_prefix = Namespace("https://crc1625.mdi.ruhr-uni-bochum.de/object/")
+crc_user_prefix = Namespace("https://crc1625.mdi.ruhr-uni-bochum.de/user/")
 pmdco_prefix = Namespace("https://w3id.org/pmd/co/")
 rdf_prefix = Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#")
 rdfs_prefix = Namespace("http://www.w3.org/2000/01/rdf-schema#")
@@ -218,12 +222,12 @@ workflow_model_step_iri_to_config = {
 }
 
 
-def uuid_for_name(name: str):
+def uuid_for_name(name: str, user_id: int):
     """
-    Generates a UUID5 for the given name in the DNS namespace. Used to uniquely identify workflow
+    Generates a UUID5 for the given name and creator in the DNS namespace. Used to uniquely identify workflow
     models and instances
     """
-    return str(uuid.uuid5(uuid.NAMESPACE_DNS, name))
+    return str(uuid.uuid5(uuid.NAMESPACE_DNS, name+(str(user_id))))
 
 
 def get_label(entity_iri: str, store:RDFDatastore):
@@ -248,14 +252,41 @@ def get_activity_type(entity_iri: str, store:RDFDatastore):
         return str(pmdco_prefix.AnalysingProcess) # It's an "Others" activity
 
 
-def read_workflow_model(workflow_model_name: str, store: RDFDatastore) -> None | WorkflowModel:
+def get_all_workflow_names_and_creators(store: RDFDatastore) -> list[tuple[str, int]]:
+    workflow_models_list : list[tuple[str, int]] = []
+
+    query = get_workflow_model_names_and_creators_query
+    results = store.launch_query(query).json()["results"]["bindings"]
+    for result in results:
+        workflow_model_name = result["workflow_model_name"]["value"]
+        workflow_model_creator = result["user_id"]["value"]
+
+        workflow_models_list.append((workflow_model_name, workflow_model_creator))
+
+    return workflow_models_list
+
+
+def get_workflow_model_names_from_user(user_id: int, store: RDFDatastore) -> list[str]:
+    workflow_models_list: list[str] = []
+
+    query = get_workflow_model_names_from_user_query.replace("{user_id}", str(user_id))
+    results = store.launch_query(query).json()["results"]["bindings"]
+    for result in results:
+        workflow_model_name = result["workflow_model_name"]["value"]
+
+        workflow_models_list.append(workflow_model_name)
+
+    return workflow_models_list
+
+
+def read_workflow_model(workflow_model_name: str, user_id: int, store: RDFDatastore) -> None | WorkflowModel:
     """
     Returns the WorkflowModel identified by the provided name
     """
     
     workflow_model = WorkflowModel()
 
-    workflow_model_id = uuid_for_name(workflow_model_name)
+    workflow_model_id = uuid_for_name(workflow_model_name, user_id)
     workflow_model_iri = crc_workflow_prefix["workflow_model_" + workflow_model_id]
 
     result = store.launch_query(workflow_model_details_query.replace("{entity_iri}", workflow_model_iri))
@@ -297,26 +328,36 @@ def read_workflow_model(workflow_model_name: str, store: RDFDatastore) -> None |
     return workflow_model
 
 
-def store_workflow_model(workflow_model: WorkflowModel, store: RDFDatastore, temporary_ttl_path: str = "workflow_model.nt"):
+def store_workflow_model(workflow_model: WorkflowModel,
+                         user_id: int,
+                         store: RDFDatastore,
+                         temporary_ttl_path: str = "workflow_model.nt"):
     """
     Serializes the workflow model into RDF and stores it
     """
     g = Graph()
     name_to_uid = dict()
 
-    workflow_model_id = uuid_for_name(workflow_model.workflow_model_name)
+    workflow_model_id = uuid_for_name(workflow_model.workflow_model_name, user_id)
     workflow_model_iri = crc_workflow_prefix["workflow_model_"+workflow_model_id]
 
+    # Type
     g.add((workflow_model_iri, rdf_prefix.type, crc_prefix.HandoverWorkflowModel))
+
     # Label
     g.add((workflow_model_iri, rdfs_prefix.label, Literal(workflow_model.workflow_model_name, datatype=XSD.string)))
+
+    # Attribution
+    g.add((workflow_model_iri, prov_prefix.wasAttributedTo, crc_user_prefix[str(user_id)]))
+
+    # Settings
     g.add((workflow_model_iri, crc_prefix.allowIntermediateHandoverGroups, Literal(workflow_model.workflow_model_options.allow_intermediate_handover_groups, datatype=XSD.boolean)))
 
     step_name: str
     step_options: WorkflowModelStep
     for step_name, step in workflow_model.workflow_model_steps.items():
         if step_name not in name_to_uid:
-            name_to_uid[step_name] = uuid_for_name(step_name)
+            name_to_uid[step_name] = uuid_for_name(step_name, user_id)
 
         step_iri = crc_workflow_prefix[f"workflow_step_{name_to_uid[step_name]}_for_workflow_model_{workflow_model_id}"]
 
@@ -329,6 +370,9 @@ def store_workflow_model(workflow_model: WorkflowModel, store: RDFDatastore, tem
 
         # Label
         g.add((step_iri, rdfs_prefix.label, Literal(step_name, datatype=XSD.string)))
+
+        # Attribution
+        g.add((step_iri, prov_prefix.wasAttributedTo, crc_user_prefix[str(user_id)]))
 
         # Comment
         g.add((step_iri, rdfs_prefix.comment, Literal(step.step_description, datatype=XSD.string)))
@@ -343,7 +387,7 @@ def store_workflow_model(workflow_model: WorkflowModel, store: RDFDatastore, tem
         # Next steps
         for next_step_name in step.next_steps:
             if next_step_name not in name_to_uid:
-                name_to_uid[next_step_name] = uuid_for_name(next_step_name)
+                name_to_uid[next_step_name] = uuid_for_name(next_step_name, user_id)
 
             next_step_iri = crc_workflow_prefix[f"workflow_step_{name_to_uid[next_step_name]}_for_workflow_model_{workflow_model_id}"]
             g.add((step_iri, pmdco_prefix.nextProcess, next_step_iri))
@@ -373,36 +417,41 @@ def store_workflow_model(workflow_model: WorkflowModel, store: RDFDatastore, tem
     os.remove(ttl_file_path)
 
 
-def delete_workflow_model(workflow_model: WorkflowModel, store: RDFDatastore):
+def delete_workflow_model(workflow_model: WorkflowModel,
+                          user_id: int,
+                          store: RDFDatastore):
     """
-    Deletes the workflow model from the store
+    Deletes the workflow model of a given user from the store
     """
-    workflow_model_id = uuid_for_name(workflow_model.workflow_model_name)
+    workflow_model_id = uuid_for_name(workflow_model.workflow_model_name, user_id)
     workflow_model_iri = crc_workflow_prefix["workflow_model_" + workflow_model_id]
 
     store.launch_query(delete_entity_query.replace("{entity_iri}", workflow_model_iri))
 
 
 def overwrite_workflow_model(workflow_model: WorkflowModel,
+                             user_id: int,
                              store: RDFDatastore):
     """
-    Deletes the workflow model corresponding to the provided one, and stores it again
+    Deletes the workflow model of a given user, and stores it again
     """
-    delete_workflow_model(workflow_model, store)
+    delete_workflow_model(workflow_model, user_id, store)
 
-    store_workflow_model(workflow_model, store)
+    store_workflow_model(workflow_model, user_id, store)
 
 
-def get_workflow_instances_of_model(workflow_model: WorkflowModel, store: RDFDatastore) -> list[WorkflowInstance]:
+def get_workflow_instances_of_model(workflow_model: WorkflowModel,
+                                    user_id: int,
+                                    store: RDFDatastore) -> list[tuple[WorkflowInstance, int]]:
     """
     Returns the list of workflow instances of the provided model
     """
-    
-    workflow_model_id = uuid_for_name(workflow_model.workflow_model_name)
+
+    workflow_model_id = uuid_for_name(workflow_model.workflow_model_name, user_id)
     workflow_model_iri = crc_workflow_prefix["workflow_model_" + workflow_model_id]
 
     # Workflow instance name -> WorkflowInstance (we use a dict for fast lookups only)
-    workflow_instances: dict[str, WorkflowInstance] = {}
+    workflow_instances: dict[str, tuple[WorkflowInstance, int]] = dict()
     query = workflow_instance_details_query.replace("{workflow_model_iri}", workflow_model_iri)
     result = store.launch_query(query)
     data = result.json()["results"]["bindings"]
@@ -413,30 +462,39 @@ def get_workflow_instances_of_model(workflow_model: WorkflowModel, store: RDFDat
         workflow_instance_name: str = binding["workflow_instance_name"]["value"]
         step_name: str = binding["step_name"]["value"]
         object_id: int = int(binding["object_id"]["value"])
+        user_id: int = int(binding["user_id"]["value"])
 
         if workflow_instance_name not in workflow_instances:
-            workflow_instances[workflow_instance_name] = WorkflowInstance()
-            workflow_instances[workflow_instance_name].workflow_instance_name = workflow_instance_name
-            workflow_instances[workflow_instance_name].workflow_model_name = workflow_model.workflow_model_name
+            workflow_instance = WorkflowInstance()
 
-        if step_name not in workflow_instances[workflow_instance_name].step_assignments:
-            workflow_instances[workflow_instance_name].step_assignments[step_name] = []
+            workflow_instance.workflow_instance_name = workflow_instance_name
+            workflow_instance.workflow_model_name = workflow_model.workflow_model_name
 
-        workflow_instances[workflow_instance_name].step_assignments[step_name].append(object_id)
+            workflow_instances[workflow_instance_name] = ((workflow_instance, user_id))
+
+        workflow_instance_to_modify, _ = workflow_instances[workflow_instance_name]
+
+        if step_name not in workflow_instance_to_modify.step_assignments:
+            workflow_instance_to_modify.step_assignments[step_name] = []
+
+        workflow_instance_to_modify.step_assignments[step_name].append(object_id)
 
     return list(workflow_instances.values())
 
 
-def create_workflow_instance(workflow_instance: WorkflowInstance, store: RDFDatastore, temporary_ttl_path: str = "workflow_instance.ttl"):
+def create_workflow_instance(workflow_instance: WorkflowInstance,
+                             user_id: int,
+                             store: RDFDatastore,
+                             temporary_ttl_path: str = "workflow_instance.ttl"):
     """
     Serializes the workflow instance into RDF and stores it
     """
     g = Graph()
 
-    workflow_model_id = uuid_for_name(workflow_instance.workflow_model_name)
+    workflow_model_id = uuid_for_name(workflow_instance.workflow_model_name, user_id)
     workflow_model_iri = crc_workflow_prefix["workflow_model_" + workflow_model_id]
 
-    workflow_instance_id = uuid_for_name(workflow_instance.workflow_instance_name)
+    workflow_instance_id = uuid_for_name(workflow_instance.workflow_instance_name, user_id)
     workflow_instance_iri = crc_workflow_prefix["workflow_instance_" + workflow_instance_id]
 
     # Type
@@ -444,6 +502,9 @@ def create_workflow_instance(workflow_instance: WorkflowInstance, store: RDFData
 
     # Label
     g.add((workflow_instance_iri, rdfs_prefix.label, Literal(workflow_instance.workflow_instance_name, datatype=XSD.string)))
+
+    # Attribution
+    g.add((workflow_instance_iri, prov_prefix.wasAttributedTo, crc_user_prefix[str(user_id)]))
 
     # Link to workflow model
     g.add((workflow_instance_iri, crc_prefix.handoverWorkflowModelInstanceOf, workflow_model_iri))
@@ -453,6 +514,9 @@ def create_workflow_instance(workflow_instance: WorkflowInstance, store: RDFData
         # Type
         g.add((assignment_iri, rdf_prefix.type, crc_prefix.HandoverWorkflowInstanceAssignment))
 
+        # Attribution
+        g.add((assignment_iri, prov_prefix.wasAttributedTo, crc_user_prefix[str(user_id)]))
+
         # Link to assignment
         g.add((workflow_instance_iri, crc_prefix.hasAssignment, assignment_iri))
 
@@ -461,7 +525,7 @@ def create_workflow_instance(workflow_instance: WorkflowInstance, store: RDFData
             g.add((assignment_iri, crc_prefix.assignedObject, crc_sample_prefix[str(object_id)]))
 
         # Link to step
-        step_iri = crc_workflow_prefix[f"workflow_step_{uuid_for_name(step_name)}_for_workflow_model_{workflow_model_id}"]
+        step_iri = crc_workflow_prefix[f"workflow_step_{uuid_for_name(step_name, user_id)}_for_workflow_model_{workflow_model_id}"]
         g.add((assignment_iri, crc_prefix.relatesToHandoverWorkflowStep, step_iri))
 
     ttl_file_path = os.path.join(module_dir, temporary_ttl_path)
@@ -470,23 +534,25 @@ def create_workflow_instance(workflow_instance: WorkflowInstance, store: RDFData
     os.remove(ttl_file_path)
 
 
-def delete_workflow_instance(workflow_instance: WorkflowInstance, store: RDFDatastore):
+def delete_workflow_instance(workflow_instance: WorkflowInstance,
+                             user_id: int,
+                             store: RDFDatastore):
     """
     Deletes the workflow instance corresponding to the provided one, and stores it again
     """
-    workflow_instance_id = uuid_for_name(workflow_instance.workflow_instance_name)
+    workflow_instance_id = uuid_for_name(workflow_instance.workflow_instance_name, user_id)
     workflow_instance_iri = crc_workflow_prefix["workflow_instance_" + workflow_instance_id]
 
     store.launch_query(delete_entity_query.replace("{entity_iri}", workflow_instance_iri))
 
 
-def overwrite_workflow_instance(workflow_instance: WorkflowInstance, store: RDFDatastore):
+def overwrite_workflow_instance(workflow_instance: WorkflowInstance, user_id: int, store: RDFDatastore):
     """
     Deletes the workflow model corresponding to the provided one, and stores it again
     """
-    delete_workflow_instance(workflow_instance, store)
+    delete_workflow_instance(workflow_instance, user_id, store)
 
-    create_workflow_instance(workflow_instance, store)
+    create_workflow_instance(workflow_instance, user_id, store)
 
 
 def get_first_handover_group(object_id: int, store: RDFDatastore) -> str:

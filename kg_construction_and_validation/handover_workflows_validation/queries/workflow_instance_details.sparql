@@ -1,9 +1,10 @@
-SELECT ?workflow_instance_name ?step_name ?object_id WHERE {
+SELECT ?workflow_instance_name ?step_name ?object_id ?user_id WHERE {
     {
         GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
             ?workflow_instance :handoverWorkflowModelInstanceOf <{workflow_model_iri}>.
             ?workflow_instance rdfs:label ?workflow_instance_name.
             ?workflow_instance :hasAssignment ?workflow_step_assignment.
+            ?workflow_instance prov:wasAttributedTo ?user.
 
             ?workflow_step_assignment :assignedObject ?assigned_ML_or_sample.
             ?workflow_step_assignment :relatesToHandoverWorkflowStep ?workflow_step_iri.
@@ -12,6 +13,7 @@ SELECT ?workflow_instance_name ?step_name ?object_id WHERE {
 
         GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
             ?assigned_ML_or_sample :internalID ?object_id.
+            ?user :internalID ?user_id.
         }
     }
 }
