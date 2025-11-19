@@ -55,8 +55,8 @@ def run_test(path: str,
     store.upload_file(path + "_workflow_model.ttl", graph_iri=WORKFLOWS_GRAPH_IRI)
     store.upload_file(path + "_workflow_instance.ttl", graph_iri=WORKFLOWS_GRAPH_IRI)
 
-    workflow_model = read_workflow_model("example_workflow", store)
-    workflow_instance = get_workflow_instances_of_model(workflow_model, store)[0] # There's only one, no need to look it up
+    workflow_model = read_workflow_model("example_workflow", 1, store)
+    workflow_instance, _ = get_workflow_instances_of_model(workflow_model, 1, store)[0] # There's only one, no need to look it up
 
     steps_to_validate = generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance, store)
     results = validate_SHACL_rules(steps_to_validate, store)
