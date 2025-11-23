@@ -66,10 +66,14 @@ ont_graph.parse(os.path.join(module_dir, "../../ontologies/pmd_core.ttl"), forma
 ont_graph.parse(os.path.join(module_dir, "../../ontologies/oce.owl"), format="xml")
 
 activity_to_iri_prefixed = {
+    "Annealing":    ":AnnealingProcess",
     "APT":          ":APTProcess",
     "Bandgap":      ":BandgapProcess",
     "FIM":          ":FIMProcess",
     "LEIS":         ":LEISProcess",
+    "Photo":        ":PhotoProcess",
+    "PSM":          ":PSMProcess",
+    "Report":       ":Reportrocess",
     "Resistance":   ":ResistanceProcess",
     "SDC":          ":SDCProcess",
     "SECCM":        ":SECCMProcess",
@@ -83,10 +87,14 @@ activity_to_iri_prefixed = {
 }
 
 activity_to_iri = {
+    "Annealing":    str(crc_prefix.AnnealingProcess),
     "APT":          str(crc_prefix.APTProcess),
     "Bandgap":      str(crc_prefix.BandgapProcess),
     "FIM":          str(crc_prefix.FIMProcess),
     "LEIS":         str(crc_prefix.LEISProcess),
+    "Photo":        str(crc_prefix.PhotoProcess),
+    "PSM":          str(crc_prefix.PSMProcess),
+    "Report":       str(crc_prefix.Reportrocess),
     "Resistance":   str(crc_prefix.ResistanceProcess),
     "SDC":          str(crc_prefix.SDCProcess),
     "SECCM":        str(crc_prefix.SECCMProcess),

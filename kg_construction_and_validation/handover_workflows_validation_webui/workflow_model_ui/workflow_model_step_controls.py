@@ -70,8 +70,15 @@ def other_activities_switch_action(workflow_model: WorkflowModel,
 
 
 def add_activity_action(activities_select: Select):
-    if sorted(State().current_workflow_model.workflow_model_steps[State().selected_node].required_activities) != sorted(
-            activities_select.value):
+    #for old_activity in State().current_workflow_model.workflow_model_steps[State().selected_node].required_activities:
+    #    ui_elements.graph_component.remove_activity(State().selected_node, old_activity)
+
+    #for new_activity in activities_select.value:
+    #    ui_elements.graph_component.add_activity(State().selected_node, new_activity)
+
+    ui_elements.graph_component.replace_activities(State().selected_node, sorted(activities_select.value))
+
+    if sorted(State().current_workflow_model.workflow_model_steps[State().selected_node].required_activities) != sorted(activities_select.value):
         State().save_workflow_model_copy()
 
         State().current_workflow_model.workflow_model_steps[

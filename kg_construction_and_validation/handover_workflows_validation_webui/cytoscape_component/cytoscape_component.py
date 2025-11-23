@@ -14,11 +14,7 @@ class NodeType(Enum):
 class CytoscapeComponent(Element, component='cytoscape_component.js'):
     """
     NiceGUI Element implementation for integrating Cytoscape as a custom Vue component
-
-    Follows the example at https://github.com/zauberzeug/nicegui/blob/main/examples/custom_vue_component/main.py
     """
-
-
 
     def __init__(self,
                  nodes: List[Dict],
@@ -64,3 +60,12 @@ class CytoscapeComponent(Element, component='cytoscape_component.js'):
 
     def select_node(self, node_id: str) -> None:
         self.run_method('selectNode', node_id)
+
+    def add_activity(self, node_id: str, activity: str) -> None:
+        self.run_method('addActivity', node_id, activity)
+
+    def remove_activity(self, node_id: str, activity: str) -> None:
+        self.run_method('removeActivity', node_id, activity)
+
+    def replace_activities(self, node_id: str, activities: [str]) -> None:
+        self.run_method('replaceActivities', node_id, activities)

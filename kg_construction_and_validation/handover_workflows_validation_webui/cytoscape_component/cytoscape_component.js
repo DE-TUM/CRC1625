@@ -22,7 +22,18 @@ export default {
         {
           selector: 'node',
           style: {
-            'label': 'data(label)',
+            'label': (ele) => {
+              const label = ele.data('label') || '';
+              const activities = ele.data('activities') || [];
+
+              if (activities.length === 0) {
+                return label;
+              }
+
+              const activityText = '\n'+activities.join('\n');
+
+              return `${label}\n${activityText}`;
+            },
             'color': '#000000',
             'text-valign': 'bottom',
             'text-margin-y': '5px',
@@ -120,6 +131,8 @@ export default {
 
   // Javascript methods that will be hooked into python in cytoscape_component.py
   methods: {
+    // --- Existing methods ---
+
     rerun_layout_and_fit() {
       // Fit to the graph elements with a small padding
       this.cy.layout({ name: 'dagre', fit: true, padding: 10, rankDir: 'LR', animate: true }).run();
@@ -155,6 +168,9 @@ export default {
       const node = this.cy.$id(id);
       if (node.length > 0) {
         node.data('label', newLabel);
+
+        // Force a re-render of the label
+        node.trigger('data');
       }
     },
 
@@ -168,7 +184,7 @@ export default {
 
         this.cy.add({
           group: 'nodes',
-          data: { id: id, label: label },
+          data: { id: id, label: label, activities: [] },
           classes: classes
         });
 
@@ -192,5 +208,49 @@ export default {
         node.addClass('selected');
       }
     },
+
+    addActivity(id, activity) {
+      const node = this.cy.$id(id);
+      if (node.length > 0) {
+        const activities = node.data('activities') || [];
+        if (!activities.includes(activity)) {
+
+          const newActivities = [...activities, activity];
+          node.data('activities', newActivities);
+
+          // Force a re-render of the label
+          node.trigger('data');
+          this.rerun_layout_and_fit();
+        }
+      }
+    },
+
+    removeActivity(id, activity) {
+      const node = this.cy.$id(id);
+      if (node.length > 0) {
+        const activities = node.data('activities') || [];
+        const index = activities.indexOf(activity);
+
+        if (index > -1) {
+          const newActivities = activities.filter(a => a !== activity);
+          node.data('activities', newActivities);
+
+          // Force a re-render of the label
+          node.trigger('data');
+          this.rerun_layout_and_fit();
+        }
+      }
+    },
+
+    replaceActivities(id, activities) {
+      const node = this.cy.$id(id);
+      if (node.length > 0) {
+        node.data('activities', activities);
+
+        // Force a re-render of the label
+        node.trigger('data');
+        this.rerun_layout_and_fit();
+      }
+    }
   }
 };

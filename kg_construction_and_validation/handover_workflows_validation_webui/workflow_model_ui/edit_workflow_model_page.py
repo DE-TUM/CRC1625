@@ -17,7 +17,7 @@ def workflow_model_to_nodes_and_edges(workflow_model: WorkflowModel):
     nodes = []
     edges = []
     for step_name, step in workflow_model.workflow_model_steps.items():
-        nodes.append({'data': {'id': step_name, 'label': step_name}, 'classes': [NodeType.node_type_step.value]})
+        nodes.append({'data': {'id': step_name, 'label': step_name, 'activities': step.required_activities}, 'classes': [NodeType.node_type_step.value]})
         for next_step_name in step.next_steps:
             edges.append({'data': {'source': step_name, 'target': next_step_name}})
 
