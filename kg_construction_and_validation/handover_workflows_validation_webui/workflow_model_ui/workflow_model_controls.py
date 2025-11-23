@@ -1,6 +1,7 @@
 from nicegui import ui
 
 from handover_workflows_validation.handover_workflows_validation import WorkflowModelStep
+from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import NodeType
 from handover_workflows_validation_webui.state import State, ui_elements
 
 
@@ -62,7 +63,7 @@ def add_step_action(new_step_name: str):
 
     new_step = WorkflowModelStep(next_steps=set())
     State().current_workflow_model.workflow_model_steps[new_step_name] = new_step
-    ui_elements.graph_component.add_node(new_step_name, new_step_name)
+    ui_elements.graph_component.add_node(new_step_name, new_step_name, NodeType.node_type_step)
 
     ui.notify(f"Added step '{new_step_name}'", type='positive')
 

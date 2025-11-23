@@ -41,29 +41,49 @@ def handle_workflow_instance_table_click(workflow_instance: WorkflowInstance, ri
 
 def create_workflow_models_table(main_content, right_drawer):
     ui.label('List of predefined workflows').classes('text-xl font-bold')
-    search_input = ui.input(placeholder='Search workflows...').classes('w-full')  # TODO
 
-    workflow_models_table = []
+    workflow_model_table = []
     for workflow_model_name, user_id in get_workflow_model_names_and_creator_user_ids(VirtuosoRDFDatastore()):
-        workflow_models_table.append(
+        workflow_model_table.append(
             {
                 "workflow_model_name": workflow_model_name,
                 "user_id": user_id,
             }
         )
 
+
+    def show_table(results_container: ui.column, rows):
+        results_container.clear()
+        with results_container:
+            for row in rows:
+                with ui.button(on_click=lambda r=row: handle_workflow_models_table_click(r['workflow_model_name'], r['user_id'],
+                                                                                         main_content, right_drawer)).props(
+                    'flat').classes('w-full p-0'):
+                    with ui.row().classes('w-full border-b border-gray-200 py-2 items-center'):
+                        ui.label(str(row['workflow_model_name'])).classes('w-1/2 text-left')
+
+                        ui.label(str(row['user_id'])).classes('w-0 flex-grow text-right')
+
+
+    def filter_table(search_input: ui.input):
+        search_term = search_input.value.lower()
+
+        filtered_rows = [
+            row for row in workflow_model_table if search_term in row['workflow_model_name'].lower()
+        ]
+
+        show_table(results_container, filtered_rows)
+
+
+    search_input = ui.input(placeholder='Search by name...').classes('w-full').on_value_change(lambda: filter_table(search_input))
+
     with ui.row().classes('w-full border-b-2 border-gray-400 py-2 font-bold'):
-        ui.label('Workflow model name').classes('w-1/2 text-left')
-        ui.label('User ID').classes('w-0 flex-grow text-left')
+        ui.label('Workflow model').classes('w-1/2 text-left')
+        ui.label('User ID').classes('w-0 flex-grow text-right')
 
-    for row in workflow_models_table:
-        with ui.button(on_click=lambda r=row: handle_workflow_models_table_click(r['workflow_model_name'], user_id,
-                                                                                 main_content, right_drawer)).props(
-            'flat').classes('w-full p-0'):
-            with ui.row().classes('w-full border-b border-gray-200 py-2 items-center'):
-                ui.label(str(row['workflow_model_name'])).classes('w-1/2 text-left')
+    results_container = ui.column().classes('w-full')
 
-                ui.label(str(row['user_id'])).classes('w-0 flex-grow text-right')
+    show_table(results_container, workflow_model_table)
 
 
 async def check_and_update_icon(validation_icon_column: ui.column, workflow_model, workflow_instance, store):

@@ -1,7 +1,15 @@
+from enum import Enum
 from typing import List, Dict, Callable, Optional
 
 from nicegui import ui
 from nicegui.element import Element
+
+
+class NodeType(Enum):
+    node_type_object = "object"
+    node_type_step = "step"
+    node_type_invisible = "invisible"
+
 
 class CytoscapeComponent(Element, component='cytoscape_component.js'):
     """
@@ -9,6 +17,8 @@ class CytoscapeComponent(Element, component='cytoscape_component.js'):
 
     Follows the example at https://github.com/zauberzeug/nicegui/blob/main/examples/custom_vue_component/main.py
     """
+
+
 
     def __init__(self,
                  nodes: List[Dict],
@@ -46,8 +56,8 @@ class CytoscapeComponent(Element, component='cytoscape_component.js'):
     def rename_node(self, node_id: str, new_label: str) -> None:
         self.run_method('renameNode', node_id, new_label)
 
-    def add_node(self, node_id: str, label: str) -> None:
-        self.run_method('addNode', node_id, label)
+    def add_node(self, node_id: str, label: str, node_type: NodeType) -> None:
+        self.run_method('addNode', node_id, label, node_type.value)
 
     def remove_node(self, node_id: str) -> None:
         self.run_method('removeNode', node_id)

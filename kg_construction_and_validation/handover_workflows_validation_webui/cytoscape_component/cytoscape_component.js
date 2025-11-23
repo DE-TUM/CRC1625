@@ -18,29 +18,58 @@ export default {
       },
 
       style: [
-        // Unselected nodes
+        // Default node style
         {
           selector: 'node',
           style: {
             'label': 'data(label)',
-            'background-color': '#0074D9',
             'color': '#000000',
             'text-valign': 'bottom',
             'text-margin-y': '5px',
             'text-halign': 'center',
             'font-size': '12px',
             'padding': '10px',
-            'text-wrap': 'wrap'
+            'text-wrap': 'wrap',
+            'background-color': '#0074D9', // Fallback default color
           }
         },
-        // Selected nodes
+
+        {
+          selector: 'node.step',
+          style: {
+            'background-color': '#FFBAA5',
+          }
+        },
+
+        {
+          selector: 'node.object',
+          style: {
+            'background-color': '#D5E8D4',
+            'shape': 'round-rectangle',
+          }
+        },
+
+        {
+          selector: 'node.invisible',
+          style: {
+            'width': 0,
+            'height': 0,
+            'padding': 0,
+            'background-opacity': 0,
+            'border-width': 0,
+
+            'label': '',
+            'text-opacity': 0,
+          }
+        },
+
+        // Selected nodes (applied on top of step/object styles)
         {
           selector: '.selected',
           style: {
-            'background-color': '#FF851B',
-            'border-width': 2,
-            'border-color': '#333',
-            'font-weight': 'bold'
+            'border-width': 4,
+            'border-color': '#FF4136',
+            'font-weight': 'bold',
           }
         },
 
@@ -51,6 +80,7 @@ export default {
             'width': 2,
             'line-color': '#ccc',
             'target-arrow-shape': 'delta',
+            'target-arrow-color': '#999',
             'curve-style': 'bezier'
           }
         }
@@ -60,7 +90,7 @@ export default {
         fit: true,
         padding: 10,
         rankDir: 'LR',
-        animate: true
+        //animate: true
       }
     });
 
@@ -128,9 +158,19 @@ export default {
       }
     },
 
-    addNode(id, label) {
+    addNode(id, label, type) {
       if (this.cy.$id(id).length === 0) {
-        this.cy.add({ group: 'nodes', data: { id: id, label: label } });
+        let classes = [];
+
+        if (type && ['step', 'object'].includes(type.toLowerCase())) {
+          classes.push(type.toLowerCase());
+        }
+
+        this.cy.add({
+          group: 'nodes',
+          data: { id: id, label: label },
+          classes: classes
+        });
 
         this.rerun_layout_and_fit();
       }

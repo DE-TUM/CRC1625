@@ -3,7 +3,7 @@ from nicegui import ui
 from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore
 from handover_workflows_validation.handover_workflows_validation import read_workflow_model, WorkflowModel, \
     get_workflow_instances_of_model, WorkflowInstance, overwrite_workflow_instance
-from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent
+from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, NodeType
 from handover_workflows_validation_webui.state import State, ui_elements
 from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_controls import create_graph_controls
 from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_step_controls import \
@@ -19,15 +19,17 @@ def workflow_model_and_instance_to_nodes_and_edges(workflow_model: WorkflowModel
     """
     nodes = list()
     edges = list()
+
     for step_name, step in workflow_model.workflow_model_steps.items():
-        nodes.append({'data': {'id': step_name, 'label': step_name}})
+        nodes.append({'data': {'id': step_name, 'label': step_name}, "classes": [NodeType.node_type_step.value]})
+
         for next_step_name in step.next_steps:
             edges.append({'data': {'source': step_name, 'target': next_step_name}})
 
     for assigned_step_name, assigned_objects in workflow_instance.step_assignments.items():
         for assigned_object in assigned_objects:
-            if {'data': {'id': assigned_object, 'label': assigned_object}} not in nodes:
-                nodes.append({'data': {'id': assigned_object, 'label': f'ML / Sample {assigned_object}'}})
+            if {'data': {'id': assigned_object, 'label': assigned_object}, "classes": [NodeType.node_type_step.value]} not in nodes:
+                nodes.append({'data': {'id': assigned_object, 'label': f'ML / Sample {assigned_object}'}, "classes": [NodeType.node_type_object.value]})
 
             edges.append({'data': {'source': assigned_step_name, 'target': assigned_object}})
 

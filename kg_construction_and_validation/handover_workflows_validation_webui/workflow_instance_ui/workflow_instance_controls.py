@@ -1,5 +1,6 @@
 from nicegui import ui
 
+from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import NodeType
 from handover_workflows_validation_webui.state import State, ui_elements
 from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_step_controls import \
     create_workflow_instance_step_controls
@@ -17,7 +18,7 @@ def add_object_action(new_object_id: str | None):
 
     State().save_workflow_instance_copy()
 
-    ui_elements.graph_component.add_node(new_object_id, new_object_id)
+    ui_elements.graph_component.add_node(new_object_id, new_object_id, NodeType.node_type_object)
     State().existing_objects.add(int(new_object_id))
 
     ui.notify(f"Added Materials Library / Sample ID '{new_object_id}'", type='positive')
@@ -62,7 +63,7 @@ def create_graph_controls():
 
         ui.label('Add a Materials Library / Sample ID').classes('text-sm font-bold text-gray-600')
         with ui.row().classes('w-full items-center'):
-            new_object_input = ui.input('Workflow step name').classes('flex-grow')
+            new_object_input = ui.input('Materials Library / Sample ID').classes('flex-grow')
             ui.button('Add step', on_click=lambda: add_object_action(
                 new_object_input.value
             ))

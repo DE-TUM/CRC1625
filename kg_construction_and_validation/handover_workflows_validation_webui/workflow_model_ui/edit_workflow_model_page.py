@@ -3,7 +3,7 @@ from nicegui import ui
 from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore
 from handover_workflows_validation.handover_workflows_validation import read_workflow_model, WorkflowModel, \
     overwrite_workflow_model
-from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent
+from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, NodeType
 from handover_workflows_validation_webui.state import State, ui_elements
 from handover_workflows_validation_webui.workflow_model_ui.workflow_model_controls import create_graph_controls
 from handover_workflows_validation_webui.workflow_model_ui.workflow_model_step_controls import \
@@ -17,7 +17,7 @@ def workflow_model_to_nodes_and_edges(workflow_model: WorkflowModel):
     nodes = []
     edges = []
     for step_name, step in workflow_model.workflow_model_steps.items():
-        nodes.append({'data': {'id': step_name, 'label': step_name}})
+        nodes.append({'data': {'id': step_name, 'label': step_name}, 'classes': [NodeType.node_type_step.value]})
         for next_step_name in step.next_steps:
             edges.append({'data': {'source': step_name, 'target': next_step_name}})
 
