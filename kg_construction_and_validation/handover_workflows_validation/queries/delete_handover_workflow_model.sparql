@@ -1,0 +1,42 @@
+DELETE {
+    GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
+        ?s ?p ?o.
+    }
+}
+WHERE {
+  GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
+    # Immediate neighborhood (outgoing)
+    {
+      <{handover_workflow_model_iri}> ?p ?o.
+      BIND(<{handover_workflow_model_iri}> AS ?s).
+    }
+    #UNION
+    # Immediate neighborhood (incoming) # TODO not for now, or else we unlink instances, we need to treat this better
+    #{
+    #  ?s ?p <{handover_workflow_model_iri}>.
+    #  BIND(<{handover_workflow_model_iri}> AS ?o).
+    #}
+
+    # Handover workflow steps (outgoing)
+    UNION
+    {
+      <{handover_workflow_model_iri}> pmdco:subordinateProcess/pmdco:nextProcess* ?s.
+      ?s ?p ?o.
+    }
+
+    # Handover workflow steps (incoming)
+    UNION
+    {
+      <{handover_workflow_model_iri}> pmdco:subordinateProcess/pmdco:nextProcess* ?o.
+      ?s ?p ?o.
+    }
+
+    # Handover workflow step activities
+    UNION
+    {
+      <{handover_workflow_model_iri}> pmdco:subordinateProcess/pmdco:nextProcess* ?step.
+      ?step pmdco:subordinateProcess ?s.
+      ?s ?p ?o.
+    }
+  }
+}

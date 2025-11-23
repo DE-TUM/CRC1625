@@ -7,7 +7,17 @@ It needs to expose a SPARQL endpoint at http://127.0.0.1:8891, and accept ODBC r
 
 We employed the following [image](https://hub.docker.com/r/openlink/virtuoso-opensource-7).
 
+Setup example:
 
+```
+docker run -d \
+  --name virtuoso_CRC_1625 \
+  -p 8891:8890 \
+  -p 1111:1111 \
+  -v $(pwd)/virtuoso-db:/database \
+  -v $(pwd)/data:/data \
+   openlink/virtuoso-opensource-7
+```
 
 #### The following configuration tweaks are **required**:
   - [Make virtuoso correctly treat untyped and typed xsd:string literals as the same during comparisons](https://github.com/openlink/virtuoso-opensource/issues/728#issuecomment-1937376203)

@@ -16,21 +16,21 @@ class RDFDatastore(ABC):
         pass
 
     @abstractmethod
-    def launch_update(self, query: str):
+    def launch_update(self, query: str, graph_iri="https://crc1625.mdi.ruhr-uni-bochum.de/graph"):
         """
         Executes a SPARQL update
         """
         pass
 
     @abstractmethod
-    def upload_file(self, file_path: str, content_type: str | None="text/turtle", graph_iri: str = ""):
+    def upload_file(self, file_path: str, content_type: str | None="text/turtle", graph_iri: str = "", delete_file_after_upload=False):
         """
         Uploads an RDF file to the SPARQL endpoint
         """
         pass
 
     @abstractmethod
-    def bulk_file_load(self, file_paths: list[str]):
+    def bulk_file_load(self, file_paths: list[str], delete_files_after_upload: bool = False):
         """
         Uploads RDF files to the SPARQL endpoint, optimized for speed by
         parallelizing requests if possible. All files should be in .ttl format

@@ -1,4 +1,5 @@
 import logging
+import os
 import subprocess
 import sys
 import time
@@ -38,11 +39,11 @@ class OxigraphRDFDatastore(RDFDatastore):
         return result
 
 
-    def launch_update(self, query: str):
+    def launch_update(self, query: str, graph_iri=GRAPH_IRI):
         """
         Executes a SPARQL update
         """
-        endpoint = "http://0.0.0.0:7878/update"
+        endpoint = "http://0.0.0.0:7878/update?graph={graph_iri}"
         headers = {"Content-Type": "application/sparql-update"}
         result = requests.post(endpoint, data=query, headers=headers)
 
@@ -50,7 +51,11 @@ class OxigraphRDFDatastore(RDFDatastore):
             raise RuntimeError(f"Error occurred on query {query}: {result.text}")
 
 
-    def upload_file(self, file_path, content_type: str | None="text/turtle", graph_iri=GRAPH_IRI):
+    def upload_file(self,
+                    file_path,
+                    content_type: str | None="text/turtle",
+                    graph_iri=GRAPH_IRI,
+                    delete_file_after_upload=False):
         """
         Uploads an RDF file to the SPARQL endpoint.
 
@@ -68,8 +73,11 @@ class OxigraphRDFDatastore(RDFDatastore):
             else:
                 logging.info(f"Loaded {file_path} (Status code: {response.status_code})")
 
+                if delete_file_after_upload:
+                    os.remove(file_path)
 
-    def bulk_file_load(self, file_paths: str | None, graph_iri=GRAPH_IRI):
+
+    def bulk_file_load(self, file_paths: str | None, graph_iri=GRAPH_IRI, delete_files_after_upload=False):
         """
         Uploads RDF files to the SPARQL endpoint, optimized for speed by
         parallelizing requests. All files should be in .ttl format.
@@ -77,7 +85,7 @@ class OxigraphRDFDatastore(RDFDatastore):
         If no graph IRI is specified, it will be stored in the CRC 1625 graph.
         """
         with ThreadPoolExecutor(max_workers=self.MAX_SPARQL_WORKERS) as executor:
-            futures = [executor.submit(self.upload_file, file_path, content_type="text/turtle", graph_iri=graph_iri) for file_path in file_paths]
+            futures = [executor.submit(self.upload_file, file_path, content_type="text/turtle", graph_iri=graph_iri, delete_file_after_upload=delete_files_after_upload) for file_path in file_paths]
             for f in futures:
                 f.result()
 

@@ -19,6 +19,7 @@ users from the actual representation of the workflows.
 """
 
 import os
+import time
 import uuid
 from dataclasses import dataclass, field
 from pyshacl import validate
@@ -39,7 +40,8 @@ shape_restrict_number_of_activities_templated = open(os.path.join(module_dir, 's
 get_first_handover_group_query = prefixes + open(os.path.join(module_dir, 'queries/get_first_handover_group.sparql'), 'r').read()
 get_next_handover_group_query = prefixes + open(os.path.join(module_dir, 'queries/get_next_handover_group.sparql'), 'r').read()
 get_handovers_and_activities_for_sample_query = prefixes + open(os.path.join(module_dir, 'queries/get_handovers_and_activities_for_sample.sparql'), 'r').read()
-delete_entity_query = prefixes + open(os.path.join(module_dir, 'queries/delete_entity.sparql'), 'r').read()
+delete_handover_workflow_model_query = prefixes + open(os.path.join(module_dir, 'queries/delete_handover_workflow_model.sparql'), 'r').read()
+delete_handover_workflow_instance_query = prefixes + open(os.path.join(module_dir, 'queries/delete_handover_workflow_instance.sparql'), 'r').read()
 workflow_model_details_query = prefixes + open(os.path.join(module_dir, 'queries/workflow_model_details.sparql'), 'r').read()
 workflow_instance_details_query = prefixes + open(os.path.join(module_dir, 'queries/workflow_instance_details.sparql'), 'r').read()
 get_label_query = prefixes + open(os.path.join(module_dir, 'queries/get_label.sparql'), 'r').read()
@@ -141,7 +143,7 @@ class WorkflowModelStep:
     """
     List of step names that follow this one. Note that the system does not check for loops
     """
-    next_steps: list[str] = field(default_factory=list)
+    next_steps: set[str] = field(default_factory=set)
 
     step_description: str = "No description"
 
@@ -252,7 +254,7 @@ def get_activity_type(entity_iri: str, store:RDFDatastore):
         return str(pmdco_prefix.AnalysingProcess) # It's an "Others" activity
 
 
-def get_all_workflow_names_and_creators(store: RDFDatastore) -> list[tuple[str, int]]:
+def get_workflow_model_names_and_creator_user_ids(store: RDFDatastore) -> list[tuple[str, int]]:
     workflow_models_list : list[tuple[str, int]] = []
 
     query = get_workflow_model_names_and_creators_query
@@ -317,7 +319,7 @@ def read_workflow_model(workflow_model_name: str, user_id: int, store: RDFDatast
             if p in workflow_model_step_iri_to_config:
                 match workflow_model_step_iri_to_config[p]:
                     case "next_steps":
-                        workflow_step.next_steps.append(get_label(o, store))
+                        workflow_step.next_steps.add(get_label(o, store))
                     case "projects":
                         workflow_step.projects.append(o.rsplit("/", 1)[-1])
                     case "required_activities":
@@ -330,8 +332,7 @@ def read_workflow_model(workflow_model_name: str, user_id: int, store: RDFDatast
 
 def store_workflow_model(workflow_model: WorkflowModel,
                          user_id: int,
-                         store: RDFDatastore,
-                         temporary_ttl_path: str = "workflow_model.nt"):
+                         store: RDFDatastore):
     """
     Serializes the workflow model into RDF and stores it
     """
@@ -411,10 +412,10 @@ def store_workflow_model(workflow_model: WorkflowModel,
         # Allow other activities
         g.add((step_iri, crc_prefix.allowsOtherActivities, Literal(step.allow_other_activities, datatype=XSD.boolean)))
 
+    temporary_ttl_path = f"{uuid.uuid4().hex}.ttl"
     ttl_file_path = os.path.join(module_dir, temporary_ttl_path)
     g.serialize(destination=ttl_file_path, format='turtle')
-    store.upload_file(ttl_file_path, graph_iri=WORKFLOWS_GRAPH_IRI)
-    os.remove(ttl_file_path)
+    store.upload_file(ttl_file_path, graph_iri=WORKFLOWS_GRAPH_IRI, delete_file_after_upload=True)
 
 
 def delete_workflow_model(workflow_model: WorkflowModel,
@@ -426,7 +427,7 @@ def delete_workflow_model(workflow_model: WorkflowModel,
     workflow_model_id = uuid_for_name(workflow_model.workflow_model_name, user_id)
     workflow_model_iri = crc_workflow_prefix["workflow_model_" + workflow_model_id]
 
-    store.launch_query(delete_entity_query.replace("{entity_iri}", workflow_model_iri))
+    store.launch_update(delete_handover_workflow_model_query.replace("{handover_workflow_model_iri}", workflow_model_iri), graph_iri=WORKFLOWS_GRAPH_IRI)
 
 
 def overwrite_workflow_model(workflow_model: WorkflowModel,
@@ -440,23 +441,24 @@ def overwrite_workflow_model(workflow_model: WorkflowModel,
     store_workflow_model(workflow_model, user_id, store)
 
 
-def get_workflow_instances_of_model(workflow_model: WorkflowModel,
+def get_workflow_instances_of_model(workflow_model_name: str,
                                     user_id: int,
-                                    store: RDFDatastore) -> list[tuple[WorkflowInstance, int]]:
+                                    store: RDFDatastore) -> dict[tuple[str, int], WorkflowInstance]:
+    print("readeo workflow instances!")
     """
-    Returns the list of workflow instances of the provided model
+    Returns a dict of (Workflow instance name, creator's user id) -> WorkflowInstance assigned to the provided model
     """
 
-    workflow_model_id = uuid_for_name(workflow_model.workflow_model_name, user_id)
+    workflow_model_id = uuid_for_name(workflow_model_name, user_id)
     workflow_model_iri = crc_workflow_prefix["workflow_model_" + workflow_model_id]
 
-    # Workflow instance name -> WorkflowInstance (we use a dict for fast lookups only)
-    workflow_instances: dict[str, tuple[WorkflowInstance, int]] = dict()
+    # Workflow (instance name, user_id) -> WorkflowInstance
+    workflow_instances: dict[tuple[str, int], WorkflowInstance] = dict()
     query = workflow_instance_details_query.replace("{workflow_model_iri}", workflow_model_iri)
     result = store.launch_query(query)
     data = result.json()["results"]["bindings"]
     if not data:
-        return []
+        return dict()
 
     for binding in data:
         workflow_instance_name: str = binding["workflow_instance_name"]["value"]
@@ -464,31 +466,32 @@ def get_workflow_instances_of_model(workflow_model: WorkflowModel,
         object_id: int = int(binding["object_id"]["value"])
         user_id: int = int(binding["user_id"]["value"])
 
-        if workflow_instance_name not in workflow_instances:
+        if (workflow_instance_name, user_id) not in workflow_instances:
             workflow_instance = WorkflowInstance()
 
             workflow_instance.workflow_instance_name = workflow_instance_name
-            workflow_instance.workflow_model_name = workflow_model.workflow_model_name
+            workflow_instance.workflow_model_name = workflow_model_name
 
-            workflow_instances[workflow_instance_name] = ((workflow_instance, user_id))
+            workflow_instances[(workflow_instance_name, user_id)] = workflow_instance
 
-        workflow_instance_to_modify, _ = workflow_instances[workflow_instance_name]
+        workflow_instance_to_modify = workflow_instances[(workflow_instance_name, user_id)]
 
         if step_name not in workflow_instance_to_modify.step_assignments:
             workflow_instance_to_modify.step_assignments[step_name] = []
 
         workflow_instance_to_modify.step_assignments[step_name].append(object_id)
 
-    return list(workflow_instances.values())
+    return workflow_instances
 
 
 def create_workflow_instance(workflow_instance: WorkflowInstance,
                              user_id: int,
-                             store: RDFDatastore,
-                             temporary_ttl_path: str = "workflow_instance.ttl"):
+                             store: RDFDatastore):
     """
     Serializes the workflow instance into RDF and stores it
     """
+    print("creo for user:", user_id, workflow_instance)
+
     g = Graph()
 
     workflow_model_id = uuid_for_name(workflow_instance.workflow_model_name, user_id)
@@ -509,7 +512,7 @@ def create_workflow_instance(workflow_instance: WorkflowInstance,
     # Link to workflow model
     g.add((workflow_instance_iri, crc_prefix.handoverWorkflowModelInstanceOf, workflow_model_iri))
 
-    for i, (step_name, object_ids) in enumerate(workflow_instance.step_assignments.items()):
+    for i, step_name in enumerate(workflow_instance.step_assignments.keys()):
         assignment_iri = crc_workflow_prefix[f"step_assignment_{i}_of_workflow_instance_{workflow_instance_id}"]
         # Type
         g.add((assignment_iri, rdf_prefix.type, crc_prefix.HandoverWorkflowInstanceAssignment))
@@ -520,19 +523,23 @@ def create_workflow_instance(workflow_instance: WorkflowInstance,
         # Link to assignment
         g.add((workflow_instance_iri, crc_prefix.hasAssignment, assignment_iri))
 
-        # Link to sample(s)
-        for object_id in object_ids:
-            g.add((assignment_iri, crc_prefix.assignedObject, crc_sample_prefix[str(object_id)]))
-
         # Link to step
         step_iri = crc_workflow_prefix[f"workflow_step_{uuid_for_name(step_name, user_id)}_for_workflow_model_{workflow_model_id}"]
         g.add((assignment_iri, crc_prefix.relatesToHandoverWorkflowStep, step_iri))
 
+    # We are guaranteed the same order of keys() and values()
+    for i, object_ids in enumerate(workflow_instance.step_assignments.values()):
+        assignment_iri = crc_workflow_prefix[f"step_assignment_{i}_of_workflow_instance_{workflow_instance_id}"]
+
+        # Link to sample(s)
+        for object_id in object_ids:
+            g.add((assignment_iri, crc_prefix.assignedObject, crc_sample_prefix[str(object_id)]))
+
+    temporary_ttl_path = f"{uuid.uuid4().hex}.ttl"
     ttl_file_path = os.path.join(module_dir, temporary_ttl_path)
     g.serialize(destination=ttl_file_path, format='turtle')
-    store.upload_file(ttl_file_path, graph_iri=WORKFLOWS_GRAPH_IRI)
-    os.remove(ttl_file_path)
-
+    print("writeo graph", g)
+    store.upload_file(ttl_file_path, graph_iri=WORKFLOWS_GRAPH_IRI, content_type='text/ntriples', delete_file_after_upload=True)
 
 def delete_workflow_instance(workflow_instance: WorkflowInstance,
                              user_id: int,
@@ -543,13 +550,19 @@ def delete_workflow_instance(workflow_instance: WorkflowInstance,
     workflow_instance_id = uuid_for_name(workflow_instance.workflow_instance_name, user_id)
     workflow_instance_iri = crc_workflow_prefix["workflow_instance_" + workflow_instance_id]
 
-    store.launch_query(delete_entity_query.replace("{entity_iri}", workflow_instance_iri))
+    print("deleteo con query ", delete_handover_workflow_instance_query.replace("{handover_workflow_instance_iri}", workflow_instance_iri))
+
+    store.launch_update(delete_handover_workflow_instance_query.replace("{handover_workflow_instance_iri}", workflow_instance_iri))
 
 
 def overwrite_workflow_instance(workflow_instance: WorkflowInstance, user_id: int, store: RDFDatastore):
     """
     Deletes the workflow model corresponding to the provided one, and stores it again
     """
+    print("Overwriteo for user:",user_id, workflow_instance)
+
+    #print("15s for deleting...")
+    #time.sleep(15)
     delete_workflow_instance(workflow_instance, user_id, store)
 
     create_workflow_instance(workflow_instance, user_id, store)
@@ -642,7 +655,7 @@ def get_next_validation_steps(workflow_model: WorkflowModel,
     If the list is empty, no more steps need to be executed
     """
     if len(current_workflow_step.next_steps) > 0:
-        next_step_name = current_workflow_step.next_steps[0]  # TODO implement OR of n>1 steps (or do it via SHACL itself?)
+        next_step_name = next(iter(current_workflow_step.next_steps))  # TODO implement OR of n>1 steps (or do it via SHACL itself?)
 
         # List of (step, object_id, target_node)
         next_steps: list[(WorkflowModelStep, str, str)] = []
@@ -739,7 +752,7 @@ def get_ttl_for_sample(object_id: str, store: RDFDatastore):
             o = Literal(o_value)
         g.add((s, p, o))
 
-    path_to_ttl = f"{object_id}_data.ttl"
+    path_to_ttl = f"{uuid.uuid4().hex}_{object_id}_data.ttl"
     g.serialize(destination=path_to_ttl, format="turtle")
     return path_to_ttl
 
@@ -774,3 +787,15 @@ def validate_SHACL_rules(steps_to_validate: list[(WorkflowModelStep, str, str)],
         os.remove(path_to_ttl)
 
     return results
+
+def is_workflow_instance_valid(workflow_model, workflow_instance, store) -> bool:
+    """
+    Returns True if the workflow model and its model instance match with the handover workflow they refer to, False otherwise
+
+    generate_SHACL_shapes_for_workflow and validate_SHACL_rules can be run separately if more details are needed (e.g., which
+    steps are valid and which aren't, and the reasons why)
+    """
+    steps_to_validate = generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance, store)
+    results = validate_SHACL_rules(steps_to_validate, store)
+
+    return all(result[5] for result in results)

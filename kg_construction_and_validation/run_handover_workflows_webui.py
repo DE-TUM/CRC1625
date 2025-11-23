@@ -1,0 +1,61 @@
+import argparse
+import os
+
+from handover_workflows_validation import handover_workflows_validation
+import handover_workflows_validation_webui.workflow_instance_ui.edit_workflow_instance_page
+import handover_workflows_validation_webui.workflow_model_ui.edit_workflow_model_page
+import handover_workflows_validation_webui.main_page
+
+from nicegui import ui
+
+from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore
+
+module_dir = os.path.dirname(__file__)
+
+
+if __name__ in {"__main__", "__mp_main__"}:
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        default=False,
+        help="Debugging mode: clear all stores before running and upload test files"
+    )
+
+    args = parser.parse_args()
+
+    store = VirtuosoRDFDatastore()
+
+    if args.debug:
+        store.clear_triples()
+        store.clear_triples(handover_workflows_validation.WORKFLOWS_GRAPH_IRI)
+
+        ontology_files: list[dict[str, str]] = [
+            {
+                "name": "PMD-core",
+                "file": "../ontologies/pmd_core.ttl",
+                "content_type": "text/turtle"
+            },
+            {
+                "name": "CRC",
+                "file": "../ontologies/crc.ttl",
+                "content_type": "text/turtle"
+            },
+            {
+                "name": "OCE",
+                "file": "../ontologies/oce.ttl",
+                "content_type": "text/turtle"
+            }
+        ]
+
+        store.bulk_file_load([f["file"] for f in ontology_files], delete_files_after_upload=False)
+
+        store.upload_file(os.path.join(module_dir, "handover_workflows_validation/validation_test/validation_test_triples.ttl"))
+
+        test_file_path = os.path.join(module_dir, 'handover_workflows_validation/validation_test/workflow_config_files/example_workflow_valid')
+
+        store.upload_file(test_file_path + "_workflow_model.ttl", graph_iri=handover_workflows_validation.WORKFLOWS_GRAPH_IRI)
+        store.upload_file(test_file_path + "_workflow_instance.ttl", graph_iri=handover_workflows_validation.WORKFLOWS_GRAPH_IRI)
+
+    ui.run()

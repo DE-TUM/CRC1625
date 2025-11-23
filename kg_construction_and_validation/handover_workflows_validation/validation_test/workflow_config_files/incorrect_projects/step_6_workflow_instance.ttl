@@ -3,38 +3,38 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_instance_4be0643f-1d98-573b-97cd-ca98a65347dd> a ns1:HandoverWorkflowInstance ;
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_instance_86e3aed3-1553-5d23-8d61-2286215e65f1> a ns1:HandoverWorkflowModelInstance ;
     rdfs:label "test"^^xsd:string ;
     prov:wasAttributedTo <https://crc1625.mdi.ruhr-uni-bochum.de/user/1> ;
-    ns1:hasAssignment <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_0_of_workflow_instance_4be0643f-1d98-573b-97cd-ca98a65347dd>,
-        <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_1_of_workflow_instance_4be0643f-1d98-573b-97cd-ca98a65347dd>,
-        <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_2_of_workflow_instance_4be0643f-1d98-573b-97cd-ca98a65347dd>,
-        <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_3_of_workflow_instance_4be0643f-1d98-573b-97cd-ca98a65347dd>,
-        <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_4_of_workflow_instance_4be0643f-1d98-573b-97cd-ca98a65347dd>,
-        <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_5_of_workflow_instance_4be0643f-1d98-573b-97cd-ca98a65347dd> ;
+    ns1:hasAssignment <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_0_of_workflow_instance_86e3aed3-1553-5d23-8d61-2286215e65f1>,
+        <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_1_of_workflow_instance_86e3aed3-1553-5d23-8d61-2286215e65f1>,
+        <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_2_of_workflow_instance_86e3aed3-1553-5d23-8d61-2286215e65f1>,
+        <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_3_of_workflow_instance_86e3aed3-1553-5d23-8d61-2286215e65f1>,
+        <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_4_of_workflow_instance_86e3aed3-1553-5d23-8d61-2286215e65f1>,
+        <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_5_of_workflow_instance_86e3aed3-1553-5d23-8d61-2286215e65f1> ;
     ns1:handoverWorkflowModelInstanceOf <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_0_of_workflow_instance_4be0643f-1d98-573b-97cd-ca98a65347dd> a ns1:HandoverWorkflowInstanceAssignment ;
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_0_of_workflow_instance_86e3aed3-1553-5d23-8d61-2286215e65f1> a ns1:HandoverWorkflowInstanceAssignment ;
     ns1:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/1> ;
     ns1:relatesToHandoverWorkflowStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_57ce4318-2905-5346-9f82-f364bb1997d9_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_1_of_workflow_instance_4be0643f-1d98-573b-97cd-ca98a65347dd> a ns1:HandoverWorkflowInstanceAssignment ;
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_1_of_workflow_instance_86e3aed3-1553-5d23-8d61-2286215e65f1> a ns1:HandoverWorkflowInstanceAssignment ;
     ns1:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/1> ;
     ns1:relatesToHandoverWorkflowStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_2_of_workflow_instance_4be0643f-1d98-573b-97cd-ca98a65347dd> a ns1:HandoverWorkflowInstanceAssignment ;
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_2_of_workflow_instance_86e3aed3-1553-5d23-8d61-2286215e65f1> a ns1:HandoverWorkflowInstanceAssignment ;
     ns1:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/1> ;
     ns1:relatesToHandoverWorkflowStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_f19e2cd8-4d3a-5547-989c-c5b4db109d7f_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_3_of_workflow_instance_4be0643f-1d98-573b-97cd-ca98a65347dd> a ns1:HandoverWorkflowInstanceAssignment ;
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_3_of_workflow_instance_86e3aed3-1553-5d23-8d61-2286215e65f1> a ns1:HandoverWorkflowInstanceAssignment ;
     ns1:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/2> ;
     ns1:relatesToHandoverWorkflowStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_ea96b670-d757-546e-9bbe-6728cc30b1c0_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_4_of_workflow_instance_4be0643f-1d98-573b-97cd-ca98a65347dd> a ns1:HandoverWorkflowInstanceAssignment ;
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_4_of_workflow_instance_86e3aed3-1553-5d23-8d61-2286215e65f1> a ns1:HandoverWorkflowInstanceAssignment ;
     ns1:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/2> ;
     ns1:relatesToHandoverWorkflowStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_5_of_workflow_instance_4be0643f-1d98-573b-97cd-ca98a65347dd> a ns1:HandoverWorkflowInstanceAssignment ;
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_5_of_workflow_instance_86e3aed3-1553-5d23-8d61-2286215e65f1> a ns1:HandoverWorkflowInstanceAssignment ;
     ns1:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/3>,
         <https://crc1625.mdi.ruhr-uni-bochum.de/object/4> ;
     ns1:relatesToHandoverWorkflowStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_cd529f81-0704-5956-8d2e-6d588ec5625d_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> .

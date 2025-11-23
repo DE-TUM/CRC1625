@@ -54,7 +54,7 @@ class VirtuosoRDFDatastore(RDFDatastore):
         return result
 
 
-    def launch_update(self, query: str):
+    def launch_update(self, query: str, graph_iri=""):
         """
         Executes a SPARQL update
         """
@@ -94,7 +94,7 @@ class VirtuosoRDFDatastore(RDFDatastore):
 
     def register_file(self, file_path: str):
         """
-        Copies the .ttl file to the Virtuoso data folder, for later processing
+        Copies the .ttl file to the Virtuoso data folder, for later processing, and returns its file path
 
         The actual registration into Virtuoso's bulk loader is done over the entire
         folder after registering all files
@@ -103,8 +103,10 @@ class VirtuosoRDFDatastore(RDFDatastore):
         target_path = os.path.join(HOST_DATA_DIR, filename)
         shutil.copy(file_path, target_path)
 
+        return target_path
 
-    def bulk_file_load(self, file_paths: list[str], graph_iri=GRAPH_IRI):
+
+    def bulk_file_load(self, file_paths: list[str], graph_iri=GRAPH_IRI, delete_files_after_upload=False):
         """
         Uploads RDF files to the SPARQL endpoint, optimized for speed by
         parallelizing requests if possible
@@ -118,8 +120,9 @@ class VirtuosoRDFDatastore(RDFDatastore):
             if os.path.isfile(file_path):
                 os.remove(file_path)
 
+        registered_file_paths = []
         for file in file_paths:
-            self.register_file(file)
+            registered_file_paths.append(self.register_file(file))
         logging.info("Registering files...")
 
         # Write a file called global.graph in CONTAINER_DATA_DIR containing only GRAPH_IRI as its contents
@@ -138,8 +141,17 @@ class VirtuosoRDFDatastore(RDFDatastore):
         logging.info("Commiting...")
         self.run_isql("checkpoint;")
 
+        if delete_files_after_upload:
+            for file in file_paths:
+                os.remove(file)
 
-    def upload_file(self, file, content_type : str | None = None, graph_iri=GRAPH_IRI):
+            for file in registered_file_paths:
+                os.remove(file)
+
+
+
+
+    def upload_file(self, file, content_type : str | None = None, graph_iri=GRAPH_IRI, delete_file_after_upload=False):
         """
         Uploads an RDF file to the SPARQL endpoint.
 
@@ -147,7 +159,7 @@ class VirtuosoRDFDatastore(RDFDatastore):
 
         If no graph IRI is specified, it will be stored in the CRC 1625 graph.
         """
-        self.bulk_file_load([file], graph_iri)
+        self.bulk_file_load([file], graph_iri, delete_file_after_upload)
 
 
     def dump_triples(self, output_file: str | None ="datastore_dump.nt"):

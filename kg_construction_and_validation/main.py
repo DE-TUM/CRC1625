@@ -42,12 +42,12 @@ ontology_files = [
 
 def upload_materialized_triples(datastore: RDFDatastore,
                                 file_names_to_add_to_rdf_store: list[str]):
-    datastore.bulk_file_load(file_names_to_add_to_rdf_store)
+    datastore.bulk_file_load(file_names_to_add_to_rdf_store, delete_files_after_upload=True)
 
 
 def upload_ontology_files(datastore: RDFDatastore,
                           ontology_files: list[dict[str]]):
-    datastore.bulk_file_load(f["file"] for f in ontology_files)
+    datastore.bulk_file_load([f["file"] for f in ontology_files], delete_files_after_upload=False)
 
 
 def serve_KG(skip_oxigraph_initialization: bool = True,

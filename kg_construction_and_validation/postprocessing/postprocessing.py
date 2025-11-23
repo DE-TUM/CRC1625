@@ -281,10 +281,8 @@ def create_handover_group_chains(datastore: RDFDatastore):
             files_to_upload.append(future.result())
 
         logging.info("Bulk loading handover groups...")
-        datastore.bulk_file_load(files_to_upload)
+        datastore.bulk_file_load(files_to_upload, delete_files_after_upload=True)
 
-        for file in files_to_upload:
-            os.remove(file)
     performance_log["create_and_load_handover_groups"] = time.perf_counter() - start
 
     logging.info("Redirecting workflow instances...")
