@@ -444,7 +444,6 @@ def overwrite_workflow_model(workflow_model: WorkflowModel,
 def get_workflow_instances_of_model(workflow_model_name: str,
                                     user_id: int,
                                     store: RDFDatastore) -> dict[tuple[str, int], WorkflowInstance]:
-    print("readeo workflow instances!")
     """
     Returns a dict of (Workflow instance name, creator's user id) -> WorkflowInstance assigned to the provided model
     """

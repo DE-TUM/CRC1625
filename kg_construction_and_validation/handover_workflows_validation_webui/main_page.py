@@ -1,24 +1,26 @@
-from nicegui import ui
+import asyncio
+
+from nicegui import ui, run
 
 from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore
 from handover_workflows_validation.handover_workflows_validation import get_workflow_model_names_and_creator_user_ids, \
-    get_workflow_instances_of_model, read_workflow_model, WorkflowInstance
-from handover_workflows_validation_webui.state import state
+    get_workflow_instances_of_model, read_workflow_model, WorkflowInstance, is_workflow_instance_valid
+from handover_workflows_validation_webui.state import State
 
 
 def edit_handover_workflow_instance_button_click():
     ui.navigate.to(
-        f'/edit_workflow_instance/{state.current_workflow_model.workflow_model_name}/{state.current_workflow_instance.workflow_instance_name}/{state.user_id}')
+        f'/edit_workflow_instance/{State().current_workflow_model.workflow_model_name}/{State().current_workflow_instance.workflow_instance_name}/{State().user_id}')
 
 
 def edit_handover_workflow_model_button_click():
-    ui.navigate.to(f'/edit_workflow_model/{state.current_workflow_model.workflow_model_name}/{state.user_id}')
+    ui.navigate.to(f'/edit_workflow_model/{State().current_workflow_model.workflow_model_name}/{State().user_id}')
 
 
 def handle_workflow_instance_table_click(workflow_instance: WorkflowInstance, right_drawer):
     right_drawer.clear()
 
-    state.current_workflow_instance = workflow_instance
+    State().current_workflow_instance = workflow_instance
 
     with right_drawer:
         right_drawer_label = ui.label('Workflow instance options').classes('text-xl font-bold')
@@ -31,10 +33,10 @@ def handle_workflow_instance_table_click(workflow_instance: WorkflowInstance, ri
             ui.button("Delete").props("color='red-6'").classes('w-full p-0')
 
         right_drawer_label.set_text(
-            f"Workflow instance '{state.current_workflow_instance.workflow_instance_name}' options")
+            f"Workflow instance '{State().current_workflow_instance.workflow_instance_name}' options")
     right_drawer.show()
 
-    ui.notify(f'Selected Workflow Instance {state.current_workflow_instance.workflow_instance_name}', color='info')
+    ui.notify(f'Selected Workflow Instance {State().current_workflow_instance.workflow_instance_name}', color='info')
 
 
 def create_workflow_models_table(main_content, right_drawer):
@@ -42,7 +44,7 @@ def create_workflow_models_table(main_content, right_drawer):
     search_input = ui.input(placeholder='Search workflows...').classes('w-full')  # TODO
 
     workflow_models_table = []
-    for workflow_model_name, user_id in get_workflow_model_names_and_creator_user_ids(state.store):
+    for workflow_model_name, user_id in get_workflow_model_names_and_creator_user_ids(VirtuosoRDFDatastore()):
         workflow_models_table.append(
             {
                 "workflow_model_name": workflow_model_name,
@@ -64,11 +66,22 @@ def create_workflow_models_table(main_content, right_drawer):
                 ui.label(str(row['user_id'])).classes('w-0 flex-grow text-right')
 
 
-def handle_workflow_models_table_click(workflow_model_name: str, user_id: int, main_content, right_drawer):
-    state.current_workflow_model = read_workflow_model(workflow_model_name, user_id, state.store)  # TODO
-    state.workflow_instances_of_selected_workflow_model = get_workflow_instances_of_model(workflow_model_name, user_id,
-                                                                                          state.store)  # TODO
-    state.user_id = user_id  # TODO where better? + Auth
+async def check_and_update_icon(validation_icon_column: ui.column, workflow_model, workflow_instance, store):
+    valid = await run.cpu_bound(is_workflow_instance_valid, workflow_model, workflow_instance, store)
+
+    validation_icon_column.clear()
+    with validation_icon_column:
+        if valid:
+            ui.icon('check_circle').classes('text-green-6')
+        else:
+            ui.icon('error').classes('text-red-6')
+
+
+async def handle_workflow_models_table_click(workflow_model_name: str, user_id: int, main_content, right_drawer):
+    State().current_workflow_model = read_workflow_model(workflow_model_name, user_id, VirtuosoRDFDatastore())  # TODO
+    State().workflow_instances_of_current_workflow_model = get_workflow_instances_of_model(workflow_model_name, user_id,
+                                                                                           VirtuosoRDFDatastore())  # TODO
+    State().user_id = user_id  # TODO where better? + Auth
 
     main_content.clear()
 
@@ -84,12 +97,8 @@ def handle_workflow_models_table_click(workflow_model_name: str, user_id: int, m
             ui.label('Associated Objects').classes('w-1/3 text-left')
             ui.label('Status').classes('w-0 flex-grow text-left')
 
-        for (workflow_instance_name,
-             user_id), workflow_instance in state.workflow_instances_of_selected_workflow_model.items():
-            with ui.button(
-                    on_click=lambda r=workflow_instance: handle_workflow_instance_table_click(r, right_drawer)).props(
-                'flat').classes(
-                'w-full p-0'):
+        for (workflow_instance_name, user_id), workflow_instance in State().workflow_instances_of_current_workflow_model.items():
+            with ui.button(on_click=lambda r=workflow_instance: handle_workflow_instance_table_click(r, right_drawer)).props('flat').classes('w-full p-0'):
                 with ui.row().classes('w-full border-b border-gray-200 py-2 items-center'):
                     ui.label(workflow_instance_name).classes('w-1/3 text-left')
 
@@ -100,18 +109,17 @@ def handle_workflow_models_table_click(workflow_model_name: str, user_id: int, m
 
                     ui.label(', '.join(sorted(associated_objects))).classes('w-1/3 text-left')
 
-                    with ui.column().classes('w-0 flex-grow text-left'):
-                        valid = False  # is_workflow_instance_valid(state.current_workflow_model, workflow_instance, state.store) # TODO
-                        if valid:
-                            ui.icon('check_circle').classes('text-green-6')
-                        else:
-                            ui.icon('error').classes('text-red-6')
+                    validation_icon_column = ui.column().classes('w-0 flex-grow text-left')
+                    with validation_icon_column:
+                        ui.spinner()
+
+                    asyncio.create_task(
+                        check_and_update_icon(validation_icon_column, State().current_workflow_model, workflow_instance, VirtuosoRDFDatastore())
+                    )
 
 
 @ui.page('/')
 async def main_page():
-    state.store = VirtuosoRDFDatastore()
-
     main_content = ui.column().classes('w-full')
 
     with ui.header(elevated=True).style('background-color: #3874c8').classes('items-center justify-between'):

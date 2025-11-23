@@ -1,5 +1,6 @@
 import glob
 import logging
+import multiprocessing
 import os
 import shutil
 import subprocess
@@ -31,50 +32,53 @@ GRAPH_IRI = "https://crc1625.mdi.ruhr-uni-bochum.de/graph"
 HOST_DATA_DIR = os.path.join(module_dir, "../../../virtuoso/data")
 CONTAINER_DATA_DIR = "/data"
 
+# We lock everything with a global mutex to prevent deadlocks when using the web apps
+# TODO: We can do this in a more fine-grained manner
+lock = multiprocessing.Lock()
+
 class VirtuosoRDFDatastore(RDFDatastore):
     def launch_query(self, query: str):
-        """
-        Executes a SPARQL query and returns the HTTP response from the endpoint
-        """
-        result = requests.post(
-            QUERY_ENDPOINT,
-            # https://github.com/openlink/virtuoso-opensource/issues/950
-            params={"query": "DEFINE sql:signal-void-variables 0\n" + query},
-            #params={
-            #    "query": query,
-            #    "signal_void": "off",
-            #    "signal_unconnected": "off"
-            #},
-            headers={"Accept": "application/sparql-results+json"},
-            auth=(VIRTUOSO_USER, VIRTUOSO_PASS)
-        )
-        if result.status_code != 200:
-            raise RuntimeError(f"Error occurred on query {query}: {result.text}")
+        with lock:
+            """
+            Executes a SPARQL query and returns the HTTP response from the endpoint
+            """
+            result = requests.post(
+                QUERY_ENDPOINT,
+                # https://github.com/openlink/virtuoso-opensource/issues/950
+                params={"query": "DEFINE sql:signal-void-variables 0\n" + query},
+                #params={
+                #    "query": query,
+                #    "signal_void": "off",
+                #    "signal_unconnected": "off"
+                #},
+                headers={"Accept": "application/sparql-results+json"},
+                auth=(VIRTUOSO_USER, VIRTUOSO_PASS)
+            )
+            if result.status_code != 200:
+                raise RuntimeError(f"Error occurred on query {query}: {result.text}")
 
-        return result
+            return result
 
 
     def launch_update(self, query: str, graph_iri=""):
-        """
-        Executes a SPARQL update
-        """
-        result = requests.post(
-            UPDATE_ENDPOINT,
-            # https://github.com/openlink/virtuoso-opensource/issues/950
-            data= ("DEFINE sql:signal-void-variables 0\n" +  query).encode("utf-8"),
-            #data=query.encode("utf-8"),
-            #params={
-            #    "signal_void": "off",
-            #    "signal_unconnected": "off"
-            #},
-            headers={"Content-Type": "application/sparql-update"},
-            auth=(VIRTUOSO_USER, VIRTUOSO_PASS)
-        )
-        if result.status_code not in [200, 204]:
-            raise RuntimeError(f"Error occurred on query {query}: {result.text}")
+        with lock:
+            result = requests.post(
+                UPDATE_ENDPOINT,
+                # https://github.com/openlink/virtuoso-opensource/issues/950
+                data= ("DEFINE sql:signal-void-variables 0\n" +  query).encode("utf-8"),
+                #data=query.encode("utf-8"),
+                #params={
+                #    "signal_void": "off",
+                #    "signal_unconnected": "off"
+                #},
+                headers={"Content-Type": "application/sparql-update"},
+                auth=(VIRTUOSO_USER, VIRTUOSO_PASS)
+            )
+            if result.status_code not in [200, 204]:
+                raise RuntimeError(f"Error occurred on query {query}: {result.text}")
 
 
-    def run_isql(self, command: str):
+    def _run_isql(self, command: str):
         """
         Run a Virtuoso command over isql
         """
@@ -92,7 +96,7 @@ class VirtuosoRDFDatastore(RDFDatastore):
         subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL)
 
 
-    def register_file(self, file_path: str):
+    def _register_file(self, file_path: str):
         """
         Copies the .ttl file to the Virtuoso data folder, for later processing, and returns its file path
 
@@ -116,37 +120,38 @@ class VirtuosoRDFDatastore(RDFDatastore):
 
         # Clear the existing files. For example, we may not want to upload
         # leftover ontology files when validating the mappings output
-        for file_path in glob.glob(os.path.join(HOST_DATA_DIR, "*")):
-            if os.path.isfile(file_path):
-                os.remove(file_path)
+        with lock:
+            for file_path in glob.glob(os.path.join(HOST_DATA_DIR, "*")):
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
 
-        registered_file_paths = []
-        for file in file_paths:
-            registered_file_paths.append(self.register_file(file))
-        logging.info("Registering files...")
-
-        # Write a file called global.graph in CONTAINER_DATA_DIR containing only GRAPH_IRI as its contents
-        with open(os.path.join(HOST_DATA_DIR, "global.graph"), "w") as f:
-            f.write(graph_iri)
-
-        self.run_isql(f"DELETE FROM DB.DBA.load_list;") # This took a while to discover...
-        self.run_isql(f"ld_dir('{CONTAINER_DATA_DIR}', '*.ttl', '{graph_iri}');")
-
-        logging.info("Loading files...")
-        with ThreadPoolExecutor(max_workers=16) as executor:
-            futures = [executor.submit(self.run_isql, "rdf_loader_run();") for _ in range(0, 16)]
-            for future in as_completed(futures):
-                future.result()
-
-        logging.info("Commiting...")
-        self.run_isql("checkpoint;")
-
-        if delete_files_after_upload:
+            registered_file_paths = []
             for file in file_paths:
-                os.remove(file)
+                registered_file_paths.append(self._register_file(file))
+            logging.info("Registering files...")
 
-            for file in registered_file_paths:
-                os.remove(file)
+            # Write a file called global.graph in CONTAINER_DATA_DIR containing only GRAPH_IRI as its contents
+            with open(os.path.join(HOST_DATA_DIR, "global.graph"), "w") as f:
+                f.write(graph_iri)
+
+            self._run_isql(f"DELETE FROM DB.DBA.load_list;") # This took a while to discover...
+            self._run_isql(f"ld_dir('{CONTAINER_DATA_DIR}', '*.ttl', '{graph_iri}');")
+
+            logging.info("Loading files...")
+            with ThreadPoolExecutor(max_workers=16) as executor:
+                futures = [executor.submit(self._run_isql, "rdf_loader_run();") for _ in range(0, 16)]
+                for future in as_completed(futures):
+                    future.result()
+
+            logging.info("Commiting...")
+            self._run_isql("checkpoint;")
+
+            if delete_files_after_upload:
+                for file in file_paths:
+                    os.remove(file)
+
+                for file in registered_file_paths:
+                    os.remove(file)
 
 
 
@@ -167,41 +172,43 @@ class VirtuosoRDFDatastore(RDFDatastore):
         Output all triples to the designated file, in Ntriples format
         content_type is ignored for Virtuoso. File formats are handled internally
         """
-        query = """
-        DEFINE output:format "NT"
-
-        CONSTRUCT {
-            ?s ?p ?o
-        }
-        WHERE {
-            GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
+        with lock:
+            query = """
+            DEFINE output:format "NT"
+    
+            CONSTRUCT {
                 ?s ?p ?o
             }
-        }
-        """
+            WHERE {
+                GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
+                    ?s ?p ?o
+                }
+            }
+            """
 
-        response = requests.get(
-            QUERY_ENDPOINT,
-            params={"query": query},
-            auth=(VIRTUOSO_USER, VIRTUOSO_PASS),
-            headers={"Accept": "text/ntriples"}
-        )
+            response = requests.get(
+                QUERY_ENDPOINT,
+                params={"query": query},
+                auth=(VIRTUOSO_USER, VIRTUOSO_PASS),
+                headers={"Accept": "text/ntriples"}
+            )
 
-        if response.status_code == 200:
-            with open(output_file, "w", encoding="utf-8") as f:
-                f.write(response.text)
-        else:
-            logging.error("Error:", response.status_code, response.text)
+            if response.status_code == 200:
+                with open(output_file, "w", encoding="utf-8") as f:
+                    f.write(response.text)
+            else:
+                logging.error("Error:", response.status_code, response.text)
 
 
     def clear_triples(self, graph_iri="https://crc1625.mdi.ruhr-uni-bochum.de/graph"):
         """
         Clear all CRC1625 KG triples from the graph, including its ontologies
         """
-        self.run_isql("log_enable(3,1);") # Autocommit mode, write transactions to log. Avoids running out of memory on large graphs
-        #self.run_isql("SPARQL CLEAR GRAPH  <https://crc1625.mdi.ruhr-uni-bochum.de/graph>;")
-        self.run_isql(f"DELETE FROM rdf_quad WHERE g = iri_to_id ('{graph_iri}');")
-        self.run_isql("checkpoint;")
+        with lock:
+            self._run_isql("log_enable(3,1);") # Autocommit mode, write transactions to log. Avoids running out of memory on large graphs
+            #self.run_isql("SPARQL CLEAR GRAPH  <https://crc1625.mdi.ruhr-uni-bochum.de/graph>;")
+            self._run_isql(f"DELETE FROM rdf_quad WHERE g = iri_to_id ('{graph_iri}');")
+            self._run_isql("checkpoint;")
 
     def stop_virtuoso(self):
         """

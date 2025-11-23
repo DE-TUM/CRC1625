@@ -27,7 +27,10 @@ if __name__ in {"__main__", "__mp_main__"}:
 
     store = VirtuosoRDFDatastore()
 
+    reload = False
     if args.debug:
+        reload = True
+
         store.clear_triples()
         store.clear_triples(handover_workflows_validation.WORKFLOWS_GRAPH_IRI)
 
@@ -58,4 +61,5 @@ if __name__ in {"__main__", "__mp_main__"}:
         store.upload_file(test_file_path + "_workflow_model.ttl", graph_iri=handover_workflows_validation.WORKFLOWS_GRAPH_IRI)
         store.upload_file(test_file_path + "_workflow_instance.ttl", graph_iri=handover_workflows_validation.WORKFLOWS_GRAPH_IRI)
 
-    ui.run()
+    ui.run(title="CRC1625 Handover horkflows validation prototype",
+           reload=reload)

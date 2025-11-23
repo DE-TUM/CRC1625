@@ -346,10 +346,11 @@ def integrate_with_CheBI(datastore: RDFDatastore):
     # The amount of temporary triples can be quite high, as they are used for the compositions
     # If we are using virtuoso, we do it in SQL directly
     if isinstance(datastore, VirtuosoRDFDatastore):
-            datastore.run_isql("""DELETE FROM DB.DBA.RDF_QUAD WHERE
+            # TODO: This is unsafe
+            datastore._run_isql("""DELETE FROM DB.DBA.RDF_QUAD WHERE
                                   P = iri_to_id('https://crc1625.mdi.ruhr-uni-bochum.de/temporaryDatatypeProperty') AND 
                                   G = iri_to_id('https://crc1625.mdi.ruhr-uni-bochum.de/graph');""")
-            datastore.run_isql('checkpoint;')
+            datastore._run_isql('checkpoint;')
     else:
         datastore.launch_update(delete_temporary_triples)
     performance_log["delete_temporary_triples"] = time.perf_counter() - start

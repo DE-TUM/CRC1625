@@ -1,7 +1,7 @@
 from nicegui import ui
 
 from handover_workflows_validation.handover_workflows_validation import WorkflowModelStep
-from handover_workflows_validation_webui.state import state
+from handover_workflows_validation_webui.state import State, ui_elements
 
 
 async def add_edge_action(source: str,
@@ -12,19 +12,19 @@ async def add_edge_action(source: str,
     elif source == target:
         ui.notify("It is not possible to connect the steps to itself", type='negative')
         return
-    elif await state.graph_component.exists_edge(source, target):
+    elif await ui_elements.graph_component.exists_edge(source, target):
         ui.notify("The two steps are already connected", type='negative')
         return
 
-    state.save_workflow_model_copy()
+    State().save_workflow_model_copy()
 
-    state.graph_component.add_edge(source, target)
-    state.current_workflow_model.workflow_model_steps[source].next_steps.add(target)
+    ui_elements.graph_component.add_edge(source, target)
+    State().current_workflow_model.workflow_model_steps[source].next_steps.add(target)
 
     ui.notify(f"Added edge from '{source}' to '{target}'", type='positive')
 
-    state.graph_controls_column.clear()
-    with state.graph_controls_column:
+    ui_elements.graph_controls_column.clear()
+    with ui_elements.graph_controls_column:
         create_graph_controls()
 
 
@@ -33,19 +33,19 @@ async def remove_edge_action(source: str,
     if not source or not target:
         ui.notify("Please enter both source and target steps", type='warning')
         return
-    elif not await state.graph_component.exists_edge(source, target):
+    elif not await ui_elements.graph_component.exists_edge(source, target):
         ui.notify("The two steps are not connected", type='negative')
         return
 
-    state.save_workflow_model_copy()
+    State().save_workflow_model_copy()
 
-    state.graph_component.remove_edge(source, target)
-    state.current_workflow_model.workflow_model_steps[source].next_steps.remove(target)
+    ui_elements.graph_component.remove_edge(source, target)
+    State().current_workflow_model.workflow_model_steps[source].next_steps.remove(target)
 
     ui.notify(f"Removed edge from '{source}' to '{target}'", type='positive')
 
-    state.graph_controls_column.clear()
-    with state.graph_controls_column:
+    ui_elements.graph_controls_column.clear()
+    with ui_elements.graph_controls_column:
         create_graph_controls()
 
 
@@ -54,20 +54,20 @@ def add_step_action(new_step_name: str):
         ui.notify("Please enter a step name", type='warning')
         return
 
-    if new_step_name in state.current_workflow_model.workflow_model_steps:
+    if new_step_name in State().current_workflow_model.workflow_model_steps:
         ui.notify(f"Node '{new_step_name}' already exists", type='negative')
         return
 
-    state.save_workflow_model_copy()
+    State().save_workflow_model_copy()
 
     new_step = WorkflowModelStep(next_steps=set())
-    state.current_workflow_model.workflow_model_steps[new_step_name] = new_step
-    state.graph_component.add_node(new_step_name, new_step_name)
+    State().current_workflow_model.workflow_model_steps[new_step_name] = new_step
+    ui_elements.graph_component.add_node(new_step_name, new_step_name)
 
     ui.notify(f"Added step '{new_step_name}'", type='positive')
 
-    state.graph_controls_column.clear()
-    with state.graph_controls_column:
+    ui_elements.graph_controls_column.clear()
+    with ui_elements.graph_controls_column:
         create_graph_controls()
 
 
@@ -76,15 +76,15 @@ def remove_step_action(node_to_remove: str):
         ui.notify("Please indicate the step to remove", type='warning')
         return
 
-    state.save_workflow_model_copy()
+    State().save_workflow_model_copy()
 
-    del state.current_workflow_model.workflow_model_steps[node_to_remove]
-    state.graph_component.remove_node(node_to_remove)
+    del State().current_workflow_model.workflow_model_steps[node_to_remove]
+    ui_elements.graph_component.remove_node(node_to_remove)
 
     ui.notify(f"Removed step '{node_to_remove}'", type='positive')
 
-    state.graph_controls_column.clear()
-    with state.graph_controls_column:
+    ui_elements.graph_controls_column.clear()
+    with ui_elements.graph_controls_column:
         create_graph_controls()
 
 
@@ -104,7 +104,7 @@ def create_graph_controls():
         ui.label('Remove workflow step').classes('text-sm font-bold text-gray-600')
         with ui.row().classes('w-full items-center'):
             remove_step_select = ui.select(
-                options=sorted(list(state.current_workflow_model.workflow_model_steps.keys())))
+                options=sorted(list(State().current_workflow_model.workflow_model_steps.keys())))
             ui.button('Remove step', on_click=lambda: remove_step_action(
                 remove_step_select.value
             ))
@@ -116,11 +116,11 @@ def create_graph_controls():
             with ui.column(align_items='center'):
                 ui.label("Source step")
                 source_node_input_add = ui.select(
-                    options=sorted(list(state.current_workflow_model.workflow_model_steps.keys())))
+                    options=sorted(list(State().current_workflow_model.workflow_model_steps.keys())))
             with ui.column(align_items='center'):
                 ui.label("Target step")
                 target_node_input_add = ui.select(
-                    options=sorted(list(state.current_workflow_model.workflow_model_steps.keys())))
+                    options=sorted(list(State().current_workflow_model.workflow_model_steps.keys())))
 
             with ui.column():
                 ui.button('Connect', on_click=lambda:
@@ -132,11 +132,11 @@ def create_graph_controls():
             with ui.column(align_items='center'):
                 ui.label("Source step")
                 source_node_input_remove = ui.select(
-                    options=sorted(list(state.current_workflow_model.workflow_model_steps.keys())))
+                    options=sorted(list(State().current_workflow_model.workflow_model_steps.keys())))
             with ui.column(align_items='center'):
                 ui.label("Target step")
                 target_node_input_remove = ui.select(
-                    options=sorted(list(state.current_workflow_model.workflow_model_steps.keys())))
+                    options=sorted(list(State().current_workflow_model.workflow_model_steps.keys())))
 
             with ui.column():
                 ui.button('Disconnect', on_click=lambda:

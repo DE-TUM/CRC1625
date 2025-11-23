@@ -3,9 +3,6 @@ from typing import List, Dict, Callable, Optional
 from nicegui import ui
 from nicegui.element import Element
 
-from handover_workflows_validation_webui.state import State
-
-
 class CytoscapeComponent(Element, component='cytoscape_component.js'):
     """
     NiceGUI Element implementation for integrating Cytoscape as a custom Vue component
@@ -16,7 +13,6 @@ class CytoscapeComponent(Element, component='cytoscape_component.js'):
     def __init__(self,
                  nodes: List[Dict],
                  edges: List[Dict],
-                 state: State,
                  on_node_click: Optional[Callable]) -> None:
         super().__init__()
 

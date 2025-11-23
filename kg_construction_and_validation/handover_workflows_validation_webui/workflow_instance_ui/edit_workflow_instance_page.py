@@ -1,9 +1,10 @@
 from nicegui import ui
 
+from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore
 from handover_workflows_validation.handover_workflows_validation import read_workflow_model, WorkflowModel, \
     get_workflow_instances_of_model, WorkflowInstance, overwrite_workflow_instance
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent
-from handover_workflows_validation_webui.state import state
+from handover_workflows_validation_webui.state import State, ui_elements
 from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_controls import create_graph_controls
 from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_step_controls import \
     create_workflow_instance_step_controls
@@ -40,8 +41,8 @@ def handle_node_click(e):
     node_id = e.get('id')
     node_label = e.get('label')
 
-    if node_id in list(state.current_workflow_model.workflow_model_steps.keys()):
-        state.selected_node = node_id
+    if node_id in list(State().current_workflow_model.workflow_model_steps.keys()):
+        State().selected_node = node_id
         create_workflow_instance_step_controls()
         ui.notify(f"Step selected: {node_label}", type='info')
     else:
@@ -49,12 +50,12 @@ def handle_node_click(e):
 
 
 def save_and_exit():
-    overwrite_workflow_instance(state.current_workflow_instance, state.user_id, state.store)
+    overwrite_workflow_instance(State().current_workflow_instance, State().user_id, VirtuosoRDFDatastore())
     ui.navigate.to('/')
 
 
 def handle_return_button():
-    if not state.changes_are_saved:
+    if not State().changes_are_saved:
         with ui.dialog() as return_dialog:
             with ui.card(align_items='center'):
                 with ui.row(align_items='center').classes('w-full justify-center'):
@@ -79,58 +80,57 @@ def handle_return_button():
 
 
 def handle_undo_button():
-    if len(state.workflow_model_history) == 0:
+    if len(State().workflow_model_history) == 0:
         ui.notify("No changes have been performed yet!", type='warning')
     else:
-        state.undo_workflow_model_change()
+        State().undo_workflow_model_change()
 
         # Reload Cytoscape
-        graph_data = workflow_model_and_instance_to_nodes_and_edges(state.current_workflow_model,
-                                                                    state.current_workflow_instance)
-        state.graph_component_column.clear()
-        with state.graph_component_column:
-            state.graph_component = CytoscapeComponent(
+        graph_data = workflow_model_and_instance_to_nodes_and_edges(State().current_workflow_model,
+                                                                    State().current_workflow_instance)
+        ui_elements.graph_component_column.clear()
+        with ui_elements.graph_component_column:
+            ui_elements.graph_component = CytoscapeComponent(
                 graph_data['nodes'],
                 graph_data['edges'],
-                state,
                 handle_node_click
             )
 
         # Reload the UI
-        state.graph_controls_column.clear()
-        with state.graph_controls_column:
+        ui_elements.graph_controls_column.clear()
+        with ui_elements.graph_controls_column:
             create_graph_controls()
 
-        state.node_controls_column.clear()
-        with state.node_controls_column:
+        ui_elements.node_controls_column.clear()
+        with ui_elements.node_controls_column:
             create_workflow_instance_step_controls()
 
-        state.graph_component.select_node(state.selected_node)
+        ui_elements.graph_component.select_node(State().selected_node)
         ui.notify("The last change has been undone", type='positive')
 
 
 def handle_save_button():
-    overwrite_workflow_instance(state.current_workflow_instance, state.user_id, state.store)
-    state.changes_are_saved = True
-    state.workflow_model_history = []
+    overwrite_workflow_instance(State().current_workflow_instance, State().user_id, VirtuosoRDFDatastore())
+    State().changes_are_saved = True
+    State().workflow_model_history = []
     ui.notify("The changes have been saved", type='positive')
 
 
 @ui.page('/edit_workflow_instance/{workflow_model_name}/{workflow_instance_name}/{user_id}')
 async def edit_workflow_instance_page(workflow_model_name: str, workflow_instance_name: str, user_id: int):
-    state.user_id = user_id  # TODO
+    State().user_id = user_id  # TODO
 
-    if state.current_workflow_model is None:  # The page has been reloaded
-        state.current_workflow_model = read_workflow_model(workflow_model_name, user_id, state.store)  # TODO
-        state.workflow_instances_of_current_workflow_model = get_workflow_instances_of_model(workflow_model_name,
+    if State().current_workflow_model is None:  # The page has been reloaded
+        State().current_workflow_model = read_workflow_model(workflow_model_name, user_id, VirtuosoRDFDatastore())  # TODO
+        State().workflow_instances_of_current_workflow_model = get_workflow_instances_of_model(workflow_model_name,
                                                                                              user_id,
-                                                                                             state.store)  # TODO
-        state.current_workflow_instance = state.workflow_instances_of_current_workflow_model[
+                                                                                             VirtuosoRDFDatastore())  # TODO
+        State().current_workflow_instance = State().workflow_instances_of_current_workflow_model[
             (workflow_instance_name, user_id)]
 
-    state.calculate_existing_objects()
+    State().calculate_existing_objects()
 
-    ui.label(f"Editing Workflow Instance '{state.current_workflow_instance.workflow_instance_name}'").classes(
+    ui.label(f"Editing Workflow Instance '{State().current_workflow_instance.workflow_instance_name}'").classes(
         'text-2xl font-bold mb-4')
     with ui.grid(columns=3):
         with ui.column(align_items='stretch'):
@@ -140,8 +140,8 @@ async def edit_workflow_instance_page(workflow_model_name: str, workflow_instanc
         with ui.column(align_items='stretch'):
             ui.button('Save all changes', on_click=lambda: handle_save_button()).props("color=green")
 
-    graph_data = workflow_model_and_instance_to_nodes_and_edges(state.current_workflow_model,
-                                                                state.current_workflow_instance)
+    graph_data = workflow_model_and_instance_to_nodes_and_edges(State().current_workflow_model,
+                                                                State().current_workflow_instance)
 
     with ui.grid(columns=1).classes('w-full gap-8'):
         graph_component_column = ui.column()
@@ -149,7 +149,6 @@ async def edit_workflow_instance_page(workflow_model_name: str, workflow_instanc
             graph_component = CytoscapeComponent(
                 graph_data['nodes'],
                 graph_data['edges'],
-                state,  # It does not depend on state for initialization
                 handle_node_click
             )
 
@@ -158,12 +157,12 @@ async def edit_workflow_instance_page(workflow_model_name: str, workflow_instanc
             node_controls_column = ui.column()
 
         if graph_data['nodes']:
-            state.selected_node = state.current_workflow_model.workflow_model_options.initial_step_name
+            State().selected_node = State().current_workflow_model.workflow_model_options.initial_step_name
 
-        state.graph_component = graph_component
-        state.graph_component_column = graph_component_column
-        state.node_controls_column = node_controls_column
-        state.graph_controls_column = graph_controls_column
+        ui_elements.graph_component = graph_component
+        ui_elements.graph_component_column = graph_component_column
+        ui_elements.node_controls_column = node_controls_column
+        ui_elements.graph_controls_column = graph_controls_column
 
         with graph_controls_column:
             create_graph_controls()
@@ -171,4 +170,4 @@ async def edit_workflow_instance_page(workflow_model_name: str, workflow_instanc
         with node_controls_column:
             create_workflow_instance_step_controls()
 
-        graph_component.select_node(state.selected_node)
+        graph_component.select_node(State().selected_node)
