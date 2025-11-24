@@ -19,13 +19,12 @@ users from the actual representation of the workflows.
 """
 
 import os
-import time
 import uuid
 from dataclasses import dataclass, field
 from pyshacl import validate
 from rdflib import Graph, URIRef, Literal, Namespace, XSD
 
-from datastores.rdf.rdf_datastore import RDFDatastore
+from datastores.rdf.rdf_datastore import RDFDatastore, UpdateType
 from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore
 
 WORKFLOWS_GRAPH_IRI = "https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows"
@@ -341,7 +340,8 @@ def read_workflow_model(workflow_model_name: str, user_id: int, store: RDFDatast
 
 def store_workflow_model(workflow_model: WorkflowModel,
                          user_id: int,
-                         store: RDFDatastore):
+                         store: RDFDatastore,
+                         return_file: bool = False):
     """
     Serializes the workflow model into RDF and stores it
     """
@@ -424,24 +424,33 @@ def store_workflow_model(workflow_model: WorkflowModel,
     temporary_ttl_path = f"{uuid.uuid4().hex}.ttl"
     ttl_file_path = os.path.join(module_dir, temporary_ttl_path)
     g.serialize(destination=ttl_file_path, format='turtle')
-    store.upload_file(ttl_file_path, graph_iri=WORKFLOWS_GRAPH_IRI, delete_file_after_upload=True)
+
+    if return_file:
+        return ttl_file_path
+    else:
+        store.upload_file(ttl_file_path, graph_iri=WORKFLOWS_GRAPH_IRI, delete_file_after_upload=True)
 
 
 def delete_workflow_model(workflow_model: WorkflowModel,
                           user_id: int,
-                          store: RDFDatastore):
+                          store: RDFDatastore,
+                          return_query: bool = False):
     """
     Deletes the workflow model of a given user from the store
     """
     workflow_model_id = uuid_for_name(workflow_model.workflow_model_name, user_id)
     workflow_model_iri = crc_workflow_prefix["workflow_model_" + workflow_model_id]
 
-    store.launch_update(delete_handover_workflow_model_query.replace("{handover_workflow_model_iri}", workflow_model_iri), graph_iri=WORKFLOWS_GRAPH_IRI)
-
+    query = delete_handover_workflow_model_query.replace("{handover_workflow_model_iri}", workflow_model_iri)
+    if return_query:
+        return query
+    else:
+        store.launch_update(query, graph_iri=WORKFLOWS_GRAPH_IRI)
 
 def clean_workflow_instance_steps(workflow_model: WorkflowModel,
                                   user_id: int,
-                                  store: RDFDatastore):
+                                  store: RDFDatastore,
+                                  return_query: bool = False):
     workflow_instances = get_workflow_instances_of_model(workflow_model.workflow_model_name,
                                                          user_id,
                                                          store)
@@ -450,7 +459,11 @@ def clean_workflow_instance_steps(workflow_model: WorkflowModel,
         workflow_instance_id = uuid_for_name(workflow_instance_name, user_id)
         workflow_instance_iri = crc_workflow_prefix["workflow_instance_" + workflow_instance_id]
 
-        store.launch_update(clean_handover_workflow_instance_steps_query.replace("{handover_workflow_instance_iri}", workflow_instance_iri), graph_iri=WORKFLOWS_GRAPH_IRI)
+        query = clean_handover_workflow_instance_steps_query.replace("{handover_workflow_instance_iri}", workflow_instance_iri)
+        if return_query:
+            return query
+        else:
+            store.launch_update(query, graph_iri=WORKFLOWS_GRAPH_IRI)
 
 
 
@@ -460,11 +473,12 @@ def overwrite_workflow_model(workflow_model: WorkflowModel,
     """
     Deletes the workflow model of a given user, and stores it again
     """
-    delete_workflow_model(workflow_model, user_id, store)
+    actions = []
+    actions.append((delete_workflow_model(workflow_model, user_id, store, return_query=True), UpdateType.query))
+    actions.append((store_workflow_model(workflow_model, user_id, store, return_file=True), UpdateType.file_upload))
+    #actions.append((clean_workflow_instance_steps(workflow_model, user_id, store, return_query=True), UpdateType.query))
 
-    store_workflow_model(workflow_model, user_id, store)
-
-    clean_workflow_instance_steps(workflow_model, user_id, store)
+    store.launch_updates(actions, graph_iri=WORKFLOWS_GRAPH_IRI, delete_files_after_upload=True)
 
 
 def get_workflow_instances_of_model(workflow_model_name: str,
@@ -511,7 +525,8 @@ def get_workflow_instances_of_model(workflow_model_name: str,
 
 def create_workflow_instance(workflow_instance: WorkflowInstance,
                              user_id: int,
-                             store: RDFDatastore):
+                             store: RDFDatastore,
+                             return_file: bool = False):
     """
     Serializes the workflow instance into RDF and stores it
     """
@@ -562,27 +577,38 @@ def create_workflow_instance(workflow_instance: WorkflowInstance,
     temporary_ttl_path = f"{uuid.uuid4().hex}.ttl"
     ttl_file_path = os.path.join(module_dir, temporary_ttl_path)
     g.serialize(destination=ttl_file_path, format='turtle')
-    store.upload_file(ttl_file_path, graph_iri=WORKFLOWS_GRAPH_IRI, content_type='text/ntriples', delete_file_after_upload=True)
+
+    if return_file:
+        return ttl_file_path
+    else:
+        store.upload_file(ttl_file_path, graph_iri=WORKFLOWS_GRAPH_IRI, content_type='text/ntriples', delete_file_after_upload=True)
 
 def delete_workflow_instance(workflow_instance: WorkflowInstance,
                              user_id: int,
-                             store: RDFDatastore):
+                             store: RDFDatastore,
+                             return_query: bool = False):
     """
     Deletes the workflow instance corresponding to the provided one, and stores it again
     """
     workflow_instance_id = uuid_for_name(workflow_instance.workflow_instance_name, user_id)
     workflow_instance_iri = crc_workflow_prefix["workflow_instance_" + workflow_instance_id]
 
-    store.launch_update(delete_handover_workflow_instance_query.replace("{handover_workflow_instance_iri}", workflow_instance_iri))
+    query = delete_handover_workflow_instance_query.replace("{handover_workflow_instance_iri}", workflow_instance_iri)
+    if return_query:
+        return query
+    else:
+        store.launch_update(query, workflow_instance_iri)
 
 
 def overwrite_workflow_instance(workflow_instance: WorkflowInstance, user_id: int, store: RDFDatastore):
     """
     Deletes the workflow model corresponding to the provided one, and stores it again
     """
-    delete_workflow_instance(workflow_instance, user_id, store)
+    actions = []
+    actions.append((delete_workflow_instance(workflow_instance, user_id, store, return_query=True), UpdateType.query))
+    actions.append((create_workflow_instance(workflow_instance, user_id, store, return_file=True), UpdateType.file_upload))
 
-    create_workflow_instance(workflow_instance, user_id, store)
+    store.launch_updates(actions, graph_iri=WORKFLOWS_GRAPH_IRI, delete_files_after_upload=True)
 
 
 def get_first_handover_group(object_id: int, store: RDFDatastore) -> str:

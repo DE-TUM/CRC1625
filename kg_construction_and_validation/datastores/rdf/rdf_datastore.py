@@ -1,7 +1,12 @@
 from abc import ABC, abstractmethod
+from enum import Enum
 
 from requests import Response
 
+
+class UpdateType(Enum):
+    query = "query"
+    file_upload = "file_upload"
 
 class RDFDatastore(ABC):
     """
@@ -19,6 +24,15 @@ class RDFDatastore(ABC):
     def launch_update(self, query: str, graph_iri="https://crc1625.mdi.ruhr-uni-bochum.de/graph"):
         """
         Executes a SPARQL update
+        """
+        pass
+
+    @abstractmethod
+    def launch_updates(self, actions: list[tuple[str, UpdateType]],
+                       graph_iri="https://crc1625.mdi.ruhr-uni-bochum.de/graph",
+                       delete_files_after_upload: bool = False):
+        """
+        Executes a set of SPARQL update operations
         """
         pass
 

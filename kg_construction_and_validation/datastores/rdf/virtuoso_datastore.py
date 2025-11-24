@@ -6,11 +6,13 @@ import shutil
 import subprocess
 import sys
 import time
+from contextlib import nullcontext
 from concurrent.futures import as_completed, ThreadPoolExecutor
+from enum import Enum
 
 import requests
 
-from .rdf_datastore import RDFDatastore
+from .rdf_datastore import RDFDatastore, UpdateType
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -54,14 +56,34 @@ class VirtuosoRDFDatastore(RDFDatastore):
                 headers={"Accept": "application/sparql-results+json"},
                 auth=(VIRTUOSO_USER, VIRTUOSO_PASS)
             )
-            if result.status_code != 200:
-                raise RuntimeError(f"Error occurred on query {query}: {result.text}")
 
-            return result
+        if result.status_code != 200:
+            raise RuntimeError(f"Error occurred on query {query}: {result.text}")
 
+        return result
 
-    def launch_update(self, query: str, graph_iri=""):
+    def launch_updates(self, actions: list[tuple[str, UpdateType]],
+                       graph_iri="",
+                       delete_files_after_upload: bool = False):
+        """
+        Launches a set of update queries with an exclusive lock (~ a transaction)
+        """
         with lock:
+            for (action, update_type) in actions:
+                if update_type == UpdateType.query:
+                    self.launch_update(action,
+                                       graph_iri=graph_iri,
+                                       use_lock=False)
+                elif update_type == UpdateType.file_upload:
+                    self.upload_file(action,
+                                     graph_iri=graph_iri,
+                                     delete_file_after_upload=delete_files_after_upload,
+                                     use_lock=False)
+
+
+    def launch_update(self, query: str, graph_iri="", use_lock=True):
+        context_manager = lock if use_lock else nullcontext()
+        with context_manager:
             result = requests.post(
                 UPDATE_ENDPOINT,
                 # https://github.com/openlink/virtuoso-opensource/issues/950
@@ -110,17 +132,17 @@ class VirtuosoRDFDatastore(RDFDatastore):
         return target_path
 
 
-    def bulk_file_load(self, file_paths: list[str], graph_iri=GRAPH_IRI, delete_files_after_upload=False):
+    def bulk_file_load(self, file_paths: list[str], graph_iri=GRAPH_IRI, delete_files_after_upload=False, use_lock=True):
         """
         Uploads RDF files to the SPARQL endpoint, optimized for speed by
         parallelizing requests if possible
 
         If no graph IRI is specified, it will be stored in the CRC 1625 graph.
         """
-
-        # Clear the existing files. For example, we may not want to upload
-        # leftover ontology files when validating the mappings output
-        with lock:
+        context_manager = lock if use_lock else nullcontext()
+        with context_manager:
+            # Clear the existing files. For example, we may not want to upload
+            # leftover ontology files when validating the mappings output
             for file_path in glob.glob(os.path.join(HOST_DATA_DIR, "*")):
                 if os.path.isfile(file_path):
                     os.remove(file_path)
@@ -128,7 +150,6 @@ class VirtuosoRDFDatastore(RDFDatastore):
             registered_file_paths = []
             for file in file_paths:
                 registered_file_paths.append(self._register_file(file))
-            logging.info("Registering files...")
 
             # Write a file called global.graph in CONTAINER_DATA_DIR containing only GRAPH_IRI as its contents
             with open(os.path.join(HOST_DATA_DIR, "global.graph"), "w") as f:
@@ -137,13 +158,11 @@ class VirtuosoRDFDatastore(RDFDatastore):
             self._run_isql(f"DELETE FROM DB.DBA.load_list;") # This took a while to discover...
             self._run_isql(f"ld_dir('{CONTAINER_DATA_DIR}', '*.ttl', '{graph_iri}');")
 
-            logging.info("Loading files...")
             with ThreadPoolExecutor(max_workers=16) as executor:
                 futures = [executor.submit(self._run_isql, "rdf_loader_run();") for _ in range(0, 16)]
                 for future in as_completed(futures):
                     future.result()
 
-            logging.info("Commiting...")
             self._run_isql("checkpoint;")
 
             if delete_files_after_upload:
@@ -156,7 +175,7 @@ class VirtuosoRDFDatastore(RDFDatastore):
 
 
 
-    def upload_file(self, file, content_type : str | None = None, graph_iri=GRAPH_IRI, delete_file_after_upload=False):
+    def upload_file(self, file, content_type : str | None = None, graph_iri=GRAPH_IRI, delete_file_after_upload=False, use_lock=True):
         """
         Uploads an RDF file to the SPARQL endpoint.
 
@@ -164,7 +183,7 @@ class VirtuosoRDFDatastore(RDFDatastore):
 
         If no graph IRI is specified, it will be stored in the CRC 1625 graph.
         """
-        self.bulk_file_load([file], graph_iri, delete_file_after_upload)
+        self.bulk_file_load([file], graph_iri, delete_file_after_upload, use_lock)
 
 
     def dump_triples(self, output_file: str | None ="datastore_dump.nt"):

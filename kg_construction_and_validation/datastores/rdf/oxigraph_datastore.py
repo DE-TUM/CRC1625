@@ -9,7 +9,7 @@ import requests
 from rdflib import Graph, Namespace
 from requests import Response
 
-from .rdf_datastore import RDFDatastore
+from .rdf_datastore import RDFDatastore, UpdateType
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -38,6 +38,20 @@ class OxigraphRDFDatastore(RDFDatastore):
 
         return result
 
+    def launch_updates(self, actions: list[tuple[str, UpdateType]],
+                       graph_iri="",
+                       delete_files_after_upload: bool = False):
+        """
+        Launches a set of update queries with an exclusive lock (~ a transaction)
+        """
+        for (action, update_type) in actions:
+            if update_type == UpdateType.query:
+                self.launch_update(action, graph_iri)
+            elif update_type == UpdateType.file_upload:
+                self.upload_file(action,
+                                 graph_iri,
+                                 delete_file_after_upload=delete_files_after_upload,
+                                 use_lock=False)
 
     def launch_update(self, query: str, graph_iri=GRAPH_IRI):
         """
