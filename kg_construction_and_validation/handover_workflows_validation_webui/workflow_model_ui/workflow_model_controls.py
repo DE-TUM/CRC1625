@@ -80,6 +80,10 @@ def remove_step_action(node_to_remove: str):
     State().save_workflow_model_copy()
 
     del State().current_workflow_model.workflow_model_steps[node_to_remove]
+    for (step_name, workflow_step) in State().current_workflow_model.workflow_model_steps.items():
+        if node_to_remove in workflow_step.next_steps:
+            workflow_step.next_steps.remove(node_to_remove)
+
     ui_elements.graph_component.remove_node(node_to_remove)
 
     ui.notify(f"Removed step '{node_to_remove}'", type='positive')

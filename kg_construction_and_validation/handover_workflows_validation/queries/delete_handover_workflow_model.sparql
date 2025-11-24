@@ -11,7 +11,10 @@ WHERE {
       BIND(<{handover_workflow_model_iri}> AS ?s).
     }
     #UNION
-    # Immediate neighborhood (incoming) # TODO not for now, or else we unlink instances, we need to treat this better
+    # Immediate neighborhood (incoming)
+    # Note that, if we do this, we will unlink workflow model instances from it
+    # If the workflow model is getting fully deleted and not replaced, then all instances will need
+    # to be deleted separately
     #{
     #  ?s ?p <{handover_workflow_model_iri}>.
     #  BIND(<{handover_workflow_model_iri}> AS ?o).
@@ -25,11 +28,13 @@ WHERE {
     }
 
     # Handover workflow steps (incoming)
-    UNION
-    {
-      <{handover_workflow_model_iri}> pmdco:subordinateProcess/pmdco:nextProcess* ?o.
-      ?s ?p ?o.
-    }
+    # Note that, if we do this, we will delete in the process all assignments from workflow instances
+    # Due to this, we clean them up or fully delete them at a later step when overwriting
+    #UNION
+    #{
+    #  <{handover_workflow_model_iri}> pmdco:subordinateProcess/pmdco:nextProcess* ?o.
+    #  ?s ?p ?o.
+    #}
 
     # Handover workflow step activities
     UNION

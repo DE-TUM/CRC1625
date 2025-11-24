@@ -62,4 +62,4 @@ if __name__ in {"__main__", "__mp_main__"}:
         store.upload_file(test_file_path + "_workflow_instance.ttl", graph_iri=handover_workflows_validation.WORKFLOWS_GRAPH_IRI)
 
     ui.run(title="CRC1625 Handover horkflows validation prototype",
-           reload=reload)
+           reload=False)

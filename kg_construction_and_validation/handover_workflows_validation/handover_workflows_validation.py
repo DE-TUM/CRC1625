@@ -42,6 +42,7 @@ get_next_handover_group_query = prefixes + open(os.path.join(module_dir, 'querie
 get_handovers_and_activities_for_sample_query = prefixes + open(os.path.join(module_dir, 'queries/get_handovers_and_activities_for_sample.sparql'), 'r').read()
 delete_handover_workflow_model_query = prefixes + open(os.path.join(module_dir, 'queries/delete_handover_workflow_model.sparql'), 'r').read()
 delete_handover_workflow_instance_query = prefixes + open(os.path.join(module_dir, 'queries/delete_handover_workflow_instance.sparql'), 'r').read()
+clean_handover_workflow_instance_steps_query = prefixes + open(os.path.join(module_dir, 'queries/clean_handover_workflow_instance_steps.sparql'), 'r').read()
 workflow_model_details_query = prefixes + open(os.path.join(module_dir, 'queries/workflow_model_details.sparql'), 'r').read()
 workflow_instance_details_query = prefixes + open(os.path.join(module_dir, 'queries/workflow_instance_details.sparql'), 'r').read()
 get_label_query = prefixes + open(os.path.join(module_dir, 'queries/get_label.sparql'), 'r').read()
@@ -314,7 +315,7 @@ def read_workflow_model(workflow_model_name: str, user_id: int, store: RDFDatast
                 workflow_model.workflow_model_name = o
             elif p in workflow_model_iri_to_config:
                 if "initial_step" in workflow_model_iri_to_config[p]:
-                    workflow_model.workflow_model_options.initial_step_name = get_label(o, store)
+                    workflow_model.workflow_model_options.initial_step_name = get_label(o, store) # TODO limit the use of this
                 else:
                     workflow_model.workflow_model_options.set_option(workflow_model_iri_to_config[p], o)
 
@@ -438,6 +439,21 @@ def delete_workflow_model(workflow_model: WorkflowModel,
     store.launch_update(delete_handover_workflow_model_query.replace("{handover_workflow_model_iri}", workflow_model_iri), graph_iri=WORKFLOWS_GRAPH_IRI)
 
 
+def clean_workflow_instance_steps(workflow_model: WorkflowModel,
+                                  user_id: int,
+                                  store: RDFDatastore):
+    workflow_instances = get_workflow_instances_of_model(workflow_model.workflow_model_name,
+                                                         user_id,
+                                                         store)
+
+    for (workflow_instance_name, user_id) in workflow_instances.keys():
+        workflow_instance_id = uuid_for_name(workflow_instance_name, user_id)
+        workflow_instance_iri = crc_workflow_prefix["workflow_instance_" + workflow_instance_id]
+
+        store.launch_update(clean_handover_workflow_instance_steps_query.replace("{handover_workflow_instance_iri}", workflow_instance_iri), graph_iri=WORKFLOWS_GRAPH_IRI)
+
+
+
 def overwrite_workflow_model(workflow_model: WorkflowModel,
                              user_id: int,
                              store: RDFDatastore):
@@ -447,6 +463,8 @@ def overwrite_workflow_model(workflow_model: WorkflowModel,
     delete_workflow_model(workflow_model, user_id, store)
 
     store_workflow_model(workflow_model, user_id, store)
+
+    clean_workflow_instance_steps(workflow_model, user_id, store)
 
 
 def get_workflow_instances_of_model(workflow_model_name: str,
@@ -497,7 +515,6 @@ def create_workflow_instance(workflow_instance: WorkflowInstance,
     """
     Serializes the workflow instance into RDF and stores it
     """
-    print("creo for user:", user_id, workflow_instance)
 
     g = Graph()
 
@@ -545,7 +562,6 @@ def create_workflow_instance(workflow_instance: WorkflowInstance,
     temporary_ttl_path = f"{uuid.uuid4().hex}.ttl"
     ttl_file_path = os.path.join(module_dir, temporary_ttl_path)
     g.serialize(destination=ttl_file_path, format='turtle')
-    print("writeo graph", g)
     store.upload_file(ttl_file_path, graph_iri=WORKFLOWS_GRAPH_IRI, content_type='text/ntriples', delete_file_after_upload=True)
 
 def delete_workflow_instance(workflow_instance: WorkflowInstance,
@@ -557,8 +573,6 @@ def delete_workflow_instance(workflow_instance: WorkflowInstance,
     workflow_instance_id = uuid_for_name(workflow_instance.workflow_instance_name, user_id)
     workflow_instance_iri = crc_workflow_prefix["workflow_instance_" + workflow_instance_id]
 
-    print("deleteo con query ", delete_handover_workflow_instance_query.replace("{handover_workflow_instance_iri}", workflow_instance_iri))
-
     store.launch_update(delete_handover_workflow_instance_query.replace("{handover_workflow_instance_iri}", workflow_instance_iri))
 
 
@@ -566,10 +580,6 @@ def overwrite_workflow_instance(workflow_instance: WorkflowInstance, user_id: in
     """
     Deletes the workflow model corresponding to the provided one, and stores it again
     """
-    print("Overwriteo for user:",user_id, workflow_instance)
-
-    #print("15s for deleting...")
-    #time.sleep(15)
     delete_workflow_instance(workflow_instance, user_id, store)
 
     create_workflow_instance(workflow_instance, user_id, store)
