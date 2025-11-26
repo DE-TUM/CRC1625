@@ -216,7 +216,7 @@ class VirtuosoRDFDatastore(RDFDatastore):
                 with open(output_file, "w", encoding="utf-8") as f:
                     f.write(response.text)
             else:
-                logging.error("Error:", response.status_code, response.text)
+                logging.error(f"Error when dumping triples: {response.status_code}, {response.text}")
 
 
     def clear_triples(self, graph_iri="https://crc1625.mdi.ruhr-uni-bochum.de/graph"):
