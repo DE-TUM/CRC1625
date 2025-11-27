@@ -844,3 +844,5 @@ def is_workflow_instance_valid(workflow_model, workflow_instance, store) -> bool
     results = validate_SHACL_rules(steps_to_validate, store)
 
     return all(result[5] for result in results)
+
+print(uuid_for_name("test 2", 1))

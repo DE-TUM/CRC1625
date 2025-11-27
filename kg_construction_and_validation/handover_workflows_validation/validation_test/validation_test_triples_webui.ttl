@@ -1,0 +1,267 @@
+# Workflow models and instances creator
+<https://crc1625.mdi.ruhr-uni-bochum.de/user/1> <https://crc1625.mdi.ruhr-uni-bochum.de/internalID> 1 .
+
+# Projects
+<https://crc1625.mdi.ruhr-uni-bochum.de/project/A01> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/Project> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/project/A01> <http://www.w3.org/2000/01/rdf-schema#label> "A01" .
+<https://crc1625.mdi.ruhr-uni-bochum.de/project/S> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/Project> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/project/S> <http://www.w3.org/2000/01/rdf-schema#label> "S" .
+<https://crc1625.mdi.ruhr-uni-bochum.de/project/C01> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/Project> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/project/C01> <http://www.w3.org/2000/01/rdf-schema#label> "C01" .
+
+
+######################################
+
+
+# Users
+<https://crc1625.mdi.ruhr-uni-bochum.de/user/UserA01> <https://crc1625.mdi.ruhr-uni-bochum.de/memberOfProject> <https://crc1625.mdi.ruhr-uni-bochum.de/project/A01> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/user/UserS> <https://crc1625.mdi.ruhr-uni-bochum.de/memberOfProject> <https://crc1625.mdi.ruhr-uni-bochum.de/project/S> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/user/UserC01> <https://crc1625.mdi.ruhr-uni-bochum.de/memberOfProject> <https://crc1625.mdi.ruhr-uni-bochum.de/project/C01> .
+
+
+######################################
+
+
+# Samples
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/1> <https://crc1625.mdi.ruhr-uni-bochum.de/internalID> 1 .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/1> <http://www.w3.org/2000/01/rdf-schema#label> "Sample 1" .
+
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/Sample> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/2> <https://crc1625.mdi.ruhr-uni-bochum.de/internalID> 2 .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/2> <http://www.w3.org/2000/01/rdf-schema#label> "Annealed Sample 1" .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/3> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/Sample> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/3> <https://crc1625.mdi.ruhr-uni-bochum.de/internalID> 3 .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/3> <http://www.w3.org/2000/01/rdf-schema#label> "Annealed Sample 1 (Piece 1 of 2)" .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/4> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/Sample> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/4> <https://crc1625.mdi.ruhr-uni-bochum.de/internalID> 4 .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/4> <http://www.w3.org/2000/01/rdf-schema#label> "Annealed Sample 1 (Piece 2 of 2)" .
+
+
+######################################
+
+
+# Pieces of samples
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/1> <https://crc1625.mdi.ruhr-uni-bochum.de/hasPiece> <https://crc1625.mdi.ruhr-uni-bochum.de/object/2> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/2> <https://crc1625.mdi.ruhr-uni-bochum.de/hasPiece> <https://crc1625.mdi.ruhr-uni-bochum.de/object/3> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/2> <https://crc1625.mdi.ruhr-uni-bochum.de/hasPiece> <https://crc1625.mdi.ruhr-uni-bochum.de/object/4> .
+
+
+######################################
+
+
+# Handovers
+
+# Initial work of Sample 1
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverGroup> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Sample_1> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Sample_1>.
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Sample_1> <http://www.w3.org/ns/prov#wasAssociatedWith> <https://crc1625.mdi.ruhr-uni-bochum.de/project/A01>.
+
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/VirtualHandover> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Sample_1> <http://www.w3.org/2000/01/rdf-schema#label> "Initial work for Sample 1" .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Sample_1> <http://www.w3.org/ns/prov#wasAssociatedWith> <https://crc1625.mdi.ruhr-uni-bochum.de/user/UserA01> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Sample_1> <http://www.w3.org/ns/prov#wasAttributedTo> <https://crc1625.mdi.ruhr-uni-bochum.de/user/UserA01> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Sample_1> <https://crc1625.mdi.ruhr-uni-bochum.de/creationDate> "2025-01-01T00:00:00.000"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+
+# Second handover group in S for Sample 1
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_2_in_S_for_Sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverGroup> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_2_in_S_for_Sample_1> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_1_in_S_for_Sample_1>.
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_2_in_S_for_Sample_1> <http://www.w3.org/ns/prov#wasAssociatedWith> <https://crc1625.mdi.ruhr-uni-bochum.de/project/S>.
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Sample_1> <https://w3id.org/pmd/co/nextProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_2_in_S_for_Sample_1>.
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_1_in_S_for_Sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/Handover> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_1_in_S_for_Sample_1> <http://www.w3.org/2000/01/rdf-schema#label> "Handover 1 in S for Sample 1" .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_1_in_S_for_Sample_1> <http://www.w3.org/ns/prov#wasAssociatedWith> <https://crc1625.mdi.ruhr-uni-bochum.de/user/UserS> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_1_in_S_for_Sample_1> <http://www.w3.org/ns/prov#wasAttributedTo> <https://crc1625.mdi.ruhr-uni-bochum.de/user/UserA01> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_1_in_S_for_Sample_1> <https://crc1625.mdi.ruhr-uni-bochum.de/creationDate> "2025-01-02T00:00:00.000"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_2_in_S_for_Sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/Handover> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_2_in_S_for_Sample_1> <http://www.w3.org/2000/01/rdf-schema#label> "Handover 2 in S for Sample 1" .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_2_in_S_for_Sample_1> <http://www.w3.org/ns/prov#wasAssociatedWith> <https://crc1625.mdi.ruhr-uni-bochum.de/user/UserS> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_2_in_S_for_Sample_1> <http://www.w3.org/ns/prov#wasAttributedTo> <https://crc1625.mdi.ruhr-uni-bochum.de/user/UserA01> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_2_in_S_for_Sample_1> <https://crc1625.mdi.ruhr-uni-bochum.de/creationDate> "2025-01-03T00:00:00.000"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_1_in_S_for_Sample_1> <https://w3id.org/pmd/co/nextProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_2_in_S_for_Sample_1> .
+
+
+# Third handover group in C01 for Sample 1
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_3_in_C01_for_Sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverGroup> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_3_in_C01_for_Sample_1> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_3_in_C01_for_Sample_1>.
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_3_in_C01_for_Sample_1> <http://www.w3.org/ns/prov#wasAssociatedWith> <https://crc1625.mdi.ruhr-uni-bochum.de/project/C01>.
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_2_in_S_for_Sample_1> <https://w3id.org/pmd/co/nextProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_3_in_C01_for_Sample_1>.
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_3_in_C01_for_Sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/Handover> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_3_in_C01_for_Sample_1> <http://www.w3.org/2000/01/rdf-schema#label> "Handover 3 in C01 for Sample 1" .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_3_in_C01_for_Sample_1> <http://www.w3.org/ns/prov#wasAssociatedWith> <https://crc1625.mdi.ruhr-uni-bochum.de/user/UserC01> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_3_in_C01_for_Sample_1> <http://www.w3.org/ns/prov#wasAttributedTo> <https://crc1625.mdi.ruhr-uni-bochum.de/user/UserS> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_3_in_C01_for_Sample_1> <https://crc1625.mdi.ruhr-uni-bochum.de/creationDate> "2025-01-04T00:00:00.000"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+
+######################################
+
+
+# Initial work of Annealed Sample 1
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Annealed_Sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverGroup> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Annealed_Sample_1> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Annealed_Sample_1>.
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Annealed_Sample_1> <http://www.w3.org/ns/prov#wasAssociatedWith> <https://crc1625.mdi.ruhr-uni-bochum.de/project/A01>.
+
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Annealed_Sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/VirtualHandover> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Annealed_Sample_1> <http://www.w3.org/2000/01/rdf-schema#label> "Initial work for Annealed Sample 1" .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Annealed_Sample_1> <http://www.w3.org/ns/prov#wasAssociatedWith> <https://crc1625.mdi.ruhr-uni-bochum.de/user/A01> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Annealed_Sample_1> <http://www.w3.org/ns/prov#wasAttributedTo> <https://crc1625.mdi.ruhr-uni-bochum.de/user/UserA01> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Annealed_Sample_1> <https://crc1625.mdi.ruhr-uni-bochum.de/creationDate> "2025-01-05T00:00:00.000"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+
+# Second handover group in S for Annealed Sample 1
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_2_in_S_for_Annealed_Sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverGroup> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_2_in_S_for_Annealed_Sample_1> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_1_in_S_for_Annealed_Sample_1>.
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_2_in_S_for_Annealed_Sample_1> <http://www.w3.org/ns/prov#wasAssociatedWith> <https://crc1625.mdi.ruhr-uni-bochum.de/project/S>.
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Annealed_Sample_1> <https://w3id.org/pmd/co/nextProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_2_in_S_for_Annealed_Sample_1>.
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_1_in_S_for_Annealed_Sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/Handover> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_1_in_S_for_Annealed_Sample_1> <http://www.w3.org/2000/01/rdf-schema#label> "Handover 1 in S for Annealed Sample 1" .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_1_in_S_for_Annealed_Sample_1> <http://www.w3.org/ns/prov#wasAssociatedWith> <https://crc1625.mdi.ruhr-uni-bochum.de/user/UserS> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_1_in_S_for_Annealed_Sample_1> <http://www.w3.org/ns/prov#wasAttributedTo> <https://crc1625.mdi.ruhr-uni-bochum.de/user/UserA01> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_1_in_S_for_Annealed_Sample_1> <https://crc1625.mdi.ruhr-uni-bochum.de/creationDate> "2025-01-06T00:00:00.000"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_2_in_S_for_Annealed_Sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/Handover> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_2_in_S_for_Annealed_Sample_1> <http://www.w3.org/2000/01/rdf-schema#label> "Handover 2 in S for Annealed Sample 1" .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_2_in_S_for_Annealed_Sample_1> <http://www.w3.org/ns/prov#wasAssociatedWith> <https://crc1625.mdi.ruhr-uni-bochum.de/user/UserS> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_2_in_S_for_Annealed_Sample_1> <http://www.w3.org/ns/prov#wasAttributedTo> <https://crc1625.mdi.ruhr-uni-bochum.de/user/UserA01> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_2_in_S_for_Annealed_Sample_1> <https://crc1625.mdi.ruhr-uni-bochum.de/creationDate> "2025-01-07T00:00:00.000"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_1_in_S_for_Annealed_Sample_1> <https://w3id.org/pmd/co/nextProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_2_in_S_for_Annealed_Sample_1> .
+
+
+######################################
+
+
+# Initial work of Annealed Sample 1 Piece 1
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Annealed_Sample_1_Piece_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverGroup> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Annealed_Sample_1_Piece_1> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Annealed_Sample_1_Piece_1>.
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Annealed_Sample_1_Piece_1> <http://www.w3.org/ns/prov#wasAssociatedWith> <https://crc1625.mdi.ruhr-uni-bochum.de/project/C01>.
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Annealed_Sample_1_Piece_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/Handover> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Annealed_Sample_1_Piece_1> <http://www.w3.org/2000/01/rdf-schema#label> "Initial work for Annealed Sample 1 (Piece 1 of 2)" .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Annealed_Sample_1_Piece_1> <http://www.w3.org/ns/prov#wasAssociatedWith> <https://crc1625.mdi.ruhr-uni-bochum.de/user/UserC01> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Annealed_Sample_1_Piece_1> <http://www.w3.org/ns/prov#wasAttributedTo> <https://crc1625.mdi.ruhr-uni-bochum.de/user/UserC01> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Annealed_Sample_1_Piece_1> <https://crc1625.mdi.ruhr-uni-bochum.de/creationDate> "2025-01-08T00:00:00.000"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+# Initial work of Annealed Sample 1 Piece 2
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Annealed_Sample_1_Piece_2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverGroup> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Annealed_Sample_1_Piece_2> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Annealed_Sample_1_Piece_2>.
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Annealed_Sample_1_Piece_2> <http://www.w3.org/ns/prov#wasAssociatedWith> <https://crc1625.mdi.ruhr-uni-bochum.de/project/C01>.
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Annealed_Sample_1_Piece_2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/Handover> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Annealed_Sample_1_Piece_2> <http://www.w3.org/2000/01/rdf-schema#label> "Initial work for Annealed Sample 1 (Piece 2 of 2)" .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Annealed_Sample_1_Piece_2> <http://www.w3.org/ns/prov#wasAssociatedWith> <https://crc1625.mdi.ruhr-uni-bochum.de/user/UserC01> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Annealed_Sample_1_Piece_2> <http://www.w3.org/ns/prov#wasAttributedTo> <https://crc1625.mdi.ruhr-uni-bochum.de/user/UserC01> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Annealed_Sample_1_Piece_2> <https://crc1625.mdi.ruhr-uni-bochum.de/creationDate> "2025-01-08T00:00:00.000"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+
+######################################
+
+
+# Workflow instances
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/Sample1WorkflowInstance> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/Sample1WorkflowInstance> <https://w3id.org/pmd/co/input> <https://crc1625.mdi.ruhr-uni-bochum.de/object/1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/Sample1WorkflowInstance> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Sample_1> .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/AnnealedSample1WorkflowInstance> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/AnnealedSample1WorkflowInstance> <https://w3id.org/pmd/co/input> <https://crc1625.mdi.ruhr-uni-bochum.de/object/2> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/AnnealedSample1WorkflowInstance> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Annealed_Sample_1> .
+
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/AnnealedSample1Piece1WorkflowInstance> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/AnnealedSample1Piece1WorkflowInstance> <https://w3id.org/pmd/co/input> <https://crc1625.mdi.ruhr-uni-bochum.de/object/3> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/AnnealedSample1Piece1WorkflowInstance> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Annealed_Sample_1_Piece_1> .
+
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/AnnealedSample1Piece2WorkflowInstance> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/AnnealedSample1Piece2WorkflowInstance> <https://w3id.org/pmd/co/input> <https://crc1625.mdi.ruhr-uni-bochum.de/object/4> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/AnnealedSample1Piece2WorkflowInstance> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/handover/hnd_group_initial_work_for_Annealed_Sample_1_Piece_2> .
+
+
+######################################
+
+
+# Measurements
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/1> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/photo_of_sample_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/1> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/sem_of_sample_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/1> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/edx_of_sample_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/1> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/seccm_of_sample_1> .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/2> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/photo_of_annealed_sample_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/2> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/sem_of_annealed_sample_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/2> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/edx_of_annealed_sample_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/2> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/seccm_of_annealed_sample_1> .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/3> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/seccm_of_annealed_sample_1_piece_1> .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/4> <https://w3id.org/pmd/co/characteristic> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/seccm_of_annealed_sample_1_piece_2> .
+
+
+######################################
+
+
+# Activities
+
+# Sample 1
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/others_activity_for_sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/others_activity_for_sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://w3id.org/pmd/co/AnalysingProcess> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/others_activity_for_sample_1> <https://w3id.org/pmd/co/output> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/photo_of_sample_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Sample_1> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/activity/others_activity_for_sample_1> .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/sem_activity_for_sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/sem_activity_for_sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/sem_activity_for_sample_1> <https://w3id.org/pmd/co/output> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/sem_of_sample_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_1_in_S_for_Sample_1> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/activity/sem_activity_for_sample_1> .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/edx_activity_for_sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/edx_activity_for_sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/edx_activity_for_sample_1> <https://w3id.org/pmd/co/output> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/edx_of_sample_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_2_in_S_for_Sample_1> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/activity/edx_activity_for_sample_1> .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/seccm_activity_for_sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/seccm_activity_for_sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/seccm_activity_for_sample_1> <https://w3id.org/pmd/co/output> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/seccm_of_sample_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_3_in_C01_for_Sample_1> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/activity/seccm_activity_for_sample_1> .
+
+# Annealed Sample 1
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/others_activity_for_annealed_sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/others_activity_for_annealed_sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://w3id.org/pmd/co/AnalysingProcess> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/others_activity_for_annealed_sample_1> <https://w3id.org/pmd/co/output> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/photo_of_annealed_sample_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Annealed_Sample_1> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/activity/others_activity_for_annealed_sample_1> .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/sem_activity_for_annealed_sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/sem_activity_for_annealed_sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/sem_activity_for_annealed_sample_1> <https://w3id.org/pmd/co/output> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/sem_of_annealed_sample_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_1_in_S_for_Annealed_Sample_1> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/activity/sem_activity_for_annealed_sample_1> .
+
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/edx_activity_for_annealed_sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/edx_activity_for_annealed_sample_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/edx_activity_for_annealed_sample_1> <https://w3id.org/pmd/co/output> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/edx_of_annealed_sample_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/handover_2_in_S_for_Annealed_Sample_1> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/activity/edx_activity_for_annealed_sample_1> .
+
+# Annealed sample piece 1
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/seccm_activity_for_sample_1_piece_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/seccm_activity_for_sample_1_piece_1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/seccm_activity_for_sample_1_piece_1> <https://w3id.org/pmd/co/output> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/seccm_of_annealed_sample_1_piece_1> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Annealed_Sample_1_Piece_1> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/activity/seccm_activity_for_sample_1_piece_1> .
+
+# Annealed sample piece 2
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/seccm_activity_for_sample_1_piece_2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/seccm_activity_for_sample_1_piece_2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/activity/seccm_activity_for_sample_1_piece_2> <https://w3id.org/pmd/co/output> <https://crc1625.mdi.ruhr-uni-bochum.de/measurement/seccm_of_annealed_sample_1_piece_2> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/handover/initial_work_for_Annealed_Sample_1_Piece_2> <https://w3id.org/pmd/co/subordinateProcess> <https://crc1625.mdi.ruhr-uni-bochum.de/activity/seccm_activity_for_sample_1_piece_2> .

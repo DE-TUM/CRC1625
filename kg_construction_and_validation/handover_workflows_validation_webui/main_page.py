@@ -114,8 +114,8 @@ async def handle_workflow_models_table_click(workflow_model_name: str, user_id: 
 
         with ui.row().classes('w-full border-b-2 border-gray-400 py-2 font-bold'):
             ui.label('Workflow Instance name').classes('w-1/3 text-left')
-            ui.label('Associated Objects').classes('w-1/3 text-left')
-            ui.label('Status').classes('w-0 flex-grow text-left')
+            ui.label('Associated Materials libraries or Samples').classes('w-1/3 text-left')
+            ui.label('Validation status').classes('w-0 flex-grow text-left')
 
         for (workflow_instance_name, user_id), workflow_instance in State().workflow_instances_of_current_workflow_model.items():
             with ui.button(on_click=lambda r=workflow_instance: handle_workflow_instance_table_click(r, right_drawer)).props('flat').classes('w-full p-0'):
