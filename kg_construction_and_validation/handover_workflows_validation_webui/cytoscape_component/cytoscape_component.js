@@ -34,6 +34,10 @@ export default {
 
               return `${label}\n${activityText}`;
             },
+            'background-color': (ele) => {
+              console.log(ele.data());
+              return ele.data('color') || '#0074D9';
+            },
             'color': '#000000',
             'text-valign': 'bottom',
             'text-margin-y': '5px',
@@ -41,21 +45,18 @@ export default {
             'font-size': '12px',
             'padding': '10px',
             'text-wrap': 'wrap',
-            'background-color': '#0074D9', // Fallback default color
           }
         },
 
         {
           selector: 'node.step',
           style: {
-            'background-color': '#FFBAA5',
           }
         },
 
         {
           selector: 'node.object',
           style: {
-            'background-color': '#D5E8D4',
             'shape': 'round-rectangle',
           }
         },
@@ -174,7 +175,7 @@ export default {
       }
     },
 
-    addNode(id, label, type) {
+    addNode(id, label, type, node_color) { // <-- node_color is used here
       if (this.cy.$id(id).length === 0) {
         let classes = [];
 
@@ -184,7 +185,12 @@ export default {
 
         this.cy.add({
           group: 'nodes',
-          data: { id: id, label: label, activities: [] },
+          data: {
+            id: id,
+            label: label,
+            activities: [],
+            color: node_color
+          },
           classes: classes
         });
 
@@ -209,7 +215,7 @@ export default {
       }
     },
 
-    addActivity(id, activity) {
+    addActivity(id, activity, new_node_color) {
       const node = this.cy.$id(id);
       if (node.length > 0) {
         const activities = node.data('activities') || [];
@@ -218,7 +224,8 @@ export default {
           const newActivities = [...activities, activity];
           node.data('activities', newActivities);
 
-          // Force a re-render of the label
+          // Force a re-render of the label and its color
+          node.data('color', new_node_color);
           node.trigger('data');
           this.rerun_layout_and_fit();
         }
@@ -235,19 +242,21 @@ export default {
           const newActivities = activities.filter(a => a !== activity);
           node.data('activities', newActivities);
 
-          // Force a re-render of the label
+          // Force a re-render of the label and its color
+          node.data('color', new_node_color);
           node.trigger('data');
           this.rerun_layout_and_fit();
         }
       }
     },
 
-    replaceActivities(id, activities) {
+    replaceActivities(id, activities, new_node_color) {
       const node = this.cy.$id(id);
       if (node.length > 0) {
         node.data('activities', activities);
 
-        // Force a re-render of the label
+        // Force a re-render of the label and its color
+        node.data('color', new_node_color);
         node.trigger('data');
         this.rerun_layout_and_fit();
       }

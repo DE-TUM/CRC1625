@@ -21,15 +21,16 @@ def workflow_model_and_instance_to_nodes_and_edges(workflow_model: WorkflowModel
     edges = list()
 
     for step_name, step in workflow_model.workflow_model_steps.items():
-        nodes.append({'data': {'id': step_name, 'label': step_name, 'activities': step.required_activities}, "classes": [NodeType.node_type_step.value]})
+        nodes.append({'data': {'id': step_name, 'label': step_name, 'activities': step.required_activities, 'identifiers_for_coloring': step.required_activities}, "classes": [NodeType.node_type_step.value]})
 
         for next_step_name in step.next_steps:
             edges.append({'data': {'source': step_name, 'target': next_step_name}})
 
     for assigned_step_name, assigned_objects in workflow_instance.step_assignments.items():
         for assigned_object in assigned_objects:
-            if {'data': {'id': assigned_object, 'label': assigned_object}, "classes": [NodeType.node_type_step.value]} not in nodes:
-                nodes.append({'data': {'id': assigned_object, 'label': f'ML / Sample {assigned_object}'}, "classes": [NodeType.node_type_object.value]})
+            # We set as the node's ids for coloring a single list containing 'object'
+            if {'data': {'id': assigned_object, 'label': assigned_object, 'identifiers_for_coloring': ['object']}, "classes": [NodeType.node_type_step.value]} not in nodes:
+                nodes.append({'data': {'id': assigned_object, 'label': f'ML / Sample {assigned_object}', 'identifiers_for_coloring': ['object']}, "classes": [NodeType.node_type_object.value]})
 
             edges.append({'data': {'source': assigned_step_name, 'target': assigned_object}})
 
