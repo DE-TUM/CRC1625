@@ -32,10 +32,19 @@ export default {
 
               const activityText = '\n'+activities.join('\n');
 
-              return `${label}\n${activityText}`;
+              const projects = ele.data('projects') || "";
+              if (projects.length === 0) {
+                return `${label}\n${activityText}`;
+              } else if (projects.length === 1) {
+                console.log("1:", projects);
+                return `${label}\n${activityText}\n\nProject ${projects[0]}`;
+              } else {
+                console.log(">1:", projects);
+                return `${label}\n${activityText}\n\nProjects\n${projects.join(',\n')}`;
+              }
+
             },
             'background-color': (ele) => {
-              console.log(ele.data());
               return ele.data('color') || '#0074D9';
             },
             'color': '#000000',
@@ -257,6 +266,17 @@ export default {
 
         // Force a re-render of the label and its color
         node.data('color', new_node_color);
+        node.trigger('data');
+        this.rerun_layout_and_fit();
+      }
+    },
+
+    replaceProjects(id, projects) {
+      const node = this.cy.$id(id);
+      if (node.length > 0) {
+        node.data('projects', projects);
+
+        // Force a re-render of the label and its color
         node.trigger('data');
         this.rerun_layout_and_fit();
       }

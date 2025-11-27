@@ -132,3 +132,6 @@ class CytoscapeComponent(Element, component='cytoscape_component.js'):
             new_node_color = self._get_node_color(activities)
 
         self.run_method('replaceActivities', node_id, activities, new_node_color)
+
+    def replace_projects(self, node_id: str, projects: [str]) -> None:
+        self.run_method('replaceProjects', node_id, projects)

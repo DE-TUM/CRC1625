@@ -24,6 +24,26 @@ allowed_activities = ["Photo",
                       "Others"]
 allowed_activities.sort()
 
+allowed_projects = [
+    "A01",
+    "A02",
+    "A03",
+    "A04",
+    "A05",
+    "A06",
+
+    "B01",
+    "B02",
+    "B03",
+    "B04",
+    "B05",
+
+    "C01",
+    "C02",
+    "C03",
+    "C04"
+]
+
 
 def change_step_name_action(new_name: str):
     State().save_workflow_model_copy()
@@ -32,12 +52,11 @@ def change_step_name_action(new_name: str):
         ui.notify("No node selected (click a node first)", type='warning')
         return
 
-    State().current_workflow_model.workflow_model_steps[new_name] = State().current_workflow_model.workflow_model_steps.pop(
-        State().selected_node)
+    State().current_workflow_model.workflow_model_steps[new_name] = State().current_workflow_model.workflow_model_steps.pop(State().selected_node)
     for step_name, step in State().current_workflow_model.workflow_model_steps.items():
         if State().selected_node in step.next_steps:
-            step.next_steps.pop(step.next_steps.index(State().selected_node))
-            step.next_steps.append(new_name)
+            step.next_steps.remove(State().selected_node)
+            step.next_steps.add(new_name)
 
     ui_elements.graph_component.rename_node(State().selected_node, new_name)
 
@@ -70,12 +89,6 @@ def other_activities_switch_action(workflow_model: WorkflowModel,
 
 
 def add_activity_action(activities_select: Select):
-    #for old_activity in State().current_workflow_model.workflow_model_steps[State().selected_node].required_activities:
-    #    ui_elements.graph_component.remove_activity(State().selected_node, old_activity)
-
-    #for new_activity in activities_select.value:
-    #    ui_elements.graph_component.add_activity(State().selected_node, new_activity)
-
     ui_elements.graph_component.replace_activities(State().selected_node, sorted(activities_select.value))
 
     if sorted(State().current_workflow_model.workflow_model_steps[State().selected_node].required_activities) != sorted(activities_select.value):
@@ -85,6 +98,14 @@ def add_activity_action(activities_select: Select):
             State().selected_node].required_activities = activities_select.value
     #  else: the selector's callback is a bit wonky and sometimes triggers with no changes
 
+def add_project_action(projects_select: Select):
+    ui_elements.graph_component.replace_projects(State().selected_node, sorted(projects_select.value))
+
+    if sorted(State().current_workflow_model.workflow_model_steps[State().selected_node].projects) != sorted(projects_select.value):
+        State().save_workflow_model_copy()
+
+        State().current_workflow_model.workflow_model_steps[
+            State().selected_node].projects = projects_select.value
 
 def create_workflow_model_step_controls():
     ui_elements.node_controls_column.clear()
@@ -115,9 +136,19 @@ def create_workflow_model_step_controls():
 
             ui.separator().classes('my-2')
 
-            with ui.grid(columns=2).classes('w-full'):
+            with ui.grid(columns=3).classes('w-full'):
                 with ui.column(align_items='center'):
-                    ui.label('Characterization activities required').classes('text-sm font-bold text-gray-600')
+                    ui.label('Project').classes('text-sm font-bold text-gray-600')
+                    projects_select = ui.select(allowed_projects,
+                                                  multiple=True,
+                                                  label='Select one or more projects',
+                                                  on_change=lambda: add_project_action(projects_select)).classes(
+                        'w-64').props('use-chips')
+                    projects_select.value = State().current_workflow_model.workflow_model_steps[
+                        State().selected_node].projects
+
+                with ui.column(align_items='center'):
+                    ui.label('Characterization activities').classes('text-sm font-bold text-gray-600')
                     activities_select = ui.select(allowed_activities,
                                                   multiple=True,
                                                   label='Select one or more activities',

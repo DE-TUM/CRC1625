@@ -17,7 +17,7 @@ def workflow_model_to_nodes_and_edges(workflow_model: WorkflowModel):
     nodes = []
     edges = []
     for step_name, step in workflow_model.workflow_model_steps.items():
-        nodes.append({'data': {'id': step_name, 'label': step_name, 'activities': step.required_activities, 'identifiers_for_coloring': step.required_activities}, 'classes': [NodeType.node_type_step.value]})
+        nodes.append({'data': {'id': step_name, 'label': step_name, 'projects': step.projects,'activities': step.required_activities, 'identifiers_for_coloring': step.required_activities}, 'classes': [NodeType.node_type_step.value]})
         for next_step_name in step.next_steps:
             edges.append({'data': {'source': step_name, 'target': next_step_name}})
 
@@ -129,7 +129,7 @@ async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
                 handle_node_click
             )
 
-        graph_and_node_controls_grid = ui.grid(columns=2).classes('w-full gap-8')
+        graph_and_node_controls_grid = ui.grid(columns='auto auto').classes('w-full gap-8')
         with graph_and_node_controls_grid:
             graph_controls_column = ui.column()
             node_controls_column = ui.column()

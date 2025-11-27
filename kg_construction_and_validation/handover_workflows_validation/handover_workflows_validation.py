@@ -158,6 +158,8 @@ class WorkflowModelStep:
     """
     Indicates that the handover group that the workflow model step is checking is allowed to take 
     place in the given group(s)
+    
+    They should be in the form of 'A01', 'B03', etc.
     """
     projects: list[str] = field(default_factory=list)
 
