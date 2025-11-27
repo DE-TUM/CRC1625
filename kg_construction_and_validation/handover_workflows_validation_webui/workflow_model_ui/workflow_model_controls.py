@@ -63,7 +63,10 @@ def add_step_action(new_step_name: str):
 
     new_step = WorkflowModelStep(next_steps=set())
     State().current_workflow_model.workflow_model_steps[new_step_name] = new_step
-    ui_elements.graph_component.add_node(new_step_name, new_step_name, NodeType.node_type_step)
+    ui_elements.graph_component.add_node(new_step_name,
+                                         new_step_name,
+                                         NodeType.node_type_step,
+                                         coloring_ids=[''])
 
     ui.notify(f"Added step '{new_step_name}'", type='positive')
 

@@ -71,7 +71,7 @@ class CytoscapeComponent(Element, component='cytoscape_component.js'):
     # Hooks into the javascript functions declared in the Vue component
 
     def _colour_nodes(self, nodes):
-        node_coloring_ids = set([' '.join(str(node['data']['identifiers_for_coloring'])) for node in nodes])
+        node_coloring_ids = set([' '.join([str(node_id) for node_id in node['data']['identifiers_for_coloring']]) for node in nodes])
 
         for coloring_id in node_coloring_ids:
             self.id_to_color[coloring_id] = self.colors[self.color_i]
@@ -81,10 +81,10 @@ class CytoscapeComponent(Element, component='cytoscape_component.js'):
                 self.color_i += 1
 
         for node in nodes:
-            node['data']['color'] = self.id_to_color[' '.join(str(node['data']['identifiers_for_coloring']))]
+            node['data']['color'] = self.id_to_color[' '.join([str(node_id) for node_id in node['data']['identifiers_for_coloring']])]
 
     def _get_node_color(self, ids_for_coloring):
-        coloring_id = ' '.join(str(id) for id in ids_for_coloring)
+        coloring_id = ' '.join([str(id) for id in ids_for_coloring])
 
         if coloring_id not in self.id_to_color:
             self.id_to_color[coloring_id] = self.colors[self.color_i]
@@ -107,10 +107,10 @@ class CytoscapeComponent(Element, component='cytoscape_component.js'):
     def rename_node(self, node_id: str, new_label: str) -> None:
         self.run_method('renameNode', node_id, new_label)
 
-    def add_node(self, node_id: str, label: str, node_type: NodeType, activities: list[str] = None) -> None:
+    def add_node(self, node_id: str, label: str, node_type: NodeType, coloring_ids: list[str] = None) -> None:
         node_color = self.colors[0]
-        if activities is not None:
-            node_color = self._get_node_color(activities)
+        if coloring_ids is not None:
+            node_color = self._get_node_color(coloring_ids)
 
         self.run_method('addNode', node_id, label, node_type.value, node_color)
 
