@@ -8,10 +8,10 @@ import sys
 import time
 from contextlib import nullcontext
 from concurrent.futures import as_completed, ThreadPoolExecutor
-from enum import Enum
 
 import requests
 
+from .ReadWriteLock import ReadWriteLock, ReadRWLock, WriteRWLock
 from .rdf_datastore import RDFDatastore, UpdateType
 
 logging.basicConfig(
@@ -36,11 +36,11 @@ CONTAINER_DATA_DIR = "/data"
 
 # We lock everything with a global mutex to prevent deadlocks when using the web apps
 # TODO: We can do this in a more fine-grained manner
-lock = multiprocessing.Lock()
+lock = ReadWriteLock()#multiprocessing.Lock()
 
 class VirtuosoRDFDatastore(RDFDatastore):
     def launch_query(self, query: str):
-        with lock:
+        with ReadRWLock(lock):
             """
             Executes a SPARQL query and returns the HTTP response from the endpoint
             """
@@ -68,7 +68,7 @@ class VirtuosoRDFDatastore(RDFDatastore):
         """
         Launches a set of update queries with an exclusive lock (~ a transaction)
         """
-        with lock:
+        with WriteRWLock(lock):
             for (action, update_type) in actions:
                 if update_type == UpdateType.query:
                     self.launch_update(action,
@@ -139,7 +139,7 @@ class VirtuosoRDFDatastore(RDFDatastore):
 
         If no graph IRI is specified, it will be stored in the CRC 1625 graph.
         """
-        context_manager = lock if use_lock else nullcontext()
+        context_manager = WriteRWLock(lock) if use_lock else nullcontext()
         with context_manager:
             # Clear the existing files. For example, we may not want to upload
             # leftover ontology files when validating the mappings output
@@ -191,7 +191,7 @@ class VirtuosoRDFDatastore(RDFDatastore):
         Output all triples to the designated file, in Ntriples format
         content_type is ignored for Virtuoso. File formats are handled internally
         """
-        with lock:
+        with ReadRWLock(lock):
             query = """
             DEFINE output:format "NT"
     
@@ -223,7 +223,7 @@ class VirtuosoRDFDatastore(RDFDatastore):
         """
         Clear all CRC1625 KG triples from the graph, including its ontologies
         """
-        with lock:
+        with WriteRWLock(lock):
             self._run_isql("log_enable(3,1);") # Autocommit mode, write transactions to log. Avoids running out of memory on large graphs
             #self.run_isql("SPARQL CLEAR GRAPH  <https://crc1625.mdi.ruhr-uni-bochum.de/graph>;")
             self._run_isql(f"DELETE FROM rdf_quad WHERE g = iri_to_id ('{graph_iri}');")
