@@ -5,6 +5,7 @@ from handover_workflows_validation import handover_workflows_validation
 import handover_workflows_validation_webui.workflow_instance_ui.edit_workflow_instance_page
 import handover_workflows_validation_webui.workflow_model_ui.edit_workflow_model_page
 import handover_workflows_validation_webui.main_page
+import handover_workflows_validation_webui.sparql_ui.yasgui_wrapper
 
 from nicegui import ui
 
