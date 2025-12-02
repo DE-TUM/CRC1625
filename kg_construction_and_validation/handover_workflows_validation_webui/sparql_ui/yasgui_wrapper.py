@@ -1,3 +1,4 @@
+import os
 import urllib.parse
 
 from nicegui import app, ui
@@ -7,6 +8,9 @@ from starlette.responses import JSONResponse
 from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore
 
 LOCAL_SPARQL_PROXY_ROUTE = "/api/sparql"
+
+module_dir = os.path.dirname(__file__)
+DEFAULT_QUERY = open(os.path.join(module_dir, "./default_query.sparql"), 'r').read()
 
 
 @app.post(LOCAL_SPARQL_PROXY_ROUTE)
@@ -56,19 +60,25 @@ def yasgui_frame_page():
 
         <script>
             function initializeYasgui() {{
-                const config = {{
+                const yasgui = new Yasgui(document.getElementById("yasgui"), {{
                     requestConfig: {{
-                        // IMPORTANT: Use the full absolute URL or a relative URL that resolves correctly *from within the iframe*
-                        endpoint: "{LOCAL_SPARQL_PROXY_ROUTE}" 
+                        endpoint: "{LOCAL_SPARQL_PROXY_ROUTE}"
                     }},
                     copyEndpointOnNewTab: true,
                     showEndpointInput: false,
-                    yasqe: {{
-                        value: "SELECT ?s ?p ?o WHERE {{ ?s ?p ?o }} LIMIT 10"
-                    }}
-                }};
+                }});
 
-                new Yasgui(document.getElementById("yasgui"), config);
+                const defaultQuery = `{DEFAULT_QUERY}`;
+                const tab = yasgui.getTab();
+                tab.setQuery(defaultQuery);
+                
+                console.log(yasgui.getTab());
+                const yasqe = yasgui.getTab().yasqe;
+
+                yasqe.addPrefixes({{
+                    pmdco: "https://w3id.org/pmd/co/",
+                    crc: "https://crc1625.mdi.ruhr-uni-bochum.de/"
+                }});
             }}
 
             initializeYasgui();
