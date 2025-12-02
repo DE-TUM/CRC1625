@@ -1,3 +1,4 @@
+
 # Handovers where an XRD measurement was taken, alongside the sample
 SELECT DISTINCT ?sample ?handover_of_group
 FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
