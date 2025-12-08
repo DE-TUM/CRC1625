@@ -1,8 +1,8 @@
-from dataclasses import dataclass, field
 from copy import deepcopy
+from dataclasses import dataclass, field
+
 from nicegui import app, ui
 
-from datastores.rdf.rdf_datastore import RDFDatastore
 from handover_workflows_validation.handover_workflows_validation import WorkflowInstance, WorkflowModel
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent
 
@@ -14,7 +14,9 @@ class UIElements:
     node_controls_column: ui.column = None
     graph_controls_column: ui.column = None
 
+
 ui_elements = UIElements()
+
 
 @dataclass
 class State:
@@ -43,7 +45,6 @@ class State:
         for key, default_value in defaults.items():
             if key not in self._storage:
                 self._storage[key] = default_value
-
 
     # Cytoscape
     @property
@@ -137,14 +138,6 @@ class State:
     def changes_are_saved(self, value: bool):
         self._storage['changes_are_saved'] = value
 
-    @property
-    def store(self) -> RDFDatastore:
-        return self._storage['store']
-
-    @store.setter
-    def store(self, value: RDFDatastore):
-        self._storage['store'] = value
-
     # History
     @property
     def workflow_model_history(self) -> list[tuple[str, WorkflowModel]]:
@@ -162,7 +155,6 @@ class State:
     def workflow_instance_history(self, value: list[tuple[str, WorkflowInstance]]):
         self._storage['workflow_instance_history'] = value
 
-
     def calculate_existing_objects(self):
         self.existing_objects = set()
 
@@ -170,21 +162,17 @@ class State:
             for assignment in assignments:
                 self.existing_objects.add(assignment)
 
-
     def save_workflow_model_copy(self):
         self.workflow_model_history.append((self.selected_node, deepcopy(self.current_workflow_model)))
         self.changes_are_saved = False
-
 
     def undo_workflow_model_change(self):
         if len(self.workflow_model_history) > 0:
             self.selected_node, self.current_workflow_model = self.workflow_model_history.pop()
 
-
     def save_workflow_instance_copy(self):
         self.workflow_instance_history.append((self.selected_node, deepcopy(self.current_workflow_instance)))
         self.changes_are_saved = False
-
 
     def undo_workflow_instance_change(self):
         if len(self.workflow_instance_history) > 0:

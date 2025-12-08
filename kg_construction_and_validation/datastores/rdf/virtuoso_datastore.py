@@ -1,18 +1,17 @@
 import glob
 import logging
-import multiprocessing
 import os
 import shutil
 import subprocess
 import sys
 import time
-from contextlib import nullcontext
 from concurrent.futures import as_completed, ThreadPoolExecutor
+from contextlib import nullcontext
 
-import requests
+import aiorwlock
+import httpx
 
-from .ReadWriteLock import ReadWriteLock, ReadRWLock, WriteRWLock
-from .rdf_datastore import RDFDatastore, UpdateType
+from .rdf_datastore_client import UpdateType
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -34,25 +33,31 @@ GRAPH_IRI = "https://crc1625.mdi.ruhr-uni-bochum.de/graph"
 HOST_DATA_DIR = os.path.join(module_dir, "../../../virtuoso/data")
 CONTAINER_DATA_DIR = "/data"
 
-# We lock everything with a global mutex to prevent deadlocks when using the web apps
-# TODO: We can do this in a more fine-grained manner
-lock = ReadWriteLock()#multiprocessing.Lock()
 
-class VirtuosoRDFDatastore(RDFDatastore):
-    def launch_query(self, query: str):
-        with ReadRWLock(lock):
-            """
-            Executes a SPARQL query and returns the HTTP response from the endpoint
-            """
-            result = requests.post(
+class VirtuosoRDFDatastore():
+    """
+    Wrapper for a Virtuoso instance deployed as a local docker container
+
+    All methods are fully async
+    """
+    def __init__(self, *args, **kwargs):
+        # We lock everything with a read-write mutex to prevent deadlocks when using the web apps
+        self.rwlock = aiorwlock.RWLock()
+
+    async def launch_query(self, query: str):
+        """
+        Executes a SPARQL query and returns the HTTP response from the endpoint
+        """
+        async with self.rwlock.reader_lock:
+            result = await httpx.AsyncClient(timeout=None).post(
                 QUERY_ENDPOINT,
                 # https://github.com/openlink/virtuoso-opensource/issues/950
                 params={"query": "DEFINE sql:signal-void-variables 0\n" + query},
-                #params={
+                # params={
                 #    "query": query,
                 #    "signal_void": "off",
                 #    "signal_unconnected": "off"
-                #},
+                # },
                 headers={"Accept": "application/sparql-results+json"},
                 auth=(VIRTUOSO_USER, VIRTUOSO_PASS)
             )
@@ -62,43 +67,41 @@ class VirtuosoRDFDatastore(RDFDatastore):
 
         return result
 
-    def launch_updates(self, actions: list[tuple[str, UpdateType]],
-                       graph_iri="",
-                       delete_files_after_upload: bool = False):
+    async def launch_updates(self,
+                             actions: list[tuple[str, UpdateType]],
+                             graph_iri="",
+                             delete_files_after_upload: bool = False):
         """
         Launches a set of update queries with an exclusive lock (~ a transaction)
         """
-        with WriteRWLock(lock):
+        async with self.rwlock.writer_lock:
             for (action, update_type) in actions:
                 if update_type == UpdateType.query:
-                    self.launch_update(action,
-                                       graph_iri=graph_iri,
-                                       use_lock=False)
+                    await self.launch_update(action,
+                                             use_lock=False)
                 elif update_type == UpdateType.file_upload:
-                    self.upload_file(action,
-                                     graph_iri=graph_iri,
-                                     delete_file_after_upload=delete_files_after_upload,
-                                     use_lock=False)
+                    await self.upload_file(action,
+                                           graph_iri=graph_iri,
+                                           delete_file_after_upload=delete_files_after_upload,
+                                           use_lock=False)
 
-
-    def launch_update(self, query: str, graph_iri="", use_lock=True):
-        context_manager = lock if use_lock else nullcontext()
-        with context_manager:
-            result = requests.post(
+    async def launch_update(self, query: str, use_lock=True):
+        context_manager = self.rwlock.writer_lock if use_lock else nullcontext()
+        async with context_manager:
+            result = await httpx.AsyncClient(timeout=None).post(
                 UPDATE_ENDPOINT,
                 # https://github.com/openlink/virtuoso-opensource/issues/950
-                data= ("DEFINE sql:signal-void-variables 0\n" +  query).encode("utf-8"),
-                #data=query.encode("utf-8"),
-                #params={
+                data=("DEFINE sql:signal-void-variables 0\n" + query).encode("utf-8"),
+                # data=query.encode("utf-8"),
+                # params={
                 #    "signal_void": "off",
                 #    "signal_unconnected": "off"
-                #},
+                # },
                 headers={"Content-Type": "application/sparql-update"},
                 auth=(VIRTUOSO_USER, VIRTUOSO_PASS)
             )
             if result.status_code not in [200, 204]:
                 raise RuntimeError(f"Error occurred on query {query}: {result.text}")
-
 
     def _run_isql(self, command: str):
         """
@@ -117,7 +120,6 @@ class VirtuosoRDFDatastore(RDFDatastore):
         ]
         subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL)
 
-
     def _register_file(self, file_path: str):
         """
         Copies the .ttl file to the Virtuoso data folder, for later processing, and returns its file path
@@ -131,16 +133,19 @@ class VirtuosoRDFDatastore(RDFDatastore):
 
         return target_path
 
-
-    def bulk_file_load(self, file_paths: list[str], graph_iri=GRAPH_IRI, delete_files_after_upload=False, use_lock=True):
+    async def bulk_file_load(self,
+                             file_paths: list[str],
+                             graph_iri=GRAPH_IRI,
+                             delete_files_after_upload=False,
+                             use_lock=True):
         """
         Uploads RDF files to the SPARQL endpoint, optimized for speed by
         parallelizing requests if possible
 
         If no graph IRI is specified, it will be stored in the CRC 1625 graph.
         """
-        context_manager = WriteRWLock(lock) if use_lock else nullcontext()
-        with context_manager:
+        context_manager = self.rwlock.writer_lock if use_lock else nullcontext()
+        async with context_manager:
             # Clear the existing files. For example, we may not want to upload
             # leftover ontology files when validating the mappings output
             for file_path in glob.glob(os.path.join(HOST_DATA_DIR, "*")):
@@ -155,7 +160,7 @@ class VirtuosoRDFDatastore(RDFDatastore):
             with open(os.path.join(HOST_DATA_DIR, "global.graph"), "w") as f:
                 f.write(graph_iri)
 
-            self._run_isql(f"DELETE FROM DB.DBA.load_list;") # This took a while to discover...
+            self._run_isql(f"DELETE FROM DB.DBA.load_list;")  # This took a while to discover...
             self._run_isql(f"ld_dir('{CONTAINER_DATA_DIR}', '*.ttl', '{graph_iri}');")
 
             with ThreadPoolExecutor(max_workers=16) as executor:
@@ -172,10 +177,7 @@ class VirtuosoRDFDatastore(RDFDatastore):
                 for file in registered_file_paths:
                     os.remove(file)
 
-
-
-
-    def upload_file(self, file, content_type : str | None = None, graph_iri=GRAPH_IRI, delete_file_after_upload=False, use_lock=True):
+    async def upload_file(self, file, content_type: str | None = None, graph_iri=GRAPH_IRI, delete_file_after_upload=False, use_lock=True):
         """
         Uploads an RDF file to the SPARQL endpoint.
 
@@ -183,15 +185,14 @@ class VirtuosoRDFDatastore(RDFDatastore):
 
         If no graph IRI is specified, it will be stored in the CRC 1625 graph.
         """
-        self.bulk_file_load([file], graph_iri, delete_file_after_upload, use_lock)
+        await self.bulk_file_load([file], graph_iri, delete_file_after_upload, use_lock)
 
-
-    def dump_triples(self, output_file: str | None ="datastore_dump.nt"):
+    async def dump_triples(self, output_file: str | None = "datastore_dump.nt"):
         """
         Output all triples to the designated file, in Ntriples format
         content_type is ignored for Virtuoso. File formats are handled internally
         """
-        with ReadRWLock(lock):
+        async with self.rwlock.reader_lock:
             query = """
             DEFINE output:format "NT"
     
@@ -205,7 +206,7 @@ class VirtuosoRDFDatastore(RDFDatastore):
             }
             """
 
-            response = requests.get(
+            response = await httpx.AsyncClient(timeout=None).get(
                 QUERY_ENDPOINT,
                 params={"query": query},
                 auth=(VIRTUOSO_USER, VIRTUOSO_PASS),
@@ -218,14 +219,14 @@ class VirtuosoRDFDatastore(RDFDatastore):
             else:
                 logging.error(f"Error when dumping triples: {response.status_code}, {response.text}")
 
-
-    def clear_triples(self, graph_iri="https://crc1625.mdi.ruhr-uni-bochum.de/graph"):
+    async def clear_triples(self, graph_iri="https://crc1625.mdi.ruhr-uni-bochum.de/graph"):
         """
-        Clear all CRC1625 KG triples from the graph, including its ontologies
+        Clear all CRC1625 KG triples from the graph, including its ontologies. The graph IRI can be changed
+        to, e.g., clear the workflows graph
         """
-        with WriteRWLock(lock):
-            self._run_isql("log_enable(3,1);") # Autocommit mode, write transactions to log. Avoids running out of memory on large graphs
-            #self.run_isql("SPARQL CLEAR GRAPH  <https://crc1625.mdi.ruhr-uni-bochum.de/graph>;")
+        async with self.rwlock.writer_lock:
+            self._run_isql("log_enable(3,1);")  # Autocommit mode, write transactions to log. Avoids running out of memory on large graphs
+            # self.run_isql("SPARQL CLEAR GRAPH  <https://crc1625.mdi.ruhr-uni-bochum.de/graph>;")
             self._run_isql(f"DELETE FROM rdf_quad WHERE g = iri_to_id ('{graph_iri}');")
             self._run_isql("checkpoint;")
 
@@ -243,7 +244,7 @@ class VirtuosoRDFDatastore(RDFDatastore):
         ]
         subprocess.run(cmd, check=False, stdout=subprocess.DEVNULL)
 
-    def start_virtuoso(self, timeout: int = 60*5):
+    def start_virtuoso(self, timeout: int = 60 * 5):
         """
         Starts the virtuoso container, and waits 5 minutes for it to allocate all its memory and be fully operational.
         This timeout can be controlled by the timeout parameter.

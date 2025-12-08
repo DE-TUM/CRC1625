@@ -8,11 +8,9 @@ import sys
 import time
 
 import datastores.sql.sql_db as sql_db
-import datastores.rdf.virtuoso_datastore as virtuoso_datastore
-import datastores.rdf.oxigraph_datastore as oxigraph_datastore
 import materialization.materialization as materialization
 import postprocessing.postprocessing as postprocessing
-from datastores.rdf.rdf_datastore import RDFDatastore
+from datastores.rdf.rdf_datastore_client import RDFDatastoreClient
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -40,34 +38,23 @@ ontology_files = [
     }
 ]
 
-def upload_materialized_triples(datastore: RDFDatastore,
-                                file_names_to_add_to_rdf_store: list[str]):
-    datastore.bulk_file_load(file_names_to_add_to_rdf_store, delete_files_after_upload=True)
+def upload_materialized_triples(file_names_to_add_to_rdf_store: list[str]):
+    RDFDatastoreClient().run_sync(RDFDatastoreClient().bulk_file_load(file_names_to_add_to_rdf_store, delete_files_after_upload=True))
 
 
-def upload_ontology_files(datastore: RDFDatastore,
-                          ontology_files: list[dict[str]]):
-    datastore.bulk_file_load([f["file"] for f in ontology_files], delete_files_after_upload=False)
+def upload_ontology_files(ontology_files: list[dict[str, str]]):
+    RDFDatastoreClient().run_sync(RDFDatastoreClient().bulk_file_load([f["file"] for f in ontology_files], delete_files_after_upload=False))
 
 
-def serve_KG(skip_oxigraph_initialization: bool = True,
-             skip_ontologies_upload: bool = True,
+def serve_KG(skip_ontologies_upload: bool = True,
              db_option: str = None,
              skip_db_setup: bool = False,
              skip_materialization: bool = False,
              skip_postprocessing: bool = False,
-             run_only_sql_queries: bool = False,
-             store: str = "virtuoso"):
+             run_only_sql_queries: bool = False):
     performance_log_postprocessing = dict()
     resource_usage_postprocessing = dict()
     file_upload_end = 0
-
-    if store == "virtuoso":
-        datastore = virtuoso_datastore.VirtuosoRDFDatastore()
-    elif store == "oxigraph":
-        datastore = oxigraph_datastore.OxigraphRDFDatastore()
-    else:
-        raise ValueError(f"Incorrect store name '{store}'")
 
     if not skip_db_setup:
         db = sql_db.MSSQLDB()
@@ -78,17 +65,14 @@ def serve_KG(skip_oxigraph_initialization: bool = True,
 
     logging.info("Materialization of the KG finished!")
     if not run_only_sql_queries:
-        if not skip_oxigraph_initialization and store == "oxigraph":
-            datastore.start_oxigraph()
-
-        datastore.clear_triples()
+        RDFDatastoreClient().run_sync(RDFDatastoreClient().clear_triples())
 
         file_upload_start = time.perf_counter()
 
-        upload_materialized_triples(datastore, materialized_files)
+        upload_materialized_triples(materialized_files)
 
         if not skip_ontologies_upload:
-            upload_ontology_files(datastore, ontology_files)
+            upload_ontology_files(ontology_files)
 
         file_upload_end = time.perf_counter() - file_upload_start
 
@@ -96,17 +80,9 @@ def serve_KG(skip_oxigraph_initialization: bool = True,
         logging.info("Triples loaded! running postprocessing...")
         resource_usage_postprocessing = []
         if not skip_postprocessing:
-            performance_log_postprocessing, resource_usage_postprocessing = postprocessing.run_postprocessing(datastore)
+            performance_log_postprocessing, resource_usage_postprocessing = postprocessing.run_postprocessing()
 
-        if not skip_oxigraph_initialization and store == "oxigraph":
-            logging.info(f"""
-                Postprocessing finished! The endpoint is available at http://0.0.0.0:7878
-                To stop Oxigraph, execute `docker rm -f {oxigraph_datastore.OxigraphRDFDatastore().DOCKER_CONTAINER_NAME}`
-                """)
-        elif store == "oxigraph":
-            logging.info("Postprocessing finished! The endpoint is available at http://0.0.0.0:7878")
-        else:
-            logging.info("Postprocessing finished! The endpoint is available at http://localhost:8891/sparql/")
+        logging.info("Postprocessing finished!")
 
     if not skip_db_setup:
         db.stop_DB()
@@ -116,20 +92,6 @@ def serve_KG(skip_oxigraph_initialization: bool = True,
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "--store",
-        choices=["oxigraph", "virtuoso"],
-        required=True,
-        help="RDF store to use. Possible values: 'oxigraph' or 'virtuoso'"
-    )
-
-    parser.add_argument(
-        "--skip_oxigraph_initialization",
-        action="store_true",
-        default=False,
-        help="Avoid starting an empty Oxigraph endpoint, assuming it is already running instead"
-    )
 
     parser.add_argument(
         "--skip_ontologies_upload",
@@ -161,9 +123,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    serve_KG(skip_oxigraph_initialization=args.skip_oxigraph_initialization,
-             skip_ontologies_upload=args.skip_ontologies_upload,
+    serve_KG(skip_ontologies_upload=args.skip_ontologies_upload,
              skip_db_setup=args.skip_db_setup,
              skip_materialization=args.skip_materialization,
-             skip_postprocessing=args.skip_postprocessing,
-             store=args.store)
+             skip_postprocessing=args.skip_postprocessing)

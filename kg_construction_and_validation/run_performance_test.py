@@ -26,7 +26,7 @@ from typing import Any
 import pymssql
 
 from create_synthetic_records import create_synthetic_records
-from datastores.rdf.rdf_datastore import RDFDatastore
+from datastores.rdf.rdf_datastore_api import RDFDatastore
 from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore
 from datastores.rdf.oxigraph_datastore import OxigraphRDFDatastore
 from datastores.sql.sql_db import MSSQLDB

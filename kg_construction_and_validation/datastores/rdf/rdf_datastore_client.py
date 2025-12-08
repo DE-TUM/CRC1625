@@ -1,0 +1,176 @@
+import asyncio
+from enum import Enum
+from typing import List, Tuple
+
+import httpx
+
+
+class UpdateType(str, Enum):
+    query = "query"
+    file_upload = "file_upload"
+
+
+class RDFDatastoreClient:
+    """
+    RDF datastore client that interacts with a (possibly remote) RDF datastore API
+
+    All methods are fully async. The run_sync() method can be used to execute any of the calls synchronously
+    """
+
+    def __init__(self, host: str = "http://127.0.0.1:60001"):
+        """
+        :param host: Endpoint of the RDF datastore API
+        """
+        self.host = host
+
+
+    async def _post(self, endpoint: str, payload: dict, return_full_response: bool = False):
+        url = f"{self.host}/{endpoint}"
+        try:
+            async with httpx.AsyncClient(timeout=None) as client:
+                response = await client.post(url, json=payload)
+                response.raise_for_status()
+                if return_full_response:
+                    return response.json()
+                else:
+                    return response
+
+        except httpx.HTTPStatusError as e:
+            raise RuntimeError(f"Remote call failed: {e.response.text}") from e
+
+        except httpx.RequestError as e:
+            raise RuntimeError(f"Connection error: {e}") from e
+
+
+    async def _get(self, endpoint: str, return_full_response: bool = False):
+        url = f"{self.host}/{endpoint}"
+        try:
+            async with httpx.AsyncClient(timeout=None) as client:
+                response = await client.get(url)
+                response.raise_for_status()
+                if return_full_response:
+                    return response.json()
+                else:
+                    return response
+
+        except httpx.HTTPStatusError as e:
+            raise RuntimeError(f"Remote call failed: {e.response.text}") from e
+
+        except httpx.RequestError as e:
+            raise RuntimeError(f"Connection error: {e}") from e
+
+
+    async def launch_query(self,
+                           query: str,
+                           return_full_response: bool = False):
+        """
+        Executes a SPARQL query and returns the JSON response from the endpoint
+        """
+        if return_full_response:
+            return await self._post("launch_query", {"query": query}, return_full_response=return_full_response)
+        else:
+            return (await self._post("launch_query", {"query": query})).json()['data']
+
+
+    async def launch_update(self,
+                            query: str,
+                            graph_iri: str = "",
+                            delete_files_after_upload: bool = False):
+        """
+        Launches an update query with an exclusive writer lock
+        """
+        payload = {
+            "actions": [(query, UpdateType.query)],
+            "graph_iri": graph_iri,
+            "delete_files_after_upload": delete_files_after_upload
+        }
+        return await self._post("launch_updates", payload)
+
+
+    async def launch_updates(self,
+                             actions: List[Tuple[str, UpdateType]],
+                             graph_iri: str = "",
+                             delete_files_after_upload: bool = False):
+        """
+        Launches a set of update queries with an exclusive writer lock. Note that this is not a transaction, i.e. there is no rollback
+        mechanism if any of the updates fails
+        """
+        payload = {
+            "actions": actions,
+            "graph_iri": graph_iri,
+            "delete_files_after_upload": delete_files_after_upload
+        }
+        return await self._post("launch_updates", payload)
+
+    async def upload_file(self,
+                          file_path: str,
+                          graph_iri: str = "https://crc1625.mdi.ruhr-uni-bochum.de/graph",
+                          delete_file_after_upload: bool = False):
+        """
+        Uploads a local RDF file to the SPARQL endpoint.
+
+        If no graph IRI is specified, it will be stored in the CRC 1625 graph.
+
+        TODO: This is all local and assumes that the server has access to the file path, no files
+              are uploaded for now
+        """
+        payload = {
+            "file_path": file_path,
+            "graph_iri": graph_iri,
+            "delete_file_after_upload": delete_file_after_upload
+        }
+        return await self._post("upload_file", payload)
+
+
+    async def bulk_file_load(self,
+                             file_paths: list[str],
+                             graph_iri="https://crc1625.mdi.ruhr-uni-bochum.de/graph",
+                             delete_files_after_upload=False,
+                             use_lock=True):
+        """
+        Uploads a collection of local RDF files to the SPARQL endpoint.
+
+        If no graph IRI is specified, it will be stored in the CRC 1625 graph.
+
+        TODO: This is all local and assumes that the server has access to the file path, no files
+              are uploaded for now
+        """
+        payload = {
+            "file_paths" : file_paths,
+            "graph_iri" : graph_iri,
+            "delete_files_after_upload" : delete_files_after_upload
+        }
+        return await self._post("bulk_file_load", payload)
+
+    async def dump_triples(self,
+                           output_file: str = "datastore_dump.nt"): # TODO this is local for now
+        """
+        Output all triples to the designated file, in Ntriples format
+        """
+        return await self._post("dump_triples", {"output_file": output_file})
+
+    async def clear_triples(self,
+                            graph_iri: str = "https://crc1625.mdi.ruhr-uni-bochum.de/graph"):
+        """
+        Clears all triples from the graph
+        """
+        return await self._post("clear_triples", {"graph_iri": graph_iri})
+
+    async def run_isql(self, isql: str):
+        """
+        Run an ISQL command on the endpoint.
+        This is only applicable if the KG is running under Virtuoso, and will fail otherwise
+        """
+        return await self._post("run_isql", {"isql": isql})
+
+    async def get_datastore_type(self):
+        """
+        Returns the name of the underlying RDF datastore
+        """
+        return (await self._get("get_datastore_type")).json()['data']
+
+    def run_sync(self, coroutine):
+        """
+        Runs any of the above methods synchronously
+        """
+        return asyncio.run(coroutine)

@@ -1,8 +1,12 @@
-import asyncio
-
 from nicegui import ui, run
 
-from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore
+from datastores.rdf.rdf_datastore_client import RDFDatastoreClient
+from handover_workflows_validation.handover_workflows_validation import get_workflow_model_names_and_creator_user_ids, \
+    get_workflow_instances_of_model, read_workflow_model, WorkflowInstance, is_workflow_instance_valid
+from handover_workflows_validation_webui.state import State
+from nicegui import ui, run
+
+from datastores.rdf.rdf_datastore_client import RDFDatastoreClient
 from handover_workflows_validation.handover_workflows_validation import get_workflow_model_names_and_creator_user_ids, \
     get_workflow_instances_of_model, read_workflow_model, WorkflowInstance, is_workflow_instance_valid
 from handover_workflows_validation_webui.state import State
@@ -39,18 +43,17 @@ def handle_workflow_instance_table_click(workflow_instance: WorkflowInstance, ri
     ui.notify(f'Selected Workflow Instance {State().current_workflow_instance.workflow_instance_name}', color='info')
 
 
-def create_workflow_models_table(main_content, right_drawer):
+async def create_workflow_models_table(main_content, right_drawer):
     ui.label('List of predefined workflows').classes('text-xl font-bold')
 
     workflow_model_table = []
-    for workflow_model_name, user_id in get_workflow_model_names_and_creator_user_ids(VirtuosoRDFDatastore()):
+    for workflow_model_name, user_id in await get_workflow_model_names_and_creator_user_ids(RDFDatastoreClient()):
         workflow_model_table.append(
             {
                 "workflow_model_name": workflow_model_name,
                 "user_id": user_id,
             }
         )
-
 
     def show_table(results_container: ui.column, rows):
         results_container.clear()
@@ -64,7 +67,6 @@ def create_workflow_models_table(main_content, right_drawer):
 
                         ui.label(str(row['user_id'])).classes('w-0 flex-grow text-right')
 
-
     def filter_table(search_input: ui.input):
         search_term = search_input.value.lower()
 
@@ -73,7 +75,6 @@ def create_workflow_models_table(main_content, right_drawer):
         ]
 
         show_table(results_container, filtered_rows)
-
 
     search_input = ui.input(placeholder='Search by name...').classes('w-full').on_value_change(lambda: filter_table(search_input))
 
@@ -86,8 +87,8 @@ def create_workflow_models_table(main_content, right_drawer):
     show_table(results_container, workflow_model_table)
 
 
-async def check_and_update_icon(validation_icon_column: ui.column, workflow_model, workflow_instance, store):
-    valid = await run.cpu_bound(is_workflow_instance_valid, workflow_model, workflow_instance, store)
+async def check_and_update_icon(validation_icon_column: ui.column, workflow_model, workflow_instance, rdf_datastore_client):
+    valid = await run.cpu_bound(is_workflow_instance_valid, workflow_model, workflow_instance, rdf_datastore_client)
 
     validation_icon_column.clear()
     with validation_icon_column:
@@ -98,9 +99,21 @@ async def check_and_update_icon(validation_icon_column: ui.column, workflow_mode
 
 
 async def handle_workflow_models_table_click(workflow_model_name: str, user_id: int, main_content, right_drawer):
-    State().current_workflow_model = read_workflow_model(workflow_model_name, user_id, VirtuosoRDFDatastore())  # TODO
-    State().workflow_instances_of_current_workflow_model = get_workflow_instances_of_model(workflow_model_name, user_id,
-                                                                                           VirtuosoRDFDatastore())  # TODO
+    State().current_workflow_model = await read_workflow_model(workflow_model_name, user_id, RDFDatastoreClient())
+
+    State().workflow_instances_of_current_workflow_model = await get_workflow_instances_of_model(
+        workflow_model_name,
+        user_id,
+        RDFDatastoreClient()
+    )
+
+    # results = await asyncio.gather(
+    #    read_workflow_model_task,
+    #    get_workflow_instances_of_model_task
+    # )
+
+    # State().current_workflow_model = read_workflow_model_task #results[0]
+    # State().workflow_instances_of_current_workflow_model = await get_workflow_instances_of_model_task #results[1]
     State().user_id = user_id  # TODO where better? + Auth
 
     main_content.clear()
@@ -133,9 +146,7 @@ async def handle_workflow_models_table_click(workflow_model_name: str, user_id: 
                     with validation_icon_column:
                         ui.spinner()
 
-                    asyncio.create_task(
-                        check_and_update_icon(validation_icon_column, State().current_workflow_model, workflow_instance, VirtuosoRDFDatastore())
-                    )
+                    # check_and_update_icon(validation_icon_column, State().current_workflow_model, workflow_instance, state.store)
 
 
 @ui.page('/')
@@ -149,7 +160,7 @@ async def main_page():
     right_drawer.hide()
 
     with ui.left_drawer().style('background-color: #d7e3f4'):
-        create_workflow_models_table(main_content, right_drawer)
+        await create_workflow_models_table(main_content, right_drawer)
 
     with ui.footer().style('background-color: #3874c8'):
         ui.label('© 2025-2027 - CRC 1625 Knowleddge Graph (WIP)')

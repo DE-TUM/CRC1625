@@ -27,8 +27,7 @@ from rdflib import Graph, Literal, URIRef
 from rdflib.namespace import split_uri, Namespace
 from tqdm import tqdm
 
-from datastores.rdf.rdf_datastore import RDFDatastore
-from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore
+from datastores.rdf.rdf_datastore_client import RDFDatastoreClient
 
 HANDOVER_GROUP_CREATION_CHUNK_SIZE = 10_000
 CROSS_GROUP_CHAIN_CREATION_CHUNK_SIZE = 10_000
@@ -95,11 +94,15 @@ rdfs_prefix = Namespace("http://www.w3.org/2000/01/rdf-schema#")
 prov_prefix = Namespace("http://www.w3.org/ns/prov#")
 
 
-def resource_usage_job(stop_event, resource_usage, datastore):
+def is_rdf_store_virtuoso():
+    return RDFDatastoreClient().run_sync(RDFDatastoreClient().get_datastore_type()) == "virtuoso"
+
+
+def resource_usage_job(stop_event, resource_usage):
     while not stop_event.is_set():
         cpu = psutil.cpu_percent(interval=1)
 
-        if isinstance(datastore, VirtuosoRDFDatastore):
+        if is_rdf_store_virtuoso():
             process_name = "virtuoso-t"
         else:
             process_name = "oxigraph"
@@ -161,7 +164,7 @@ def create_handover_group_triples(worker_id: int, chains_batch: list[(str, (str,
 
                 hnd_group_iri_next = f"https://crc1625.mdi.ruhr-uni-bochum.de/handover/handovers_in_project_{project_name_next}_{hnd_start_id_next}_{hnd_end_id_next}"
 
-                g.add(((URIRef(hnd_group_iri), pmdco_prefix.nextProcess, URIRef(hnd_group_iri_next))))
+                g.add((URIRef(hnd_group_iri), pmdco_prefix.nextProcess, URIRef(hnd_group_iri_next)))
 
     file_name = os.path.join(module_dir, f"handover_groups_{worker_id}.ttl")
     g.serialize(destination=os.path.join(module_dir, file_name), format='turtle')
@@ -169,7 +172,7 @@ def create_handover_group_triples(worker_id: int, chains_batch: list[(str, (str,
     return file_name
 
 
-def create_handover_group_chains(datastore: RDFDatastore):
+def create_handover_group_chains():
     """
     Transforms the handover chains in the datastore to a two-level hierarchy of handover groups and virtual/non-virtual
     handovers, required for the validation of workflows
@@ -187,13 +190,13 @@ def create_handover_group_chains(datastore: RDFDatastore):
 
     logging.info("Querying for cross-project handover pairs...")
     start = time.perf_counter()
-    response_cross_project_handovers = datastore.launch_query(get_cross_project_handovers)
+    response_cross_project_handovers = RDFDatastoreClient().run_sync(RDFDatastoreClient().launch_query(get_cross_project_handovers))
     performance_log["query_cross_project_handovers"] = time.perf_counter() - start
 
     # Using the query, cache the correspondence of beginnings and ends of handover chains to their samples
     # This will be used later to identify to which sample the remaining handover chains belong to
     hnd_to_sample: dict[str, str] = dict()
-    for binding in response_cross_project_handovers.json()["results"]["bindings"]:
+    for binding in response_cross_project_handovers["results"]["bindings"]:
         hnd_start = binding["start"]["value"]
         hnd_end = binding["end"]["value"]
 
@@ -204,16 +207,16 @@ def create_handover_group_chains(datastore: RDFDatastore):
 
     logging.info("Deleting cross-project links between handovers...")
     query = delete_cross_group_links
-    if isinstance(datastore, VirtuosoRDFDatastore):
+    if is_rdf_store_virtuoso():
         # Prevents OOMs from writing transactions to memory if there are many affected triples
         query = "DEFINE sql:log-enable 3\n" + query
     start = time.perf_counter()
-    datastore.launch_update(query)
+    RDFDatastoreClient().run_sync(RDFDatastoreClient().launch_update(query))
     performance_log["delete_cross_project_links"] = time.perf_counter() - start
 
     logging.info("Querying for the remaining handover chains...")
     start = time.perf_counter()
-    response_get_handover_chains = datastore.launch_query(get_handover_chains)
+    response_get_handover_chains = RDFDatastoreClient().run_sync(RDFDatastoreClient().launch_query(get_handover_chains))
     performance_log["query_remaining_handover_chains"] = time.perf_counter() - start
 
     logging.info("Processing and sorting handover chains for each sample...")
@@ -221,7 +224,7 @@ def create_handover_group_chains(datastore: RDFDatastore):
     # Dict of sample_id -> [(hnd_start, hnd_start_id, hnd_end, hnd_end_id, hnd_start_date, group)], containing all
     # necessary information to instantiate the triples for each of the handover chains the sample contains
     handover_chains: dict[str, (str, str, str, str, str, str)] = dict()
-    for binding in response_get_handover_chains.json()["results"]["bindings"]:
+    for binding in response_get_handover_chains["results"]["bindings"]:
         # For each handover chain, we identify the handover IDs and samples they belong to, distinguishing between virtual
         # and "normal" handovers
         sample_id = None
@@ -281,32 +284,32 @@ def create_handover_group_chains(datastore: RDFDatastore):
             files_to_upload.append(future.result())
 
         logging.info("Bulk loading handover groups...")
-        datastore.bulk_file_load(files_to_upload, delete_files_after_upload=True)
+        RDFDatastoreClient().run_sync(RDFDatastoreClient().bulk_file_load(files_to_upload, delete_files_after_upload=True))
 
     performance_log["create_and_load_handover_groups"] = time.perf_counter() - start
 
     logging.info("Redirecting workflow instances...")
     # Make the workflow instances point to the first group instead of the first handover
     query = redirect_workflow_instances
-    if isinstance(datastore, VirtuosoRDFDatastore):
+    if is_rdf_store_virtuoso():
         # Prevents OOMs from writing transactions to memory if there are many affected triples
         query = "DEFINE sql:log-enable 3\n" + query
     start = time.perf_counter()
-    datastore.launch_update(query)
+    RDFDatastoreClient().run_sync(RDFDatastoreClient().launch_update(query))
     performance_log["redirect_workflow_instances"] = time.perf_counter() - start
 
     logging.info("Creating handover groups for remaining initial work handovers...")
     query = create_groups_for_isolated_initial_work_handovers
-    if isinstance(datastore, VirtuosoRDFDatastore):
+    if is_rdf_store_virtuoso():
         # Prevents OOMs from writing transactions to memory if there are many affected triples
         query = "DEFINE sql:log-enable 3\n" + query
     start = time.perf_counter()
-    datastore.launch_update(query)
+    RDFDatastoreClient().run_sync(RDFDatastoreClient().launch_update(query))
     performance_log["create_handover_groups_for_initial_work_handovers"] = time.perf_counter() - start
 
     return performance_log
 
-def replace_entity_iris(datastore: RDFDatastore):
+def replace_entity_iris():
     """
     Replace entity IRIs in the KG. Currently used to have clearer IRI names for measurement types
     """
@@ -319,13 +322,13 @@ def replace_entity_iris(datastore: RDFDatastore):
         for k, v in replacements.items():
             query = query.replace(k, v)
 
-        if isinstance(datastore, VirtuosoRDFDatastore):
+        if is_rdf_store_virtuoso():
             # Prevents OOMs from writing transactions to memory if there are many affected triples
             query = "DEFINE sql:log-enable 3\n" + query
-        datastore.launch_update(query)
+        RDFDatastoreClient().run_sync(RDFDatastoreClient().launch_update(query))
 
 
-def integrate_with_CheBI(datastore: RDFDatastore):
+def integrate_with_CheBI():
     """
     Add references to CheBI elements to every composition present in the KG. This is done in a programmatic way by
     querying for the CheBI entities that contain the same string formulas that are for now present in the compositions
@@ -334,31 +337,32 @@ def integrate_with_CheBI(datastore: RDFDatastore):
 
     logging.info("Adding CheBI elements to EDX compositions and samples...")
     query = add_chebi_elements
-    if isinstance(datastore, VirtuosoRDFDatastore):
+    if is_rdf_store_virtuoso():
         # Prevents OOMs from writing transactions to memory if there are many affected triples
         query = "DEFINE sql:log-enable 3\n" + query
     start = time.perf_counter()
-    datastore.launch_update(query)
+    RDFDatastoreClient().run_sync(RDFDatastoreClient().launch_update(query))
     performance_log["add_chebi_elements"] = time.perf_counter() - start
 
     logging.info("Deleting temporary triples...")
     start = time.perf_counter()
     # The amount of temporary triples can be quite high, as they are used for the compositions
     # If we are using virtuoso, we do it in SQL directly
-    if isinstance(datastore, VirtuosoRDFDatastore):
+    if is_rdf_store_virtuoso():
             # TODO: This is unsafe
-            datastore._run_isql("""DELETE FROM DB.DBA.RDF_QUAD WHERE
-                                  P = iri_to_id('https://crc1625.mdi.ruhr-uni-bochum.de/temporaryDatatypeProperty') AND 
-                                  G = iri_to_id('https://crc1625.mdi.ruhr-uni-bochum.de/graph');""")
-            datastore._run_isql('checkpoint;')
+            RDFDatastoreClient().run_sync(RDFDatastoreClient().run_isql("""DELETE FROM DB.DBA.RDF_QUAD WHERE
+                                                                           P = iri_to_id('https://crc1625.mdi.ruhr-uni-bochum.de/temporaryDatatypeProperty')
+                                                                           AND G = iri_to_id('https://crc1625.mdi.ruhr-uni-bochum.de/graph');"""))
+            RDFDatastoreClient().run_sync(RDFDatastoreClient().run_isql('checkpoint;'))
     else:
-        datastore.launch_update(delete_temporary_triples)
+        RDFDatastoreClient().run_sync(RDFDatastoreClient().launch_update(delete_temporary_triples))
+
     performance_log["delete_temporary_triples"] = time.perf_counter() - start
 
     return performance_log
 
 
-def run_postprocessing(datastore: RDFDatastore) -> (dict[str, float], list[(float, float)]):
+def run_postprocessing() -> (dict[str, float], list[(float, float)]):
     """
     Performs insertions and deletions in the graph after the materialization of the KG has finished and an
     endpoint is available. The endpoint type is indicated by the datastore parameter.
@@ -382,20 +386,20 @@ def run_postprocessing(datastore: RDFDatastore) -> (dict[str, float], list[(floa
 
     resource_usage_tracker = multiprocessing.Process(
         target=resource_usage_job,
-        args=(stop_event, resource_usage, datastore)
+        args=(stop_event, resource_usage)
     )
     resource_usage_tracker.start()
     time.sleep(1.0) # Give enough time to catch a trace of the datastore *before* running any queries
 
     performance_log = dict()
 
-    performance_log_handover_chains = create_handover_group_chains(datastore)
+    performance_log_handover_chains = create_handover_group_chains()
 
-    performance_log_chebi_integration = integrate_with_CheBI(datastore)
+    performance_log_chebi_integration = integrate_with_CheBI()
 
     logging.info("Replacing temporary entity IRIs...")
     start = time.perf_counter()
-    replace_entity_iris(datastore)
+    replace_entity_iris()
     performance_log["replace_temporary_entity_iris"] = time.perf_counter() - start
 
     # Combine them

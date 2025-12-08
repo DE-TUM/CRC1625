@@ -1,6 +1,6 @@
-from nicegui import ui
+from nicegui import ui, run
 
-from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore
+from datastores.rdf.rdf_datastore_client import RDFDatastoreClient
 from handover_workflows_validation.handover_workflows_validation import read_workflow_model, WorkflowModel, \
     overwrite_workflow_model
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, NodeType
@@ -17,7 +17,8 @@ def workflow_model_to_nodes_and_edges(workflow_model: WorkflowModel):
     nodes = []
     edges = []
     for step_name, step in workflow_model.workflow_model_steps.items():
-        nodes.append({'data': {'id': step_name, 'label': step_name, 'projects': step.projects,'activities': step.required_activities, 'identifiers_for_coloring': step.required_activities}, 'classes': [NodeType.node_type_step.value]})
+        nodes.append({'data': {'id': step_name, 'label': step_name, 'projects': step.projects, 'activities': step.required_activities,
+                               'identifiers_for_coloring': step.required_activities}, 'classes': [NodeType.node_type_step.value]})
         for next_step_name in step.next_steps:
             edges.append({'data': {'source': step_name, 'target': next_step_name}})
 
@@ -36,23 +37,19 @@ def handle_node_click(e):
     ui.notify(f"Step selected: {node_label}", type='info')
 
 
-def save_and_exit():
-    overwrite_workflow_model(State().current_workflow_model, State().user_id, VirtuosoRDFDatastore())
-    ui.navigate.to('/')
-
-
-def handle_return_button():
+async def handle_return_button():
     if not State().changes_are_saved:
         with ui.dialog() as return_dialog:
             with ui.card(align_items='center'):
                 with ui.row(align_items='center').classes('w-full justify-center'):
                     ui.label('The workflow model has been modified. Save changes and exit?')
 
-                    def save_and_exit_and_close():
-                        save_and_exit()
+                    async def save_and_exit_and_close():
+                        await run.io_bound(overwrite_workflow_model(State().current_workflow_model, State().user_id, RDFDatastoreClient()))
                         return_dialog.close()
+                        ui.navigate.to('/')
 
-                    def navigate_without_saving():
+                    async def navigate_without_saving():
                         return_dialog.close()
                         ui.navigate.to('/')
 
@@ -95,8 +92,8 @@ def handle_undo_button():
         ui.notify("The last change has been undone", type='positive')
 
 
-def handle_save_button():
-    overwrite_workflow_model(State().current_workflow_model, State().user_id, VirtuosoRDFDatastore())
+async def handle_save_button():
+    await run.io_bound(overwrite_workflow_model(State().current_workflow_model, State().user_id, RDFDatastoreClient()))
     State().changes_are_saved = True
     State().workflow_model_history = []
     ui.notify("The changes have been saved", type='positive')
@@ -107,16 +104,16 @@ async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
     State().user_id = user_id  # TODO
 
     if State().current_workflow_model is None:  # The page has been reloaded
-        State().current_workflow_model = read_workflow_model(workflow_model_name, user_id, VirtuosoRDFDatastore())
+        State().current_workflow_model = await read_workflow_model(workflow_model_name, user_id, RDFDatastoreClient())
 
     ui.label(f"Editing Workflow Model '{workflow_model_name}'").classes('text-2xl font-bold mb-4')
     with ui.grid(columns=3):
         with ui.column(align_items='stretch'):
-            ui.button('Return to main page', on_click=lambda: handle_return_button())
+            ui.button('Return to main page', on_click=handle_return_button)
         with ui.column(align_items='stretch'):
-            ui.button('Undo last change', on_click=lambda: handle_undo_button()).props("color=red")
+            ui.button('Undo last change', on_click=handle_undo_button).props("color=red")
         with ui.column(align_items='stretch'):
-            ui.button('Save all changes', on_click=lambda: handle_save_button()).props("color=green")
+            ui.button('Save all changes', on_click=handle_save_button).props("color=green")
 
     graph_data = workflow_model_to_nodes_and_edges(State().current_workflow_model)
 

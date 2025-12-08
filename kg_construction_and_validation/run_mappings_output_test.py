@@ -22,7 +22,7 @@ import logging
 import os
 import sys
 
-from datastores.rdf.rdf_datastore import RDFDatastore
+from datastores.rdf.rdf_datastore_api import RDFDatastore
 from main import serve_KG
 from datastores.rdf.oxigraph_datastore import OxigraphRDFDatastore
 from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore

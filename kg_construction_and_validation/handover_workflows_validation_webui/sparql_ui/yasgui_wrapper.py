@@ -5,7 +5,7 @@ from nicegui import app, ui
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore
+from datastores.rdf.rdf_datastore_client import RDFDatastoreClient
 
 LOCAL_SPARQL_PROXY_ROUTE = "/api/sparql"
 
@@ -22,19 +22,18 @@ async def sparql_proxy(request: Request):
         data = await request.body()
 
         parsed_data = urllib.parse.parse_qs(data.decode('utf-8'))
-
     else:
         return JSONResponse({"error": f"No requests other than POST are allowed"}, status_code=400)
 
     try:
-        response = VirtuosoRDFDatastore().launch_query(parsed_data['query'][0])
+        response = await RDFDatastoreClient().launch_query(parsed_data['query'][0], return_full_response=True)
 
         return JSONResponse(
-            content=response.json(),
-            status_code=response.status_code
+            content=response['data'],
+            status_code=response['status']
         )
 
-    except Exception as e: # TODO: I know, but we are not exposing anything critical
+    except Exception as e:  # TODO: I know, but we are not exposing anything critical
         return JSONResponse({"error": f"An unexpected error occurred: {e}"}, status_code=500)
 
 
@@ -108,7 +107,7 @@ async def main_page():
         ui.label('SPARQL Query Interface').classes('text-2xl font-bold')
 
     with ui.footer().style('background-color: #3874c8'):
-        ui.label('© 2025-2027 - CRC 1625 Knowleddge Graph (WIP)')
+        ui.label('© 2025-2027 - CRC 1625 Knowledge Graph (WIP)')
 
     with ui.page_scroller(position='bottom-right', x_offset=20, y_offset=20):
         ui.button('Scroll to Top')
