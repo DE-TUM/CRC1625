@@ -21,6 +21,12 @@ docker run -d \
 
 #### The following configuration tweaks are **required**:
   - [Make virtuoso correctly treat untyped and typed xsd:string literals as the same during comparisons](https://github.com/openlink/virtuoso-opensource/issues/728#issuecomment-1937376203)
+  - Add `/data` under `DirsAllowed` in the `virtuoso.ini` file
+  - Increase `MaxVectorSize` in the `virtuoso.ini` file to, e.g., 4000000
 
 #### The following configuration tweaks are **recommended**:
-  - General performance tweaks are also recommended, such as increasing its maximum allowed memory usage. The `virtuoso.ini` file we employed for all our experiments is also [available in this folder](virtuoso.ini).
+  - General performance tweaks are also recommended, such as increasing its maximum allowed memory usage. 
+
+
+The `virtuoso.ini` file we employed for all our experiments is with the above-mentioned tweaks [available in this folder](virtuoso.ini). 
+Note that you will need to modify `NumberOfBuffers` and `MaxDirtyBuffers` according to your server's memory. 4 or 8 GiB is sufficient.
