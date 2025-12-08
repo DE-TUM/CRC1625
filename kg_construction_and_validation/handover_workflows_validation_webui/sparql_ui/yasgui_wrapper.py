@@ -5,7 +5,7 @@ from nicegui import app, ui
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-from datastores.rdf.rdf_datastore_client import RDFDatastoreClient
+from datastores.rdf import rdf_datastore_client
 
 LOCAL_SPARQL_PROXY_ROUTE = "/api/sparql"
 
@@ -26,7 +26,7 @@ async def sparql_proxy(request: Request):
         return JSONResponse({"error": f"No requests other than POST are allowed"}, status_code=400)
 
     try:
-        response = await RDFDatastoreClient().launch_query(parsed_data['query'][0], return_full_response=True)
+        response = await rdf_datastore_client.launch_query(parsed_data['query'][0], return_full_response=True)
 
         return JSONResponse(
             content=response['data'],

@@ -1,12 +1,12 @@
 from nicegui import ui, run
 
-from datastores.rdf.rdf_datastore_client import RDFDatastoreClient
+from datastores.rdf import rdf_datastore_client
 from handover_workflows_validation.handover_workflows_validation import get_workflow_model_names_and_creator_user_ids, \
     get_workflow_instances_of_model, read_workflow_model, WorkflowInstance, is_workflow_instance_valid
 from handover_workflows_validation_webui.state import State
 from nicegui import ui, run
 
-from datastores.rdf.rdf_datastore_client import RDFDatastoreClient
+from datastores.rdf import rdf_datastore_client
 from handover_workflows_validation.handover_workflows_validation import get_workflow_model_names_and_creator_user_ids, \
     get_workflow_instances_of_model, read_workflow_model, WorkflowInstance, is_workflow_instance_valid
 from handover_workflows_validation_webui.state import State
@@ -47,7 +47,7 @@ async def create_workflow_models_table(main_content, right_drawer):
     ui.label('List of predefined workflows').classes('text-xl font-bold')
 
     workflow_model_table = []
-    for workflow_model_name, user_id in await get_workflow_model_names_and_creator_user_ids(RDFDatastoreClient()):
+    for workflow_model_name, user_id in await get_workflow_model_names_and_creator_user_ids():
         workflow_model_table.append(
             {
                 "workflow_model_name": workflow_model_name,
@@ -99,12 +99,12 @@ async def check_and_update_icon(validation_icon_column: ui.column, workflow_mode
 
 
 async def handle_workflow_models_table_click(workflow_model_name: str, user_id: int, main_content, right_drawer):
-    State().current_workflow_model = await read_workflow_model(workflow_model_name, user_id, RDFDatastoreClient())
+    State().current_workflow_model = await read_workflow_model(workflow_model_name, user_id, rdf_datastore_client)
 
     State().workflow_instances_of_current_workflow_model = await get_workflow_instances_of_model(
         workflow_model_name,
         user_id,
-        RDFDatastoreClient()
+        rdf_datastore_client
     )
 
     # results = await asyncio.gather(

@@ -10,7 +10,7 @@ import time
 import datastores.sql.sql_db as sql_db
 import materialization.materialization as materialization
 import postprocessing.postprocessing as postprocessing
-from datastores.rdf.rdf_datastore_client import RDFDatastoreClient
+from datastores.rdf import rdf_datastore_client
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -39,11 +39,11 @@ ontology_files = [
 ]
 
 def upload_materialized_triples(file_names_to_add_to_rdf_store: list[str]):
-    RDFDatastoreClient().run_sync(RDFDatastoreClient().bulk_file_load(file_names_to_add_to_rdf_store, delete_files_after_upload=True))
+    rdf_datastore_client.run_sync(rdf_datastore_client.bulk_file_load(file_names_to_add_to_rdf_store, delete_files_after_upload=True))
 
 
 def upload_ontology_files(ontology_files: list[dict[str, str]]):
-    RDFDatastoreClient().run_sync(RDFDatastoreClient().bulk_file_load([f["file"] for f in ontology_files], delete_files_after_upload=False))
+    rdf_datastore_client.run_sync(rdf_datastore_client.bulk_file_load([f["file"] for f in ontology_files], delete_files_after_upload=False))
 
 
 def serve_KG(skip_ontologies_upload: bool = True,
@@ -65,7 +65,7 @@ def serve_KG(skip_ontologies_upload: bool = True,
 
     logging.info("Materialization of the KG finished!")
     if not run_only_sql_queries:
-        RDFDatastoreClient().run_sync(RDFDatastoreClient().clear_triples())
+        rdf_datastore_client.run_sync(rdf_datastore_client.clear_triples())
 
         file_upload_start = time.perf_counter()
 

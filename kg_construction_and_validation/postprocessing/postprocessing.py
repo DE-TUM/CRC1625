@@ -27,7 +27,7 @@ from rdflib import Graph, Literal, URIRef
 from rdflib.namespace import split_uri, Namespace
 from tqdm import tqdm
 
-from datastores.rdf.rdf_datastore_client import RDFDatastoreClient
+from datastores.rdf import rdf_datastore_client
 
 HANDOVER_GROUP_CREATION_CHUNK_SIZE = 10_000
 CROSS_GROUP_CHAIN_CREATION_CHUNK_SIZE = 10_000
@@ -95,7 +95,7 @@ prov_prefix = Namespace("http://www.w3.org/ns/prov#")
 
 
 def is_rdf_store_virtuoso():
-    return RDFDatastoreClient().run_sync(RDFDatastoreClient().get_datastore_type()) == "virtuoso"
+    return rdf_datastore_client.run_sync(rdf_datastore_client.get_datastore_type()) == "virtuoso"
 
 
 def resource_usage_job(stop_event, resource_usage):
@@ -190,7 +190,7 @@ def create_handover_group_chains():
 
     logging.info("Querying for cross-project handover pairs...")
     start = time.perf_counter()
-    response_cross_project_handovers = RDFDatastoreClient().run_sync(RDFDatastoreClient().launch_query(get_cross_project_handovers))
+    response_cross_project_handovers = rdf_datastore_client.run_sync(rdf_datastore_client.launch_query(get_cross_project_handovers))
     performance_log["query_cross_project_handovers"] = time.perf_counter() - start
 
     # Using the query, cache the correspondence of beginnings and ends of handover chains to their samples
@@ -211,12 +211,12 @@ def create_handover_group_chains():
         # Prevents OOMs from writing transactions to memory if there are many affected triples
         query = "DEFINE sql:log-enable 3\n" + query
     start = time.perf_counter()
-    RDFDatastoreClient().run_sync(RDFDatastoreClient().launch_update(query))
+    rdf_datastore_client.run_sync(rdf_datastore_client.launch_update(query))
     performance_log["delete_cross_project_links"] = time.perf_counter() - start
 
     logging.info("Querying for the remaining handover chains...")
     start = time.perf_counter()
-    response_get_handover_chains = RDFDatastoreClient().run_sync(RDFDatastoreClient().launch_query(get_handover_chains))
+    response_get_handover_chains = rdf_datastore_client.run_sync(rdf_datastore_client.launch_query(get_handover_chains))
     performance_log["query_remaining_handover_chains"] = time.perf_counter() - start
 
     logging.info("Processing and sorting handover chains for each sample...")
@@ -284,7 +284,7 @@ def create_handover_group_chains():
             files_to_upload.append(future.result())
 
         logging.info("Bulk loading handover groups...")
-        RDFDatastoreClient().run_sync(RDFDatastoreClient().bulk_file_load(files_to_upload, delete_files_after_upload=True))
+        rdf_datastore_client.run_sync(rdf_datastore_client.bulk_file_load(files_to_upload, delete_files_after_upload=True))
 
     performance_log["create_and_load_handover_groups"] = time.perf_counter() - start
 
@@ -295,7 +295,7 @@ def create_handover_group_chains():
         # Prevents OOMs from writing transactions to memory if there are many affected triples
         query = "DEFINE sql:log-enable 3\n" + query
     start = time.perf_counter()
-    RDFDatastoreClient().run_sync(RDFDatastoreClient().launch_update(query))
+    rdf_datastore_client.run_sync(rdf_datastore_client.launch_update(query))
     performance_log["redirect_workflow_instances"] = time.perf_counter() - start
 
     logging.info("Creating handover groups for remaining initial work handovers...")
@@ -304,7 +304,7 @@ def create_handover_group_chains():
         # Prevents OOMs from writing transactions to memory if there are many affected triples
         query = "DEFINE sql:log-enable 3\n" + query
     start = time.perf_counter()
-    RDFDatastoreClient().run_sync(RDFDatastoreClient().launch_update(query))
+    rdf_datastore_client.run_sync(rdf_datastore_client.launch_update(query))
     performance_log["create_handover_groups_for_initial_work_handovers"] = time.perf_counter() - start
 
     return performance_log
@@ -325,7 +325,7 @@ def replace_entity_iris():
         if is_rdf_store_virtuoso():
             # Prevents OOMs from writing transactions to memory if there are many affected triples
             query = "DEFINE sql:log-enable 3\n" + query
-        RDFDatastoreClient().run_sync(RDFDatastoreClient().launch_update(query))
+        rdf_datastore_client.run_sync(rdf_datastore_client.launch_update(query))
 
 
 def integrate_with_CheBI():
@@ -341,7 +341,7 @@ def integrate_with_CheBI():
         # Prevents OOMs from writing transactions to memory if there are many affected triples
         query = "DEFINE sql:log-enable 3\n" + query
     start = time.perf_counter()
-    RDFDatastoreClient().run_sync(RDFDatastoreClient().launch_update(query))
+    rdf_datastore_client.run_sync(rdf_datastore_client.launch_update(query))
     performance_log["add_chebi_elements"] = time.perf_counter() - start
 
     logging.info("Deleting temporary triples...")
@@ -350,12 +350,12 @@ def integrate_with_CheBI():
     # If we are using virtuoso, we do it in SQL directly
     if is_rdf_store_virtuoso():
             # TODO: This is unsafe
-            RDFDatastoreClient().run_sync(RDFDatastoreClient().run_isql("""DELETE FROM DB.DBA.RDF_QUAD WHERE
+            rdf_datastore_client.run_sync(rdf_datastore_client.run_isql("""DELETE FROM DB.DBA.RDF_QUAD WHERE
                                                                            P = iri_to_id('https://crc1625.mdi.ruhr-uni-bochum.de/temporaryDatatypeProperty')
                                                                            AND G = iri_to_id('https://crc1625.mdi.ruhr-uni-bochum.de/graph');"""))
-            RDFDatastoreClient().run_sync(RDFDatastoreClient().run_isql('checkpoint;'))
+            rdf_datastore_client.run_sync(rdf_datastore_client.run_isql('checkpoint;'))
     else:
-        RDFDatastoreClient().run_sync(RDFDatastoreClient().launch_update(delete_temporary_triples))
+        rdf_datastore_client.run_sync(rdf_datastore_client.launch_update(delete_temporary_triples))
 
     performance_log["delete_temporary_triples"] = time.perf_counter() - start
 

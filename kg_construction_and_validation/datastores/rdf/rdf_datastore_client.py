@@ -61,20 +61,18 @@ async def _get(endpoint: str, return_full_response: bool = False):
         raise RuntimeError(f"Connection error: {e}") from e
 
 
-async def launch_query(self,
-                       query: str,
+async def launch_query(query: str,
                        return_full_response: bool = False):
     """
     Executes a SPARQL query and returns the JSON response from the endpoint
     """
     if return_full_response:
-        return await self._post("launch_query", {"query": query}, return_full_response=return_full_response)
+        return await _post("launch_query", {"query": query}, return_full_response=return_full_response)
     else:
-        return (await self._post("launch_query", {"query": query})).json()['data']
+        return (await _post("launch_query", {"query": query})).json()['data']
 
 
-async def launch_update(self,
-                        query: str,
+async def launch_update(query: str,
                         graph_iri: str = "",
                         delete_files_after_upload: bool = False):
     """
@@ -85,11 +83,10 @@ async def launch_update(self,
         "graph_iri": graph_iri,
         "delete_files_after_upload": delete_files_after_upload
     }
-    return await self._post("launch_updates", payload)
+    return await _post("launch_updates", payload)
 
 
-async def launch_updates(self,
-                         actions: List[Tuple[str, UpdateType]],
+async def launch_updates(actions: List[Tuple[str, UpdateType]],
                          graph_iri: str = "",
                          delete_files_after_upload: bool = False):
     """
@@ -101,10 +98,9 @@ async def launch_updates(self,
         "graph_iri": graph_iri,
         "delete_files_after_upload": delete_files_after_upload
     }
-    return await self._post("launch_updates", payload)
+    return await _post("launch_updates", payload)
 
-async def upload_file(self,
-                      file_path: str,
+async def upload_file(file_path: str,
                       graph_iri: str = "https://crc1625.mdi.ruhr-uni-bochum.de/graph",
                       delete_file_after_upload: bool = False):
     """
@@ -120,11 +116,10 @@ async def upload_file(self,
         "graph_iri": graph_iri,
         "delete_file_after_upload": delete_file_after_upload
     }
-    return await self._post("upload_file", payload)
+    return await _post("upload_file", payload)
 
 
-async def bulk_file_load(self,
-                         file_paths: list[str],
+async def bulk_file_load(file_paths: list[str],
                          graph_iri="https://crc1625.mdi.ruhr-uni-bochum.de/graph",
                          delete_files_after_upload=False,
                          use_lock=True):
@@ -141,21 +136,19 @@ async def bulk_file_load(self,
         "graph_iri" : graph_iri,
         "delete_files_after_upload" : delete_files_after_upload
     }
-    return await self._post("bulk_file_load", payload)
+    return await _post("bulk_file_load", payload)
 
-async def dump_triples(self,
-                       output_file: str = "datastore_dump.nt"): # TODO this is local for now
+async def dump_triples(output_file: str = "datastore_dump.nt"): # TODO this is local for now
     """
     Output all triples to the designated file, in Ntriples format
     """
-    return await self._post("dump_triples", {"output_file": output_file})
+    return await _post("dump_triples", {"output_file": output_file})
 
-async def clear_triples(self,
-                        graph_iri: str = "https://crc1625.mdi.ruhr-uni-bochum.de/graph"):
+async def clear_triples(graph_iri: str = "https://crc1625.mdi.ruhr-uni-bochum.de/graph"):
     """
     Clears all triples from the graph
     """
-    return await self._post("clear_triples", {"graph_iri": graph_iri})
+    return await _post("clear_triples", {"graph_iri": graph_iri})
 
 async def run_isql(isql: str):
     """
@@ -164,11 +157,11 @@ async def run_isql(isql: str):
     """
     return await _post("run_isql", {"isql": isql})
 
-async def get_datastore_type(self):
+async def get_datastore_type():
     """
     Returns the name of the underlying RDF datastore
     """
-    return (await self._get("get_datastore_type")).json()['data']
+    return (await _get("get_datastore_type")).json()['data']
 
 def run_sync(coroutine):
     """

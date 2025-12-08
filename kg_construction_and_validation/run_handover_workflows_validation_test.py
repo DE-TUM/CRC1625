@@ -15,7 +15,7 @@ import os
 import sys
 import traceback
 
-from datastores.rdf.rdf_datastore_client import RDFDatastoreClient
+from datastores.rdf import rdf_datastore_client
 from handover_workflows_validation.handover_workflows_validation import (generate_SHACL_shapes_for_workflow, validate_SHACL_rules, read_workflow_model, get_workflow_instances_of_model, WORKFLOWS_GRAPH_IRI)
 
 logging.basicConfig(
@@ -46,16 +46,16 @@ async def run_test(path: str,
     sample id should pass the SHACL validation for its parent step. If, when trying to replicate these results, there
     is a mismatch, will be stopped and a complete trace will be printed out.
     """
-    await RDFDatastoreClient().clear_triples(WORKFLOWS_GRAPH_IRI)
+    await rdf_datastore_client.clear_triples(WORKFLOWS_GRAPH_IRI)
 
-    await RDFDatastoreClient().upload_file(path + "_workflow_model.ttl", graph_iri=WORKFLOWS_GRAPH_IRI)
-    await RDFDatastoreClient().upload_file(path + "_workflow_instance.ttl", graph_iri=WORKFLOWS_GRAPH_IRI)
+    await rdf_datastore_client.upload_file(path + "_workflow_model.ttl", graph_iri=WORKFLOWS_GRAPH_IRI)
+    await rdf_datastore_client.upload_file(path + "_workflow_instance.ttl", graph_iri=WORKFLOWS_GRAPH_IRI)
 
-    workflow_model = await read_workflow_model("example_workflow", 1, RDFDatastoreClient())
-    workflow_instance = list((await get_workflow_instances_of_model("example_workflow", 1, RDFDatastoreClient())).values())[0] # There's only one, no need to look it up
+    workflow_model = await read_workflow_model("example_workflow", 1, rdf_datastore_client)
+    workflow_instance = list((await get_workflow_instances_of_model("example_workflow", 1, rdf_datastore_client)).values())[0] # There's only one, no need to look it up
 
-    steps_to_validate = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance, RDFDatastoreClient())
-    results = await validate_SHACL_rules(steps_to_validate, RDFDatastoreClient())
+    steps_to_validate = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance, rdf_datastore_client)
+    results = await validate_SHACL_rules(steps_to_validate, rdf_datastore_client)
 
     for (workflow_step, workflow_step_name, sample_id, target_node, shacl_rules, conforms, results_text) in results:
         if conforms != step_validities[workflow_step_name][sample_id]:
@@ -213,8 +213,8 @@ async def run_incorrect_numbers_of_activities_tests():
              })
 
 async def main():
-    await RDFDatastoreClient().clear_triples()
-    await RDFDatastoreClient().upload_file(os.path.join(module_dir, "handover_workflows_validation/validation_test/validation_test_triples.ttl"))
+    await rdf_datastore_client.clear_triples()
+    await rdf_datastore_client.upload_file(os.path.join(module_dir, "handover_workflows_validation/validation_test/validation_test_triples.ttl"))
 
     ontology_files: list[dict[str, str]] = [
         {
@@ -234,7 +234,7 @@ async def main():
         }
     ]
 
-    await RDFDatastoreClient().bulk_file_load([f["file"] for f in ontology_files])
+    await rdf_datastore_client.bulk_file_load([f["file"] for f in ontology_files])
 
     try:
         logging.info("Testing example correct workflow...")
@@ -258,8 +258,8 @@ async def main():
 
         logging.info("Tests run successfully!")
 
-        await RDFDatastoreClient().clear_triples()
-        await RDFDatastoreClient().clear_triples(graph_iri=WORKFLOWS_GRAPH_IRI)
+        await rdf_datastore_client.clear_triples()
+        await rdf_datastore_client.clear_triples(graph_iri=WORKFLOWS_GRAPH_IRI)
 
     except Exception as e:
         logging.error(f"Exception while running the tests: {e}")

@@ -26,12 +26,14 @@ MSSQL_HOST = os.environ.get("MSSQL_HOST")
 MSSQL_PORT = os.environ.get("MSSQL_PORT")
 MSSQL_USER = os.environ.get("MSSQL_USER")
 MSSQL_PASSWORD = os.environ.get("MSSQL_PASSWORD")
-MSSQL_DATABASE_NAME = os.environ.get("MSSQL_DATABASE_NAME")
-
+MSSQL_CRC1625_DATABASE_NAME = os.environ.get("MSSQL_CRC1625_DATABASE_NAME")
+MSSQL_MASTER_DATABASE_NAME = os.environ.get("MSSQL_MASTER_DATABASE_NAME")
 
 class MSSQLDB():
     """
-    Wrapper for a local MSSQL Docker container storing an instance of the CRC 1625 DB
+    Wrapper for a local MSSQL Docker container storing an instance of the CRC 1625 DB.
+
+    Only one container is intended to be up at the same time in the same host.
     """
     DATA_DIR = os.path.join(module_dir, './db_data')
     ADDITIONAL_INDEXES_QUERY = open(os.path.join(module_dir, './additional_indexes.sql')).read()
@@ -46,7 +48,7 @@ class MSSQLDB():
             port=MSSQL_PORT,
             user=MSSQL_USER,
             password=MSSQL_PASSWORD,
-            database=MSSQL_DATABASE_NAME,
+            database=MSSQL_CRC1625_DATABASE_NAME,
         )
         cursor = conn.cursor()
         cursor.execute(query)
@@ -99,14 +101,14 @@ class MSSQLDB():
             - 'c': Clear DB dump, containing no data. Used for the performance tests
         """
         options = {
-            'm': 'docker_compose_crc1625_db.yml',
-            'v': 'docker_compose_validation_db.yml',
-            'v_1': 'docker_compose_validation_db_subtest_1.yml',
-            'v_2': 'docker_compose_validation_db_subtest_2.yml',
-            'v_3': 'docker_compose_validation_db_subtest_3.yml',
-            'v_4': 'docker_compose_validation_db_subtest_4.yml',
-            'v_5': 'docker_compose_validation_db_subtest_5.yml',
-            'c': 'docker_compose_clear_db.yml'
+            'm': 'RUB_CRC1625.bak',
+            'v': 'RUB_INF_validation.bak',
+            'v_1': 'initial_work_with_handovers_in_same_group.bak',
+            'v_2': 'user_within_multiple_projects.bak',
+            'v_3': 'isolated_handover_between_groups_in_same_project.bak',
+            'v_4': 'isolated_handover_between_long_groups_in_same_project.bak',
+            'v_5': 'handover_groups_with_linked_measurements_to_handovers.bak',
+            'c': 'RUB_Clear.bak'
         }
 
         if db_option is None:
@@ -130,14 +132,14 @@ class MSSQLDB():
                     """).strip().lower()
 
                 if choice in options:
-                    self.docker_file = options[choice]
+                    os.environ["MSSQL_BAK_FILE_NAME"] = options[choice]
                     break
                 else:
                     logging.error(f"Invalid option '{choice}'")
 
         elif db_option in list(options.keys()):
-            self.docker_file = options[db_option]
-
+            # Used by the MSSQL dockerfile
+            os.environ["MSSQL_BAK_FILE_NAME"] = options[db_option]
         else:
             raise ValueError(f"An option for the database was already indicated, but the value was unknown: {db_option}")
 
@@ -146,14 +148,14 @@ class MSSQLDB():
         self.clear_data_dir()
 
         subprocess.run(
-            ["docker-compose", "-f", self.docker_file, "down", "--volumes", "--remove-orphans"],
+            ["docker-compose", "-f", "docker_compose_mssql.yml", "down", "--volumes", "--remove-orphans"],
             check=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             cwd=module_dir
         )
         subprocess.run(
-            ["docker-compose", "-f", self.docker_file, "up", "--detach", "--force-recreate"],
+            ["docker-compose", "-f", "docker_compose_mssql.yml", "up", "--detach", "--force-recreate"],
             check=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
@@ -171,7 +173,7 @@ class MSSQLDB():
         """
         logging.info("Stopping and removing MSSQL container...")
         subprocess.run(
-            ["docker-compose", "-f", self.docker_file, "down", "--volumes", "--remove-orphans"],
+            ["docker-compose", "-f", "docker_compose_mssql.yml", "down", "--volumes", "--remove-orphans"],
             check=True,
             cwd=module_dir
         )
@@ -212,7 +214,7 @@ class MSSQLDB():
             port=MSSQL_PORT,
             user=MSSQL_USER,
             password=MSSQL_PASSWORD,
-            database=MSSQL_DATABASE_NAME,
+            database=MSSQL_CRC1625_DATABASE_NAME,
         )
         cursor = conn.cursor()
 
@@ -239,7 +241,7 @@ class MSSQLDB():
             port=MSSQL_PORT,
             user=MSSQL_USER,
             password=MSSQL_PASSWORD,
-            database=MSSQL_DATABASE_NAME,
+            database=MSSQL_CRC1625_DATABASE_NAME,
         )
         cursor = conn.cursor()
 
@@ -271,7 +273,7 @@ class MSSQLDB():
             port=MSSQL_PORT,
             user=MSSQL_USER,
             password=MSSQL_PASSWORD,
-            database=MSSQL_DATABASE_NAME,
+            database=MSSQL_CRC1625_DATABASE_NAME,
         )
         cursor = conn.cursor()
 

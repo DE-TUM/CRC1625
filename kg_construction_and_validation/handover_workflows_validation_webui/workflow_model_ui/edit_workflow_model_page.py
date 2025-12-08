@@ -1,6 +1,6 @@
 from nicegui import ui, run
 
-from datastores.rdf.rdf_datastore_client import RDFDatastoreClient
+from datastores.rdf import rdf_datastore_client
 from handover_workflows_validation.handover_workflows_validation import read_workflow_model, WorkflowModel, \
     overwrite_workflow_model
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, NodeType
@@ -45,7 +45,7 @@ async def handle_return_button():
                     ui.label('The workflow model has been modified. Save changes and exit?')
 
                     async def save_and_exit_and_close():
-                        await run.io_bound(overwrite_workflow_model(State().current_workflow_model, State().user_id, RDFDatastoreClient()))
+                        await run.io_bound(overwrite_workflow_model(State().current_workflow_model, State().user_id, rdf_datastore_client))
                         return_dialog.close()
                         ui.navigate.to('/')
 
@@ -93,7 +93,7 @@ def handle_undo_button():
 
 
 async def handle_save_button():
-    await run.io_bound(overwrite_workflow_model(State().current_workflow_model, State().user_id, RDFDatastoreClient()))
+    await run.io_bound(overwrite_workflow_model(State().current_workflow_model, State().user_id, rdf_datastore_client))
     State().changes_are_saved = True
     State().workflow_model_history = []
     ui.notify("The changes have been saved", type='positive')
@@ -104,7 +104,7 @@ async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
     State().user_id = user_id  # TODO
 
     if State().current_workflow_model is None:  # The page has been reloaded
-        State().current_workflow_model = await read_workflow_model(workflow_model_name, user_id, RDFDatastoreClient())
+        State().current_workflow_model = await read_workflow_model(workflow_model_name, user_id, rdf_datastore_client)
 
     ui.label(f"Editing Workflow Model '{workflow_model_name}'").classes('text-2xl font-bold mb-4')
     with ui.grid(columns=3):

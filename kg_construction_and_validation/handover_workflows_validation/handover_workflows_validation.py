@@ -25,7 +25,7 @@ from dataclasses import dataclass, field
 from pyshacl import validate
 from rdflib import Graph, URIRef, Literal, Namespace, XSD
 
-from datastores.rdf.rdf_datastore_client import RDFDatastoreClient, UpdateType
+from datastores.rdf import rdf_datastore_client, UpdateType
 
 WORKFLOWS_GRAPH_IRI = "https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows"
 
@@ -241,7 +241,7 @@ def uuid_for_name(name: str, user_id: int):
     return str(uuid.uuid5(uuid.NAMESPACE_DNS, name + (str(user_id))))
 
 
-async def get_label(entity_iri: str, rdf_datastore_client: RDFDatastoreClient):
+async def get_label(entity_iri: str):
     """
     Returns the label of an entity in the workflows named graph
     """
@@ -251,7 +251,7 @@ async def get_label(entity_iri: str, rdf_datastore_client: RDFDatastoreClient):
     return result["results"]["bindings"][0]["label"]["value"]
 
 
-async def get_activity_type(entity_iri: str, rdf_datastore_client: RDFDatastoreClient):
+async def get_activity_type(entity_iri: str):
     """
     Returns the activity type IRI for an entity (a type that is pmdco_prefix.AnalysingProcess or a subclass of it)
     
@@ -266,7 +266,7 @@ async def get_activity_type(entity_iri: str, rdf_datastore_client: RDFDatastoreC
         return str(pmdco_prefix.AnalysingProcess)  # It's an "Others" activity
 
 
-async def get_workflow_model_names_and_creator_user_ids(rdf_datastore_client: RDFDatastoreClient) -> list[tuple[str, int]]:
+async def get_workflow_model_names_and_creator_user_ids(rdf_datastore_client) -> list[tuple[str, int]]:
     workflow_models_list: list[tuple[str, int]] = []
 
     query = get_workflow_model_names_and_creators_query
@@ -281,7 +281,7 @@ async def get_workflow_model_names_and_creator_user_ids(rdf_datastore_client: RD
     return workflow_models_list
 
 
-async def get_workflow_model_names_from_user(user_id: int, rdf_datastore_client: RDFDatastoreClient) -> list[str]:
+async def get_workflow_model_names_from_user(user_id: int) -> list[str]:
     workflow_models_list: list[str] = []
 
     query = get_workflow_model_names_from_user_query.replace("{user_id}", str(user_id))
@@ -295,7 +295,7 @@ async def get_workflow_model_names_from_user(user_id: int, rdf_datastore_client:
     return workflow_models_list
 
 
-async def read_workflow_model(workflow_model_name: str, user_id: int, rdf_datastore_client: RDFDatastoreClient) -> None | WorkflowModel:
+async def read_workflow_model(workflow_model_name: str, user_id: int) -> None | WorkflowModel:
     """
     Returns the WorkflowModel identified by the provided name
     """
@@ -320,12 +320,12 @@ async def read_workflow_model(workflow_model_name: str, user_id: int, rdf_datast
                 workflow_model.workflow_model_name = o
             elif p in workflow_model_iri_to_config:
                 if "initial_step" in workflow_model_iri_to_config[p]:
-                    workflow_model.workflow_model_options.initial_step_name = await get_label(o, rdf_datastore_client)  # TODO limit the use of this
+                    workflow_model.workflow_model_options.initial_step_name = await get_label(o)  # TODO limit the use of this
                 else:
                     workflow_model.workflow_model_options.set_option(workflow_model_iri_to_config[p], o)
 
         else:  # It's a step
-            step_name = await get_label(s, rdf_datastore_client)
+            step_name = await get_label(s)
             if step_name not in workflow_model.workflow_model_steps:
                 workflow_model.workflow_model_steps[step_name] = WorkflowModelStep()
 
@@ -333,11 +333,11 @@ async def read_workflow_model(workflow_model_name: str, user_id: int, rdf_datast
             if p in workflow_model_step_iri_to_config:
                 match workflow_model_step_iri_to_config[p]:
                     case "next_steps":
-                        workflow_step.next_steps.add(await get_label(o, rdf_datastore_client))
+                        workflow_step.next_steps.add(await get_label(o))
                     case "projects":
                         workflow_step.projects.append(o.rsplit("/", 1)[-1])
                     case "required_activities":
-                        workflow_step.required_activities.append(iri_to_activity[await get_activity_type(o, rdf_datastore_client)])
+                        workflow_step.required_activities.append(iri_to_activity[await get_activity_type(o)])
                     case _:
                         workflow_step.set_option(workflow_model_step_iri_to_config[p], o)
 
@@ -346,7 +346,7 @@ async def read_workflow_model(workflow_model_name: str, user_id: int, rdf_datast
 
 async def store_workflow_model(workflow_model: WorkflowModel,
                                user_id: int,
-                               rdf_datastore_client: RDFDatastoreClient,
+                               rdf_datastore_client,
                                return_file: bool = False):
     """
     Serializes the workflow model into RDF and stores it
@@ -440,7 +440,7 @@ async def store_workflow_model(workflow_model: WorkflowModel,
 
 def delete_workflow_model(workflow_model: WorkflowModel,
                           user_id: int,
-                          rdf_datastore_client: RDFDatastoreClient,
+                          rdf_datastore_client,
                           return_query: bool = False):
     """
     Deletes the workflow model of a given user from the rdf_datastore_client
@@ -458,7 +458,7 @@ def delete_workflow_model(workflow_model: WorkflowModel,
 
 async def clean_workflow_instance_steps(workflow_model: WorkflowModel,
                                         user_id: int,
-                                        rdf_datastore_client: RDFDatastoreClient,
+                                        rdf_datastore_client,
                                         return_query: bool = False):
     workflow_instances = await get_workflow_instances_of_model(workflow_model.workflow_model_name,
                                                                user_id,
@@ -478,13 +478,12 @@ async def clean_workflow_instance_steps(workflow_model: WorkflowModel,
 
 def overwrite_workflow_model(workflow_model: WorkflowModel,
                              user_id: int,
-                             rdf_datastore_client: RDFDatastoreClient):
+                             rdf_datastore_client):
     """
     Deletes the workflow model of a given user, and stores it again
     """
-    actions = []
-    actions.append((delete_workflow_model(workflow_model, user_id, rdf_datastore_client, return_query=True), UpdateType.query))
-    actions.append((store_workflow_model(workflow_model, user_id, rdf_datastore_client, return_file=True), UpdateType.file_upload))
+    actions = [(delete_workflow_model(workflow_model, user_id, rdf_datastore_client, return_query=True), UpdateType.query),
+               (store_workflow_model(workflow_model, user_id, rdf_datastore_client, return_file=True), UpdateType.file_upload)]
     # actions.append((clean_workflow_instance_steps(workflow_model, user_id, rdf_datastore_client, return_query=True), UpdateType.query))
 
     rdf_datastore_client.launch_updates(actions, graph_iri=WORKFLOWS_GRAPH_IRI, delete_files_after_upload=True)
@@ -492,7 +491,7 @@ def overwrite_workflow_model(workflow_model: WorkflowModel,
 
 async def get_workflow_instances_of_model(workflow_model_name: str,
                                           user_id: int,
-                                          rdf_datastore_client: RDFDatastoreClient) -> dict[tuple[str, int], WorkflowInstance]:
+                                          rdf_datastore_client) -> dict[tuple[str, int], WorkflowInstance]:
     """
     Returns a dict of (Workflow instance name, creator's user id) -> WorkflowInstance assigned to the provided model
     """
@@ -534,7 +533,7 @@ async def get_workflow_instances_of_model(workflow_model_name: str,
 
 async def create_workflow_instance(workflow_instance: WorkflowInstance,
                                    user_id: int,
-                                   rdf_datastore_client: RDFDatastoreClient,
+                                   rdf_datastore_client,
                                    return_file: bool = False):
     """
     Serializes the workflow instance into RDF and stores it
@@ -595,7 +594,7 @@ async def create_workflow_instance(workflow_instance: WorkflowInstance,
 
 async def delete_workflow_instance(workflow_instance: WorkflowInstance,
                                    user_id: int,
-                                   rdf_datastore_client: RDFDatastoreClient,
+                                   rdf_datastore_client,
                                    return_query: bool = False):
     """
     Deletes the workflow instance corresponding to the provided one, and stores it again
@@ -611,7 +610,7 @@ async def delete_workflow_instance(workflow_instance: WorkflowInstance,
         await rdf_datastore_client.launch_updates(updates, workflow_instance_iri)
 
 
-async def overwrite_workflow_instance(workflow_instance: WorkflowInstance, user_id: int, rdf_datastore_client: RDFDatastoreClient):
+async def overwrite_workflow_instance(workflow_instance: WorkflowInstance, user_id: int):
     """
     Deletes the workflow model corresponding to the provided one, and stores it again
     """
@@ -622,7 +621,7 @@ async def overwrite_workflow_instance(workflow_instance: WorkflowInstance, user_
     await rdf_datastore_client.launch_updates(actions, graph_iri=WORKFLOWS_GRAPH_IRI, delete_files_after_upload=True)
 
 
-async def get_first_handover_group(object_id: int, rdf_datastore_client: RDFDatastoreClient) -> str:
+async def get_first_handover_group(object_id: int) -> str:
     """
     Returns the IRI of the first handover group the given materials library or sample has
     """
@@ -639,7 +638,7 @@ async def get_first_handover_group(object_id: int, rdf_datastore_client: RDFData
     return result["results"]["bindings"][0]["first_handover_group"]["value"]
 
 
-async def get_next_handover_group(current_handover_group_iri: str, rdf_datastore_client: RDFDatastoreClient) -> str | None:
+async def get_next_handover_group(current_handover_group_iri: str) -> str | None:
     """
     Returns the next handover group's IRI after the provided one if exists, else None
     """
@@ -698,8 +697,7 @@ async def get_next_validation_steps(workflow_model: WorkflowModel,
                               workflow_instance: WorkflowInstance,
                               current_workflow_step: WorkflowModelStep,
                               current_object_id: int,
-                              target_node: str,
-                              rdf_datastore_client: RDFDatastoreClient) -> list[tuple[WorkflowModelStep, str, int, str]]:
+                              target_node: str) -> list[tuple[WorkflowModelStep, str, int, str]]:
     """
     Returns a list of (WorkflowModelStep, next_step_name, object_id, target node IRI) tuples given the current
     step, sample ID and target node
@@ -716,12 +714,12 @@ async def get_next_validation_steps(workflow_model: WorkflowModel,
 
         for new_object_id in workflow_instance.step_assignments[next_step_name]:
             if current_object_id == new_object_id:  # The next target node is the next handover group for the target node
-                new_target_node = await get_next_handover_group(target_node, rdf_datastore_client)
+                new_target_node = await get_next_handover_group(target_node)
                 if new_target_node is not None:  # Else, we stop checking TODO handle better
                     next_steps.append((workflow_model.workflow_model_steps[next_step_name], next_step_name, current_object_id, new_target_node))
             else:  # We have a new sample, so we must continue the workflow from the new sample's *first* handover group
                 next_steps.append((workflow_model.workflow_model_steps[next_step_name], next_step_name, new_object_id,
-                                   await get_first_handover_group(new_object_id, rdf_datastore_client)))
+                                   await get_first_handover_group(new_object_id)))
 
         return next_steps
     else:
@@ -729,8 +727,7 @@ async def get_next_validation_steps(workflow_model: WorkflowModel,
 
 
 async def generate_SHACL_shapes_for_workflow(workflow_model: WorkflowModel,
-                                             workflow_instance: WorkflowInstance,
-                                             rdf_datastore_client: RDFDatastoreClient) -> list[tuple[WorkflowModelStep, str, int, str, str]]:
+                                             workflow_instance: WorkflowInstance) -> list[tuple[WorkflowModelStep, str, int, str, str]]:
     """
     Returns a list of (WorkflowModelStep, workflow step name, sample id, target node IRI, SHACL shape string) for the
     workflow model, following the sample assignments of the workflow instance.
@@ -762,7 +759,7 @@ async def generate_SHACL_shapes_for_workflow(workflow_model: WorkflowModel,
 
     # Start validating from the initial step, for every sample that is assigned to it
     for object_id in workflow_instance.step_assignments[workflow_model.workflow_model_options.initial_step_name]:
-        first_handover_group = await get_first_handover_group(object_id, rdf_datastore_client)
+        first_handover_group = await get_first_handover_group(object_id)
         if first_handover_group is not None:  # Else, stop checking TODO handle better?
             initial_step = workflow_model.workflow_model_steps[workflow_model.workflow_model_options.initial_step_name]
             steps_to_parse.append((initial_step, workflow_model.workflow_model_options.initial_step_name, object_id, first_handover_group))
@@ -771,12 +768,12 @@ async def generate_SHACL_shapes_for_workflow(workflow_model: WorkflowModel,
         (workflow_step, workflow_step_name, object_id, target_node) = steps_to_parse.pop()
 
         steps_to_validate.append((workflow_step, workflow_step_name, object_id, target_node, generate_group_shape(workflow_step, target_node)))
-        steps_to_parse.extend(await get_next_validation_steps(workflow_model, workflow_instance, workflow_step, object_id, target_node, rdf_datastore_client))
+        steps_to_parse.extend(await get_next_validation_steps(workflow_model, workflow_instance, workflow_step, object_id, target_node))
 
     return steps_to_validate
 
 
-async def get_ttl_for_sample(object_id: str, rdf_datastore_client: RDFDatastoreClient):
+async def get_ttl_for_sample(object_id: str):
     """
     Generate a .ttl file for pySHACL by querying for the handover groups, handovers and activities of the given sample
 
@@ -812,8 +809,7 @@ async def get_ttl_for_sample(object_id: str, rdf_datastore_client: RDFDatastoreC
     return path_to_ttl
 
 
-async def validate_SHACL_rules(steps_to_validate: list[(WorkflowModelStep, str, str)],
-                               rdf_datastore_client: RDFDatastoreClient) -> list[(WorkflowModelStep, int, str, str, bool, str)]:
+async def validate_SHACL_rules(steps_to_validate: list[(WorkflowModelStep, str, str)]) -> list[(WorkflowModelStep, int, str, str, bool, str)]:
     results: list[(WorkflowModelStep, int, str, str, bool, str)] = []
 
     sample_ttls = dict()
@@ -823,7 +819,7 @@ async def validate_SHACL_rules(steps_to_validate: list[(WorkflowModelStep, str, 
         shacl_graph.parse(data=shacl_rules, format="turtle")
 
         if object_id not in sample_ttls:
-            sample_ttls[object_id] = await get_ttl_for_sample(object_id, rdf_datastore_client)
+            sample_ttls[object_id] = await get_ttl_for_sample(object_id)
 
         conforms, results_graph, results_text = validate(data_graph=sample_ttls[object_id],
                                                          shacl_graph=shacl_graph,
@@ -844,14 +840,14 @@ async def validate_SHACL_rules(steps_to_validate: list[(WorkflowModelStep, str, 
     return results
 
 
-async def is_workflow_instance_valid(workflow_model, workflow_instance, rdf_datastore_client) -> bool:
+async def is_workflow_instance_valid(workflow_model, workflow_instance) -> bool:
     """
     Returns True if the workflow model and its model instance match with the handover workflow they refer to, False otherwise
 
     generate_SHACL_shapes_for_workflow and validate_SHACL_rules can be run separately if more details are needed (e.g., which
     steps are valid and which aren't, and the reasons why)
     """
-    steps_to_validate = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance, rdf_datastore_client)
-    results = await validate_SHACL_rules(steps_to_validate, rdf_datastore_client)
+    steps_to_validate = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance)
+    results = await validate_SHACL_rules(steps_to_validate)
 
     return all(result[5] for result in results)
