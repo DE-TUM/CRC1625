@@ -1,5 +1,7 @@
+import os
 from enum import Enum
 from typing import List, Optional, Tuple, Any, Dict
+from dotenv import load_dotenv
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Body
@@ -8,6 +10,11 @@ from pydantic import BaseModel
 from datastores.rdf.rdf_datastore_client import UpdateType
 from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore
 
+module_dir = os.path.dirname(__file__)
+load_dotenv(os.path.join(module_dir, '../../.env'))
+
+RDF_DATASTORE_API_HOST = os.environ.get("RDF_DATASTORE_API_HOST")
+RDF_DATASTORE_API_PORT = os.environ.get("RDF_DATASTORE_API_PORT")
 
 class DatastoreType(Enum):
     VIRTUOSO = "virtuoso"
@@ -191,8 +198,8 @@ def run(rdf_store_to_serve: DatastoreType, debug: bool = False):
         access_log = True
 
     uvicorn.run(app,
-                host="127.0.0.1",
-                port=60001,
+                host=RDF_DATASTORE_API_HOST,
+                port=int(RDF_DATASTORE_API_PORT),
                 # The RDF store is already async, so we don't
                 # want to conflict with multiple threadpools
                 workers=1,

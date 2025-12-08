@@ -15,21 +15,19 @@ This folder contains the following implementations:
 
 
 ## Requirements
-The whole Knowledge Graph creation and testing pipeline is designed to work under either `Virtuoso` or `Oxigraph`. `Virtuoso` is
-recommended for production usage, whereas `Oxigraph` is recommended for developing. Both are feature-complete and tested.
+The whole Knowledge Graph creation and testing pipeline is designed to work under `Virtuoso` and `[WIP]`.
 
 ### General requirements
 - `Python >= 3.13.7`: The required libraries are provided in `../requirements.txt`, using a `conda` environment with the `conda-forge` channel
 - `Docker`: The scripts will set up local containers of the MSSQL DB for MatInf and, optionally, of `Oxigraph`.
-- `RMLMapper`: A .jar executable of `RMLMapper` is needed. The `setup_files.sh` script can be used to retrieve it.
-
-### `Oxigraph` requirements
-Nothing is needed. The scripts will automatically pull and set up an `Oxigraph` docker container, with a SPARQL endpoint 
-available at http://0.0.0.0:7878/
+- `RMLMapper` `RMLStreamer`: `.jar` executables of `RMLMapper` and `RMLStreamer` are needed. The `setup_files.sh` script can be used to retrieve and set them up.
+- A `.env` file containing login and endpoint details. An example file can be found in `example.env`.
+- TODO: Start the RDF client/server module
 
 ### `Virtuoso` requirements
 A local `Virtuoso` docker container that employs the [../virtuoso/data](../virtuoso/data) directory as the mountpoint for `/data` inside
-the container. This is **required** as the system will store and attempt to upload serialized RDF triples from there.
+the container. This is **required** as the system will store and attempt to upload serialized RDF triples from there. This 
+folder must always be locally accessible by any of the modules through any means (TODO: Pending to change to remote file uploads).
 
 It needs to expose a SPARQL endpoint at http://127.0.0.1:8891, and accept ODBC requests at the `1111` port for user/password dba/dba (pending to change on production settings)
 

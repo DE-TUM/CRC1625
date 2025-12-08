@@ -7,6 +7,7 @@ import sys
 import time
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from contextlib import nullcontext
+from dotenv import load_dotenv
 
 import aiorwlock
 import httpx
@@ -21,14 +22,15 @@ logging.basicConfig(
 )
 
 module_dir = os.path.dirname(__file__)
+load_dotenv(os.path.join(module_dir, '../../.env'))
 
-VIRTUOSO_HOST = "http://127.0.0.1:8891"
-QUERY_ENDPOINT = f"{VIRTUOSO_HOST}/sparql"
-UPDATE_ENDPOINT = f"{VIRTUOSO_HOST}/sparql"
+VIRTUOSO_ADDRESS = os.environ.get("VIRTUOSO_ADDRESS")
+QUERY_ENDPOINT = f"{VIRTUOSO_ADDRESS}/sparql"
+UPDATE_ENDPOINT = f"{VIRTUOSO_ADDRESS}/sparql"
+VIRTUOSO_USER = os.environ.get("VIRTUOSO_USER")
+VIRTUOSO_PASS = os.environ.get("VIRTUOSO_PASS")
+ODBC_PORT = os.environ.get("VIRTUOSO_ODBC_PORT")
 
-VIRTUOSO_USER = "dba"
-VIRTUOSO_PASS = "dba"
-ODBC_PORT = "1111"
 GRAPH_IRI = "https://crc1625.mdi.ruhr-uni-bochum.de/graph"
 HOST_DATA_DIR = os.path.join(module_dir, "../../../virtuoso/data")
 CONTAINER_DATA_DIR = "/data"

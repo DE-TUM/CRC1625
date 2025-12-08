@@ -9,6 +9,7 @@ import uuid
 
 import pandas as pd
 import pymssql
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 
 logging.basicConfig(
@@ -19,6 +20,14 @@ logging.basicConfig(
 )
 
 module_dir = os.path.dirname(__file__)
+load_dotenv(os.path.join(module_dir, '../../.env'))
+
+MSSQL_HOST = os.environ.get("MSSQL_HOST")
+MSSQL_PORT = os.environ.get("MSSQL_PORT")
+MSSQL_USER = os.environ.get("MSSQL_USER")
+MSSQL_PASSWORD = os.environ.get("MSSQL_PASSWORD")
+MSSQL_DATABASE_NAME = os.environ.get("MSSQL_DATABASE_NAME")
+
 
 class MSSQLDB():
     """
@@ -33,11 +42,11 @@ class MSSQLDB():
         Executes a query. Does not return its result
         """
         conn = pymssql.connect(
-            server='localhost',
-            port='1433',
-            user='sa',
-            password='DebugPassword123@',
-            database='RUB_INF'
+            server=MSSQL_HOST,
+            port=MSSQL_PORT,
+            user=MSSQL_USER,
+            password=MSSQL_PASSWORD,
+            database=MSSQL_DATABASE_NAME,
         )
         cursor = conn.cursor()
         cursor.execute(query)
@@ -199,12 +208,11 @@ class MSSQLDB():
         Dumps the database as a .bak file, stored in the container's backups folder
         """
         conn = pymssql.connect(
-            server='localhost',
-            port='1433',
-            user='sa',
-            password='DebugPassword123@',
-            database='RUB_INF',
-            autocommit=True
+            server=MSSQL_HOST,
+            port=MSSQL_PORT,
+            user=MSSQL_USER,
+            password=MSSQL_PASSWORD,
+            database=MSSQL_DATABASE_NAME,
         )
         cursor = conn.cursor()
 
@@ -227,12 +235,11 @@ class MSSQLDB():
             return ValueError(f"The DB backup {identifier} is not present in the backups folder")
 
         conn = pymssql.connect(
-            server='localhost',
-            port='1433',
-            user='sa',
-            password='DebugPassword123@',
-            database='master',
-            autocommit=True
+            server=MSSQL_HOST,
+            port=MSSQL_PORT,
+            user=MSSQL_USER,
+            password=MSSQL_PASSWORD,
+            database=MSSQL_DATABASE_NAME,
         )
         cursor = conn.cursor()
 
@@ -260,12 +267,11 @@ class MSSQLDB():
             records = [records]
 
         conn = pymssql.connect(
-            server='localhost',
-            port='1433',
-            user='sa',
-            password='DebugPassword123@',
-            database='master',
-            autocommit=True
+            server=MSSQL_HOST,
+            port=MSSQL_PORT,
+            user=MSSQL_USER,
+            password=MSSQL_PASSWORD,
+            database=MSSQL_DATABASE_NAME,
         )
         cursor = conn.cursor()
 
