@@ -275,16 +275,19 @@ def create_handover_group_chains():
     # parallel. Each worker will create a .ttl file containing the triples for its assigned chunk and yield its path. Once
     # all workers have finished, they will be uploaded in bulk to the datastore
     start = time.perf_counter()
-    with ProcessPoolExecutor(max_workers=len(handover_chains_chunks)) as executor:
-        futures = [executor.submit(create_handover_group_triples, i, chunk) for (i ,chunk) in enumerate(handover_chains_chunks)]
+    if len(handover_chains_chunks) > 0:
+        with ProcessPoolExecutor(max_workers=len(handover_chains_chunks)) as executor:
+            futures = [executor.submit(create_handover_group_triples, i, chunk) for (i ,chunk) in enumerate(handover_chains_chunks)]
 
-        files_to_upload = []
-        for future in tqdm(as_completed(futures), total=len(futures),
-                           desc=f"Creating handover groups (batches of {HANDOVER_GROUP_CREATION_CHUNK_SIZE} handovers)..."):
-            files_to_upload.append(future.result())
+            files_to_upload = []
+            for future in tqdm(as_completed(futures), total=len(futures),
+                               desc=f"Creating handover groups (batches of {HANDOVER_GROUP_CREATION_CHUNK_SIZE} handovers)..."):
+                files_to_upload.append(future.result())
 
-        logging.info("Bulk loading handover groups...")
-        rdf_datastore_client.run_sync(rdf_datastore_client.bulk_file_load(files_to_upload, delete_files_after_upload=True))
+            logging.info("Bulk loading handover groups...")
+            rdf_datastore_client.run_sync(rdf_datastore_client.bulk_file_load(files_to_upload, delete_files_after_upload=True))
+    else:
+        logging.warning("There are no handover groups to create. This should only happen on an empty database.")
 
     performance_log["create_and_load_handover_groups"] = time.perf_counter() - start
 

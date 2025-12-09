@@ -25,13 +25,19 @@ The whole Knowledge Graph creation and testing pipeline is designed to work unde
 - TODO: Start the RDF client/server module
 
 ### `Virtuoso` requirements
-A local `Virtuoso` docker container that employs the [../virtuoso/data](../virtuoso/data) directory as the mountpoint for `/data` inside
+The system requires a local `Virtuoso` docker container that:
+
+- Employs the following [image](https://hub.docker.com/r/zenontum/virtuoso-sparql-samuel).
+
+- Has as its container name `virtuoso_CRC_1625`
+
+- Employs the [../virtuoso/data](../virtuoso/data) directory as the mountpoint for `/data` inside
 the container. This is **required** as the system will store and attempt to upload serialized RDF triples from there. This 
 folder must always be locally accessible by any of the modules through any means (TODO: Pending to change to remote file uploads).
 
-It needs to expose a SPARQL endpoint at http://127.0.0.1:8891, and accept ODBC requests at the `1111` port for user/password dba/dba (pending to change on production settings)
+- Exposes a SPARQL endpoint with read and write permissions at http://127.0.0.1:8891.
 
-We employed the following [image](https://hub.docker.com/r/zenontum/virtuoso-sparql-samuel).
+- Accepts ODBC requests at the `1111` port for a write-allowed user (configurable in the `.env` file).
 
 
 #### The following configuration tweaks are **required**:

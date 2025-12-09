@@ -171,6 +171,41 @@ async def rpc_run_isql(isql: str = Body(embed=True)):
     else:
         raise HTTPException(status_code=500, detail="ISQL commands are only possible when running Virtuoso.")
 
+@app.get("/start_datastore")
+async def rpc_start_datastore() -> Dict[str, str]:
+    """
+    Starts the underlying RDF datastore
+    """
+    try:
+        await rdf_store.start_datastore()
+
+        return {"status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/stop_datastore")
+async def rpc_stop_datastore() -> Dict[str, str]:
+    """
+    Stops the underlying RDF datastore. Does not affect the remote API endpoint itself
+    """
+    try:
+        await rdf_store.stop_datastore()
+
+        return {"status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/restart_datastore")
+async def rpc_restart_datastore() -> Dict[str, str]:
+    """
+    Restarts the underlying RDF datastore. Does not affect the remote API endpoint itself
+    """
+    try:
+        await rdf_store.restart_datastore()
+
+        return {"status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/get_datastore_type")
 async def rpc_get_datastore_type() -> Dict[str, str]:

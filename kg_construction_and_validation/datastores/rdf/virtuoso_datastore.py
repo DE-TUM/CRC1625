@@ -232,26 +232,30 @@ class VirtuosoRDFDatastore():
             self._run_isql(f"DELETE FROM rdf_quad WHERE g = iri_to_id ('{graph_iri}');")
             self._run_isql("checkpoint;")
 
-    def stop_virtuoso(self):
+
+    def stop_datastore(self, timeout: int = 60 * 5):
         """
         Stops the virtuoso container. The output is not checked, as sometimes virtuoso takes slightly more time to stop
-        than docker is willing to wait, which we set to 60 seconds (up from default 10 seconds)
+        than docker is willing to wait, which we set to 60 seconds (up from default 10 seconds).
+
+        The container should already exist.
         """
         cmd = [
             "docker",
             "stop",
             "-t",
-            "60",
+            str(timeout),
             "virtuoso_CRC_1625"
         ]
         subprocess.run(cmd, check=False, stdout=subprocess.DEVNULL)
 
-    def start_virtuoso(self, timeout: int = 60 * 5):
+
+    def start_datastore(self, timeout: int = 60 * 5):
         """
         Starts the virtuoso container, and waits 5 minutes for it to allocate all its memory and be fully operational.
         This timeout can be controlled by the timeout parameter.
 
-        The output of the command is not checked.
+        The output of the command is not checked, and the container should already exist.
         """
         cmd = [
             "docker",
@@ -261,3 +265,14 @@ class VirtuosoRDFDatastore():
         subprocess.run(cmd, check=False, stdout=subprocess.DEVNULL)
 
         time.sleep(timeout)
+
+
+    def restart_datastore(self, timeout: int = 60 * 5):
+        """
+        Restarts the virtuoso container.
+        This timeout can be controlled by the timeout parameter, and is applied to the stopping and starting phases separately.
+
+        The output of the command is not checked, and the container should already exist.
+        """
+        self.stop_datastore(timeout)
+        self.start_datastore(timeout)

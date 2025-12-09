@@ -157,6 +157,24 @@ async def run_isql(isql: str):
     """
     return await _post("run_isql", {"isql": isql})
 
+async def start_datastore():
+    """
+    Returns the name of the underlying RDF datastore
+    """
+    return (await _get("start_datastore")).json()['data']
+
+async def stop_datastore():
+    """
+    Returns the name of the underlying RDF datastore
+    """
+    return (await _get("stop_datastore")).json()['data']
+
+async def restart_datastore():
+    """
+    Returns the name of the underlying RDF datastore
+    """
+    return (await _get("restart_datastore")).json()['data']
+
 async def get_datastore_type():
     """
     Returns the name of the underlying RDF datastore

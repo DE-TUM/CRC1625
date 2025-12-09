@@ -12,6 +12,7 @@ Assumes that virtuoso is already started. It will be stopped and started between
 """
 
 import argparse
+import asyncio
 import json
 import logging
 import math
@@ -26,10 +27,8 @@ from typing import Any
 import pymssql
 
 from create_synthetic_records import create_synthetic_records
-from datastores.rdf.rdf_datastore_api import RDFDatastore
-from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore
-from datastores.rdf.oxigraph_datastore import OxigraphRDFDatastore
 from datastores.sql.sql_db import MSSQLDB
+from datastores.rdf import rdf_datastore_client
 from main import serve_KG
 
 logging.basicConfig(
@@ -89,7 +88,7 @@ count_triples_query = prefixes + open(
     os.path.join(module_dir, './performance_test/queries/count_triples.sparql')).read()
 
 
-def run_querying_benchmark(datastore: RDFDatastore) -> dict[str, tuple[float, float]]:
+def run_querying_benchmark() -> dict[str, tuple[float, float]]:
     """
     Executes all query files contained in the ./performance_test/queries folder. Each query file must have a corresponding
     counterpart in SQL/SPARQL using the .sql or .sparql extension, respectively, with the same base name.
@@ -115,7 +114,7 @@ def run_querying_benchmark(datastore: RDFDatastore) -> dict[str, tuple[float, fl
 
         start = time.perf_counter()
         try:
-            datastore.launch_query(sparql_query) # We do not care about the result
+            asyncio.run(rdf_datastore_client.launch_query(sparql_query)) # We do not care about the result
         except Exception as e:
             print(f"Error on SPARQL query '{sparql_file}': {e}")
             raise
@@ -150,18 +149,14 @@ def soft_scale_root(x, k):
 
 def get_value_from_query(q: str,
                          value: str,
-                         datatype: type,
-                         store: str) -> Any:
+                         datatype: type) -> Any:
     """
     Convenience function to get a single value of a SPARQL query in the desired type
     """
-    if store == "oxigraph":
-        return datatype(OxigraphRDFDatastore().launch_query(q).json()["results"]["bindings"][0][value]["value"])
-    else:
-        return datatype(VirtuosoRDFDatastore().launch_query(q).json()["results"]["bindings"][0][value]["value"])
+    return datatype(asyncio.run(rdf_datastore_client.launch_query(q))["results"]["bindings"][0][value]["value"])
 
 
-def get_runs_configuration_from_datastore(store: str, n_repetitions: int=1):
+def get_runs_configuration_from_datastore(n_repetitions: int=1):
     """
     Generate a runs_configuration.json file containing the statistics and probabilities of each required parameter
     for the creation of a synthetic DB. This will be obtaining by launching SPARQL queries to the specified store type
@@ -169,40 +164,35 @@ def get_runs_configuration_from_datastore(store: str, n_repetitions: int=1):
     """
     sql_db.select_and_start_db(db_option='m')
 
-    serve_KG(skip_oxigraph_initialization=False,
-                 skip_ontologies_upload=False,
-                 skip_db_setup=True,
-                 skip_materialization=False,
-                 store=store)
+    serve_KG(skip_ontologies_upload=False,
+             skip_db_setup=True,
+             skip_materialization=False)
 
-    n_users = get_value_from_query(n_users_query, "n_users", int, store)
-    n_projects = get_value_from_query(n_projects_query, "n_projects", int, store)
-    n_samples = get_value_from_query(n_samples_query, "n_samples", int, store)
+    n_users = asyncio.run(get_value_from_query(n_users_query, "n_users", int))
+    n_projects = asyncio.run(get_value_from_query(n_projects_query, "n_projects", int))
+    n_samples = asyncio.run(get_value_from_query(n_samples_query, "n_samples", int))
 
-    n_substrates = get_value_from_query(n_substrates_query, "n_substrates", int, store)
-    chance_to_have_idea = get_value_from_query(chance_to_have_idea_query, "chance_to_have_idea", float, store)
-    chance_to_have_request_for_synthesis = get_value_from_query(chance_to_have_request_for_synthesis_query, "chance_to_have_request_for_synthesis", float, store)
+    n_substrates = asyncio.run(get_value_from_query(n_substrates_query, "n_substrates", int))
+    chance_to_have_idea = asyncio.run(get_value_from_query(chance_to_have_idea_query, "chance_to_have_idea", float))
+    chance_to_have_request_for_synthesis = asyncio.run(get_value_from_query(chance_to_have_request_for_synthesis_query, "chance_to_have_request_for_synthesis", float))
 
-    chance_to_have_piece = get_value_from_query(chance_to_have_piece_query, "chance_to_have_piece", float, store)
-    max_piece_depth = math.ceil(get_value_from_query(max_piece_depth_query, "max_piece_depth", float, store))
+    chance_to_have_piece = asyncio.run(get_value_from_query(chance_to_have_piece_query, "chance_to_have_piece", float))
+    max_piece_depth = math.ceil(asyncio.run(get_value_from_query(max_piece_depth_query, "max_piece_depth", float)))
 
-    chance_to_have_handover = get_value_from_query(chance_to_have_handover_query, "chance_to_have_handover", float, store)
-    max_handovers = math.ceil(get_value_from_query(max_handovers_query, "max_handovers", float, store))
+    chance_to_have_handover = asyncio.run(get_value_from_query(chance_to_have_handover_query, "chance_to_have_handover", float))
+    max_handovers = math.ceil(asyncio.run(get_value_from_query(max_handovers_query, "max_handovers", float)))
 
-    chance_to_have_measurement_in_main_sample = get_value_from_query(chance_to_have_measurement_in_main_sample_query,
-                                                                  "chance_to_have_measurement_in_main_sample", float, store)
-    max_measurements_in_main_samples = math.ceil(get_value_from_query(max_measurements_in_main_samples_query,
-                                                                     "max_measurements_in_main_samples", float,
-                                                                     store))
-    chance_to_have_measurement_in_sample_piece = get_value_from_query(chance_to_have_measurement_in_sample_piece_query,
-                                                         "chance_to_have_measurement_in_sample_piece", float, store)
-    max_measurements_in_sample_pieces = math.ceil(get_value_from_query(max_measurements_in_sample_pieces_query,
-                                                            "max_measurements_in_sample_pieces", float,
-                                                            store))
+    chance_to_have_measurement_in_main_sample = asyncio.run(get_value_from_query(chance_to_have_measurement_in_main_sample_query,
+                                                                  "chance_to_have_measurement_in_main_sample", float))
+    max_measurements_in_main_samples = math.ceil(asyncio.run(get_value_from_query(max_measurements_in_main_samples_query,
+                                                                     "max_measurements_in_main_samples", float)))
+    chance_to_have_measurement_in_sample_piece = asyncio.run(get_value_from_query(chance_to_have_measurement_in_sample_piece_query,
+                                                         "chance_to_have_measurement_in_sample_piece", float))
+    max_measurements_in_sample_pieces = math.ceil(asyncio.run(get_value_from_query(max_measurements_in_sample_pieces_query,
+                                                            "max_measurements_in_sample_pieces", float)))
 
-    chance_for_EDX_measurement = get_value_from_query(chance_for_EDX_measurement_query,
-                                                            "chance_for_EDX_measurement", float,
-                                                            store)
+    chance_for_EDX_measurement = asyncio.run(get_value_from_query(chance_for_EDX_measurement_query,
+                                                            "chance_for_EDX_measurement", float))
 
     logging.info("Completed! Resetting datastores...")
     stop_datastores(args, sql_db)
@@ -364,16 +354,11 @@ def get_runs_configuration_from_file(f):
 
 
 def stop_datastores(args, sql_db: MSSQLDB):
-    if args.store == "oxigraph":
-        logging.info("Stopping and removing Oxigraph container...")
-        OxigraphRDFDatastore().stop_oxigraph()
-    elif args.store == "virtuoso":
-        logging.info("Clearing Virtuoso...")
-        VirtuosoRDFDatastore().clear_triples()
-        logging.info("Stopping Virtuoso...")
-        VirtuosoRDFDatastore().stop_virtuoso()
-        logging.info("Starting Virtuoso...")
-        VirtuosoRDFDatastore().start_virtuoso()
+    logging.info("Clearing datastore...")
+    asyncio.run(rdf_datastore_client.clear_triples())
+
+    logging.info("Restarting datastore...")
+    asyncio.run(rdf_datastore_client.restart_datastore())
 
     sql_db.stop_DB()
 
@@ -438,13 +423,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "--store",
-        choices=["oxigraph", "virtuoso"],
-        required=True,
-        help="RDF store to use. Possible values: 'oxigraph' or 'virtuoso'"
-    )
-
-    parser.add_argument(
         "--log_file",
         required=True,
         help="Path of the log file to resume experiments from and store results"
@@ -474,7 +452,7 @@ if __name__ == "__main__":
         logging.info("""No runs configuration file indicated.
         Materializing CRC1625 KG to obtain statistics for the synthetic data generation...""")
 
-        runs_config = get_runs_configuration_from_datastore(args.store, 3)
+        runs_config = get_runs_configuration_from_datastore(3)
     else:
         runs_config = get_runs_configuration_from_file(args.runs_configuration_file)
 
@@ -541,15 +519,13 @@ if __name__ == "__main__":
                     )
 
                 mappings_performance_log, resource_usage_mappings, performance_log_postprocessing, resource_usage_postprocessing,  file_upload_time = (
-                    serve_KG(skip_oxigraph_initialization=False,
-                             skip_ontologies_upload=False,
+                    serve_KG(skip_ontologies_upload=False,
                              skip_db_setup=True,
                              skip_materialization=False,
-                             run_only_sql_queries=args.evaluate_only_sql_queries,
-                             store=args.store))
+                             run_only_sql_queries=args.evaluate_only_sql_queries))
 
                 if not args.evaluate_only_sql_queries:
-                    n_triples = get_value_from_query(count_triples_query, "n_triples", int, args.store)
+                    n_triples = get_value_from_query(count_triples_query, "n_triples", int)
 
                     postprocessing_time = sum([time for time in performance_log_postprocessing.values()])
 
@@ -560,11 +536,8 @@ if __name__ == "__main__":
 
                     logging.info(f"Benchmarking query times...")
 
-                    if args.store == "virtuoso":
-                        datastore = VirtuosoRDFDatastore()
-                    else:
-                        datastore = OxigraphRDFDatastore()
-                    query_benchmark_results = run_querying_benchmark(datastore)
+                
+                    query_benchmark_results = run_querying_benchmark()
                 else:
                     n_triples = 0
                     query_benchmark_results = {}

@@ -61,13 +61,15 @@ class MSSQLDB():
         """
         Executes a query and writes results to a CSV file
         """
+        df = pd.read_sql(query, create_engine(f'mssql+pymssql://{MSSQL_USER}:{MSSQL_PASSWORD.replace("@", "%40")}@{MSSQL_HOST}:{MSSQL_PORT}/RUB_INF'))
+        if not df.empty:
+            str_cols = df.select_dtypes(include=['object', 'string']).columns
+            df[str_cols] = df[str_cols].replace({r'[\r\n]+': ' '}, regex=True)
+            df.to_csv(csv_filename, index=False, encoding='utf-8')
+        else:
+            logging.warning(f'A .csv query returned no results: {csv_filename}')
+            df.to_csv(csv_filename, index=False, encoding='utf-8')
 
-        df = pd.read_sql(query, create_engine('mssql+pymssql://SA:DebugPassword123%40@localhost:1433/RUB_INF'))
-        str_cols = df.select_dtypes(include=['object', 'string']).columns
-        df[str_cols] = df[str_cols].replace({r'[\r\n]+': ' '}, regex=True)
-
-
-        df.to_csv(csv_filename, index=False, encoding='utf-8')
 
     def clear_data_dir(self):
         if not os.path.exists(self.DATA_DIR):
@@ -215,6 +217,7 @@ class MSSQLDB():
             user=MSSQL_USER,
             password=MSSQL_PASSWORD,
             database=MSSQL_CRC1625_DATABASE_NAME,
+            autocommit=True
         )
         cursor = conn.cursor()
 
@@ -242,6 +245,7 @@ class MSSQLDB():
             user=MSSQL_USER,
             password=MSSQL_PASSWORD,
             database=MSSQL_CRC1625_DATABASE_NAME,
+            autocommit=True
         )
         cursor = conn.cursor()
 
@@ -273,7 +277,8 @@ class MSSQLDB():
             port=MSSQL_PORT,
             user=MSSQL_USER,
             password=MSSQL_PASSWORD,
-            database=MSSQL_CRC1625_DATABASE_NAME,
+            database=MSSQL_MASTER_DATABASE_NAME,
+            autocommit=True
         )
         cursor = conn.cursor()
 
