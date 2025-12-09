@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 import aiorwlock
 import httpx
 
-from .rdf_datastore_client import UpdateType
+from kg_construction_and_validation.datastores.rdf.rdf_datastore import RDFDatastore, GRAPH_IRI, UpdateType
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -31,18 +31,20 @@ VIRTUOSO_USER = os.environ.get("VIRTUOSO_USER")
 VIRTUOSO_PASS = os.environ.get("VIRTUOSO_PASS")
 ODBC_PORT = os.environ.get("VIRTUOSO_ODBC_PORT")
 
-GRAPH_IRI = "https://crc1625.mdi.ruhr-uni-bochum.de/graph"
+
 HOST_DATA_DIR = os.path.join(module_dir, "../../../virtuoso/data")
 CONTAINER_DATA_DIR = "/data"
 
-
-class VirtuosoRDFDatastore():
+class VirtuosoRDFDatastore(RDFDatastore):
     """
     Wrapper for a Virtuoso instance deployed as a local docker container
 
     All methods are fully async
     """
+
     def __init__(self, *args, **kwargs):
+        super().__init__()
+
         # We lock everything with a read-write mutex to prevent deadlocks when using the web apps
         self.rwlock = aiorwlock.RWLock()
 
@@ -71,10 +73,10 @@ class VirtuosoRDFDatastore():
 
     async def launch_updates(self,
                              actions: list[tuple[str, UpdateType]],
-                             graph_iri="",
+                             graph_iri: str = GRAPH_IRI,
                              delete_files_after_upload: bool = False):
         """
-        Launches a set of update queries with an exclusive lock (~ a transaction)
+        Launches a set of update queries with an exclusive lock
         """
         async with self.rwlock.writer_lock:
             for (action, update_type) in actions:
@@ -88,6 +90,9 @@ class VirtuosoRDFDatastore():
                                            use_lock=False)
 
     async def launch_update(self, query: str, use_lock=True):
+        """
+        Launches a single update query
+        """
         context_manager = self.rwlock.writer_lock if use_lock else nullcontext()
         async with context_manager:
             result = await httpx.AsyncClient(timeout=None).post(
@@ -137,7 +142,7 @@ class VirtuosoRDFDatastore():
 
     async def bulk_file_load(self,
                              file_paths: list[str],
-                             graph_iri=GRAPH_IRI,
+                             graph_iri:str = GRAPH_IRI,
                              delete_files_after_upload=False,
                              use_lock=True):
         """
@@ -179,7 +184,11 @@ class VirtuosoRDFDatastore():
                 for file in registered_file_paths:
                     os.remove(file)
 
-    async def upload_file(self, file, content_type: str | None = None, graph_iri=GRAPH_IRI, delete_file_after_upload=False, use_lock=True):
+    async def upload_file(self,
+                          file: str,
+                          graph_iri: str = GRAPH_IRI,
+                          delete_file_after_upload=False,
+                          use_lock=True):
         """
         Uploads an RDF file to the SPARQL endpoint.
 
@@ -221,7 +230,7 @@ class VirtuosoRDFDatastore():
             else:
                 logging.error(f"Error when dumping triples: {response.status_code}, {response.text}")
 
-    async def clear_triples(self, graph_iri="https://crc1625.mdi.ruhr-uni-bochum.de/graph"):
+    async def clear_triples(self, graph_iri: str = GRAPH_IRI):
         """
         Clear all CRC1625 KG triples from the graph, including its ontologies. The graph IRI can be changed
         to, e.g., clear the workflows graph

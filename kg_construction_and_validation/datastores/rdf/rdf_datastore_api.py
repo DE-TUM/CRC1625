@@ -1,13 +1,13 @@
 import os
 from enum import Enum
-from typing import List, Optional, Tuple, Any, Dict
+from typing import List, Tuple, Dict
 from dotenv import load_dotenv
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Body
 from pydantic import BaseModel
 
-from datastores.rdf.rdf_datastore_client import UpdateType
+from datastores.rdf.rdf_datastore import UpdateType, RDFDatastore
 from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore
 
 module_dir = os.path.dirname(__file__)
@@ -21,8 +21,8 @@ class DatastoreType(Enum):
     QLEVER = "qlever"
 
 
-rdf_store: Optional[Any] = None
-rdf_store_type: DatastoreType = None
+rdf_store: RDFDatastore = VirtuosoRDFDatastore()
+rdf_store_type: DatastoreType = DatastoreType.VIRTUOSO
 app = FastAPI()
 
 
@@ -125,7 +125,8 @@ async def rpc_bulk_file_load(payload: BulkFileUploadRequest):
         await rdf_store.bulk_file_load(
             file_paths = payload.file_paths,
             graph_iri = payload.graph_iri,
-            delete_files_after_upload = payload.delete_files_after_upload
+            delete_files_after_upload = payload.delete_files_after_upload,
+            use_lock=payload.use_lock
         )
 
         return {"status": "success"}
@@ -215,7 +216,8 @@ async def rpc_get_datastore_type() -> Dict[str, str]:
     return {"status": "success", "data": rdf_store_type.value}
 
 
-def run(rdf_store_to_serve: DatastoreType, debug: bool = False):
+def run(rdf_store_to_serve: DatastoreType,
+        debug: bool = False):
     global rdf_store
     global rdf_store_type
 

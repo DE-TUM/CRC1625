@@ -1,16 +1,11 @@
 import asyncio
 import os
-from enum import Enum
 from typing import List, Tuple
 from dotenv import load_dotenv
 
 import httpx
 
-
-class UpdateType(str, Enum):
-    query = "query"
-    file_upload = "file_upload"
-
+from datastores.rdf.rdf_datastore import UpdateType
 
 module_dir = os.path.dirname(__file__)
 load_dotenv(os.path.join(module_dir, '../../.env'))
@@ -134,7 +129,8 @@ async def bulk_file_load(file_paths: list[str],
     payload = {
         "file_paths" : file_paths,
         "graph_iri" : graph_iri,
-        "delete_files_after_upload" : delete_files_after_upload
+        "delete_files_after_upload" : delete_files_after_upload,
+        "use_lock": use_lock
     }
     return await _post("bulk_file_load", payload)
 
