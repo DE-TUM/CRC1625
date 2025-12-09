@@ -8,16 +8,6 @@ from handover_workflows_validation_webui.state import State, ui_elements
 from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_controls import create_graph_controls
 from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_step_controls import \
     create_workflow_instance_step_controls
-from nicegui import ui, run
-
-from datastores.rdf import rdf_datastore_client
-from handover_workflows_validation.handover_workflows_validation import read_workflow_model, WorkflowModel, \
-    get_workflow_instances_of_model, WorkflowInstance, overwrite_workflow_instance
-from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, NodeType
-from handover_workflows_validation_webui.state import State, ui_elements
-from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_controls import create_graph_controls
-from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_step_controls import \
-    create_workflow_instance_step_controls
 
 
 def workflow_model_and_instance_to_nodes_and_edges(workflow_model: WorkflowModel,
@@ -73,7 +63,7 @@ def handle_return_button():
                     ui.label('The workflow model has been modified. Save changes and exit?')
 
                     async def save_and_exit_and_close():
-                        await run.io_bound(overwrite_workflow_instance, State().current_workflow_instance, State().user_id, rdf_datastore_client)
+                        await run.io_bound(overwrite_workflow_instance, State().current_workflow_instance, State().user_id)
                         return_dialog.close()
                         ui.navigate.to('/')
 
@@ -122,7 +112,7 @@ def handle_undo_button():
 
 
 async def handle_save_button():
-    await run.io_bound(overwrite_workflow_instance, State().current_workflow_instance, State().user_id, rdf_datastore_client)
+    await run.io_bound(overwrite_workflow_instance, State().current_workflow_instance, State().user_id)
     State().changes_are_saved = True
     State().workflow_model_history = []
     ui.notify("The changes have been saved", type='positive')
@@ -133,7 +123,7 @@ async def edit_workflow_instance_page(workflow_model_name: str, workflow_instanc
     State().user_id = user_id  # TODO
 
     if State().current_workflow_model is None:  # The page has been reloaded
-        State().current_workflow_model = await read_workflow_model(workflow_model_name, user_id, rdf_datastore_client)
+        State().current_workflow_model = await read_workflow_model(workflow_model_name, user_id)
         State().workflow_instances_of_current_workflow_model = await get_workflow_instances_of_model(workflow_model_name, user_id, rdf_datastore_client)
 
         # results = await asyncio.gather(

@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import os
 
+from datastores.rdf import rdf_datastore_client
 from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore
 from handover_workflows_validation import handover_workflows_validation
 
@@ -19,10 +20,8 @@ module_dir = os.path.dirname(__file__)
 
 
 async def setup_debug_files():
-    store = VirtuosoRDFDatastore()
-
-    await store.clear_triples()
-    await store.clear_triples(handover_workflows_validation.WORKFLOWS_GRAPH_IRI)
+    await rdf_datastore_client.clear_triples()
+    await rdf_datastore_client.clear_triples(handover_workflows_validation.WORKFLOWS_GRAPH_IRI)
 
     ontology_files: list[dict[str, str]] = [
         {
@@ -42,14 +41,14 @@ async def setup_debug_files():
         }
     ]
 
-    await store.bulk_file_load([f["file"] for f in ontology_files], delete_files_after_upload=False)
+    await rdf_datastore_client.bulk_file_load([f["file"] for f in ontology_files], delete_files_after_upload=False)
 
-    await store.upload_file(os.path.join(module_dir, "handover_workflows_validation/validation_test/validation_test_triples_webui.ttl"))
+    await rdf_datastore_client.upload_file(os.path.join(module_dir, "handover_workflows_validation/validation_test/validation_test_triples_webui.ttl"))
 
     test_file_path = os.path.join(module_dir, 'handover_workflows_validation/validation_test/workflow_config_files/')
 
-    await store.upload_file(test_file_path + "workflow_models_webui.ttl", graph_iri=handover_workflows_validation.WORKFLOWS_GRAPH_IRI)
-    await store.upload_file(test_file_path + "workflow_instances_webui.ttl", graph_iri=handover_workflows_validation.WORKFLOWS_GRAPH_IRI)
+    await rdf_datastore_client.upload_file(test_file_path + "workflow_models_webui.ttl", graph_iri=handover_workflows_validation.WORKFLOWS_GRAPH_IRI)
+    await rdf_datastore_client.upload_file(test_file_path + "workflow_instances_webui.ttl", graph_iri=handover_workflows_validation.WORKFLOWS_GRAPH_IRI)
 
 
 if __name__ in {"__main__", "__mp_main__"}:

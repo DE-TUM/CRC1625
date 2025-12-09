@@ -4,12 +4,6 @@ from datastores.rdf import rdf_datastore_client
 from handover_workflows_validation.handover_workflows_validation import get_workflow_model_names_and_creator_user_ids, \
     get_workflow_instances_of_model, read_workflow_model, WorkflowInstance, is_workflow_instance_valid
 from handover_workflows_validation_webui.state import State
-from nicegui import ui, run
-
-from datastores.rdf import rdf_datastore_client
-from handover_workflows_validation.handover_workflows_validation import get_workflow_model_names_and_creator_user_ids, \
-    get_workflow_instances_of_model, read_workflow_model, WorkflowInstance, is_workflow_instance_valid
-from handover_workflows_validation_webui.state import State
 
 
 def edit_handover_workflow_instance_button_click():
@@ -87,8 +81,8 @@ async def create_workflow_models_table(main_content, right_drawer):
     show_table(results_container, workflow_model_table)
 
 
-async def check_and_update_icon(validation_icon_column: ui.column, workflow_model, workflow_instance, rdf_datastore_client):
-    valid = await run.cpu_bound(is_workflow_instance_valid, workflow_model, workflow_instance, rdf_datastore_client)
+async def check_and_update_icon(validation_icon_column: ui.column, workflow_model, workflow_instance):
+    valid = await is_workflow_instance_valid(workflow_model, workflow_instance)
 
     validation_icon_column.clear()
     with validation_icon_column:
@@ -99,7 +93,7 @@ async def check_and_update_icon(validation_icon_column: ui.column, workflow_mode
 
 
 async def handle_workflow_models_table_click(workflow_model_name: str, user_id: int, main_content, right_drawer):
-    State().current_workflow_model = await read_workflow_model(workflow_model_name, user_id, rdf_datastore_client)
+    State().current_workflow_model = await read_workflow_model(workflow_model_name, user_id)
 
     State().workflow_instances_of_current_workflow_model = await get_workflow_instances_of_model(
         workflow_model_name,
@@ -146,7 +140,8 @@ async def handle_workflow_models_table_click(workflow_model_name: str, user_id: 
                     with validation_icon_column:
                         ui.spinner()
 
-                    # check_and_update_icon(validation_icon_column, State().current_workflow_model, workflow_instance, state.store)
+                    # TODO avoid lockups here
+                    await check_and_update_icon(validation_icon_column, State().current_workflow_model, workflow_instance)
 
 
 @ui.page('/')

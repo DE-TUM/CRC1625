@@ -104,7 +104,7 @@ async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
     State().user_id = user_id  # TODO
 
     if State().current_workflow_model is None:  # The page has been reloaded
-        State().current_workflow_model = await read_workflow_model(workflow_model_name, user_id, rdf_datastore_client)
+        State().current_workflow_model = await read_workflow_model(workflow_model_name, user_id)
 
     ui.label(f"Editing Workflow Model '{workflow_model_name}'").classes('text-2xl font-bold mb-4')
     with ui.grid(columns=3):

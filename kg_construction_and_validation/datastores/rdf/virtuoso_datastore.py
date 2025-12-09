@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 import aiorwlock
 import httpx
 
-from kg_construction_and_validation.datastores.rdf.rdf_datastore import RDFDatastore, GRAPH_IRI, UpdateType
+from datastores.rdf.rdf_datastore import RDFDatastore, GRAPH_IRI, UpdateType
 
 logging.basicConfig(
     stream=sys.stdout,

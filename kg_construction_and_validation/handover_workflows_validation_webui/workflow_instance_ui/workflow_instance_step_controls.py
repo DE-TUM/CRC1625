@@ -15,7 +15,7 @@ async def add_edge_action(step_name: str | None,
     State().save_workflow_model_copy()
 
     ui_elements.graph_component.add_edge(step_name, object_id)
-    State().current_workflow_instance.step_assignments[step_name].append(object_id)
+    State().current_workflow_instance.step_assignments[step_name].append(int(object_id))
 
     ui.notify(f"Assigned Materials Library / Sample ID '{object_id}' to step '{step_name}'", type='positive')
 
@@ -32,7 +32,7 @@ async def remove_edge_action(step_name: str,
     State().save_workflow_model_copy()
 
     ui_elements.graph_component.remove_edge(step_name, object_id)
-    State().current_workflow_instance.step_assignments[step_name].remove(object_id)
+    State().current_workflow_instance.step_assignments[step_name].remove(int(object_id))
 
     ui.notify(f"Removed assignment of Materials Library / Sample ID '{object_id}' from step '{step_name}'",
               type='positive')

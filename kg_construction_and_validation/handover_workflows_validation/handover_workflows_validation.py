@@ -25,7 +25,8 @@ from dataclasses import dataclass, field
 from pyshacl import validate
 from rdflib import Graph, URIRef, Literal, Namespace, XSD
 
-from datastores.rdf import rdf_datastore_client, UpdateType
+from datastores.rdf import rdf_datastore_client
+from datastores.rdf.rdf_datastore import UpdateType
 
 WORKFLOWS_GRAPH_IRI = "https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows"
 
@@ -266,7 +267,7 @@ async def get_activity_type(entity_iri: str):
         return str(pmdco_prefix.AnalysingProcess)  # It's an "Others" activity
 
 
-async def get_workflow_model_names_and_creator_user_ids(rdf_datastore_client) -> list[tuple[str, int]]:
+async def get_workflow_model_names_and_creator_user_ids() -> list[tuple[str, int]]:
     workflow_models_list: list[tuple[str, int]] = []
 
     query = get_workflow_model_names_and_creators_query
