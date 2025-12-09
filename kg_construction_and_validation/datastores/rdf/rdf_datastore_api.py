@@ -1,4 +1,5 @@
 import os
+import uuid
 from enum import Enum
 from typing import List, Tuple, Dict
 from dotenv import load_dotenv
@@ -36,27 +37,28 @@ class UpdateAction(BaseModel):
 
 
 class UpdatesRequest(BaseModel):
-    actions: List[Tuple[str, UpdateType]]
+    actions: List[Tuple[str, UpdateType, str | None]]
     graph_iri: str = ""
-    delete_files_after_upload: bool = False
 
 
 class FileUploadRequest(BaseModel):
-    file_path: str
+    file_as_str: str
+    file_extension: str
     graph_iri: str = "https://crc1625.mdi.ruhr-uni-bochum.de/graph"
-    delete_files_after_upload: bool = False
 
 
 class BulkFileUploadRequest(BaseModel):
-    file_paths: List[str]
+    files_as_str: List[Tuple[str, str]]
     graph_iri: str = "https://crc1625.mdi.ruhr-uni-bochum.de/graph"
-    delete_files_after_upload: bool = False
     use_lock: bool = True
 
 
 class DumpRequest(BaseModel):
     output_file: str = "datastore_dump.nt"
 
+
+def get_random_file_name(file_extension: str):
+    return f"{uuid.uuid4()}.{file_extension}"
 
 @app.post("/launch_query")
 async def rpc_launch_query(payload: QueryRequest):
@@ -78,10 +80,19 @@ async def rpc_launch_updates(payload: UpdatesRequest):
     mechanism if any of the updates fails
     """
     try:
+        actions = []
+        for query_or_file_str, update_type, file_extension_or_none in payload.actions:
+            if update_type == UpdateType.query:
+                actions.append((query_or_file_str, update_type))
+            else:
+                random_filename = get_random_file_name(file_extension_or_none)
+                open(f"{random_filename}", "w").write(query_or_file_str)
+                actions.append((random_filename, update_type))
+
         await rdf_store.launch_updates(
-            payload.actions,
+            actions,
             graph_iri=payload.graph_iri,
-            delete_files_after_upload=payload.delete_files_after_upload
+            delete_files_after_upload=True # We write a tempfile at the virtuoso endpoint
         )
 
         return {"status": "success"}
@@ -100,10 +111,13 @@ async def rpc_upload_file(payload: FileUploadRequest):
           are uploaded for now
     """
     try:
+        random_filename = get_random_file_name(payload.file_extension)
+        open(f"{random_filename}", "w").write(payload.file_as_str)
+
         await rdf_store.upload_file(
-            file=payload.file_path,
+            file=random_filename,
             graph_iri=payload.graph_iri,
-            delete_file_after_upload=payload.delete_files_after_upload
+            delete_file_after_upload=True # We write a tempfile at the virtuoso endpoint
         )
 
         return {"status": "success"}
@@ -122,10 +136,16 @@ async def rpc_bulk_file_load(payload: BulkFileUploadRequest):
           are uploaded for now
     """
     try:
+        file_paths = []
+        for file_as_str, extension in payload.files_as_str:
+            random_filename = get_random_file_name(extension)
+            open(f"{random_filename}", "w").write(file_as_str)
+            file_paths.append(random_filename)
+
         await rdf_store.bulk_file_load(
-            file_paths = payload.file_paths,
+            file_paths = file_paths,
             graph_iri = payload.graph_iri,
-            delete_files_after_upload = payload.delete_files_after_upload,
+            delete_files_after_upload = True, # We write a tempfile at the virtuoso endpoint
             use_lock=payload.use_lock
         )
 

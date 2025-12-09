@@ -21,8 +21,7 @@ The whole Knowledge Graph creation and testing pipeline is designed to work unde
 - `Python >= 3.13.7`: The required libraries are provided in `../requirements.txt`, using a `conda` environment with the `conda-forge` channel
 - `Docker`: The scripts will set up local containers of the MSSQL DB for MatInf and, optionally, of `Oxigraph`.
 - `RMLMapper` `RMLStreamer`: `.jar` executables of `RMLMapper` and `RMLStreamer` are needed. The `setup_files.sh` script can be used to retrieve and set them up.
-- A `.env` file containing login and endpoint details. An example file can be found in `example.env`.
-- TODO: Start the RDF client/server module
+- An `.env` file containing login and endpoint details. An example file can be found in `example.env`.
 
 ### `Virtuoso` requirements
 The system requires a local `Virtuoso` docker container that:
@@ -32,8 +31,7 @@ The system requires a local `Virtuoso` docker container that:
 - Has as its container name `virtuoso_CRC_1625`
 
 - Employs the [../virtuoso/data](../virtuoso/data) directory as the mountpoint for `/data` inside
-the container. This is **required** as the system will store and attempt to upload serialized RDF triples from there. This 
-folder must always be locally accessible by any of the modules through any means (TODO: Pending to change to remote file uploads).
+the container. This is **required** as the system will store and attempt to upload serialized RDF triples from there.
 
 - Exposes a SPARQL endpoint with read and write permissions at http://127.0.0.1:8891.
 
@@ -48,6 +46,7 @@ folder must always be locally accessible by any of the modules through any means
 
 ## Usage
 The following CLI applications are offered, offering documentation with the `-h / --help` parameter:
+- `run_rdf_datastore_API.py`: A lightweight HTTP API that communicates with an RDF datastore (e.g. Virtuoso) and serves requests to the rest of this system's modules. This module, alongside the underlying RDF datastore, can be located in a different system than the rest of the below modules and the SQL store. Their endpoints are controlled in the `.env` file.
 - `main.py`: Executes the complete YARRRML mappings pipeline over a specified database backup. Note that the production database is not offered, but all DB backups used for testing are available.
 - `run_mappings_output_test.py`: Performs a correctness test of the YARRRML mappings
 - `run_handover_workflows_validation_test.py`: Performs an experimental workflows validation correctness test.
