@@ -21,10 +21,10 @@ The whole Knowledge Graph creation and testing pipeline is designed to work unde
 - `Python >= 3.13.7`: The required libraries are provided in `../requirements.txt`, using a `conda` environment with the `conda-forge` channel
 - `Docker`: The scripts will set up local containers of the MSSQL DB for MatInf and, optionally, of `Oxigraph`.
 - `RMLMapper` `RMLStreamer`: `.jar` executables of `RMLMapper` and `RMLStreamer` are needed. The `setup_files.sh` script can be used to retrieve and set them up.
-- An `.env` file containing login and endpoint details. An example file can be found in `example.env`.
+- An `.env` file containing login and endpoint details, located in this folder. An example file can be found in `example.env`.
 
 ### `Virtuoso` requirements
-The system requires a local `Virtuoso` docker container that:
+If chosen, the system requires a local `Virtuoso` docker container that:
 
 - Employs the following [image](https://hub.docker.com/r/zenontum/virtuoso-sparql-samuel).
 
@@ -43,6 +43,10 @@ the container. This is **required** as the system will store and attempt to uplo
 
 #### The following configuration tweaks are **recommended**:
   - General performance tweaks are also recommended, such as increasing its maximum allowed memory usage. The `virtuoso.ini` file we employed for all our experiments is also [available](../virtuoso/virtuoso.ini).
+
+### `Qlever` requirements
+The Qlever setup is for now simpler but set to change in the future due to it being under heavy development. We only require filling endpoint and authentication details in the `.env` file.
+The system will internally call the `qlever-control` to manage the datastore as a `Docker` container.
 
 ## Usage
 The following CLI applications are offered, offering documentation with the `-h / --help` parameter:
