@@ -43,7 +43,6 @@ delete_handover_workflow_instance_query = prefixes + open(os.path.join(module_di
 clean_handover_workflow_instance_steps_query = prefixes + open(os.path.join(module_dir, 'queries/clean_handover_workflow_instance_steps.sparql'), 'r').read()
 workflow_model_details_query = prefixes + open(os.path.join(module_dir, 'queries/workflow_model_details.sparql'), 'r').read()
 workflow_instance_details_query = prefixes + open(os.path.join(module_dir, 'queries/workflow_instance_details.sparql'), 'r').read()
-get_label_query = prefixes + open(os.path.join(module_dir, 'queries/get_label.sparql'), 'r').read()
 get_activity_type_query = prefixes + open(os.path.join(module_dir, 'queries/get_activity_type.sparql'), 'r').read()
 get_workflow_model_names_and_creators_query = prefixes + open(os.path.join(module_dir, 'queries/get_workflow_model_names_and_creators.sparql'), 'r').read()
 get_workflow_model_names_from_user_query = prefixes + open(os.path.join(module_dir, 'queries/get_workflow_model_names_from_user.sparql'), 'r').read()
@@ -192,7 +191,7 @@ class WorkflowModel:
     Once this is integrated into a UI, they can be uniquely identified by a combination of name, username
     and/or creation date
     """
-    workflow_model_name: str = ""
+    workflow_model_name: str = field(default_factory=str)
 
     workflow_model_options: WorkflowModelOptions = field(default_factory=WorkflowModelOptions)
     workflow_model_steps: dict[str, WorkflowModelStep] = field(default_factory=dict)
@@ -238,16 +237,6 @@ def uuid_for_name(name: str, user_id: int):
     models and instances
     """
     return str(uuid.uuid5(uuid.NAMESPACE_DNS, name + (str(user_id))))
-
-
-async def get_label(entity_iri: str):
-    """
-    Returns the label of an entity in the workflows named graph
-    """
-    query = get_label_query.replace("{entity_iri}", entity_iri)
-    result = await rdf_datastore_client.launch_query(query)
-
-    return result["results"]["bindings"][0]["label"]["value"]
 
 
 async def get_activity_type(entity_iri: str):
@@ -309,22 +298,34 @@ async def read_workflow_model(workflow_model_name: str, user_id: int) -> None | 
     if not data:
         return None
 
+    labels_dict = dict()
+    # Get the labels of everything first
+    for binding in data:
+        s = binding["s"]["value"]
+        p = binding["p"]["value"]
+        o = Literal(binding["o"]["value"], datatype=binding["o"].get("datatype")).toPython()
+
+        if p == 'http://www.w3.org/2000/01/rdf-schema#label':
+            if "step" not in s:
+                workflow_model.workflow_model_name = o # Set it directly
+            else:
+                labels_dict[s] = o
+
+
     for binding in data:
         s = binding["s"]["value"]
         p = binding["p"]["value"]
         o = Literal(binding["o"]["value"], datatype=binding["o"].get("datatype")).toPython()
 
         if "step" not in s:
-            if "label" in p:
-                workflow_model.workflow_model_name = o
-            elif p in workflow_model_iri_to_config:
+            if p in workflow_model_iri_to_config:
                 if "initial_step" in workflow_model_iri_to_config[p]:
-                    workflow_model.workflow_model_options.initial_step_name = await get_label(o)  # TODO limit the use of this
-                else:
+                    workflow_model.workflow_model_options.initial_step_name = labels_dict[o]
+                elif p != 'http://www.w3.org/2000/01/rdf-schema#label': # We already set it, and the label is not an option
                     workflow_model.workflow_model_options.set_option(workflow_model_iri_to_config[p], o)
 
         else:  # It's a step
-            step_name = await get_label(s)
+            step_name = labels_dict[s]
             if step_name not in workflow_model.workflow_model_steps:
                 workflow_model.workflow_model_steps[step_name] = WorkflowModelStep()
 
@@ -332,7 +333,7 @@ async def read_workflow_model(workflow_model_name: str, user_id: int) -> None | 
             if p in workflow_model_step_iri_to_config:
                 match workflow_model_step_iri_to_config[p]:
                     case "next_steps":
-                        workflow_step.next_steps.add(await get_label(o))
+                        workflow_step.next_steps.add(labels_dict[o])
                     case "projects":
                         workflow_step.projects.append(o.rsplit("/", 1)[-1])
                     case "required_activities":
