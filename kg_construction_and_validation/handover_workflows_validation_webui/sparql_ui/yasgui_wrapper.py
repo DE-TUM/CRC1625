@@ -51,7 +51,7 @@ def yasgui_frame_page():
                 width: 100%;
                 margin: 0; /* Remove default body margins */
                 padding: 0;
-                overflow: hidden; /* Prevent double scrollbars */
+                overflow: auto; 
             }}
         </style>
 
@@ -91,23 +91,21 @@ def yasgui_frame_page():
 async def main_page():
     ui.page_title('CRC 1625 SPARQL Endpoint')
 
-    with ui.column().classes('w-full h-screen flex'):
-        with ui.row().classes('w-full flex-grow p-4'):
+    with ui.column().classes('w-full h-screen overflow-hidden flex'):
+        with ui.row().classes('w-full h-full flex-grow overflow-hidden'):
             iframe_html = """
                     <iframe 
                         src="/yasgui_frame"
-                        style="width: 100%; height: 100%; border: none; border-radius: 0.25rem;"
+                        style="width: 100%; height: 100%; border: none; border-radius: 0.25rem; overflow: hidden;"
                         title="YASGUI SPARQL Editor"
                     ></iframe>
                 """
 
             ui.html(iframe_html, sanitize=False).classes('w-full h-full flex-grow')
 
-    with ui.header(elevated=True).style('background-color: #3874c8').classes('items-center justify-between'):
-        ui.label('SPARQL Query Interface').classes('text-2xl font-bold')
+    with ui.header(elevated=True).style('background-color: #17365c').classes('items-center justify-between p-2 h-15'):
+        ui.label(f"CRC 1625 SPARQL endpoint").classes('text-xl font-medium')
 
-    with ui.footer().style('background-color: #3874c8'):
-        ui.label('© 2025-2027 - CRC 1625 Knowledge Graph (WIP)')
-
-    with ui.page_scroller(position='bottom-right', x_offset=20, y_offset=20):
-        ui.button('Scroll to Top')
+    with ui.footer().style('background-color: #17365c').classes('items-center justify-between p-2 h-15'):
+        ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-xl font-medium')
+        ui.image('/assets/crc_logo_white_letters.png').classes('w-15')

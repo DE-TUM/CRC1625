@@ -21,6 +21,7 @@ users from the actual representation of the workflows.
 import os
 import uuid
 from dataclasses import dataclass, field
+import time
 
 from pyshacl import validate
 from rdflib import Graph, URIRef, Literal, Namespace, XSD
@@ -310,7 +311,6 @@ async def read_workflow_model(workflow_model_name: str, user_id: int) -> None | 
                 workflow_model.workflow_model_name = o # Set it directly
             else:
                 labels_dict[s] = o
-
 
     for binding in data:
         s = binding["s"]["value"]
@@ -811,9 +811,12 @@ async def validate_SHACL_rules(steps_to_validate: list[(WorkflowModelStep, str, 
         shacl_graph = Graph()
         shacl_graph.parse(data=shacl_rules, format="turtle")
 
+        time_start = time.monotonic()
         if object_id not in sample_ttls:
             sample_ttls[object_id] = await get_ttl_for_sample(object_id)
+        print("get ttl for sample:", time.monotonic() - time_start)
 
+        time_start = time.monotonic()
         conforms, results_graph, results_text = validate(data_graph=sample_ttls[object_id],
                                                          shacl_graph=shacl_graph,
                                                          ont_graph=ont_graph,
@@ -826,6 +829,8 @@ async def validate_SHACL_rules(steps_to_validate: list[(WorkflowModelStep, str, 
                                                          js=False,
                                                          debug=False)
         results.append((workflow_step, workflow_step_name, object_id, target_node, shacl_rules, conforms, results_text))
+
+        print("run SHACL:", time.monotonic() - time_start)
 
     for path_to_ttl in sample_ttls.values():
         os.remove(path_to_ttl)

@@ -105,7 +105,13 @@ async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
     if State().current_workflow_model is None:  # The page has been reloaded
         State().current_workflow_model = await read_workflow_model(workflow_model_name, user_id)
 
-    ui.label(f"Editing Workflow Model '{workflow_model_name}'").classes('text-2xl font-bold mb-4')
+    with ui.header(elevated=True).style('background-color: #17365c').classes('items-center justify-between p-2 h-15'):
+        ui.label(f"Editing Workflow Model '{workflow_model_name}'").classes('text-2xl font-bold mb-4')
+
+    with ui.footer().style('background-color: #17365c').classes('items-center justify-between p-2 h-15'):
+        ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-xl font-medium')
+        ui.image('/assets/crc_logo_white_letters.png').classes('w-15')
+
     with ui.grid(columns=3):
         with ui.column(align_items='stretch'):
             ui.button('Return to main page', on_click=handle_return_button)

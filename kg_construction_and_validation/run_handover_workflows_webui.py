@@ -12,12 +12,13 @@ import handover_workflows_validation_webui.workflow_model_ui.edit_workflow_model
 import handover_workflows_validation_webui.main_page
 import handover_workflows_validation_webui.sparql_ui.yasgui_wrapper
 
-from nicegui import ui
+from nicegui import ui, app
 
 from handover_workflows_validation_webui import state
 
 module_dir = os.path.dirname(__file__)
 
+ASSETS_FOLDER = os.path.join(module_dir, 'handover_workflows_validation_webui/assets/')
 
 async def setup_debug_files():
     await rdf_datastore_client.clear_triples()
@@ -69,6 +70,8 @@ if __name__ in {"__main__", "__mp_main__"}:
         asyncio.run(setup_debug_files())
         uvicorn_logging_level = 'debug'
         access_log = True
+
+    app.add_static_files("/assets", ASSETS_FOLDER)
 
     ui.run(title="CRC1625 Handover workflows validation prototype",
            reload=args.debug,

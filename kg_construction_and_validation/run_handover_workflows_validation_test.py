@@ -13,6 +13,7 @@ import asyncio
 import logging
 import os
 import sys
+import time
 import traceback
 
 from datastores.rdf import rdf_datastore_client
@@ -50,10 +51,18 @@ async def run_test(path: str,
     await rdf_datastore_client.upload_file(path + "_workflow_model.ttl", graph_iri=WORKFLOWS_GRAPH_IRI)
     await rdf_datastore_client.upload_file(path + "_workflow_instance.ttl", graph_iri=WORKFLOWS_GRAPH_IRI)
 
+    time_start = time.monotonic()
     workflow_model = await read_workflow_model("example_workflow", 1)
-    workflow_instance = list((await get_workflow_instances_of_model("example_workflow", 1)).values())[0] # There's only one, no need to look it up
+    print("read workflow model:", time.monotonic() - time_start)
 
+    time_start = time.monotonic()
+    workflow_instance = list((await get_workflow_instances_of_model("example_workflow", 1)).values())[0] # There's only one, no need to look it up
+    print("read workflow instances:", time.monotonic() - time_start)
+
+    time_start = time.monotonic()
     steps_to_validate = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance)
+    print("generate shapes:", time.monotonic() - time_start)
+
     results = await validate_SHACL_rules(steps_to_validate)
 
     for (workflow_step, workflow_step_name, sample_id, target_node, shacl_rules, conforms, results_text) in results:

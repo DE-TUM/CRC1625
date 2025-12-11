@@ -136,8 +136,13 @@ async def edit_workflow_instance_page(workflow_model_name: str, workflow_instanc
 
     State().calculate_existing_objects()
 
-    ui.label(f"Editing Workflow Instance '{State().current_workflow_instance.workflow_instance_name}'").classes(
-        'text-2xl font-bold mb-4')
+    with ui.header(elevated=True).style('background-color: #17365c').classes('items-center justify-between p-2 h-15'):
+        ui.label(f"Editing Workflow Instance '{State().current_workflow_instance.workflow_instance_name}'").classes('text-2xl font-bold mb-4')
+
+    with ui.footer().style('background-color: #17365c').classes('items-center justify-between p-2 h-15'):
+        ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-xl font-medium')
+        ui.image('/assets/crc_logo_white_letters.png').classes('w-15')
+
     with ui.grid(columns=3):
         with ui.column(align_items='stretch'):
             ui.button('Return to main page', on_click=lambda: handle_return_button())

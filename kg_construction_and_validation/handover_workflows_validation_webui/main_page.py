@@ -87,6 +87,7 @@ async def check_and_update_icon(validation_icon_column: ui.column, workflow_mode
     with validation_icon_column:
         if valid:
             ui.icon('check_circle').classes('text-green-6')
+            #ui.image('/assets/heppy.png').classes('w-8')
         else:
             ui.icon('error').classes('text-red-6')
 
@@ -99,13 +100,6 @@ async def handle_workflow_models_table_click(workflow_model_name: str, user_id: 
         user_id
     )
 
-    # results = await asyncio.gather(
-    #    read_workflow_model_task,
-    #    get_workflow_instances_of_model_task
-    # )
-
-    # State().current_workflow_model = read_workflow_model_task #results[0]
-    # State().workflow_instances_of_current_workflow_model = await get_workflow_instances_of_model_task #results[1]
     State().user_id = user_id  # TODO where better? + Auth
 
     main_content.clear()
@@ -146,17 +140,19 @@ async def handle_workflow_models_table_click(workflow_model_name: str, user_id: 
 async def main_page():
     main_content = ui.column().classes('w-full')
 
-    with ui.header(elevated=True).style('background-color: #3874c8').classes('items-center justify-between'):
+    with ui.header(elevated=True).style('background-color: #17365c').classes('items-center justify-between p-2 h-15'):
         ui.label('Handover workflows validation prototype UI').classes('text-2xl font-bold')
 
-    right_drawer = ui.right_drawer(fixed=False).style('background-color: #ebf1fa').props('bordered')
+    with ui.footer().style('background-color: #17365c').classes('items-center justify-between p-2 h-15'):
+        ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-xl font-medium')
+        ui.image('/assets/crc_logo_white_letters.png').classes('w-15')
+
+    right_drawer = ui.right_drawer(fixed=False).style('background-color: #d7e3f4').props('bordered')
     right_drawer.hide()
 
     with ui.left_drawer().style('background-color: #d7e3f4'):
         await create_workflow_models_table(main_content, right_drawer)
 
-    with ui.footer().style('background-color: #3874c8'):
-        ui.label('© 2025-2027 - CRC 1625 Knowleddge Graph (WIP)')
 
     with ui.page_scroller(position='bottom-right', x_offset=20, y_offset=20):
         ui.button('Scroll to Top')
