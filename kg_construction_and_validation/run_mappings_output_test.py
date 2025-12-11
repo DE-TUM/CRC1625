@@ -18,16 +18,15 @@ How to add a test:
 """
 
 import argparse
+import asyncio
 import logging
 import os
 import sys
 
-from datastores.rdf.rdf_datastore_api import RDFDatastore
+from datastores.rdf import rdf_datastore_client
 from main import serve_KG
-from datastores.rdf.oxigraph_datastore import OxigraphRDFDatastore
-from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore
 
-from rdflib import Graph
+from rdflib import Graph, Literal, XSD
 from rdflib.compare import isomorphic, graph_diff
 
 logging.basicConfig(
@@ -40,7 +39,7 @@ logging.basicConfig(
 module_dir = os.path.dirname(__file__)
 
 prefixes = open(os.path.join(module_dir, 'mappings_output_test/queries/prefixes_validation.sparql')).read()
-validate_compositions_query_oxigraph = prefixes + open(os.path.join(module_dir, 'mappings_output_test/queries/validate_compositions_oxigraph.sparql')).read()
+validate_compositions_query = prefixes + open(os.path.join(module_dir, 'mappings_output_test/queries/validate_compositions.sparql')).read()
 validate_compositions_query_virtuoso = prefixes + open(os.path.join(module_dir, 'mappings_output_test/queries/validate_compositions_virtuoso.sparql')).read()
 
 ML_1 = "https://crc1625.mdi.ruhr-uni-bochum.de/object/1"
@@ -65,18 +64,18 @@ test_names = {
 
 }
 
-def validate_compositions(datastore_choice: RDFDatastore):
+def validate_compositions():
     """
     Aside of comparing the compositions in the .ttl files, this test ensures that they are also sound by querying for
     them via SPARQL
     """
     # Each store has some quirks when querying for decimal values
-    if isinstance(datastore_choice, OxigraphRDFDatastore):
-        response = datastore_choice.launch_query(validate_compositions_query_oxigraph)
+    if asyncio.run(rdf_datastore_client.get_datastore_type()) == "virtuoso":
+        response = asyncio.run(rdf_datastore_client.launch_query(validate_compositions_query_virtuoso))
     else:
-        response = datastore_choice.launch_query(validate_compositions_query_virtuoso)
+        response = asyncio.run(rdf_datastore_client.launch_query(validate_compositions_query))
 
-    bindings = response.json()["results"]["bindings"]
+    bindings = response["results"]["bindings"]
 
     MLs = dict()
     for binding in bindings:
@@ -90,50 +89,34 @@ def validate_compositions(datastore_choice: RDFDatastore):
     # the query validates their uniqueness and their values
     return MLs[ML_1] == 342 and MLs[ML_2] == 342
 
-
-def load_ttl_graph(file_path: str) -> Graph:
+def load_ttl_graph(file_path: str, delete_original: bool = False) -> Graph:
     g = Graph()
-    g.parse(file_path, format="ttl")
+
+    g.parse(file_path, format="turtle")
+
+    if delete_original:
+        os.remove(file_path)
+
     return g
 
-
-def load_nt_graph(file_path: str) -> Graph:
-    g = Graph()
-    g.parse(file_path, format="ntriples")
-    return g
+def load_endpoint_graph() -> Graph:
+    asyncio.run(rdf_datastore_client.dump_triples(os.path.join(module_dir, "datastore_dump.nt")))
+    return load_ttl_graph(os.path.join(module_dir, "datastore_dump.nt"), delete_original=True)
 
 
-def load_endpoint_graph(datastore_choice) -> Graph:
-    datastore_choice.dump_triples()
-    return load_nt_graph("datastore_dump.nt")
+def clear_datastores():
+    asyncio.run(rdf_datastore_client.clear_triples())
 
 
-def stop_datastores(store: str):
-    if store == "oxigraph":
-        logging.info("Stopping and removing Oxigraph container...")
-        OxigraphRDFDatastore().stop_oxigraph()
-    else:
-        logging.info("Clearing Virtuoso graph...")
-        VirtuosoRDFDatastore().clear_triples()
-
-
-def run_validation_test(test_key: str,
-                        store: str):
+def run_validation_test(test_key: str):
     logging.info(f"Running test: {test_names[test_key]}")
 
-    serve_KG(skip_oxigraph_initialization=False,
-             skip_ontologies_upload=True,
+    serve_KG(skip_ontologies_upload=True,
              db_option=test_key,
-             skip_materialization=False,
-             store=args.store)
+             skip_materialization=False)
 
     ttl_graph = load_ttl_graph(test_files[test_key])
-    if store == "oxigraph":
-        datastore = OxigraphRDFDatastore()
-        endpoint_graph = load_endpoint_graph(datastore)
-    else:
-        datastore = VirtuosoRDFDatastore()
-        endpoint_graph = load_endpoint_graph(datastore)
+    endpoint_graph = load_endpoint_graph()
 
     logging.info("Comparing the generated KG against the reference...")
     # Use isomorphic function to check equivalence
@@ -142,21 +125,18 @@ def run_validation_test(test_key: str,
 
         if test_key == 'v': # The subtests don't contain measurement data
             logging.info("Validating the compositions...")
-            if validate_compositions(datastore):
+            if validate_compositions():
                 logging.info("Test successful! ＼(＾O＾)／")
 
-                stop_datastores(store)
+                clear_datastores()
                 return True
             else:
-                logging.error(
-                    "The validation check for the compositions was unsuccessful, please check the output of the validation query")
-
-                # stop_datastores(store)
+                logging.error("The validation check for the compositions was unsuccessful, please check the output of the validation query")
                 return False
         else:
             logging.info("Test successful! ＼(＾O＾)／")
 
-            stop_datastores(store)
+            clear_datastores()
             return True
     else:
         logging.info("The validation graph and the materialized graph are different, differences were written to files")
@@ -176,20 +156,12 @@ def run_validation_test(test_key: str,
             for triple in in_second:
                 f2.write(f"{triple}\n")
 
-        stop_datastores(store)
+        clear_datastores()
         return False
-
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "--store",
-        choices=["oxigraph", "virtuoso"],
-        required=True,
-        help="RDF store to use. Possible values: 'oxigraph' or 'virtuoso'"
-    )
 
     parser.add_argument(
         "--test",
@@ -200,15 +172,19 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    if asyncio.run(rdf_datastore_client.get_datastore_type()) == "qlever":
+        logging.warning("WARNING: Running the mappings output test under Qlever is unsupported. "
+                        "Until Qlever correctly serializes datatypes, it will produce mismatches on composition values and thus incorrectly fail the tests.")
+
     if args.test == "all":
         results = {}
 
         for key in test_names.keys():
-            results[key] = run_validation_test(key, args.store)
+            results[key] = run_validation_test(key)
 
         logging.info("Mappings output validation results:")
         for key, res in results.items():
             logging.info(f"{test_names[key]}. Passed: {res}")
     else:
-        run_validation_test(args.test, args.store)
+        run_validation_test(args.test)
 

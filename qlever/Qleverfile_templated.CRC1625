@@ -1,0 +1,27 @@
+[DEFAULT]
+NAME = CRC1625
+
+[data]
+NAME              = CRC1625
+DESCRIPTION       = CRC1625 setup
+
+[index]
+INPUT_FILES      = ./input_dir/*.ttl
+CAT_INPUT_FILES = cat ${INPUT_FILES}
+SETTINGS_JSON   = { "num-triples-per-batch": 1000000 }
+
+[server]
+PORT                        = {QLEVER_PORT}
+MEMORY_FOR_QUERIES          = 4G
+CACHE_MAX_SIZE              = 4G
+CACHE_MAX_SIZE_SINGLE_ENTRY = 3G
+TIMEOUT                     = 600s
+ACCESS_TOKEN                = {ACCESS_TOKEN}
+
+[runtime]
+SYSTEM = docker
+IMAGE  = adfreiburg/qlever
+
+[ui]
+UI_PORT   = 8176
+UI_CONFIG = default

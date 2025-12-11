@@ -1,6 +1,5 @@
 from nicegui import ui, run
 
-from datastores.rdf import rdf_datastore_client
 from handover_workflows_validation.handover_workflows_validation import read_workflow_model, WorkflowModel, \
     get_workflow_instances_of_model, WorkflowInstance, overwrite_workflow_instance
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, NodeType
@@ -63,7 +62,7 @@ def handle_return_button():
                     ui.label('The workflow model has been modified. Save changes and exit?')
 
                     async def save_and_exit_and_close():
-                        await run.io_bound(overwrite_workflow_instance, State().current_workflow_instance, State().user_id)
+                        await overwrite_workflow_instance(State().current_workflow_instance, State().user_id)
                         return_dialog.close()
                         ui.navigate.to('/')
 
@@ -124,7 +123,7 @@ async def edit_workflow_instance_page(workflow_model_name: str, workflow_instanc
 
     if State().current_workflow_model is None:  # The page has been reloaded
         State().current_workflow_model = await read_workflow_model(workflow_model_name, user_id)
-        State().workflow_instances_of_current_workflow_model = await get_workflow_instances_of_model(workflow_model_name, user_id, rdf_datastore_client)
+        State().workflow_instances_of_current_workflow_model = await get_workflow_instances_of_model(workflow_model_name, user_id)
 
         # results = await asyncio.gather(
         #    read_workflow_model_task,

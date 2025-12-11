@@ -47,15 +47,14 @@ async def run_test(path: str,
     is a mismatch, will be stopped and a complete trace will be printed out.
     """
     await rdf_datastore_client.clear_triples(WORKFLOWS_GRAPH_IRI)
-
     await rdf_datastore_client.upload_file(path + "_workflow_model.ttl", graph_iri=WORKFLOWS_GRAPH_IRI)
     await rdf_datastore_client.upload_file(path + "_workflow_instance.ttl", graph_iri=WORKFLOWS_GRAPH_IRI)
 
-    workflow_model = await read_workflow_model("example_workflow", 1, rdf_datastore_client)
-    workflow_instance = list((await get_workflow_instances_of_model("example_workflow", 1, rdf_datastore_client)).values())[0] # There's only one, no need to look it up
+    workflow_model = await read_workflow_model("example_workflow", 1)
+    workflow_instance = list((await get_workflow_instances_of_model("example_workflow", 1)).values())[0] # There's only one, no need to look it up
 
-    steps_to_validate = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance, rdf_datastore_client)
-    results = await validate_SHACL_rules(steps_to_validate, rdf_datastore_client)
+    steps_to_validate = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance)
+    results = await validate_SHACL_rules(steps_to_validate)
 
     for (workflow_step, workflow_step_name, sample_id, target_node, shacl_rules, conforms, results_text) in results:
         if conforms != step_validities[workflow_step_name][sample_id]:
@@ -235,7 +234,6 @@ async def main():
     ]
 
     await rdf_datastore_client.bulk_file_load([f["file"] for f in ontology_files])
-
     try:
         logging.info("Testing example correct workflow...")
         await run_test(os.path.join(module_dir,

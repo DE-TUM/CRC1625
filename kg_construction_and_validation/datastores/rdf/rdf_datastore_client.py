@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 import httpx
 
-from datastores.rdf.rdf_datastore import UpdateType, GRAPH_IRI
+from datastores.rdf.rdf_datastore import UpdateType, MAIN_GRAPH_IRI
 
 module_dir = os.path.dirname(__file__)
 load_dotenv(os.path.join(module_dir, '../../.env'))
@@ -110,10 +110,10 @@ async def launch_updates(actions: List[Tuple[str, UpdateType]],
     return response
 
 async def upload_file(file_path: str,
-                      graph_iri: str = GRAPH_IRI,
+                      graph_iri: str = MAIN_GRAPH_IRI,
                       delete_file_after_upload: bool = False):
     """
-    Uploads a local RDF file to the SPARQL endpoint.
+    Uploads a local RDF file to the SPARQL endpoint. The file must be in turtle (.ttl) format.
 
     If no graph IRI is specified, it will be stored in the CRC 1625 graph.
 
@@ -133,11 +133,11 @@ async def upload_file(file_path: str,
 
 
 async def bulk_file_load(file_paths: list[str],
-                         graph_iri=GRAPH_IRI,
-                         delete_files_after_upload=False,
-                         use_lock=True):
+                         delete_files_after_upload: bool = False,
+                         use_lock: bool = True,
+                         graph_iri: str = MAIN_GRAPH_IRI):
     """
-    Uploads a collection of local RDF files to the SPARQL endpoint.
+    Uploads a collection of local RDF files to the SPARQL endpoint. The files must be in turtle (.ttl) format.
 
     If no graph IRI is specified, it will be stored in the CRC 1625 graph.
 
@@ -157,13 +157,15 @@ async def bulk_file_load(file_paths: list[str],
 
     return response
 
-async def dump_triples(output_file: str = "datastore_dump.nt"): # TODO this is local for now
+async def dump_triples(output_file: str = "datastore_dump.ttl"):
     """
-    Output all triples to the designated file, in Ntriples format
+    Output all triples to the designated file, in turtle (.ttl) format
+
+    WARNING: This is a debugging, local-only function (intended to be run as part of the testing in the same host as the RDF store)
     """
     return await _post("dump_triples", {"output_file": output_file})
 
-async def clear_triples(graph_iri: str = GRAPH_IRI):
+async def clear_triples(graph_iri: str = MAIN_GRAPH_IRI):
     """
     Clears all triples from the graph
     """

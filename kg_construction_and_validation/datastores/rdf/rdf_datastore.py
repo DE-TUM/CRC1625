@@ -1,3 +1,4 @@
+import subprocess
 from abc import ABC, abstractmethod
 from enum import Enum
 
@@ -7,7 +8,8 @@ class UpdateType(str, Enum):
     query = "query"
     file_upload = "file_upload"
 
-GRAPH_IRI = "https://crc1625.mdi.ruhr-uni-bochum.de/graph"
+MAIN_GRAPH_IRI = "https://crc1625.mdi.ruhr-uni-bochum.de/graph"
+WORKFLOWS_GRAPH_IRI = "https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows"
 
 class RDFDatastore(ABC):
     """
@@ -23,7 +25,7 @@ class RDFDatastore(ABC):
     @abstractmethod
     async def launch_updates(self,
                              actions: list[tuple[str, UpdateType]],
-                             graph_iri: str = GRAPH_IRI,
+                             graph_iri: str = MAIN_GRAPH_IRI,
                              delete_files_after_upload: bool = False):
         """
         Launches a set of update queries. They must be run with an exclusive lock (~ a transaction without rollbacks)
@@ -38,7 +40,7 @@ class RDFDatastore(ABC):
 
     async def bulk_file_load(self,
                              file_paths: list[str],
-                             graph_iri=GRAPH_IRI,
+                             graph_iri=MAIN_GRAPH_IRI,
                              delete_files_after_upload=False,
                              use_lock=True):
         """
@@ -52,7 +54,7 @@ class RDFDatastore(ABC):
     @abstractmethod
     async def upload_file(self,
                           file: str,
-                          graph_iri=GRAPH_IRI,
+                          graph_iri=MAIN_GRAPH_IRI,
                           delete_file_after_upload=False,
                           use_lock=True):
         """
@@ -72,7 +74,7 @@ class RDFDatastore(ABC):
         pass
 
     @abstractmethod
-    async def clear_triples(self, graph_iri: str = GRAPH_IRI):
+    async def clear_triples(self, graph_iri: str = MAIN_GRAPH_IRI):
         """
         Clear all CRC1625 KG triples from the graph, including its ontologies. The graph IRI can be changed
         to, e.g., clear the workflows graph
@@ -99,3 +101,33 @@ class RDFDatastore(ABC):
         Restarts the RDF store. An optional timeout can be used to safely wait for its completion.
         """
         pass
+
+    def _is_datastore_docker_container_running(self, container_name: str) -> bool:
+        """
+        Returns True if the datastore's docker container exists and is running, False otherwise.
+        """
+        command = [
+            "docker", "inspect",
+            "--format", "{{.State.Status}}",
+            container_name
+        ]
+
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=5
+        )
+
+        if result.returncode == 0:
+            status = result.stdout.strip()
+            return status == "running"
+        else:
+            return False
+
+    @abstractmethod
+    def is_datastore_running(self) -> bool:
+        """
+        Returns True if the datastore's docker container exists and is running, False otherwise.
+        """

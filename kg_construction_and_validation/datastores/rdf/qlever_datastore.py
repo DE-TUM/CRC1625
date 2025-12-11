@@ -1,12 +1,11 @@
-import glob
+import asyncio
 import logging
 import os
-import shutil
 import subprocess
 import sys
-import time
-from concurrent.futures import as_completed, ThreadPoolExecutor
 from contextlib import nullcontext
+
+import rdflib
 from dotenv import load_dotenv
 
 import aiorwlock
@@ -24,28 +23,38 @@ logging.basicConfig(
 module_dir = os.path.dirname(__file__)
 load_dotenv(os.path.join(module_dir, '../../.env'))
 
-VIRTUOSO_ADDRESS = os.environ.get("VIRTUOSO_ADDRESS")
-QUERY_ENDPOINT = f"{VIRTUOSO_ADDRESS}/sparql"
-UPDATE_ENDPOINT = f"{VIRTUOSO_ADDRESS}/sparql"
-VIRTUOSO_USER = os.environ.get("VIRTUOSO_USER")
-VIRTUOSO_PASS = os.environ.get("VIRTUOSO_PASS")
-ODBC_PORT = os.environ.get("VIRTUOSO_ODBC_PORT")
+QLEVER_PORT = os.environ.get("QLEVER_PORT")
+QLEVER_ENDPOINT = os.environ.get("QLEVER_ADDRESS")
 
+QLEVER_DIR = os.path.join(module_dir, "../../../qlever")
+QLEVER_CONFIG_FILE_NAME = "Qleverfile_templated.CRC1625"
+QLEVER_CONFIG_FILE_PATH = os.path.join(module_dir, "../../../qlever", QLEVER_CONFIG_FILE_NAME)
+COMPLETE_QLEVER_CONFIG_FILE_NAME = "Qleverfile.CRC1625"
+COMPLETE_QLEVER_CONFIG_FILE_PATH = os.path.join(module_dir, "../../../qlever", COMPLETE_QLEVER_CONFIG_FILE_NAME)
 
-HOST_DATA_DIR = os.path.join(module_dir, "../../../virtuoso/data")
-CONTAINER_DATA_DIR = "/data"
+QLEVER_ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
 
-DOCKER_CONTAINER_NAME = "virtuoso_CRC_1625"
+DOCKER_CONTAINER_NAME = "qlever.server.CRC1625"
 
-class VirtuosoRDFDatastore(RDFDatastore):
+class QleverRDFDatastore(RDFDatastore):
     """
-    Wrapper for a Virtuoso instance deployed as a local docker container
+    Wrapper for a Qlever instance deployed as a local docker container. In comparison to the Virtuoso wrapper, we purely use
+    here SPARQL 1.1 and 1.2 alongside some custom auth headers, so it can be used as a template for other fully-spec compliant
+    datastores
 
     All methods are fully async
     """
 
+    def write_complete_qlever_file(self):
+        with open(COMPLETE_QLEVER_CONFIG_FILE_PATH, 'w') as f:
+            f.write(open(QLEVER_CONFIG_FILE_PATH, 'r').read()
+                    .replace('{ACCESS_TOKEN}', QLEVER_ACCESS_TOKEN)
+                    .replace('{QLEVER_PORT}', QLEVER_PORT))
+
     def __init__(self, *args, **kwargs):
         super().__init__()
+
+        self.write_complete_qlever_file()
 
         # We lock everything with a read-write mutex to prevent deadlocks when using the web apps
         self.rwlock = aiorwlock.RWLock()
@@ -55,21 +64,16 @@ class VirtuosoRDFDatastore(RDFDatastore):
         Executes a SPARQL query and returns the HTTP response from the endpoint
         """
         async with self.rwlock.reader_lock:
-            result = await httpx.AsyncClient(timeout=None).post(
-                QUERY_ENDPOINT,
-                # https://github.com/openlink/virtuoso-opensource/issues/950
-                params={"query": "DEFINE sql:signal-void-variables 0\n" + query},
-                # params={
-                #    "query": query,
-                #    "signal_void": "off",
-                #    "signal_unconnected": "off"
-                # },
-                headers={"Accept": "application/sparql-results+json"},
-                auth=(VIRTUOSO_USER, VIRTUOSO_PASS)
+            result = await httpx.AsyncClient(timeout=None).get(
+                QLEVER_ENDPOINT,
+                params={"query": query},
+                headers={
+                    "Authorization": f"Bearer {QLEVER_ACCESS_TOKEN}"
+                }
             )
 
-        if result.is_error:
-            raise RuntimeError(f"Error occurred on query {query}: {result.status_code}, {result.text}")
+            if result.is_error:
+                raise RuntimeError(f"Error occurred on query {query}: {result.status_code}, {result.text}")
 
         return result
 
@@ -78,7 +82,7 @@ class VirtuosoRDFDatastore(RDFDatastore):
                              graph_iri: str = MAIN_GRAPH_IRI,
                              delete_files_after_upload: bool = False):
         """
-        Launches a set of update queries with an exclusive lock. The files must be in turtle (.ttl) format.
+        Launches a set of update queries with an exclusive lock
         """
         async with self.rwlock.writer_lock:
             for (action, update_type) in actions:
@@ -93,54 +97,48 @@ class VirtuosoRDFDatastore(RDFDatastore):
 
     async def launch_update(self, query: str, use_lock=True):
         """
-        Launches a single update query. The file must be in turtle (.ttl) format.
+        Launches a single update query
         """
         context_manager = self.rwlock.writer_lock if use_lock else nullcontext()
         async with context_manager:
             result = await httpx.AsyncClient(timeout=None).post(
-                UPDATE_ENDPOINT,
-                # https://github.com/openlink/virtuoso-opensource/issues/950
-                data=("DEFINE sql:signal-void-variables 0\n" + query).encode("utf-8"),
-                # data=query.encode("utf-8"),
-                # params={
-                #    "signal_void": "off",
-                #    "signal_unconnected": "off"
-                # },
-                headers={"Content-Type": "application/sparql-update"},
-                auth=(VIRTUOSO_USER, VIRTUOSO_PASS)
+                QLEVER_ENDPOINT,
+                content = query,
+                headers = {
+                    "Authorization": f"Bearer {QLEVER_ACCESS_TOKEN}",
+                    "Content-Type": "application/sparql-update"
+                }
             )
+
             if result.is_error:
                 raise RuntimeError(f"Error occurred on update {query}: {result.status_code}, {result.text}")
 
-    def _run_isql(self, command: str):
+    async def _upload_file(self, file_path: str, graph_iri: str = MAIN_GRAPH_IRI):
         """
-        Run a Virtuoso command over isql
+        Uploads a file using the SPARQL 1.2 Graph Store Protocol. The file must be in turtle (.ttl) format.
         """
-        cmd = [
-            "docker",
-            "exec",
-            "-i",
-            "virtuoso_CRC_1625",
-            "isql",
-            ODBC_PORT,
-            VIRTUOSO_USER,
-            VIRTUOSO_PASS,
-            f"exec={command}"
-        ]
-        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL)
+        file_contents = open(file_path, 'r').read()
 
-    def _register_file(self, file_path: str):
-        """
-        Copies the .ttl file to the Virtuoso data folder, for later processing, and returns its file path
+        # This shoud be illegal
+        g = rdflib.Graph()
+        g.parse(data=file_contents, format='ttl')
+        nt_string = g.serialize(format='nt')
 
-        The actual registration into Virtuoso's bulk loader is done over the entire
-        folder after registering all files
-        """
-        filename = os.path.basename(file_path)
-        target_path = os.path.join(HOST_DATA_DIR, filename)
-        shutil.copy(file_path, target_path)
+        query = f"""INSERT DATA {{ GRAPH <{graph_iri}> {{ {nt_string} }} }}"""
 
-        return target_path
+
+        response = await httpx.AsyncClient(timeout=None).post(
+            QLEVER_ENDPOINT,
+            content = query,
+            headers = {
+                "Authorization": f"Bearer {QLEVER_ACCESS_TOKEN}",
+                "Content-Type": "application/sparql-update"
+            }
+        )
+
+        if response.is_error:
+            logging.error(f"Error when uploading file: {response.status_code}, {response.text}")
+
 
     async def bulk_file_load(self,
                              file_paths: list[str],
@@ -149,41 +147,18 @@ class VirtuosoRDFDatastore(RDFDatastore):
                              use_lock=True):
         """
         Uploads RDF files to the SPARQL endpoint, optimized for speed by
-        parallelizing requests if possible
+        parallelizing requests if possible. The files must be in turtle (.ttl) format.
 
         If no graph IRI is specified, it will be stored in the CRC 1625 graph.
         """
         context_manager = self.rwlock.writer_lock if use_lock else nullcontext()
         async with context_manager:
-            # Clear the existing files. For example, we may not want to upload
-            # leftover ontology files when validating the mappings output
-            for file_path in glob.glob(os.path.join(HOST_DATA_DIR, "*")):
-                if os.path.isfile(file_path):
-                    os.remove(file_path)
+            upload_tasks = [self._upload_file(file_path, graph_iri) for file_path in file_paths]
 
-            registered_file_paths = []
-            for file in file_paths:
-                registered_file_paths.append(self._register_file(file))
-
-            # Write a file called global.graph in CONTAINER_DATA_DIR containing only GRAPH_IRI as its contents
-            with open(os.path.join(HOST_DATA_DIR, "global.graph"), "w") as f:
-                f.write(graph_iri)
-
-            self._run_isql(f"DELETE FROM DB.DBA.load_list;")  # This took a while to discover...
-            self._run_isql(f"ld_dir('{CONTAINER_DATA_DIR}', '*.ttl', '{graph_iri}');")
-
-            with ThreadPoolExecutor(max_workers=16) as executor:
-                futures = [executor.submit(self._run_isql, "rdf_loader_run();") for _ in range(0, 16)]
-                for future in as_completed(futures):
-                    future.result()
-
-            self._run_isql("checkpoint;")
+            await asyncio.gather(*upload_tasks)
 
             if delete_files_after_upload:
                 for file in file_paths:
-                    os.remove(file)
-
-                for file in registered_file_paths:
                     os.remove(file)
 
     async def upload_file(self,
@@ -203,13 +178,11 @@ class VirtuosoRDFDatastore(RDFDatastore):
     async def dump_triples(self, output_file: str | None = "datastore_dump.ttl"):
         """
         Output all triples to the designated file, in turtle (.ttl) format
+        content_type is ignored for Virtuoso. File formats are handled internally
         """
-        # We actually tell virtuoso to dump them as ntriples, as for some reason it refuses to correctly type
-        # decimals...
+        # In the case of Qlever, literals are untyped when written, no matter what...
         async with self.rwlock.reader_lock:
             query = """
-            DEFINE output:format "NT"
-    
             CONSTRUCT {
                 ?s ?p ?o
             }
@@ -220,18 +193,20 @@ class VirtuosoRDFDatastore(RDFDatastore):
             }
             """
 
-            result = await httpx.AsyncClient(timeout=None).get(
-                QUERY_ENDPOINT,
+            response = await httpx.AsyncClient(timeout=None).get(
+                QLEVER_ENDPOINT,
                 params={"query": query},
-                auth=(VIRTUOSO_USER, VIRTUOSO_PASS),
-                headers={"Accept": "text/ntriples"}
+                headers={
+                    "Authorization": f"Bearer {QLEVER_ACCESS_TOKEN}",
+                    "Accept": "application/n-triples"
+                }
             )
 
-            if result.is_success:
+            if response.is_success:
                 with open(output_file, "w", encoding="utf-8") as f:
-                    f.write(result.text)
+                    f.write(response.text)
             else:
-                logging.error(f"Error when dumping triples: {result.status_code}, {result.text}")
+                logging.error(f"Error when dumping triples: {response.status_code}, {response.text}")
 
     async def clear_triples(self, graph_iri: str = MAIN_GRAPH_IRI):
         """
@@ -239,10 +214,25 @@ class VirtuosoRDFDatastore(RDFDatastore):
         to, e.g., clear the workflows graph
         """
         async with self.rwlock.writer_lock:
-            self._run_isql("log_enable(3,1);")  # Autocommit mode, write transactions to log. Avoids running out of memory on large graphs
-            # self.run_isql("SPARQL CLEAR GRAPH  <https://crc1625.mdi.ruhr-uni-bochum.de/graph>;")
-            self._run_isql(f"DELETE FROM rdf_quad WHERE g = iri_to_id ('{graph_iri}');")
-            self._run_isql("checkpoint;")
+            # Doesn't seem to be supported...
+            #query = f"""
+            #CLEAR GRAPH <{graph_iri}>
+            #"""
+
+            query = f"""
+            DELETE {{ GRAPH <{graph_iri}> {{ ?s ?p ?o }} }} WHERE {{ GRAPH <{graph_iri}> {{ ?s ?p ?o }} }}
+            """
+
+            response = await httpx.AsyncClient(timeout=None).post(
+                QLEVER_ENDPOINT,
+                content = query,
+                headers = {
+                    "Authorization": f"Bearer {QLEVER_ACCESS_TOKEN}",
+                    "Content-Type": "application/sparql-update"
+                }
+            )
+            if response.is_error:
+                logging.error(f"Error when clearing triples: {response.status_code}, {response.text}")
 
 
     def stop_datastore(self, timeout: int = 60 * 5):
@@ -253,13 +243,17 @@ class VirtuosoRDFDatastore(RDFDatastore):
         The container should already exist.
         """
         cmd = [
-            "docker",
-            "stop",
-            "-t",
-            str(timeout),
-            "virtuoso_CRC_1625"
+            "qlever",
+            "--qleverfile",
+            COMPLETE_QLEVER_CONFIG_FILE_NAME,
+            "stop"
         ]
-        subprocess.run(cmd, check=False, stdout=subprocess.DEVNULL)
+
+        subprocess.run(cmd,
+                       stdout=subprocess.DEVNULL,
+                       #stderr=subprocess.DEVNULL, # For some reason, they print debug messages in stderr...
+                       check=False,
+                       cwd=QLEVER_DIR)
 
 
     def start_datastore(self, timeout: int = 60 * 5):
@@ -270,13 +264,19 @@ class VirtuosoRDFDatastore(RDFDatastore):
         The output of the command is not checked, and the container should already exist.
         """
         cmd = [
-            "docker",
+            "qlever",
+            "--qleverfile",
+            COMPLETE_QLEVER_CONFIG_FILE_NAME,
             "start",
-            "virtuoso_CRC_1625"
+            "--access-token",
+            QLEVER_ACCESS_TOKEN,
         ]
-        subprocess.run(cmd, check=False, stdout=subprocess.DEVNULL)
 
-        time.sleep(timeout)
+        subprocess.run(cmd,
+                       stdout=subprocess.DEVNULL,
+                       #stderr=subprocess.DEVNULL,  # For some reason, they print debug messages in stderr...
+                       check=False,
+                       cwd=QLEVER_DIR)
 
 
     def restart_datastore(self, timeout: int = 60 * 5):

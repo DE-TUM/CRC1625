@@ -26,9 +26,7 @@ from pyshacl import validate
 from rdflib import Graph, URIRef, Literal, Namespace, XSD
 
 from datastores.rdf import rdf_datastore_client
-from datastores.rdf.rdf_datastore import UpdateType
-
-WORKFLOWS_GRAPH_IRI = "https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows"
+from datastores.rdf.rdf_datastore import UpdateType, WORKFLOWS_GRAPH_IRI
 
 module_dir = os.path.dirname(__file__)
 
@@ -347,7 +345,6 @@ async def read_workflow_model(workflow_model_name: str, user_id: int) -> None | 
 
 async def store_workflow_model(workflow_model: WorkflowModel,
                                user_id: int,
-                               rdf_datastore_client,
                                return_file: bool = False):
     """
     Serializes the workflow model into RDF and stores it
@@ -439,9 +436,8 @@ async def store_workflow_model(workflow_model: WorkflowModel,
         await rdf_datastore_client.upload_file(ttl_file_path, graph_iri=WORKFLOWS_GRAPH_IRI, delete_file_after_upload=True)
 
 
-def delete_workflow_model(workflow_model: WorkflowModel,
+async def delete_workflow_model(workflow_model: WorkflowModel,
                           user_id: int,
-                          rdf_datastore_client,
                           return_query: bool = False):
     """
     Deletes the workflow model of a given user from the rdf_datastore_client
@@ -454,16 +450,14 @@ def delete_workflow_model(workflow_model: WorkflowModel,
         return query
     else:
         updates = [(query, UpdateType.query)]
-        rdf_datastore_client.launch_updates(updates, graph_iri=WORKFLOWS_GRAPH_IRI)
+        await rdf_datastore_client.launch_updates(updates, graph_iri=WORKFLOWS_GRAPH_IRI)
 
 
 async def clean_workflow_instance_steps(workflow_model: WorkflowModel,
                                         user_id: int,
-                                        rdf_datastore_client,
                                         return_query: bool = False):
     workflow_instances = await get_workflow_instances_of_model(workflow_model.workflow_model_name,
-                                                               user_id,
-                                                               rdf_datastore_client)
+                                                               user_id)
 
     for (workflow_instance_name, user_id) in workflow_instances.keys():
         workflow_instance_id = uuid_for_name(workflow_instance_name, user_id)
@@ -477,22 +471,21 @@ async def clean_workflow_instance_steps(workflow_model: WorkflowModel,
             await rdf_datastore_client.launch_updates(updates, graph_iri=WORKFLOWS_GRAPH_IRI)
 
 
-def overwrite_workflow_model(workflow_model: WorkflowModel,
-                             user_id: int,
-                             rdf_datastore_client):
+async def overwrite_workflow_model(workflow_model: WorkflowModel,
+                             user_id: int):
     """
     Deletes the workflow model of a given user, and stores it again
     """
-    actions = [(delete_workflow_model(workflow_model, user_id, rdf_datastore_client, return_query=True), UpdateType.query),
-               (store_workflow_model(workflow_model, user_id, rdf_datastore_client, return_file=True), UpdateType.file_upload)]
+    actions = [(await (delete_workflow_model(workflow_model, user_id, return_query=True)), UpdateType.query),
+                (await (store_workflow_model(workflow_model, user_id, return_file=True)), UpdateType.file_upload)]
     # actions.append((clean_workflow_instance_steps(workflow_model, user_id, rdf_datastore_client, return_query=True), UpdateType.query))
 
-    rdf_datastore_client.launch_updates(actions, graph_iri=WORKFLOWS_GRAPH_IRI, delete_files_after_upload=True)
+    # TODO FIX
+    await rdf_datastore_client.launch_updates(actions, graph_iri=WORKFLOWS_GRAPH_IRI, delete_files_after_upload=True)
 
 
 async def get_workflow_instances_of_model(workflow_model_name: str,
-                                          user_id: int,
-                                          rdf_datastore_client) -> dict[tuple[str, int], WorkflowInstance]:
+                                          user_id: int) -> dict[tuple[str, int], WorkflowInstance]:
     """
     Returns a dict of (Workflow instance name, creator's user id) -> WorkflowInstance assigned to the provided model
     """
@@ -534,7 +527,6 @@ async def get_workflow_instances_of_model(workflow_model_name: str,
 
 async def create_workflow_instance(workflow_instance: WorkflowInstance,
                                    user_id: int,
-                                   rdf_datastore_client,
                                    return_file: bool = False):
     """
     Serializes the workflow instance into RDF and stores it
@@ -595,7 +587,6 @@ async def create_workflow_instance(workflow_instance: WorkflowInstance,
 
 async def delete_workflow_instance(workflow_instance: WorkflowInstance,
                                    user_id: int,
-                                   rdf_datastore_client,
                                    return_query: bool = False):
     """
     Deletes the workflow instance corresponding to the provided one, and stores it again
@@ -616,8 +607,8 @@ async def overwrite_workflow_instance(workflow_instance: WorkflowInstance, user_
     Deletes the workflow model corresponding to the provided one, and stores it again
     """
     actions = []
-    actions.append((await delete_workflow_instance(workflow_instance, user_id, rdf_datastore_client, return_query=True), UpdateType.query))
-    actions.append((await create_workflow_instance(workflow_instance, user_id, rdf_datastore_client, return_file=True), UpdateType.file_upload))
+    actions.append((await delete_workflow_instance(workflow_instance, user_id, return_query=True), UpdateType.query))
+    actions.append((await create_workflow_instance(workflow_instance, user_id, return_file=True), UpdateType.file_upload))
 
     await rdf_datastore_client.launch_updates(actions, graph_iri=WORKFLOWS_GRAPH_IRI, delete_files_after_upload=True)
 

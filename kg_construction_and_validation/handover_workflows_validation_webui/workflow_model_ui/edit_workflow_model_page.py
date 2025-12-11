@@ -1,6 +1,5 @@
-from nicegui import ui, run
+from nicegui import ui
 
-from datastores.rdf import rdf_datastore_client
 from handover_workflows_validation.handover_workflows_validation import read_workflow_model, WorkflowModel, \
     overwrite_workflow_model
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, NodeType
@@ -45,7 +44,7 @@ async def handle_return_button():
                     ui.label('The workflow model has been modified. Save changes and exit?')
 
                     async def save_and_exit_and_close():
-                        await run.io_bound(overwrite_workflow_model(State().current_workflow_model, State().user_id, rdf_datastore_client))
+                        await overwrite_workflow_model(State().current_workflow_model, State().user_id)
                         return_dialog.close()
                         ui.navigate.to('/')
 
@@ -93,7 +92,7 @@ def handle_undo_button():
 
 
 async def handle_save_button():
-    await run.io_bound(overwrite_workflow_model(State().current_workflow_model, State().user_id, rdf_datastore_client))
+    await overwrite_workflow_model(State().current_workflow_model, State().user_id)
     State().changes_are_saved = True
     State().workflow_model_history = []
     ui.notify("The changes have been saved", type='positive')

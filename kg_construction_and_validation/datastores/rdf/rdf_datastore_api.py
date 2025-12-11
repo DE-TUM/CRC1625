@@ -1,4 +1,7 @@
+import logging
 import os
+import subprocess
+import sys
 import uuid
 from enum import Enum
 from typing import List, Tuple, Dict
@@ -8,8 +11,16 @@ import uvicorn
 from fastapi import FastAPI, HTTPException, Body
 from pydantic import BaseModel
 
-from datastores.rdf.rdf_datastore import UpdateType, RDFDatastore
+from datastores.rdf.qlever_datastore import QleverRDFDatastore
+from datastores.rdf.rdf_datastore import UpdateType, RDFDatastore, MAIN_GRAPH_IRI
 from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore
+
+logging.basicConfig(
+    stream=sys.stdout,
+    level=logging.INFO,
+    format='[%(asctime)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 module_dir = os.path.dirname(__file__)
 load_dotenv(os.path.join(module_dir, '../../.env'))
@@ -44,12 +55,12 @@ class UpdatesRequest(BaseModel):
 class FileUploadRequest(BaseModel):
     file_as_str: str
     file_extension: str
-    graph_iri: str = "https://crc1625.mdi.ruhr-uni-bochum.de/graph"
+    graph_iri: str = MAIN_GRAPH_IRI
 
 
 class BulkFileUploadRequest(BaseModel):
     files_as_str: List[Tuple[str, str]]
-    graph_iri: str = "https://crc1625.mdi.ruhr-uni-bochum.de/graph"
+    graph_iri: str = MAIN_GRAPH_IRI
     use_lock: bool = True
 
 
@@ -131,9 +142,6 @@ async def rpc_bulk_file_load(payload: BulkFileUploadRequest):
     Uploads a collection of local RDF files to the SPARQL endpoint.
 
     If no graph IRI is specified, it will be stored in the CRC 1625 graph.
-
-    TODO: This is all local and assumes that the server has access to the file path, no files
-          are uploaded for now
     """
     try:
         file_paths = []
@@ -155,9 +163,9 @@ async def rpc_bulk_file_load(payload: BulkFileUploadRequest):
 
 
 @app.post("/dump_triples")
-async def rpc_dump_triples(payload: DumpRequest): # TODO this is local for now
+async def rpc_dump_triples(payload: DumpRequest):
     """
-    Output all triples to the designated file, in Ntriples format
+    Output all triples to the designated file, in turtle (.ttl) format
     """
     try:
         await rdf_store.dump_triples(output_file=payload.output_file)
@@ -245,8 +253,14 @@ def run(rdf_store_to_serve: DatastoreType,
 
     if rdf_store_to_serve == DatastoreType.VIRTUOSO:
         rdf_store = VirtuosoRDFDatastore()
+    elif rdf_store_to_serve == DatastoreType.QLEVER:
+        rdf_store = QleverRDFDatastore()
     else:
-        raise ValueError("No other datastores are supported yet")
+        raise ValueError("Unknown RDF datastore type selected")
+
+    if not rdf_store.is_datastore_running():
+        logging.info("The datastore is not running. Starting it...")
+        rdf_store.start_datastore()
 
     log_level = 'warning'
     access_log = False
