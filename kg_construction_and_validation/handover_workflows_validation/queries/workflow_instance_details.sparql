@@ -11,8 +11,12 @@ SELECT ?workflow_instance_name ?step_name ?object_id ?user_id WHERE {
             ?workflow_step_iri rdfs:label ?step_name.
         }
 
+        # We don't combine it to avoid issues with Qlever
         GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
             ?assigned_ML_or_sample :internalID ?object_id.
+        }
+
+        GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
             ?user :internalID ?user_id.
         }
     }
