@@ -48,6 +48,9 @@ the container. This is **required** as the system will store and attempt to uplo
 The Qlever setup is for now simpler but set to change in the future due to it being under heavy development. We only require filling endpoint and authentication details in the `.env` file.
 The system will internally call the `qlever-control` to manage the datastore as a `Docker` container.
 
+Before running `Qlever` for the first time, it is necessary to execute `qlever --qleverfile Qleverfile.CRC1625 index` to create the index files. It will use a dummy .ttl file to create an empty datastore instance.
+
+
 ## Usage
 The following CLI applications are offered, offering documentation with the `-h / --help` parameter:
 - `run_rdf_datastore_API.py`: A lightweight HTTP API that communicates with an RDF datastore (e.g. Virtuoso) and serves requests to the rest of this system's modules. This module, alongside the underlying RDF datastore, can be located in a different system than the rest of the below modules and the SQL store. Their endpoints are controlled in the `.env` file.

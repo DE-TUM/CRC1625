@@ -74,6 +74,6 @@ if __name__ in {"__main__", "__mp_main__"}:
     app.add_static_files("/assets", ASSETS_FOLDER)
 
     ui.run(title="CRC1625 Handover workflows validation prototype",
-           reload=args.debug,
+           reload=False, # Do not enable this for now, it freaks out when detecting changes on .ttl files
            uvicorn_logging_level=uvicorn_logging_level,
            access_log=access_log)
