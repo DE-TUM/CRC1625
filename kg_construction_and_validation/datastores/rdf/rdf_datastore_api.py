@@ -1,6 +1,5 @@
 import logging
 import os
-import subprocess
 import sys
 import uuid
 from enum import Enum

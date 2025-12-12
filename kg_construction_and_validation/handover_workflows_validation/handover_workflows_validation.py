@@ -17,9 +17,10 @@ bootstrap them.
 Note: no user-facing UI is available yet. The UI is meant to hook to this API and abstract
 users from the actual representation of the workflows.
 """
-
+import asyncio
 import os
 import uuid
+from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, field
 import time
 
@@ -108,6 +109,8 @@ activity_to_iri = {
 iri_to_activity = {v: k for k, v in activity_to_iri.items()}
 
 
+validation_process_pool = ProcessPoolExecutor(max_workers=os.cpu_count())
+
 @dataclass
 class WorkflowModelOptions:
     """
@@ -150,7 +153,7 @@ class WorkflowModelStep:
     """
     List of step names that follow this one. Note that the system does not check for loops
     """
-    next_steps: set[str] = field(default_factory=set)
+    next_steps: list[str] = field(default_factory=list)
 
     step_description: str = "No description"
 
@@ -197,6 +200,9 @@ class WorkflowModel:
     workflow_model_options: WorkflowModelOptions = field(default_factory=WorkflowModelOptions)
     workflow_model_steps: dict[str, WorkflowModelStep] = field(default_factory=dict)
 
+    def __hash__(self):
+        return hash(self.workflow_model_name)
+
 
 @dataclass
 class WorkflowInstance:
@@ -214,6 +220,9 @@ class WorkflowInstance:
     The step names must refer to the step names contained in the workflow model it is specifying
     """
     step_assignments: dict[str, list[int]] = field(default_factory=dict)
+
+    def __hash__(self):
+        return hash(self.workflow_model_name)
 
 
 workflow_model_iri_to_config = {
@@ -333,7 +342,7 @@ async def read_workflow_model(workflow_model_name: str, user_id: int) -> None | 
             if p in workflow_model_step_iri_to_config:
                 match workflow_model_step_iri_to_config[p]:
                     case "next_steps":
-                        workflow_step.next_steps.add(labels_dict[o])
+                        workflow_step.next_steps.append(labels_dict[o])
                     case "projects":
                         workflow_step.projects.append(o.rsplit("/", 1)[-1])
                     case "required_activities":
@@ -766,7 +775,7 @@ async def generate_SHACL_shapes_for_workflow(workflow_model: WorkflowModel,
     return steps_to_validate
 
 
-async def get_ttl_for_sample(object_id: str):
+async def get_data_graph_for_object_id(object_id: str):
     """
     Generate a .ttl file for pySHACL by querying for the handover groups, handovers and activities of the given sample
 
@@ -797,45 +806,68 @@ async def get_ttl_for_sample(object_id: str):
             o = Literal(o_value)
         g.add((s, p, o))
 
-    path_to_ttl = f"{uuid.uuid4().hex}_{object_id}_data.ttl"
-    g.serialize(destination=path_to_ttl, format="turtle")
-    return path_to_ttl
+    return object_id, g
 
 
-async def validate_SHACL_rules(steps_to_validate: list[(WorkflowModelStep, str, str)]) -> list[(WorkflowModelStep, int, str, str, bool, str)]:
-    results: list[(WorkflowModelStep, int, str, str, bool, str)] = []
-
-    sample_ttls = dict()
+async def generate_data_graphs_for_workfow_steps(steps_to_validate):
+    data_graphs = dict()
+    tasks = []
+    object_ids_to_fetch = set()
 
     for (workflow_step, workflow_step_name, object_id, target_node, shacl_rules) in steps_to_validate:
-        shacl_graph = Graph()
-        shacl_graph.parse(data=shacl_rules, format="turtle")
+        if object_id not in object_ids_to_fetch:
+            object_ids_to_fetch.add(object_id)
+            tasks.append(get_data_graph_for_object_id(object_id))
 
-        time_start = time.monotonic()
-        if object_id not in sample_ttls:
-            sample_ttls[object_id] = await get_ttl_for_sample(object_id)
-        print("get ttl for sample:", time.monotonic() - time_start)
+    results = await asyncio.gather(*tasks)
 
-        time_start = time.monotonic()
-        conforms, results_graph, results_text = validate(data_graph=sample_ttls[object_id],
-                                                         shacl_graph=shacl_graph,
-                                                         ont_graph=ont_graph,
-                                                         inference=None,  # 'rdfs',
-                                                         abort_on_first=False,
-                                                         allow_infos=False,
-                                                         allow_warnings=False,
-                                                         meta_shacl=False,
-                                                         advanced=False,
-                                                         js=False,
-                                                         debug=False)
-        results.append((workflow_step, workflow_step_name, object_id, target_node, shacl_rules, conforms, results_text))
+    for object_id, data_graph in results:
+        data_graphs[object_id] = data_graph
 
-        print("run SHACL:", time.monotonic() - time_start)
+    return data_graphs
 
-    for path_to_ttl in sample_ttls.values():
-        os.remove(path_to_ttl)
+
+def validate_workflow_model_step(data_graph, object_id, shacl_rules, target_node, workflow_step, workflow_step_name, results):
+    shacl_graph = Graph()
+    shacl_graph.parse(data=shacl_rules, format="turtle")
+
+    conforms, results_graph, results_text = validate(data_graph=data_graph,
+                                                     shacl_graph=shacl_graph,
+                                                     ont_graph=ont_graph,
+                                                     inference=None,  # 'rdfs',
+                                                     abort_on_first=False,
+                                                     allow_infos=False,
+                                                     allow_warnings=False,
+                                                     meta_shacl=False,
+                                                     advanced=False,
+                                                     js=False,
+                                                     # sparql_mode=True, # TODO check it out, could it be faster this way?
+                                                     debug=False)
+
+    results.append((workflow_step, workflow_step_name, object_id, target_node, shacl_rules, conforms, results_text))
+
+
+def validate_SHACL_rules(steps_to_validate: list[(WorkflowModelStep, str, str)], data_graphs) -> list[(WorkflowModelStep, int, str, str, bool, str)]:
+    results: list[(WorkflowModelStep, int, str, str, bool, str)] = []
+
+    for (workflow_step, workflow_step_name, object_id, target_node, shacl_rules) in steps_to_validate:
+        validate_workflow_model_step(data_graphs[object_id], object_id, shacl_rules, target_node, workflow_step, workflow_step_name, results)
 
     return results
+
+
+def validation_task_wrapper(data_graphs, object_id, shacl_rules, target_node, workflow_step, workflow_step_name):
+    local_results = []
+
+    validate_workflow_model_step(data_graphs[object_id],
+                                 object_id,
+                                 shacl_rules,
+                                 target_node,
+                                 workflow_step,
+                                 workflow_step_name,
+                                 local_results)
+
+    return local_results[0]
 
 
 async def is_workflow_instance_valid(workflow_model, workflow_instance) -> bool:
@@ -844,8 +876,28 @@ async def is_workflow_instance_valid(workflow_model, workflow_instance) -> bool:
 
     generate_SHACL_shapes_for_workflow and validate_SHACL_rules can be run separately if more details are needed (e.g., which
     steps are valid and which aren't, and the reasons why)
+
+    Optimized for parallelism (or, at least, for python's "parallelism")
     """
     steps_to_validate = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance)
-    results = await validate_SHACL_rules(steps_to_validate)
+    data_graphs = await generate_data_graphs_for_workfow_steps(steps_to_validate)
+
+    with ProcessPoolExecutor() as executor:
+        tasks = []
+
+        for (workflow_step, workflow_step_name, object_id, target_node, shacl_rules) in steps_to_validate:
+            task = asyncio.get_running_loop().run_in_executor(
+                executor,
+                validation_task_wrapper,
+                data_graphs,
+                object_id,
+                shacl_rules,
+                target_node,
+                workflow_step,
+                workflow_step_name
+            )
+            tasks.append(task)
+
+        results = await asyncio.gather(*tasks)
 
     return all(result[5] for result in results)

@@ -1,7 +1,8 @@
 from nicegui import ui
 
 from handover_workflows_validation.handover_workflows_validation import get_workflow_model_names_and_creator_user_ids, \
-    get_workflow_instances_of_model, read_workflow_model, WorkflowInstance, is_workflow_instance_valid
+    get_workflow_instances_of_model, read_workflow_model, WorkflowInstance, is_workflow_instance_valid, generate_SHACL_shapes_for_workflow, \
+    generate_data_graphs_for_workfow_steps, WorkflowModelStep, validate_workflow_model_step
 from handover_workflows_validation_webui.state import State
 
 
