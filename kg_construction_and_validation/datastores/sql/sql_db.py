@@ -9,6 +9,7 @@ import uuid
 
 import pandas as pd
 import pymssql
+import requests
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 
@@ -29,15 +30,22 @@ MSSQL_PASSWORD = os.environ.get("MSSQL_PASSWORD")
 MSSQL_CRC1625_DATABASE_NAME = os.environ.get("MSSQL_CRC1625_DATABASE_NAME")
 MSSQL_MASTER_DATABASE_NAME = os.environ.get("MSSQL_MASTER_DATABASE_NAME")
 
+MSSQL_PROD_TENANT_URL = os.environ.get("MSSQL_PROD_TENANT_URL")
+MSSQL_PROD_API_KEY = os.environ.get("MSSQL_PROD_API_KEY")
+
 class MSSQLDB():
     """
-    Wrapper for a local MSSQL Docker container storing an instance of the CRC 1625 DB.
+    Wrapper for a remote production endpoint or a local MSSQL Docker container storing an instance of the CRC 1625 DB.
+
+    The source must be chosen via select_and_start_db(). If a remote endpoint is chosen, no functions will produce any
+    effects besides query_to_csv
 
     Only one container is intended to be up at the same time in the same host.
     """
     DATA_DIR = os.path.join(module_dir, './db_data')
     ADDITIONAL_INDEXES_QUERY = open(os.path.join(module_dir, './additional_indexes.sql')).read()
-    docker_file: str
+    docker_file: str = ""
+    is_remote: bool = False
 
     def _execute_query(self, query: str):
         """
@@ -57,18 +65,45 @@ class MSSQLDB():
         cursor.close()
         conn.close()
 
-    def query_to_csv(self, query: str, csv_filename: str):
+    def query_to_csv(self,
+                     query: str,
+                     csv_filename: str) -> bool:
         """
         Executes a query and writes results to a CSV file
+
+        Returns True if the query yielded results, False otherwise
         """
-        df = pd.read_sql(query, create_engine(f'mssql+pymssql://{MSSQL_USER}:{MSSQL_PASSWORD.replace("@", "%40")}@{MSSQL_HOST}:{MSSQL_PORT}/RUB_INF'))
+        if self.is_remote:
+            logging.info("Remote query!")
+            headers = {'VroApi': MSSQL_PROD_API_KEY}
+            data = {'sql': query}
+            response = requests.post(MSSQL_PROD_TENANT_URL + "execute", headers=headers, data=data)
+            response.raise_for_status()
+            if not response.text:
+                return False
+            else:
+                try:
+                    df = pd.DataFrame.from_dict(response.json())
+                except Exception as e:
+                    print("EXCEPTION:", query, "FILENAME", csv_filename)
+                    print(response)
+                    print(response.text)
+                    print(not response.text)
+                    print(response.json())
+                    print(e)
+                    return e
+        else:
+            logging.info("Non-remote query!")
+            df = pd.read_sql(query, create_engine(f'mssql+pymssql://{MSSQL_USER}:{MSSQL_PASSWORD.replace("@", "%40")}@{MSSQL_HOST}:{MSSQL_PORT}/RUB_INF'))
+
         if not df.empty:
             str_cols = df.select_dtypes(include=['object', 'string']).columns
             df[str_cols] = df[str_cols].replace({r'[\r\n]+': ' '}, regex=True)
             df.to_csv(csv_filename, index=False, encoding='utf-8')
+            return True
         else:
             logging.warning(f'A .csv query returned no results: {csv_filename}')
-            df.to_csv(csv_filename, index=False, encoding='utf-8')
+            return False
 
 
     def clear_data_dir(self):
@@ -86,9 +121,12 @@ class MSSQLDB():
 
     def select_and_start_db(self, db_option: str | None =None):
         """
-        Selects and starts the selected SQL database container
+        Selects and starts the selected SQL database container.
         If `db_option` == None, then the choice will be requested via CLI
         Possible values:
+            Production DB endpoints:
+            - 'p': Remote production endpoint (only available within the CRC, will not create a local Docker container)
+
             Production DB dumps:
             - 'm': Main CRC1625 DB dump (only available within the CRC)
 
@@ -103,6 +141,7 @@ class MSSQLDB():
             - 'c': Clear DB dump, containing no data. Used for the performance tests
         """
         options = {
+            'p': "", # Production remote endpoint, we just put a dummy value
             'm': 'RUB_CRC1625.bak',
             'v': 'RUB_INF_validation.bak',
             'v_1': 'initial_work_with_handovers_in_same_group.bak',
@@ -115,9 +154,12 @@ class MSSQLDB():
 
         if db_option is None:
             while True:
-                choice = input(
+                db_option = input(
                     """Please choose the DB to use
                     Possible values:
+                        Production DB endpoints:
+                        - 'p': Remote production endpoint (only available within the CRC, will not create a local Docker container)
+        
                         Production DB dumps:
                         - 'm': Main CRC1625 DB dump (only available within the CRC)
                         
@@ -133,11 +175,12 @@ class MSSQLDB():
                         - 'c': Clear DB dump, containing no data. Used for the performance tests
                     """).strip().lower()
 
-                if choice in options:
-                    os.environ["MSSQL_BAK_FILE_NAME"] = options[choice]
+                if db_option in options:
+                    os.environ["MSSQL_BAK_FILE_NAME"] = options[db_option]
                     break
                 else:
-                    logging.error(f"Invalid option '{choice}'")
+                    logging.error(f"Invalid option '{db_option}'")
+
 
         elif db_option in list(options.keys()):
             # Used by the MSSQL dockerfile
@@ -145,29 +188,33 @@ class MSSQLDB():
         else:
             raise ValueError(f"An option for the database was already indicated, but the value was unknown: {db_option}")
 
-        logging.info("Starting MSSQL container...")
+        if db_option == 'p':
+            self.is_remote = True
+            logging.info("The production DB endpoint has been chosen. No local containers will be created.")
+        else:
+            logging.info("Starting MSSQL container...")
 
-        self.clear_data_dir()
+            self.clear_data_dir()
+            try:
+                subprocess.run(
+                    ["docker-compose", "-f", "docker_compose_mssql.yml", "down", "--volumes", "--remove-orphans"],
+                    check=True,
+                    stdout=subprocess.DEVNULL,
+                    cwd=module_dir
+                )
+                subprocess.run(
+                    ["docker-compose", "-f", "docker_compose_mssql.yml", "up", "--detach", "--force-recreate"],
+                    check=True,
+                    stdout=subprocess.DEVNULL,
+                    cwd=module_dir
+                )
 
-        subprocess.run(
-            ["docker-compose", "-f", "docker_compose_mssql.yml", "down", "--volumes", "--remove-orphans"],
-            check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            cwd=module_dir
-        )
-        subprocess.run(
-            ["docker-compose", "-f", "docker_compose_mssql.yml", "up", "--detach", "--force-recreate"],
-            check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            cwd=module_dir
-        )
+                time.sleep(30) # Allow MSSQL to create the DB and allow connections
+            except Exception as e:
+                raise RuntimeError(f"Error when setting up the MSSQL container: {e}")
 
-        time.sleep(30) # Allow MSSQL to create the DB and allow connections
-
-        # Create additional indexes for better performance
-        self._execute_query(self.ADDITIONAL_INDEXES_QUERY)
+            # Create additional indexes for better performance
+            self._execute_query(self.ADDITIONAL_INDEXES_QUERY)
 
     def stop_DB(self):
         """
@@ -309,13 +356,53 @@ class MSSQLDB():
 
         os.remove(os.path.join(module_dir, './db_dumps/bulk_insert_records.csv'))
 
-
 if __name__ == "__main__":
     db = MSSQLDB()
 
     docker_file = db.select_and_start_db()
 
-    input("Press Enter to stop the DB...")
+    db.query_to_csv("""
+          SELECT
+          /* ML, its measurement alongside its creation, and the handover
+           it **may** belong to  based on their creation dates */
+          linkingMLs.ObjectId AS MLId,
+          measurementData.ObjectId AS MeasurementId,
+          FORMAT(measurementData._created, 'yyyy-MM-ddTHH:mm:ss.fff') AS MeasurementDate,
+          handoverData.handoverId AS HandoverId
+          /* MLs linking to measurements */
+          FROM vro.vroObjectLinkObject linkingMLs
+          /* ObjectInfo of the measurements */
+          JOIN vro.vroObjectInfo measurementData ON measurementData.ObjectId = linkingMLs.LinkedObjectId
+          JOIN vro.vroObjectInfo sampleData ON sampleData.ObjectId = linkingMLs.ObjectId
+          JOIN (
+              /* Handovers alongside their creation date and the ML they refer to */
+              SELECT vro.vroObjectInfo.objectId AS handoverId,
+              vro.vroObjectInfo._created AS handoverDate,
+              vro.vroHandover.sampleObjectId AS MLId
+              FROM vro.vroObjectInfo
+              JOIN vro.vroHandover ON vro.vroObjectInfo.objectId = vro.vroHandover.handoverid
+              WHERE vro.vroObjectInfo.typeId = -1
+          ) handoverData ON linkingMLs.ObjectId = handoverData.MLId
+          WHERE NOT EXISTS ( /* Exclude measurements that are already linked to a handover */
+              SELECT 1
+              FROM vro.vroObjectLinkObject
+              JOIN vro.vroObjectInfo s on vro.vroObjectLinkObject.ObjectId = s.ObjectId
+              WHERE s.TypeId = -1 AND vro.vroObjectLinkObject.LinkedObjectId = measurementData.ObjectId
+          )
+          AND measurementData.TypeId IN (27, 38, 39, 40)
+          AND sampleData.TypeId = 6
+          /* Get only the handover that has the maximum date among those
+             that have a creation date earlier than the measurement's creation date */
+          AND handoverData.handoverDate = (
+              SELECT MAX(hSub._created)
+              FROM vro.vroObjectInfo hSub
+              JOIN vro.vroHandover hSubData ON hSub.objectId = hSubData.handoverid
+              WHERE hSubData.sampleObjectId = linkingMLs.ObjectId
+              AND hSub._created < measurementData._created
+              AND hSub.typeId = -1
+          ) 
+    
+    
+    """, "test.csv")
 
     db.stop_DB()
-

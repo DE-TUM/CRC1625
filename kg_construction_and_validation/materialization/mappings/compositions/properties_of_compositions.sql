@@ -8,19 +8,19 @@ SELECT compositionInfo.ObjectId AS CompositionId,
     END AS propertyname,
 FORMAT(compositionMetadata.value, '0.0000') AS value, /* Fixed to a string with 4 decimal places, to avoid weird formatting errors */
 compositionLocation.value  AS MeasurementArea
-FROM ObjectLinkObject
+FROM vro.vroObjectLinkObject
 /* The original measurement the composition has been parsed from points to the composition's object */
-JOIN ObjectLinkObject originalMeasurement ON originalMeasurement.linkedobjectid = ObjectLinkObject.LinkedObjectId
+JOIN vro.vroObjectLinkObject originalMeasurement ON originalMeasurement.linkedobjectid = vro.vroObjectLinkObject.LinkedObjectId
 /* Original measurement's information */
-JOIN objectinfo originalMeasurementInfo ON originalMeasurement.ObjectId = originalMeasurementInfo.ObjectId
+JOIN vro.vroObjectinfo originalMeasurementInfo ON originalMeasurement.ObjectId = originalMeasurementInfo.ObjectId
 /* Composition information */
-JOIN objectinfo compositionInfo ON compositionInfo.ObjectId = ObjectLinkObject.LinkedObjectId
+JOIN vro.vroObjectinfo compositionInfo ON compositionInfo.ObjectId = vro.vroObjectLinkObject.LinkedObjectId
 /* ML information */
-JOIN objectinfo MLInfo ON MLInfo.ObjectId = ObjectLinkObject.ObjectId
+JOIN vro.vroObjectinfo MLInfo ON MLInfo.ObjectId = vro.vroObjectLinkObject.ObjectId
 /* Composition's extra metadata (R, tolerance, tool's x,y positions...) */
-JOIN PropertyFloat compositionMetadata ON compositionMetadata.ObjectId = ObjectLinkObject.LinkedObjectId
+JOIN vro.vroPropertyFloat compositionMetadata ON compositionMetadata.ObjectId = vro.vroObjectLinkObject.LinkedObjectId
 /* Composition's location */
-JOIN PropertyInt compositionLocation ON compositionLocation.ObjectId = objectlinkobject.LinkedObjectId
+JOIN vro.vroPropertyInt compositionLocation ON compositionLocation.ObjectId = vro.vroObjectlinkobject.LinkedObjectId
 WHERE  MLInfo.TypeId = 6 /* Sample  */
 AND compositionInfo.TypeId = 8 /* Composition */
 AND originalMeasurementInfo.TypeId IN ( 13, 15, 19, 53, 78, 79 ) /* EDX */

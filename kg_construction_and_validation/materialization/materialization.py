@@ -459,13 +459,19 @@ def rmlmapper_materialization_job(yarrrml_file: str):
     return yarrrml_file, materialized_file_name
 
 
-def rmlstreamer_materialization_job(yarrrml_file: str, csv_job: tuple[str, str, bool]):
+def rmlstreamer_materialization_job(yarrrml_file: str, db: MSSQLDB, csv_job: tuple[str, str, bool]):
     (query, csv_file, run_only_sql_queries) = csv_job
-    MSSQLDB().query_to_csv(query, csv_file)
-
     rml_file_name = yarrrml_file.split('.')[0] + "_rml.ttl"
     materialized_file_name = rml_file_name.replace("/mappings/", "/materialized_triples/").split('.')[
                                  0] + "_materialized.ttl"
+
+    yielded_results = db.query_to_csv(query, csv_file)
+
+    if not yielded_results:
+        # Write an empty .ttl file
+        with open(materialized_file_name, 'w') as _:
+            pass
+        return yarrrml_file, materialized_file_name
 
     output_dir = materialized_file_name.replace(".ttl", "")
     cmd = [
@@ -499,15 +505,18 @@ def rmlstreamer_materialization_job(yarrrml_file: str, csv_job: tuple[str, str, 
 
 
 def get_mapping_jobs(mapping: tuple[str, bool] | tuple[str, dict, dict, bool],
+                     db: MSSQLDB,
                      skip_materialization: bool = False,
                      run_only_sql_queries: bool = False) \
         -> tuple[str, list[tuple[tuple[Callable, str], tuple[Callable, str, bool] | None]]]:
     """
     :param run_only_sql_queries: Forces the job to be an RMLStreamer job that will only run the SQL query. This is only
-                                  used to measure query times for debugging
+                                 used to measure query times for debugging
 
-    :returns: If use_rmlstreamer = False, a tuple of untemplated_base_yarrrml_file, [((rmlmapper_materialization_job, yarrrml_file_name), None)]
-              If use_rmlstreamer = True, a tuple of untemplated_base_yarrrml_file, [((rmlstreamer_materialization_job, yarrrml_file_name), (query, csv_file, run_only_sql_queries))]
+    :returns: If the mapping has set use_rmlstreamer = False, a tuple of untemplated_base_yarrrml_file, [((rmlmapper_materialization_job, yarrrml_file_name), None)]
+              If the mapping has set use_rmlstreamer = True, a tuple of untemplated_base_yarrrml_file, [((rmlstreamer_materialization_job, yarrrml_file_name), (query, csv_file, run_only_sql_queries))]
+
+              If the SQL database is set to a remote endpoint, use_rmlstreamer will be forcefully True in all cases (in this case, MSSQLDB only allows generating .csv results)
 
               In both cases, the returned tuple consists of the reference to the untemplated YARRRML file and a list of jobs to execute. If RMLStreamer is
               to be used, then the list will also contain the jobs to execute in order to generate the CSV files RMLStreamer requires as input
@@ -520,7 +529,7 @@ def get_mapping_jobs(mapping: tuple[str, bool] | tuple[str, dict, dict, bool],
     else:
         (templated_yarrrml_file, custom_sql_template, custom_yml_template, use_rmlstreamer) = mapping
 
-    if run_only_sql_queries:
+    if run_only_sql_queries or db.is_remote:
         use_rmlstreamer = True # Force it to generate CSV files
 
     untemplated_base_yarrrml_file = templated_yarrrml_file.replace("_templated", "")
@@ -542,9 +551,11 @@ def get_mapping_jobs(mapping: tuple[str, bool] | tuple[str, dict, dict, bool],
     return untemplated_base_yarrrml_file, jobs
 
 
-def run_mappings(skip_materialization: bool =False, run_only_sql_queries: bool = False) -> (list[str],
-                                                                                            dict[str, dict[str, float]],
-                                                                                            list[(float, float)]):
+def run_mappings(db: MSSQLDB,
+                 skip_materialization: bool =False,
+                 run_only_sql_queries: bool = False) -> (list[str],
+                                                         dict[str, dict[str, float]],
+                                                         list[(float, float)]):
     """
     Executes the complete pipeline of templated YARRRML file parsing -> YARRRML to RML files conversion -> mappings execution
     (See the module's documentation for how to include/extend the mappings)
@@ -581,7 +592,7 @@ def run_mappings(skip_materialization: bool =False, run_only_sql_queries: bool =
     # Create all untemplated YARRRML files, and save a reference to each one as an individual job
     mapping_jobs = []
     for m in templated_file_names:
-        base_untemplated_yarrrml_file_name, jobs = get_mapping_jobs(m, skip_materialization, run_only_sql_queries)
+        base_untemplated_yarrrml_file_name, jobs = get_mapping_jobs(m, db, skip_materialization, run_only_sql_queries)
         mapping_jobs.append((base_untemplated_yarrrml_file_name, jobs))
 
         performance_log["per_mapping_times"][base_untemplated_yarrrml_file_name] = dict()
@@ -621,7 +632,7 @@ def run_mappings(skip_materialization: bool =False, run_only_sql_queries: bool =
         futures = []
         for ((function, arg), csv_job) in total_materialization_jobs:
             if csv_job is not None:
-                futures.append(executor.submit(function, arg, csv_job))
+                futures.append(executor.submit(function, arg, db, csv_job))
             else:
                 futures.append(executor.submit(function, arg))
 

@@ -5,6 +5,6 @@ SELECT SampleId,
        ObjectName,
        ObjectDescription,
        TypeId
-FROM ObjectInfo
-JOIN Sample ON ObjectId = SampleId
+FROM vro.vroObjectInfo
+JOIN vro.vroSample ON ObjectId = SampleId
 WHERE TypeId IN (6, 99) /* Physical samples or computational samples */

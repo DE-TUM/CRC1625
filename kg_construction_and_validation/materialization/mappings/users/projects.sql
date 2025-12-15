@@ -4,6 +4,6 @@ SELECT UserId,
            WHEN COUNT(ClaimValue) = 1 THEN MAX(ClaimValue)
            ELSE STRING_AGG(ClaimValue, '_') WITHIN GROUP (ORDER BY ClaimValue)
        END AS ClaimValue
-FROM AspNetUserClaims
+FROM vro.vroAspNetUserClaims
 WHERE ClaimType = 'Project'
 GROUP BY UserId;

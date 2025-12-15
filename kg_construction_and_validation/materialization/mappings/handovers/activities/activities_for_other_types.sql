@@ -6,24 +6,24 @@ measurementData.ObjectId AS MeasurementId,
 FORMAT(measurementData._created, 'yyyy-MM-ddTHH:mm:ss.fff') AS MeasurementDate,
 handoverData.handoverId AS HandoverId
 /* MLs linking to measurements */
-FROM objectLinkObject linkingMLs
+FROM vro.vroObjectLinkObject linkingMLs
 /* ObjectInfo of the measurements */
-JOIN ObjectInfo measurementData ON measurementData.ObjectId = linkingMLs.LinkedObjectId
-JOIN ObjectInfo sampleData ON sampleData.ObjectId = linkingMLs.ObjectId
+JOIN vro.vroObjectInfo measurementData ON measurementData.ObjectId = linkingMLs.LinkedObjectId
+JOIN vro.vroObjectInfo sampleData ON sampleData.ObjectId = linkingMLs.ObjectId
 JOIN (
     /* Handovers alongside their creation date and the ML they refer to */
-    SELECT ObjectInfo.objectId AS handoverId,
-    ObjectInfo._created AS handoverDate,
-    Handover.sampleObjectId AS MLId
-    FROM ObjectInfo
-    JOIN Handover ON ObjectInfo.objectId = Handover.handoverid
-    WHERE ObjectInfo.typeId = -1
+    SELECT vro.vroObjectInfo.objectId AS handoverId,
+    vro.vroObjectInfo._created AS handoverDate,
+    vro.vroHandover.sampleObjectId AS MLId
+    FROM vro.vroObjectInfo
+    JOIN vro.vroHandover ON vro.vroObjectInfo.objectId = vro.vroHandover.handoverid
+    WHERE vro.vroObjectInfo.typeId = -1
 ) handoverData ON linkingMLs.ObjectId = handoverData.MLId
 WHERE NOT EXISTS ( /* Exclude measurements that are already linked to a handover */
     SELECT 1
-    FROM ObjectLinkObject
-    JOIN ObjectInfo s on ObjectLinkObject.ObjectId = s.ObjectId
-    WHERE s.TypeId = -1 AND ObjectLinkObject.LinkedObjectId = measurementData.ObjectId
+    FROM vro.vroObjectLinkObject
+    JOIN vro.vroObjectInfo s on vro.vroObjectLinkObject.ObjectId = s.ObjectId
+    WHERE s.TypeId = -1 AND vro.vroObjectLinkObject.LinkedObjectId = measurementData.ObjectId
 )
 AND measurementData.TypeId NOT IN (12) /* Photo */
 AND measurementData.TypeId NOT IN (13, 15, 19, 53, 78, 79) /* EDX */
@@ -55,8 +55,8 @@ AND sampleData.TypeId = 6
    that have a creation date earlier than the measurement's creation date */
 AND handoverData.handoverDate = (
     SELECT MAX(hSub._created)
-    FROM ObjectInfo hSub
-    JOIN Handover hSubData ON hSub.objectId = hSubData.handoverid
+    FROM vro.vroObjectInfo hSub
+    JOIN vro.vroHandover hSubData ON hSub.objectId = hSubData.handoverid
     WHERE hSubData.sampleObjectId = linkingMLs.ObjectId
     AND hSub._created < measurementData._created
     AND hSub.typeId = -1

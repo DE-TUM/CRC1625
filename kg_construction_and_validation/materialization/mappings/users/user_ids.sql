@@ -1,1 +1,1 @@
-SELECT Id FROM AspNetUsers
+SELECT Id FROM vro.vroAspNetUsers

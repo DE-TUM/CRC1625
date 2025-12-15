@@ -1,24 +1,24 @@
 SELECT
-ObjectLinkObject.ObjectId AS MLId,
-ObjectLinkObject.LinkedObjectId AS CompositionId,
+vro.vroObjectLinkObject.ObjectId AS MLId,
+vro.vroObjectLinkObject.LinkedObjectId AS CompositionId,
 compositionInfo.ObjectId AS CompositionId,
 originalMeasurement.ObjectId AS OriginalMeasurementId,
 compositionValues.ElementName,
 FORMAT(compositionValues.ValuePercent, '0.0000') AS ValuePercent, /* Fixed to a string with 4 decimal places, to avoid weird formatting errors */
 compositionLocation.Value AS MeasurementArea
-FROM ObjectLinkObject
+FROM vro.vroObjectLinkObject
 /* The original measurement the composition has been parsed from points to the composition's object */
-JOIN ObjectLinkObject originalMeasurement ON originalMeasurement.LinkedObjectId = ObjectLinkObject.LinkedObjectId
+JOIN vro.vroObjectLinkObject originalMeasurement ON originalMeasurement.LinkedObjectId = vro.vroObjectLinkObject.LinkedObjectId
 /* Original measurement's information */
-JOIN ObjectInfo originalMeasurementInfo ON originalMeasurement.ObjectId = originalMeasurementInfo.ObjectId
+JOIN vro.vroObjectInfo originalMeasurementInfo ON originalMeasurement.ObjectId = originalMeasurementInfo.ObjectId
 /* Composition information */
-JOIN ObjectInfo compositionInfo ON ObjectLinkObject.LinkedObjectId = compositionInfo.ObjectId
+JOIN vro.vroObjectInfo compositionInfo ON vro.vroObjectLinkObject.LinkedObjectId = compositionInfo.ObjectId
 /* ML information */
-JOIN ObjectInfo MLInfo ON ObjectLinkObject.ObjectId = MLInfo.ObjectId
+JOIN vro.vroObjectInfo MLInfo ON vro.vroObjectLinkObject.ObjectId = MLInfo.ObjectId
 /* Composition elements and percentages */
-JOIN Composition compositionValues ON ObjectLinkObject.LinkedObjectId = compositionValues.SampleId
+JOIN vro.vroComposition compositionValues ON vro.vroObjectLinkObject.LinkedObjectId = compositionValues.SampleId
 /* Composition's location */
-JOIN PropertyInt compositionLocation ON ObjectLinkObject.LinkedObjectId = compositionLocation.ObjectId
+JOIN vro.vroPropertyInt compositionLocation ON vro.vroObjectLinkObject.LinkedObjectId = compositionLocation.ObjectId
 WHERE MLInfo.TypeId = 6 /* Sample */
 AND compositionInfo.TypeId = 8 /* Composition */
 AND originalMeasurementInfo.TypeId IN (13, 15, 19, 53, 78, 79) /* EDX */

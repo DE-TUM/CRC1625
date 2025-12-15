@@ -33,9 +33,9 @@ END AS relation,
         END
     + CONVERT(VARCHAR, target.ObjectId)) AS targetIRI
 
-FROM ObjectLinkObject
-JOIN ObjectInfo source on ObjectLinkObject.ObjectId = source.ObjectId
-JOIN ObjectInfo target on ObjectLinkObject.LinkedObjectId = target.ObjectId
+FROM vro.vroObjectLinkObject
+JOIN vro.vroObjectInfo source on vro.vroObjectLinkObject.ObjectId = source.ObjectId
+JOIN vro.vroObjectInfo target on vro.vroObjectLinkObject.LinkedObjectId = target.ObjectId
 WHERE source.TypeId NOT IN (
     -1, 8, 125 /* Handover, volume or surface composition */
 )

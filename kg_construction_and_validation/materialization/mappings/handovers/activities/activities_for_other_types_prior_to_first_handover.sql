@@ -6,29 +6,29 @@ measurementData.ObjectId AS MeasurementId,
 FORMAT(measurementData._created, 'yyyy-MM-ddTHH:mm:ss.fff') AS MeasurementDate,
 InitialHandover.HandoverId AS HandoverId
 /* MLs linking to measurements */
-FROM objectLinkObject linkingMLs
+FROM vro.vroObjectLinkObject linkingMLs
 /* ObjectInfo of the measurements */
-JOIN ObjectInfo measurementData ON measurementData.ObjectId = linkingMLs.LinkedObjectId
-JOIN ObjectInfo sampleData ON sampleData.ObjectId = linkingMLs.ObjectId
+JOIN vro.vroObjectInfo measurementData ON measurementData.ObjectId = linkingMLs.LinkedObjectId
+JOIN vro.vroObjectInfo sampleData ON sampleData.ObjectId = linkingMLs.ObjectId
 /* First Handover related to a ML, including also MLs that have *no* handovers */
 JOIN (
     SELECT H.HandoverId, O._created, H.SampleObjectId
-    FROM Handover H
+    FROM vro.vroHandover H
     /* ObjectInfo of the handover */
-    JOIN ObjectInfo O ON H.HandoverId = O.ObjectId
+    JOIN vro.vroObjectInfo O ON H.HandoverId = O.ObjectId
     /* Handover with the earliest creation date for each ML */
     JOIN (
         SELECT SampleObjectId, MIN(_created) AS min_created
-        FROM Handover
-        JOIN ObjectInfo ON Handover.HandoverId = ObjectInfo.ObjectId
+        FROM vro.vroHandover
+        JOIN vro.vroObjectInfo ON vro.vroHandover.HandoverId = vro.vroObjectInfo.ObjectId
         GROUP BY SampleObjectId
     ) MinH ON H.SampleObjectId = MinH.SampleObjectId AND O._created = MinH.min_created
 ) InitialHandover ON linkingMLs.ObjectId = InitialHandover.SampleObjectId
 WHERE NOT EXISTS ( /* Exclude measurements that are already linked to a handover */
     SELECT 1
-    FROM ObjectLinkObject
-    JOIN ObjectInfo s on ObjectLinkObject.ObjectId = s.ObjectId
-    WHERE s.TypeId = -1 AND ObjectLinkObject.LinkedObjectId = measurementData.ObjectId
+    FROM vro.vroObjectLinkObject
+    JOIN vro.vroObjectInfo s on vro.vroObjectLinkObject.ObjectId = s.ObjectId
+    WHERE s.TypeId = -1 AND vro.vroObjectLinkObject.LinkedObjectId = measurementData.ObjectId
 )
 AND measurementData.TypeId NOT IN (12) /* Photo */
 AND measurementData.TypeId NOT IN (13, 15, 19, 53, 78, 79) /* EDX */

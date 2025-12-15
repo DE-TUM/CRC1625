@@ -61,7 +61,8 @@ def serve_KG(skip_ontologies_upload: bool = True,
         db = sql_db.MSSQLDB()
         db.select_and_start_db(db_option)
 
-    materialized_files, performance_log_mappings, resource_usage_mappings = materialization.run_mappings(skip_materialization=skip_materialization,
+    materialized_files, performance_log_mappings, resource_usage_mappings = materialization.run_mappings(db,
+                                                                                                         skip_materialization=skip_materialization,
                                                                                                          run_only_sql_queries=run_only_sql_queries)
 
     logging.info("Materialization of the KG finished!")

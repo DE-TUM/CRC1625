@@ -1,32 +1,32 @@
 SELECT
-ObjectLinkObject.ObjectId AS MLId,
+vro.vroObjectLinkObject.ObjectId AS MLId,
 compositionInfo.ObjectId AS CompositionId,
 compositionLocation.Value AS MeasurementArea
-FROM ObjectLinkObject
+FROM vro.vroObjectLinkObject
 /* Composition information */
-JOIN ObjectInfo compositionInfo ON compositionInfo.ObjectId = ObjectLinkObject.LinkedObjectId
+JOIN vro.vroObjectInfo compositionInfo ON compositionInfo.ObjectId = vro.vroObjectLinkObject.LinkedObjectId
 /* ML information */
-JOIN ObjectInfo MLInfo ON MLInfo.ObjectId = ObjectLinkObject.ObjectId
+JOIN vro.vroObjectInfo MLInfo ON MLInfo.ObjectId = vro.vroObjectLinkObject.ObjectId
 /* The original measurement the composition has been parsed from points to the composition's object */
-JOIN ObjectLinkObject originalMeasurement ON originalMeasurement.LinkedObjectId = ObjectLinkObject.LinkedObjectId
+JOIN vro.vroObjectLinkObject originalMeasurement ON originalMeasurement.LinkedObjectId = vro.vroObjectLinkObject.LinkedObjectId
 /* Original measurement's information */
-JOIN ObjectInfo originalMeasurementInfo ON originalMeasurement.ObjectId = originalMeasurementInfo.ObjectId
+JOIN vro.vroObjectInfo originalMeasurementInfo ON originalMeasurement.ObjectId = originalMeasurementInfo.ObjectId
 /* Composition's location */
-JOIN PropertyInt compositionLocation ON ObjectLinkObject.LinkedObjectId = compositionLocation.ObjectId
+JOIN vro.vroPropertyInt compositionLocation ON vro.vroObjectLinkObject.LinkedObjectId = compositionLocation.ObjectId
 /* First Handover related to a ML, including also MLs that have *no* handovers */
 LEFT JOIN (
     SELECT H.HandoverId, O._created, H.SampleObjectId
-    FROM Handover H
+    FROM vro.vroHandover H
     /* ObjectInfo of the handover */
-    JOIN ObjectInfo O ON H.HandoverId = O.ObjectId
+    JOIN vro.vroObjectInfo O ON H.HandoverId = O.ObjectId
     /* Handover with the earliest creation date for each ML */
     JOIN (
         SELECT SampleObjectId, MIN(_created) AS min_created
-        FROM Handover
-        JOIN ObjectInfo ON Handover.HandoverId = ObjectInfo.ObjectId
+        FROM vro.vroHandover
+        JOIN vro.vroObjectInfo ON vro.vroHandover.HandoverId = vro.vroObjectInfo.ObjectId
         GROUP BY SampleObjectId
     ) MinH ON H.SampleObjectId = MinH.SampleObjectId AND O._created = MinH.min_created
-) InitialHandover ON ObjectLinkObject.ObjectId = InitialHandover.SampleObjectId
+) InitialHandover ON vro.vroObjectLinkObject.ObjectId = InitialHandover.SampleObjectId
 WHERE MLInfo.TypeId = 6 /* Sample */
 AND compositionInfo.TypeId = 8 /* Composition */
 AND originalMeasurementInfo.TypeId IN (13, 15, 19, 53, 78, 79) /* EDX */
