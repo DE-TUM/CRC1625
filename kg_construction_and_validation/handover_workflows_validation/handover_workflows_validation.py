@@ -539,9 +539,6 @@ async def get_workflow_instances_of_model(workflow_model_name: str,
 
         workflow_instance_to_modify.step_assignments[step_name].append(object_id)
 
-
-    print("read workflow instances:", workflow_instances)
-
     return workflow_instances
 
 
@@ -663,7 +660,6 @@ async def get_first_handover_group(object_id: int,
     Returns the IRI of the first handover group the given materials library or sample has
     """
     if object_id in cached_object_handover_groups:
-        print(object_id, "was cached!")
         return cached_object_handover_groups[object_id][0]
 
     if (await rdf_datastore_client.get_datastore_type()) == "virtuoso":
@@ -746,19 +742,16 @@ async def get_next_validation_steps(workflow_model: WorkflowModel,
         # List of (step, object_id, target_node)
         next_steps: list[tuple[WorkflowModelStep, str, int, str, dict[str, str]]] = []
 
-        print("assignments of next step:",next_step_name, workflow_instance.step_assignments[next_step_name])
         for new_object_id in workflow_instance.step_assignments[next_step_name]:
             if current_object_id == new_object_id:  # The next target node is the next handover group for the target node
                 new_target_node = handover_group_pairs.get(target_node)
                 if new_target_node is not None:  # Else, we stop checking TODO handle better
-                    print("next step in same sample:", next_step_name, current_object_id)
                     next_steps.append((workflow_model.workflow_model_steps[next_step_name],
                                        next_step_name,
                                        current_object_id,
                                        new_target_node,
                                        handover_group_pairs))
             else:  # We have a new sample, so we must continue the workflow from the new sample's *first* handover group
-                print("next step in NEW sample:", next_step_name, new_object_id)
                 next_steps.append((workflow_model.workflow_model_steps[next_step_name],
                                    next_step_name,
                                    new_object_id,
@@ -928,7 +921,6 @@ async def is_workflow_instance_valid(workflow_model, workflow_instance) -> bool:
 
     Optimized for parallelism (or, at least, for python's "parallelism")
     """
-    print("Running validation for", workflow_instance)
     steps_to_validate = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance)
     data_graphs = await generate_data_graphs_for_workfow_steps(steps_to_validate)
 
