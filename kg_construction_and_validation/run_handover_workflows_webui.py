@@ -2,6 +2,8 @@ import argparse
 import asyncio
 import os
 
+from dotenv import load_dotenv
+
 from datastores.rdf import rdf_datastore_client
 from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore
 from handover_workflows_validation import handover_workflows_validation
@@ -15,6 +17,9 @@ import handover_workflows_validation_webui.sparql_ui.yasgui_wrapper
 from nicegui import ui, app
 
 from handover_workflows_validation_webui import state
+
+module_dir = os.path.dirname(__file__)
+load_dotenv(os.path.join(module_dir, '.env'))
 
 module_dir = os.path.dirname(__file__)
 
@@ -73,7 +78,9 @@ if __name__ in {"__main__", "__mp_main__"}:
 
     app.add_static_files("/assets", ASSETS_FOLDER)
 
-    ui.run(title="CRC1625 Handover workflows validation prototype",
+    ui.run(host=os.environ.get("WEBUI_HOST"),
+           port=os.environ.get("WEBUI_PORT"),
+           title="CRC1625 Handover workflows validation prototype",
            reload=False, # Do not enable this for now, it freaks out when detecting changes on .ttl files
            uvicorn_logging_level=uvicorn_logging_level,
            access_log=access_log)
