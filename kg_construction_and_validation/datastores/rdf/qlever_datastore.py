@@ -255,6 +255,8 @@ class QleverRDFDatastore(RDFDatastore):
                        check=False,
                        cwd=QLEVER_DIR)
 
+        logging.info("Qlever datastore stopped")
+
 
     def start_datastore(self, timeout: int = 60 * 5):
         """
@@ -277,6 +279,8 @@ class QleverRDFDatastore(RDFDatastore):
                        #stderr=subprocess.DEVNULL,  # For some reason, they print debug messages in stderr...
                        check=False,
                        cwd=QLEVER_DIR)
+
+        logging.info("Qlever datastore started")
 
 
     def restart_datastore(self, timeout: int = 60 * 5):

@@ -156,6 +156,10 @@ def run_validation_test(test_key: str):
             for triple in in_second:
                 f2.write(f"{triple}\n")
 
+        dump_file_path = os.path.join(module_dir, "datastore_dump.ttl")
+        logging.info(f"Generated triples dumped to {dump_file_path}")
+        asyncio.run(rdf_datastore_client.dump_triples(dump_file_path))
+
         clear_datastores()
         return False
 

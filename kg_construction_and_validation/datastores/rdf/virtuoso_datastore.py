@@ -4,7 +4,6 @@ import os
 import shutil
 import subprocess
 import sys
-import time
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from contextlib import nullcontext
 from dotenv import load_dotenv
@@ -261,6 +260,8 @@ class VirtuosoRDFDatastore(RDFDatastore):
         ]
         subprocess.run(cmd, check=False, stdout=subprocess.DEVNULL)
 
+        logging.info("Virtuoso datastore stopped")
+
 
     def start_datastore(self, timeout: int = 60 * 5):
         """
@@ -277,6 +278,8 @@ class VirtuosoRDFDatastore(RDFDatastore):
         subprocess.run(cmd, check=False, stdout=subprocess.DEVNULL)
 
         time.sleep(timeout)
+
+        logging.info("Virtuoso datastore started")
 
 
     def restart_datastore(self, timeout: int = 60 * 5):

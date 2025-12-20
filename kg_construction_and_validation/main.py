@@ -51,40 +51,37 @@ def serve_KG(skip_ontologies_upload: bool = True,
              skip_db_setup: bool = False,
              skip_materialization: bool = False,
              skip_postprocessing: bool = False,
-             run_only_sql_queries: bool = False,
-             delete_materialized_triples_files: bool = True):
+             delete_materialized_triples_files: bool = True,
+             use_rmlstreamer: bool = False):
     performance_log_postprocessing = dict()
-    resource_usage_postprocessing = dict()
-    file_upload_end = 0
 
+    db = sql_db.MSSQLDB()
     if not skip_db_setup:
-        db = sql_db.MSSQLDB()
         db.select_and_start_db(db_option)
 
     materialized_files, performance_log_mappings, resource_usage_mappings = materialization.run_mappings(db,
                                                                                                          skip_materialization=skip_materialization,
-                                                                                                         run_only_sql_queries=run_only_sql_queries)
+                                                                                                         use_rmlstreamer=use_rmlstreamer)
 
     logging.info("Materialization of the KG finished!")
-    if not run_only_sql_queries:
-        rdf_datastore_client.run_sync(rdf_datastore_client.clear_triples())
+    rdf_datastore_client.run_sync(rdf_datastore_client.clear_triples())
 
-        file_upload_start = time.perf_counter()
+    file_upload_start = time.perf_counter()
 
-        upload_materialized_triples(materialized_files, delete_materialized_triples_files)
+    upload_materialized_triples(materialized_files, delete_materialized_triples_files)
 
-        if not skip_ontologies_upload:
-            upload_ontology_files(ontology_files)
+    if not skip_ontologies_upload:
+        upload_ontology_files(ontology_files)
 
-        file_upload_end = time.perf_counter() - file_upload_start
+    file_upload_end = time.perf_counter() - file_upload_start
 
 
-        logging.info("Triples loaded! running postprocessing...")
-        resource_usage_postprocessing = []
-        if not skip_postprocessing:
-            performance_log_postprocessing, resource_usage_postprocessing = postprocessing.run_postprocessing()
+    logging.info("Triples loaded! running postprocessing...")
+    resource_usage_postprocessing = []
+    if not skip_postprocessing:
+        performance_log_postprocessing, resource_usage_postprocessing = postprocessing.run_postprocessing()
 
-        logging.info("Postprocessing finished!")
+    logging.info("Postprocessing finished!")
 
     if not skip_db_setup:
         db.stop_DB()
@@ -130,10 +127,20 @@ if __name__ == "__main__":
         help="Do not delete the files containing the materialized triples after uploading them to the RDF datastore"
     )
 
+    parser.add_argument(
+        "--use_rmlstreamer",
+        action="store_true",
+        default=False,
+        help="Use RMLStreamer instead of RMLMapper. Only recommended for very large databases due to its overhead"
+    )
+
+
+
     args = parser.parse_args()
 
     serve_KG(skip_ontologies_upload=args.skip_ontologies_upload,
              skip_db_setup=args.skip_db_setup,
              skip_materialization=args.skip_materialization,
              skip_postprocessing=args.skip_postprocessing,
-             delete_materialized_triples_files=not args.do_not_delete_materialized_triples_files)
+             delete_materialized_triples_files=not args.do_not_delete_materialized_triples_files,
+             use_rmlstreamer=args.use_rmlstreamer)

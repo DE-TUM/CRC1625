@@ -2,6 +2,7 @@
 Module used to fill the query and other optional parameters in a YARRRML mapping file
 """
 import os
+import uuid
 
 from datastores.sql.sql_db import MSSQLDB
 from .validate_mappings_consistency import validate_mapping
@@ -58,9 +59,20 @@ def create_untemplated_yarrrml_file(content: str,
                                     sources: str,
                                     new_output_file_name: str,
                                     custom_yml_template: dict[str, list[str]] | None,
-                                    replacement_i: int | None):
+                                    replacement_i: int | None,
+                                    add_prefixes: bool = True):
+    """
+    Intermediate function that fills and writes an untemplated, final YARRRML file
+
+    :param content: Templated YARRRML file as a string
+    :param sources: Sources to add to the YARRRML file, as a valid YARRRML-syntax string
+    :param new_output_file_name: Destination file
+    :param custom_yml_template: Dict of custom replacements to apply
+    :param replacement_i: Identifier of the replacement inside the dict, cannot be None if custom_yml_template is set
+    :param add_prefixes: Whether to add a prefixes entry or not
+    """
     placeholders = {
-        '{prefixes}': prefixes,
+        '{prefixes}': prefixes if add_prefixes else "",
         '{sources}': sources,
     }
     # For as many replacements as there are, replace contents with corresponding position *in the yml mapping*
@@ -68,37 +80,43 @@ def create_untemplated_yarrrml_file(content: str,
         for key in custom_yml_template.keys():
             placeholders[key] = custom_yml_template[key][replacement_i]
 
-    chunk_content = content
+    content = content
     for key, val in placeholders.items():
-        chunk_content = chunk_content.replace(key, val)
+        content = content.replace(key, val)
 
     with open(new_output_file_name, 'w') as f:
-        f.write(chunk_content)
+        f.write(content)
 
 
 def fill_template_values(templated_yml: str,
                          output_file_name: str,
                          custom_sql_template: dict[str, list[str]] | None,
                          custom_yml_template: dict[str, list[str]] | None,
-                         convert_to_csv: bool=False) -> list[str] | list[tuple[str, str, str]]:
+                         convert_to_csv: bool = False,
+                         add_prefixes: bool = True) -> list[str] | list[tuple[str, str, str]]:
     """
     Given a YARRRML mapping file path, fetches and replaces the templated prefixes and corresponding SQL queries, writes
     it back in a non-templated form and returns their file path(s) as a list. If the below optional parameters are
     indicated, multiple output files will be written and returned and/or the return list will be of a different shape.
 
     Optional parameters:
+    :param output_file_name: Where to store the final YARRRML file. If the file has a custom yml template (see below), it will be expanded to _replacement_{i}.yml
     :param custom_yml_template: Dict composed of replacement keys and corresponding lists of possible replacement values.
                                All replacement value lists must have the same size. It will iterate through each possible
                                index in the replacement lists, replacing the key with the corresponding value each time
                                (e.g. iteration 0 will replace every key with element 0 of its replacement values list, etc.).
                                This is currently used to generate SQL queries discriminating against different type IDs in the RDMS.
     :param custom_sql_template: used to replace values in the SQL query, following the same strategy as custom_yml_template (See get_sql_query documentation)
-    :convert_to_csv: Signals that the source will be a CSV file instead of the SQL query directly. This is mandatory if we want to use RMLStreamer for this mapping
+    :param convert_to_csv: Signals that the source will be a CSV file instead of the SQL query directly. This is mandatory if we want to use RMLStreamer for this mapping
+    :param add_prefixes: Whether we should add prefixes to the final YARRRML file(s) or not. Used to prevent warnings when coalescing multiple .yml files into an RML file
 
     :returns: If convert_to_csv = False, returns a list of str containing the untemplated YARRRML files
               If convert_to_csv = True, returns a list of (untemplated YARRRML file path, SQL query to execute, CSV file path to store the SQL query results in)
-              The SQL queries are then to be executed inside the materialization job. This is exclusively used for RMLStreamer
+              The SQL queries are then to be executed inside the materialization job.
     """
+    with open(templated_yml, 'r') as f:
+        content = f.read()
+
     if convert_to_csv:
         output_file_names: list[tuple[str, str, str]] = []
     else:
@@ -125,40 +143,50 @@ def fill_template_values(templated_yml: str,
             csv_files_to_create.append((query, csv_file))
 
         for replacement_i, (query, csv_file) in enumerate(csv_files_to_create):
-            with open(templated_yml, 'r') as f:
-                content = f.read()
+            source_identifier = uuid.uuid4().hex # One identifier for each copy
+
+            content_copy = content.replace("{i}", source_identifier).replace("sql_source", source_identifier)
 
             # Without SQL views, only used to validate the mappings consistency
             sources_for_validation = mssql_source.replace('{query}', query)
 
             # Validate it
-            validate_mapping(output_file_name, sources_for_validation, content)
+            validate_mapping(output_file_name, sources_for_validation, content_copy)
 
             if convert_to_csv:
                 new_output_file_name = output_file_name.replace(".yml", f"_{replacement_i}.yml")
 
                 sources = csv_source.replace('{csv_file}', csv_file)
 
-                create_untemplated_yarrrml_file(content,
+                create_untemplated_yarrrml_file(content_copy,
                                                 sources,
                                                 new_output_file_name,
                                                 custom_yml_template,
-                                                replacement_i)
+                                                replacement_i,
+                                                add_prefixes=add_prefixes)
+                add_prefixes = False
 
                 output_file_names.append((new_output_file_name, query, csv_file))
 
             else: # SQL query directly
-                new_output_file_name = output_file_name.replace(".yml", f"_{replacement_i}.yml")
-                sources = mssql_source.replace('{query}', query)
+                content_copy = content.replace("{i}", source_identifier).replace("sql_source", source_identifier)
 
-                create_untemplated_yarrrml_file(content, sources, new_output_file_name, custom_yml_template,
-                                                replacement_i)
+                new_output_file_name = output_file_name.replace(".yml", f"_{replacement_i}.yml")
+                sources = mssql_source.replace('{query}', query).replace("sql_source", source_identifier)
+
+                create_untemplated_yarrrml_file(content_copy,
+                                                sources, 
+                                                new_output_file_name, 
+                                                custom_yml_template,
+                                                replacement_i,
+                                                add_prefixes=add_prefixes)
+                add_prefixes = False
 
                 output_file_names.append(new_output_file_name)
 
     else: # It's a single .yml
-        with open(templated_yml, 'r') as f:
-            content = f.read()
+        source_identifier = uuid.uuid4().hex
+        content_copy = content.replace("{i}", source_identifier).replace("sql_source", source_identifier)
 
         query = get_sql_query(templated_yml,
                               custom_sql_template,
@@ -169,20 +197,30 @@ def fill_template_values(templated_yml: str,
         sources_for_validation = mssql_source.replace('{query}', query)
 
         # Validate it
-        validate_mapping(output_file_name, sources_for_validation, content)
+        validate_mapping(output_file_name, sources_for_validation, content_copy)
 
         if convert_to_csv:
             csv_file = output_file_name.replace(".yml", ".csv")
 
             sources = csv_source.replace('{csv_file}', csv_file)
 
-            create_untemplated_yarrrml_file(content, sources, output_file_name, None, None)
+            create_untemplated_yarrrml_file(content_copy,
+                                            sources, 
+                                            output_file_name,
+                                            None, 
+                                            None,
+                                            add_prefixes=add_prefixes)
 
             output_file_names.append((output_file_name, query, csv_file))
         else:
             sources = mssql_source.replace('{query}', query)
 
-            create_untemplated_yarrrml_file(content, sources, output_file_name, None, None)
+            create_untemplated_yarrrml_file(content_copy,
+                                            sources, 
+                                            output_file_name, 
+                                            None, 
+                                            None,
+                                            add_prefixes=add_prefixes)
 
             output_file_names.append(output_file_name)
 

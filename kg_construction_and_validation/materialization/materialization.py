@@ -20,12 +20,11 @@ How to run:
 """
 import logging
 import multiprocessing
-import shutil
 import sys
 import time
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from pathlib import Path
-from typing import Callable
+from typing import final
 
 import psutil
 from tqdm import tqdm
@@ -381,6 +380,11 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                             (os.path.join(module_dir, "mappings/compositions/properties_of_compositions_templated.yml"), True)
                        ]
 
+# RML file all the YARRRML mappings must coalesce to
+final_RML_file_path = os.path.join(module_dir, 'mappings/final_RML_file.rml')
+materialized_triples_file_path = os.path.join(module_dir, 'materialized_triples/materialized_triples.ttl')
+rmlstreamer_path = os.path.join(module_dir, 'materialized_triples')
+
 
 def resource_usage_job(stop_event, resource_usage):
     while not stop_event.is_set():
@@ -410,165 +414,151 @@ def resource_usage_job(stop_event, resource_usage):
         resource_usage.append((cpu, used_mem))
 
 
-def convert_yarrrml_to_rml_job(output_file_name, rml_file_name):
-    start_yarrrml_to_rml_conversion = time.perf_counter()
+def prepare_YARRRML_files() -> list[tuple[str, str, str]]:
+    """
+    Fills and writes all untemplated YARRRML files
 
+    Returns a list of (untemplated YARRRML file path, SQL query to execute, CSV file path to store the SQL query results in)
+    """
+    untemplated_yarrrml_file_names_and_jobs = []
+
+    for i, mapping in enumerate(templated_file_names):
+        if len(mapping) == 2:
+            templated_yarrrml_file, use_rmlstreamer = mapping
+            custom_sql_template = None
+            custom_yml_template = None
+        else:
+            (templated_yarrrml_file, custom_sql_template, custom_yml_template, use_rmlstreamer) = mapping
+
+        untemplated_base_yarrrml_file = templated_yarrrml_file.replace("_templated", "")
+        untemplated_yarrrml_file_names_and_jobs += fill_template_values(templated_yml=templated_yarrrml_file,
+                                                                        output_file_name=untemplated_base_yarrrml_file,
+                                                                        custom_sql_template=custom_sql_template,
+                                                                        custom_yml_template=custom_yml_template,
+                                                                        convert_to_csv=True,
+                                                                        # We only add prefixes to the first mapping
+                                                                        add_prefixes= i == 0)
+
+    return untemplated_yarrrml_file_names_and_jobs
+
+
+def create_rml_file(untemplated_yarrrml_file_paths: list[str]):
+    """
+    Coalesces a list of valid YARRRML file paths into a single RML file
+
+    The result will be written to `final_RML_file_path`
+    """
     yarrrml_to_rml_cmd = [
         "docker", "run", "--rm",
         "--user", f"{os.getuid()}:{os.getgid()}",
         "-v", f"{os.path.join(module_dir, 'mappings/')}:/data:z",
         "rmlio/yarrrml-parser:latest",
-        "-i", output_file_name.replace(os.path.join(module_dir, 'mappings/'), "/data/"),
-        "-o", rml_file_name.replace(os.path.join(module_dir, 'mappings/'), "/data/")
     ]
 
+    for f in untemplated_yarrrml_file_paths:
+        yarrrml_to_rml_cmd += ["-i", f.replace(os.path.join(module_dir, 'mappings/'), "/data/")]
+    yarrrml_to_rml_cmd += ["-o", final_RML_file_path.replace(os.path.join(module_dir, 'mappings/'), "/data/")]
+
     try:
-        subprocess.run(yarrrml_to_rml_cmd, check=True, capture_output=False, text=True)
+        subprocess.run(yarrrml_to_rml_cmd,
+                       check=True,
+                       capture_output=False,
+                       text=True).check_returncode()
     except subprocess.CalledProcessError as e:
-        logging.error(
-            f"{output_file_name}: YARRRML to RML conversion process failed with return code {e.returncode}")
+        logging.error(f"YARRRML-parser process failed with return code {e.returncode}")
         logging.error(f"Error output:\n{e.stderr}")
+        raise e
 
-    return time.perf_counter() - start_yarrrml_to_rml_conversion
+
+def run_mappings_queries(db: MSSQLDB,
+                         untemplated_yarrrml_file_names_and_jobs: list[tuple[str, str, str]]):
+    """
+    Runs the SQL queries corresponding to each mapping in parallel, and saves the results to CSV files
+
+    :param db: DB instance to run the queries against
+    :param untemplated_yarrrml_file_names_and_jobs: List of (_, SQL query to execute, CSV file path to store the SQL query results in), obtained via `prepare_YARRRML_files()`.
+    """
+    sql_query_jobs = [(query, output_csv_file_path) for (_, query, output_csv_file_path) in untemplated_yarrrml_file_names_and_jobs]
+
+    # To keep track of which query was being executed by the (unordered) finishing jobs
+    sql_query_to_yarrrml_file_path = {query: f.replace(os.path.join(module_dir, 'mappings/'), "/data/") for (f, query, _) in untemplated_yarrrml_file_names_and_jobs}
+
+    yarrrml_files_to_convert = []
+
+    with ThreadPoolExecutor(os.cpu_count()) as executor:
+        futures = []
+
+        for (query, output_csv_file_path) in sql_query_jobs:
+            futures.append(executor.submit(db.query_to_csv, query, output_csv_file_path))
+
+        with tqdm(total=len(futures), desc="SQL queries executed", leave=True) as pbar:
+            for future in as_completed(futures):
+                (yielded_results, query) = future.result()
+                if yielded_results:
+                    yarrrml_files_to_convert.append(sql_query_to_yarrrml_file_path[query])
+                # Else: we don't do anything for that mapping
+
+                pbar.update(1)
+
+    return yarrrml_files_to_convert
 
 
-def rmlmapper_materialization_job(yarrrml_file: str):
-    rml_file_name = yarrrml_file.split('.')[0] + "_rml.ttl"
-    materialized_file_name = rml_file_name.replace("/mappings/", "/materialized_triples/").split('.')[
-                                 0] + "_materialized.ttl"
-
+def execute_mappings(use_rmlstreamer: bool = False):
+    """
+    Runs RMLMapper or RMLStreamer over `final_RML_file_path`, writing the results to `materialized_triples_file_path`
+    """
+    # Let's be generous and offer it half of the system's RAM
     max_heap = int(psutil.virtual_memory().total * 0.5 / (1024 ** 3))
-    cmd = [
-        "java",
-        f"-Xmx{max_heap}g",
-        "-cp", f"{os.path.join(module_dir, 'rmlmapper.jar:sqljdbc')}", "be.ugent.rml.cli.Main",
-        "-m", rml_file_name,
-        "-o", materialized_file_name
-    ]
+
+    if not use_rmlstreamer:
+        cmd = [
+            "java",
+            f"-Xmx{max_heap}g",
+            "-cp", f"{os.path.join(module_dir, 'rmlmapper.jar:sqljdbc')}", "be.ugent.rml.cli.Main",
+            "-m", final_RML_file_path,
+            "-o", materialized_triples_file_path
+        ]
+
+    else:
+        cmd = [
+            "java", "-jar", os.path.join(module_dir, 'RMLStreamer.jar'), "toFile",
+            "-m", final_RML_file_path,
+            "-o", rmlstreamer_path
+        ]
+
+        with open(materialized_triples_file_path, 'wb') as outfile:
+            for filename in sorted(os.listdir(rmlstreamer_path)):
+                file_path = os.path.join(rmlstreamer_path, filename)
+
+                if os.path.isfile(file_path) and file_path != os.path.abspath(materialized_triples_file_path):
+                    with open(file_path, 'rb') as infile:
+                        outfile.write(infile.read())
+                    os.remove(file_path)
+
 
     try:
-        subprocess.run(cmd, check=True, capture_output=False, text=True)
+        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, text=True).check_returncode()
     except subprocess.CalledProcessError as e:
-        logging.error(f"{yarrrml_file}: RML Materialization process failed with return code {e.returncode}")
+        logging.error(f"RMLMapper materialization process failed with return code {e.returncode}")
         logging.error(f"Error output:\n{e.stderr}")
         raise
 
-    os.remove(yarrrml_file)
-    os.remove(rml_file_name)
-
-    return yarrrml_file, materialized_file_name
-
-
-def rmlstreamer_materialization_job(yarrrml_file: str, db: MSSQLDB, csv_job: tuple[str, str, bool]):
-    (query, csv_file, run_only_sql_queries) = csv_job
-    rml_file_name = yarrrml_file.split('.')[0] + "_rml.ttl"
-    materialized_file_name = rml_file_name.replace("/mappings/", "/materialized_triples/").split('.')[
-                                 0] + "_materialized.ttl"
-
-    yielded_results = db.query_to_csv(query, csv_file)
-
-    if not yielded_results:
-        # Write an empty .ttl file
-        with open(materialized_file_name, 'w') as _:
-            pass
-        return yarrrml_file, materialized_file_name
-
-    output_dir = materialized_file_name.replace(".ttl", "")
-    cmd = [
-        "java", "-jar", os.path.join(module_dir, 'RMLStreamer.jar'), "toFile",
-        "-m", rml_file_name,
-        "-o", output_dir
-    ]
-
-    if not run_only_sql_queries:
-        try:
-            subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, text=True)
-        except subprocess.CalledProcessError as e:
-            logging.error(f"RMLStreamer materialization process failed with return code {e.returncode}")
-            logging.error(f"Error output:\n{e.stderr}")
-            raise
-
-        with open(materialized_file_name, "w") as outfile:
-            for file_path in Path(output_dir).iterdir():
-                if file_path.is_file():
-                    with open(file_path, "r") as infile:
-                        outfile.write(infile.read())
-
-        # Clean up RMLStreamer's output dir
-        shutil.rmtree(output_dir)
-        # and the rest of the files
-        os.remove(yarrrml_file)
-        os.remove(rml_file_name)
-        os.remove(csv_file)
-
-    return yarrrml_file, materialized_file_name
-
-
-def get_mapping_jobs(mapping: tuple[str, bool] | tuple[str, dict, dict, bool],
-                     db: MSSQLDB,
-                     skip_materialization: bool = False,
-                     run_only_sql_queries: bool = False) \
-        -> tuple[str, list[tuple[tuple[Callable, str], tuple[Callable, str, bool] | None]]]:
-    """
-    :param run_only_sql_queries: Forces the job to be an RMLStreamer job that will only run the SQL query. This is only
-                                 used to measure query times for debugging
-
-    :returns: If the mapping has set use_rmlstreamer = False, a tuple of untemplated_base_yarrrml_file, [((rmlmapper_materialization_job, yarrrml_file_name), None)]
-              If the mapping has set use_rmlstreamer = True, a tuple of untemplated_base_yarrrml_file, [((rmlstreamer_materialization_job, yarrrml_file_name), (query, csv_file, run_only_sql_queries))]
-
-              If the SQL database is set to a remote endpoint, use_rmlstreamer will be forcefully True in all cases (in this case, MSSQLDB only allows generating .csv results)
-
-              In both cases, the returned tuple consists of the reference to the untemplated YARRRML file and a list of jobs to execute. If RMLStreamer is
-              to be used, then the list will also contain the jobs to execute in order to generate the CSV files RMLStreamer requires as input
-    """
-
-    if len(mapping) == 2:
-        templated_yarrrml_file, use_rmlstreamer = mapping
-        custom_sql_template = None
-        custom_yml_template = None
-    else:
-        (templated_yarrrml_file, custom_sql_template, custom_yml_template, use_rmlstreamer) = mapping
-
-    if run_only_sql_queries or db.is_remote:
-        use_rmlstreamer = True # Force it to generate CSV files
-
-    untemplated_base_yarrrml_file = templated_yarrrml_file.replace("_templated", "")
-    untemplated_yarrrml_file_names_and_jobs = fill_template_values(templated_yarrrml_file,
-                                                                   untemplated_base_yarrrml_file,
-                                                                   custom_sql_template,
-                                                                   custom_yml_template,
-                                                                   use_rmlstreamer)
-
-    jobs = []
-    if not skip_materialization:
-        if use_rmlstreamer:
-            for (yarrrml_file_name, query, csv_file) in untemplated_yarrrml_file_names_and_jobs:
-                jobs.append(((rmlstreamer_materialization_job, yarrrml_file_name), (query, csv_file, run_only_sql_queries)))
-        else:
-            for yarrrml_file_name in untemplated_yarrrml_file_names_and_jobs:
-                jobs.append(((rmlmapper_materialization_job, yarrrml_file_name), None))
-
-    return untemplated_base_yarrrml_file, jobs
-
 
 def run_mappings(db: MSSQLDB,
-                 skip_materialization: bool =False,
-                 run_only_sql_queries: bool = False) -> (list[str],
-                                                         dict[str, dict[str, float]],
-                                                         list[(float, float)]):
+                 skip_materialization: bool = False,
+                 use_rmlstreamer: bool = False) -> (list[str],
+                                                    dict[str, dict[str, float]],
+                                                    list[(float, float)]):
     """
     Executes the complete pipeline of templated YARRRML file parsing -> YARRRML to RML files conversion -> mappings execution
     (See the module's documentation for how to include/extend the mappings)
 
-    :param skip_materialization: Avoids materializing the YARRRML files. It will assume that they are present in the
-                                 materialization/materialized_triples/ folder
-    :param run_only_sql_queries: Runs the entire pipeline without executing RML->RDF mapping jobs. Instead, only run
-                                 their SQL queries by saving them into .csv files. This is only used to measure
-                                 query times for debugging
-
+    :param db: DB instance to run the queries against
+    :param skip_materialization: Avoids running the entire pipeline (query execution, preparation and conversion of YARRRML files and execution of mappings).
+                                 It will return a list of materialized file paths, but assuming they are already present
 
     :return: Tuple containing:
-                - A list of file paths containing the materialized triples in turtle format
+                - A list of file paths containing the materialized triples in turtle format (For now, it's only one)
                 - A dict of file path -> time_measurement_identifier -> time measurement (in s.), containing execution time
                   logs for the different phases of the pipeline
                 - A list of pairs of (cpu_percent_usage, bytes_of_memory_used) taken every second for the duration of this function
@@ -583,83 +573,44 @@ def run_mappings(db: MSSQLDB,
     )
     resource_usage_tracker.start()
 
-    results = []
     performance_log: dict[str: float | dict[str: float]] = dict()
     performance_log["per_mapping_times"] = {}
 
-    yarrrml_file_correspondences = dict()
+    if skip_materialization:
+        logging.info("Skipping materialization. Note that the system will assume the materialized files already exist.")
+        return [materialized_triples_file_path], performance_log, list(resource_usage)
 
-    # Create all untemplated YARRRML files, and save a reference to each one as an individual job
-    mapping_jobs = []
-    for m in templated_file_names:
-        base_untemplated_yarrrml_file_name, jobs = get_mapping_jobs(m, db, skip_materialization, run_only_sql_queries)
-        mapping_jobs.append((base_untemplated_yarrrml_file_name, jobs))
+    logging.info("Filling the templated YARRRML mappings...")
+    untemplated_yarrrml_file_names_and_jobs = prepare_YARRRML_files()
+    logging.info(f"YARRRML files created: {len(untemplated_yarrrml_file_names_and_jobs)}")
 
-        performance_log["per_mapping_times"][base_untemplated_yarrrml_file_name] = dict()
+    logging.info("Executing SQL queries...")
+    time_query_execution_start = time.perf_counter()
+    yarrrml_files_to_convert = run_mappings_queries(db, untemplated_yarrrml_file_names_and_jobs)
+    performance_log["query_execution"] = time.perf_counter() - time_query_execution_start
+    logging.info(f" YARRRML files whose queries yielded results: {len(yarrrml_files_to_convert)} / {len(untemplated_yarrrml_file_names_and_jobs)}")
 
-        for (_, yarrrml_file), _ in jobs:
-            yarrrml_file_correspondences[yarrrml_file] = base_untemplated_yarrrml_file_name
-
-
-    # Convert all YARRRML files to RML
+    logging.info("Converting YARRRML mappings to RML...")
     time_yarrrml_to_rml_conversion_start = time.perf_counter()
-
-    with ThreadPoolExecutor(os.cpu_count()) as executor:
-        yarrrml_to_rml_jobs = []
-        for _, jobs in mapping_jobs:
-            for (_, yarrrml_file), _ in jobs:
-                rml_file_name = yarrrml_file.split('.')[0] + "_rml.ttl"
-                yarrrml_to_rml_jobs.append((convert_yarrrml_to_rml_job, yarrrml_file, rml_file_name))
-
-        futures = {
-            executor.submit(function, yarrrml_file, rml_file_name) for (function, yarrrml_file, rml_file_name) in yarrrml_to_rml_jobs
-        }
-        with tqdm(total=len(futures), desc="Mappings converted to RML", leave=True) as pbar:
-            for future in as_completed(futures):
-                future.result()
-                pbar.update(1)
-
+    create_rml_file(yarrrml_files_to_convert)
     performance_log["yarrrml_to_rml_conversion_real_time"] = time.perf_counter() - time_yarrrml_to_rml_conversion_start
 
-    # Execute all mapping jobs
+
+    logging.info(f"Materializing the triples via {"RMLStreamer" if use_rmlstreamer else "RMLMapper"}...")
     time_materialization_start = time.perf_counter()
-
-    with ThreadPoolExecutor(os.cpu_count()) as executor:
-        total_materialization_jobs = []
-        for base_untemplated_yarrrml_file_name, jobs in mapping_jobs:
-            total_materialization_jobs += jobs
-
-        futures = []
-        for ((function, arg), csv_job) in total_materialization_jobs:
-            if csv_job is not None:
-                futures.append(executor.submit(function, arg, db, csv_job))
-            else:
-                futures.append(executor.submit(function, arg))
-
-        with tqdm(total=len(futures), desc="Mappings processed", leave=True) as pbar:
-            for future in as_completed(futures):
-                yarrrml_file, materialized_file_name = future.result()
-
-                base_untemplated_yarrrml_file_name = yarrrml_file_correspondences[yarrrml_file]
-
-                materialization_time_for_file = time.perf_counter() - time_materialization_start
-
-                performance_log["per_mapping_times"][base_untemplated_yarrrml_file_name][yarrrml_file] = {
-                    "rml_materialization": materialization_time_for_file,
-                }
-
-                tqdm.write(f"✔ Processing of {yarrrml_file} completed! "
-                           f"Materialization time = {materialization_time_for_file:.2f}s")
-
-                pbar.update(1)
-
-                results.append(materialized_file_name)
-
-    # Log the time for all the mappings to finish. This differs from the sum of all
-    # mapping times if multithreading is used (by default)
+    execute_mappings(use_rmlstreamer)
     performance_log["materialization_real_time"] = time.perf_counter() - time_materialization_start
 
+    # Stop the resource logging
     stop_event.set()
     resource_usage_tracker.join()
 
-    return results, performance_log, list(resource_usage)
+    logging.info("Cleaning up temporary files...")
+    for (yml_file, _, csv_file) in untemplated_yarrrml_file_names_and_jobs:
+        if os.path.exists(yml_file):
+            os.remove(yml_file)
+
+        if os.path.exists(csv_file):
+            os.remove(csv_file)
+
+    return [materialized_triples_file_path], performance_log, list(resource_usage)

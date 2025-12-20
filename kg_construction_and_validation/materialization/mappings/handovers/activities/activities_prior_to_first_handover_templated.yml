@@ -4,13 +4,13 @@ sources:
   sql_source: {sources}
 
 mappings:
-  handover_to_activity:
+  handover_to_activity_prior_to_first_handover_{i}:
     sources: sql_source
     s: handover:initial_work_for_ML_$(MLId)
     po:
       - [pmdco:subordinateProcess, activity:{measurement_name}_activity_for_initial_work_for_ML_$(MLId)~iri]
 
-  activity:
+  activity_prior_to_first_handover_{i}:
     sources: sql_source
     s: activity:{measurement_name}_activity_for_initial_work_for_ML_$(MLId)
     po:

@@ -5,7 +5,7 @@ sources:
   sql_source: {sources}
 
 mappings:
-  sample_to_substrate:
+  physical_sample_to_substrate:
     sources: sql_source
     s: object:$(ObjectId)
     po:

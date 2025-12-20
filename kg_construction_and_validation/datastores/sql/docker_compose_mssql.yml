@@ -11,7 +11,7 @@ services:
       bash -c "
       /opt/mssql/bin/sqlservr &
       sleep 5 &&
-      /opt/mssql-tools18/bin/sqlcmd -S localhost -U ${MSSQL_USER} -P ${MSSQL_PASSWORD} -C -Q \"RESTORE DATABASE [RUB_INF] FROM DISK = '/var/opt/mssql/backup/${MSSQL_BAK_FILE_NAME}' WITH MOVE 'RUB_INF' TO '/var/opt/mssql/data/RUB_INF.mdf', MOVE 'RUB_INF_log' TO '/var/opt/mssql/data/RUB_INF_log.ldf';\" &&
+      /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1 -U ${MSSQL_USER} -P ${MSSQL_PASSWORD} -C -Q \"RESTORE DATABASE [RUB_INF] FROM DISK = '/var/opt/mssql/backup/${MSSQL_BAK_FILE_NAME}' WITH MOVE 'RUB_INF' TO '/var/opt/mssql/data/RUB_INF.mdf', MOVE 'RUB_INF_log' TO '/var/opt/mssql/data/RUB_INF_log.ldf';\" &&
       tail -f /dev/null"
     ports:
       - "${MSSQL_PORT}:${MSSQL_PORT}"

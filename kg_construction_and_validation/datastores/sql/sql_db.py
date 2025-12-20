@@ -6,6 +6,7 @@ import subprocess
 import sys
 import time
 import uuid
+from subprocess import CalledProcessError
 
 import pandas as pd
 import pymssql
@@ -67,43 +68,37 @@ class MSSQLDB():
 
     def query_to_csv(self,
                      query: str,
-                     csv_filename: str) -> bool:
+                     csv_filename: str) -> tuple[bool, str]:
         """
         Executes a query and writes results to a CSV file
 
-        Returns True if the query yielded results, False otherwise
+        Returns (True, query) if the query yielded results, (False, query) otherwise. Query is returned to identify jobs,
+        as they are run in thread pools.
         """
         if self.is_remote:
-            logging.info("Remote query!")
             headers = {'VroApi': MSSQL_PROD_API_KEY}
             data = {'sql': query}
             response = requests.post(MSSQL_PROD_TENANT_URL + "execute", headers=headers, data=data)
             response.raise_for_status()
             if not response.text:
-                return False
+                return (False, query)
             else:
                 try:
                     df = pd.DataFrame.from_dict(response.json())
                 except Exception as e:
                     print("EXCEPTION:", query, "FILENAME", csv_filename)
-                    print(response)
-                    print(response.text)
-                    print(not response.text)
-                    print(response.json())
-                    print(e)
                     return e
         else:
-            logging.info("Non-remote query!")
             df = pd.read_sql(query, create_engine(f'mssql+pymssql://{MSSQL_USER}:{MSSQL_PASSWORD.replace("@", "%40")}@{MSSQL_HOST}:{MSSQL_PORT}/RUB_INF'))
 
         if not df.empty:
             str_cols = df.select_dtypes(include=['object', 'string']).columns
             df[str_cols] = df[str_cols].replace({r'[\r\n]+': ' '}, regex=True)
             df.to_csv(csv_filename, index=False, encoding='utf-8')
-            return True
+            return (True, query)
         else:
-            logging.warning(f'A .csv query returned no results: {csv_filename}')
-            return False
+            logging.warning(f'A .csv query returned no results ({csv_filename}). This may happen when, e.g., mappings for specific object types that are not used.')
+            return (False, query)
 
 
     def clear_data_dir(self):
@@ -200,18 +195,20 @@ class MSSQLDB():
                     ["docker-compose", "-f", "docker_compose_mssql.yml", "down", "--volumes", "--remove-orphans"],
                     check=True,
                     stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
                     cwd=module_dir
-                )
+                ).check_returncode()
+
                 subprocess.run(
                     ["docker-compose", "-f", "docker_compose_mssql.yml", "up", "--detach", "--force-recreate"],
                     check=True,
                     stdout=subprocess.DEVNULL,
                     cwd=module_dir
-                )
+                ).check_returncode()
 
-                time.sleep(30) # Allow MSSQL to create the DB and allow connections
+                time.sleep(15) # Allow MSSQL to create the DB and allow connections
             except Exception as e:
-                raise RuntimeError(f"Error when setting up the MSSQL container: {e}")
+                raise CalledProcessError(f"Error when setting up the MSSQL container: {e}")
 
             # Create additional indexes for better performance
             self._execute_query(self.ADDITIONAL_INDEXES_QUERY)

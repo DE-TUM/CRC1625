@@ -4,13 +4,13 @@ sources:
   sql_source: {sources}
 
 mappings:
-  handover_to_activity:
+  handover_to_activity_for_other_types:
     sources: sql_source
     s: handover:$(HandoverId)
     po:
       - [pmdco:subordinateProcess, activity:misc_activity_for_handover_$(HandoverId)~iri]
 
-  activity:
+  activity_for_other_types:
     sources: sql_source
     s: activity:misc_activity_for_handover_$(HandoverId)
     po:

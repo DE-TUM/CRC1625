@@ -4,7 +4,7 @@ sources:
   sql_source: {sources}
 
 mappings:
-  idea:
+  object_to_object:
     sources: sql_source
     s: $(sourceIRI)
     po:

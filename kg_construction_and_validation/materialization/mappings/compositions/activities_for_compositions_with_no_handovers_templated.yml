@@ -4,13 +4,13 @@ sources:
   sql_source: {sources}
 
 mappings:
-  handover_to_activity_for_composition:
+  handover_to_activity_for_composition_with_no_handovers:
     sources: sql_source
     s: handover:initial_work_for_ML_$(MLId)
     po:
       - [pmdco:subordinateProcess, activity:EDX_activity_for_initial_work_for_ML_$(MLId)~iri]
 
-  activity_metadata_and_link_to_composition:
+  activity_metadata_and_link_to_composition_with_no_handovers:
     sources: sql_source
     s: activity:EDX_activity_for_initial_work_for_ML_$(MLId)
     po:
