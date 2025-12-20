@@ -498,7 +498,6 @@ async def overwrite_workflow_model(workflow_model: WorkflowModel,
                 (await (store_workflow_model(workflow_model, user_id, return_file=True)), UpdateType.file_upload)]
     # actions.append((clean_workflow_instance_steps(workflow_model, user_id, rdf_datastore_client, return_query=True), UpdateType.query))
 
-    # TODO FIX
     await rdf_datastore_client.launch_updates(actions, graph_iri=WORKFLOWS_GRAPH_IRI, delete_files_after_upload=True)
 
 
@@ -539,6 +538,9 @@ async def get_workflow_instances_of_model(workflow_model_name: str,
             workflow_instance_to_modify.step_assignments[step_name] = []
 
         workflow_instance_to_modify.step_assignments[step_name].append(object_id)
+
+
+    print("read workflow instances:", workflow_instances)
 
     return workflow_instances
 
@@ -632,7 +634,11 @@ async def overwrite_workflow_instance(workflow_instance: WorkflowInstance, user_
     await rdf_datastore_client.launch_updates(actions, graph_iri=WORKFLOWS_GRAPH_IRI, delete_files_after_upload=True)
 
 
-async def get_handover_group_pairs(object_id: int) -> dict[str, str]:
+async def get_handover_group_pairs(object_id: int,
+                                   cached_object_handover_groups: dict[int, tuple[str, dict[str, str] | None]]) -> dict[str, str]:
+    if object_id in cached_object_handover_groups and cached_object_handover_groups[object_id][1] is not None:
+        return cached_object_handover_groups[object_id][1]
+
     handover_groups: dict[str, str] = {}
 
     if (await rdf_datastore_client.get_datastore_type()) == "virtuoso":
@@ -646,13 +652,20 @@ async def get_handover_group_pairs(object_id: int) -> dict[str, str]:
     for binding in result["results"]["bindings"]:
         handover_groups[binding["handover_group_1"]["value"]] = binding["handover_group_2"]["value"]
 
+    cached_object_handover_groups[object_id] = (cached_object_handover_groups[object_id][0], handover_groups)
+
     return handover_groups
 
 
-async def get_first_handover_group(object_id: int) -> str:
+async def get_first_handover_group(object_id: int,
+                                   cached_object_handover_groups: dict[int, tuple[str, dict[str, str] | None]]) -> str:
     """
     Returns the IRI of the first handover group the given materials library or sample has
     """
+    if object_id in cached_object_handover_groups:
+        print(object_id, "was cached!")
+        return cached_object_handover_groups[object_id][0]
+
     if (await rdf_datastore_client.get_datastore_type()) == "virtuoso":
         # Virtuoso is very finicky when matching ints
         query = get_first_handover_group_query.replace('{object_id}', f'"{object_id}"^^xsd:integer')
@@ -663,7 +676,10 @@ async def get_first_handover_group(object_id: int) -> str:
     if len(result["results"]["bindings"]) == 0:
         raise RuntimeError(f"No initial handover group found for sample {object_id}")
 
-    return result["results"]["bindings"][0]["first_handover_group"]["value"]
+    first_handover_group = result["results"]["bindings"][0]["first_handover_group"]["value"]
+    cached_object_handover_groups[object_id] = (first_handover_group, None)
+
+    return first_handover_group
 
 
 def generate_group_shape(workflow_model_step: WorkflowModelStep, target_node: str) -> str:
@@ -714,7 +730,8 @@ async def get_next_validation_steps(workflow_model: WorkflowModel,
                                     current_workflow_step: WorkflowModelStep,
                                     current_object_id: int,
                                     target_node: str,
-                                    handover_group_pairs: dict[str, str]) -> list[tuple[WorkflowModelStep, str, int, str, dict[str, str]]]:
+                                    handover_group_pairs: dict[str, str],
+                                    cached_object_handover_groups: dict[int, tuple[str, dict[str, str] | None]]) -> list[tuple[WorkflowModelStep, str, int, str, dict[str, str]]]:
     """
     Returns a list of (WorkflowModelStep, next_step_name, object_id, target node IRI) tuples given the current
     step, sample ID and target node
@@ -729,21 +746,24 @@ async def get_next_validation_steps(workflow_model: WorkflowModel,
         # List of (step, object_id, target_node)
         next_steps: list[tuple[WorkflowModelStep, str, int, str, dict[str, str]]] = []
 
+        print("assignments of next step:",next_step_name, workflow_instance.step_assignments[next_step_name])
         for new_object_id in workflow_instance.step_assignments[next_step_name]:
             if current_object_id == new_object_id:  # The next target node is the next handover group for the target node
                 new_target_node = handover_group_pairs.get(target_node)
                 if new_target_node is not None:  # Else, we stop checking TODO handle better
+                    print("next step in same sample:", next_step_name, current_object_id)
                     next_steps.append((workflow_model.workflow_model_steps[next_step_name],
                                        next_step_name,
                                        current_object_id,
                                        new_target_node,
                                        handover_group_pairs))
             else:  # We have a new sample, so we must continue the workflow from the new sample's *first* handover group
+                print("next step in NEW sample:", next_step_name, new_object_id)
                 next_steps.append((workflow_model.workflow_model_steps[next_step_name],
                                    next_step_name,
                                    new_object_id,
-                                   await get_first_handover_group(new_object_id),
-                                   await get_handover_group_pairs(new_object_id)))
+                                   await get_first_handover_group(new_object_id, cached_object_handover_groups),
+                                   await get_handover_group_pairs(new_object_id, cached_object_handover_groups)))
 
         return next_steps
     else:
@@ -782,10 +802,14 @@ async def generate_SHACL_shapes_for_workflow(workflow_model: WorkflowModel,
     # model with its corresponding handover workflow model instance
     steps_to_validate: list[tuple[WorkflowModelStep, str, int, str, str]] = []
 
+    # Since we also allow arbitrary objects along the handover workflow models that may reappear at any time at any branch, 
+    # we also cache their information globally
+    cached_object_handover_groups: dict[int, tuple[str, dict[str, str] | None]] = {}
+
     # Start validating from the initial step, for every sample that is assigned to it
     for object_id in workflow_instance.step_assignments[workflow_model.workflow_model_options.initial_step_name]:
-        first_handover_group = await get_first_handover_group(object_id)
-        handover_group_pairs = await get_handover_group_pairs(object_id)
+        first_handover_group = await get_first_handover_group(object_id, cached_object_handover_groups)
+        handover_group_pairs = await get_handover_group_pairs(object_id, cached_object_handover_groups)
 
         if first_handover_group is not None:  # Else, stop checking TODO handle better?
             initial_step = workflow_model.workflow_model_steps[workflow_model.workflow_model_options.initial_step_name]
@@ -795,7 +819,7 @@ async def generate_SHACL_shapes_for_workflow(workflow_model: WorkflowModel,
         (workflow_step, workflow_step_name, object_id, target_node, handover_group_pairs) = steps_to_parse.pop()
 
         steps_to_validate.append((workflow_step, workflow_step_name, object_id, target_node, generate_group_shape(workflow_step, target_node)))
-        steps_to_parse.extend(await get_next_validation_steps(workflow_model, workflow_instance, workflow_step, object_id, target_node, handover_group_pairs))
+        steps_to_parse.extend(await get_next_validation_steps(workflow_model, workflow_instance, workflow_step, object_id, target_node, handover_group_pairs, cached_object_handover_groups))
 
     return steps_to_validate
 
@@ -904,6 +928,7 @@ async def is_workflow_instance_valid(workflow_model, workflow_instance) -> bool:
 
     Optimized for parallelism (or, at least, for python's "parallelism")
     """
+    print("Running validation for", workflow_instance)
     steps_to_validate = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance)
     data_graphs = await generate_data_graphs_for_workfow_steps(steps_to_validate)
 

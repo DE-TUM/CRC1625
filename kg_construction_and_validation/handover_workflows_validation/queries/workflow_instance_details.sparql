@@ -1,4 +1,4 @@
-SELECT ?workflow_instance_name ?step_name ?object_id ?user_id WHERE {
+SELECT DISTINCT ?workflow_instance_name ?step_name ?object_id ?user_id WHERE {
     {
         GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
             ?workflow_instance :handoverWorkflowModelInstanceOf <{workflow_model_iri}>.
