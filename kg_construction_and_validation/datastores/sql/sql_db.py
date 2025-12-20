@@ -288,7 +288,7 @@ class MSSQLDB():
             port=MSSQL_PORT,
             user=MSSQL_USER,
             password=MSSQL_PASSWORD,
-            database=MSSQL_CRC1625_DATABASE_NAME,
+            database=MSSQL_MASTER_DATABASE_NAME,
             autocommit=True
         )
         cursor = conn.cursor()

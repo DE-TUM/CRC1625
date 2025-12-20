@@ -24,8 +24,6 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Any
 
-import pymssql
-
 from create_synthetic_records import create_synthetic_records
 from datastores.sql.sql_db import MSSQLDB
 from datastores.rdf import rdf_datastore_client
@@ -88,7 +86,7 @@ count_triples_query = prefixes + open(
     os.path.join(module_dir, './performance_test/queries/count_triples.sparql')).read()
 
 
-def run_querying_benchmark() -> dict[str, tuple[float, float]]:
+def run_querying_benchmark(sql_db: MSSQLDB) -> dict[str, tuple[float, float]]:
     """
     Executes all query files contained in the ./performance_test/queries folder. Each query file must have a corresponding
     counterpart in SQL/SPARQL using the .sql or .sparql extension, respectively, with the same base name.
@@ -99,15 +97,6 @@ def run_querying_benchmark() -> dict[str, tuple[float, float]]:
     benchmark_results: dict[str, tuple[float, float]] = dict()
 
     sparql_query_files = list(Path(os.path.join(module_dir, './performance_test/queries/sql_sparql_benchmark/')).rglob("*.sparql"))
-
-    conn = pymssql.connect(
-        server='localhost',
-        port='1433',
-        user='sa',
-        password='DebugPassword123@',
-        database='RUB_INF'
-    )
-    cursor = conn.cursor()
 
     for sparql_file in sparql_query_files:
         sparql_query = prefixes + open(sparql_file).read()
@@ -125,7 +114,7 @@ def run_querying_benchmark() -> dict[str, tuple[float, float]]:
 
         start = time.perf_counter()
         try:
-            cursor.execute(sql_query)  # Same here
+            sql_db._execute_query(sql_query)  # Same here
         except Exception as e:
             print(f"Error on SQL query '{sql_file}': {e}")
             raise
@@ -156,7 +145,7 @@ def get_value_from_query(q: str,
     return datatype(asyncio.run(rdf_datastore_client.launch_query(q))["results"]["bindings"][0][value]["value"])
 
 
-def get_runs_configuration_from_datastore(n_repetitions: int=1):
+def get_runs_configuration_from_datastore(sql_db: MSSQLDB, n_repetitions: int=1):
     """
     Generate a runs_configuration.json file containing the statistics and probabilities of each required parameter
     for the creation of a synthetic DB. This will be obtaining by launching SPARQL queries to the specified store type
@@ -436,14 +425,6 @@ if __name__ == "__main__":
         Note that there is already a default file located at ./performance_test/runs_configuration"""
     )
 
-    parser.add_argument(
-        "--evaluate_only_sql_queries",
-        required=False,
-        action="store_true",
-        help="""Run the performance test without materializing or doing anything RDF-related.
-        The output will be the same, but will only reflect SQL-to-csv times."""
-    )
-
     args = parser.parse_args()
 
     sql_db = MSSQLDB()
@@ -452,7 +433,7 @@ if __name__ == "__main__":
         logging.info("""No runs configuration file indicated.
         Materializing CRC1625 KG to obtain statistics for the synthetic data generation...""")
 
-        runs_config = get_runs_configuration_from_datastore(3)
+        runs_config = get_runs_configuration_from_datastore(sql_db, 3)
     else:
         runs_config = get_runs_configuration_from_file(args.runs_configuration_file)
 
@@ -481,6 +462,9 @@ if __name__ == "__main__":
                 elif max_measurements_in_main_samples == 8:
                     multiplier = "2"
                 else:
+                    continue
+
+                if multiplier != "2" or num_main_samples != 10_000:
                     continue
 
                 logging.info(f"Executing test for multiplier '{multiplier}', n_samples {num_main_samples}, n_run: {run_config['n_run']}")
@@ -521,8 +505,7 @@ if __name__ == "__main__":
                 mappings_performance_log, resource_usage_mappings, performance_log_postprocessing, resource_usage_postprocessing,  file_upload_time = (
                     serve_KG(skip_ontologies_upload=False,
                              skip_db_setup=True,
-                             skip_materialization=False,
-                             run_only_sql_queries=args.evaluate_only_sql_queries))
+                             skip_materialization=False))
 
                 if not args.evaluate_only_sql_queries:
                     n_triples = get_value_from_query(count_triples_query, "n_triples", int)
@@ -537,7 +520,7 @@ if __name__ == "__main__":
                     logging.info(f"Benchmarking query times...")
 
                 
-                    query_benchmark_results = run_querying_benchmark()
+                    query_benchmark_results = run_querying_benchmark(sql_db)
                 else:
                     n_triples = 0
                     query_benchmark_results = {}
