@@ -217,33 +217,15 @@ class MSSQLDB():
         """
         Stops the DB container and deletes all of its data
         """
+        if self.is_remote:
+            raise RuntimeError("Only local DBs deployed as docker containers can be stopped")
+
         logging.info("Stopping and removing MSSQL container...")
         subprocess.run(
             ["docker-compose", "-f", "docker_compose_mssql.yml", "down", "--volumes", "--remove-orphans"],
             check=True,
             cwd=module_dir
         )
-
-    def create_view_for_query(self, query: str) -> (str, str):
-        """
-        Creates a materialized view of the provided SQL query, returning the view name
-        and the SQL query to be used to query it instead
-
-        Not used anymore, as we ensure that mappings related to the same query are materialized together
-        """
-
-        materialized_view_name = f"view_{uuid.uuid4().hex[:8]}"
-        self._execute_query(query.replace("FROM", f"INTO {materialized_view_name} FROM", 1))
-
-        return materialized_view_name, f"SELECT * FROM {materialized_view_name}"
-
-    def remove_views(self, view_names: list[str]):
-        """
-        Deletes all provided materialized views that were previously created
-        via create_view_for_query
-        """
-        for view_name in view_names:
-            self._execute_query(f"DROP TABLE {view_name};")
 
     def database_backup_exists(self, identifier):
         """
@@ -255,6 +237,9 @@ class MSSQLDB():
         """
         Dumps the database as a .bak file, stored in the container's backups folder
         """
+        if self.is_remote:
+            raise RuntimeError("Only local DBs deployed as docker containers can be dumped")
+
         conn = pymssql.connect(
             server=MSSQL_HOST,
             port=MSSQL_PORT,
@@ -352,54 +337,3 @@ class MSSQLDB():
         conn.close()
 
         os.remove(os.path.join(module_dir, './db_dumps/bulk_insert_records.csv'))
-
-if __name__ == "__main__":
-    db = MSSQLDB()
-
-    docker_file = db.select_and_start_db()
-
-    db.query_to_csv("""
-          SELECT
-          /* ML, its measurement alongside its creation, and the handover
-           it **may** belong to  based on their creation dates */
-          linkingMLs.ObjectId AS MLId,
-          measurementData.ObjectId AS MeasurementId,
-          FORMAT(measurementData._created, 'yyyy-MM-ddTHH:mm:ss.fff') AS MeasurementDate,
-          handoverData.handoverId AS HandoverId
-          /* MLs linking to measurements */
-          FROM vro.vroObjectLinkObject linkingMLs
-          /* ObjectInfo of the measurements */
-          JOIN vro.vroObjectInfo measurementData ON measurementData.ObjectId = linkingMLs.LinkedObjectId
-          JOIN vro.vroObjectInfo sampleData ON sampleData.ObjectId = linkingMLs.ObjectId
-          JOIN (
-              /* Handovers alongside their creation date and the ML they refer to */
-              SELECT vro.vroObjectInfo.objectId AS handoverId,
-              vro.vroObjectInfo._created AS handoverDate,
-              vro.vroHandover.sampleObjectId AS MLId
-              FROM vro.vroObjectInfo
-              JOIN vro.vroHandover ON vro.vroObjectInfo.objectId = vro.vroHandover.handoverid
-              WHERE vro.vroObjectInfo.typeId = -1
-          ) handoverData ON linkingMLs.ObjectId = handoverData.MLId
-          WHERE NOT EXISTS ( /* Exclude measurements that are already linked to a handover */
-              SELECT 1
-              FROM vro.vroObjectLinkObject
-              JOIN vro.vroObjectInfo s on vro.vroObjectLinkObject.ObjectId = s.ObjectId
-              WHERE s.TypeId = -1 AND vro.vroObjectLinkObject.LinkedObjectId = measurementData.ObjectId
-          )
-          AND measurementData.TypeId IN (27, 38, 39, 40)
-          AND sampleData.TypeId = 6
-          /* Get only the handover that has the maximum date among those
-             that have a creation date earlier than the measurement's creation date */
-          AND handoverData.handoverDate = (
-              SELECT MAX(hSub._created)
-              FROM vro.vroObjectInfo hSub
-              JOIN vro.vroHandover hSubData ON hSub.objectId = hSubData.handoverid
-              WHERE hSubData.sampleObjectId = linkingMLs.ObjectId
-              AND hSub._created < measurementData._created
-              AND hSub.typeId = -1
-          ) 
-    
-    
-    """, "test.csv")
-
-    db.stop_DB()

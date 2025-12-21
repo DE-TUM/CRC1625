@@ -83,7 +83,7 @@ def serve_KG(skip_ontologies_upload: bool = True,
 
     logging.info("Postprocessing finished!")
 
-    if not skip_db_setup:
+    if not skip_db_setup and not db.is_remote:
         db.stop_DB()
 
     return performance_log_mappings, resource_usage_mappings, performance_log_postprocessing, resource_usage_postprocessing, file_upload_end
