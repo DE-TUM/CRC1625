@@ -492,7 +492,7 @@ def run_mappings_queries(db: MSSQLDB,
     sql_query_jobs = [(query, output_csv_file_path) for (_, query, output_csv_file_path) in untemplated_yarrrml_file_names_and_jobs]
 
     # To keep track of which query was being executed by the (unordered) finishing jobs
-    sql_query_to_yarrrml_file_path = {query: f.replace(os.path.join(module_dir, 'mappings/'), "/data/") for (f, query, _) in untemplated_yarrrml_file_names_and_jobs}
+    sql_query_to_yarrrml_file_path = {query: f for (f, query, _) in untemplated_yarrrml_file_names_and_jobs}
 
     yarrrml_files_to_convert = []
 
