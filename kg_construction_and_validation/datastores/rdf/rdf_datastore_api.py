@@ -67,6 +67,10 @@ class DumpRequest(BaseModel):
     output_file: str = "datastore_dump.nt"
 
 
+def is_in_docker_deployment():
+    return os.environ.get('IN_DOCKER_DEPLOYMENT', False)
+
+
 def get_random_file_name(file_extension: str):
     return f"{uuid.uuid4()}.{file_extension}"
 
@@ -204,6 +208,9 @@ async def rpc_start_datastore() -> Dict[str, str]:
     """
     Starts the underlying RDF datastore
     """
+    if is_in_docker_deployment():
+        return {"status": "success"}
+
     try:
         await rdf_store.start_datastore()
 
@@ -216,6 +223,9 @@ async def rpc_stop_datastore() -> Dict[str, str]:
     """
     Stops the underlying RDF datastore. Does not affect the remote API endpoint itself
     """
+    if is_in_docker_deployment():
+        return {"status": "success"}
+
     try:
         await rdf_store.stop_datastore()
 
@@ -228,6 +238,9 @@ async def rpc_restart_datastore() -> Dict[str, str]:
     """
     Restarts the underlying RDF datastore. Does not affect the remote API endpoint itself
     """
+    if is_in_docker_deployment():
+        return {"status": "success"}
+
     try:
         await rdf_store.restart_datastore()
 
