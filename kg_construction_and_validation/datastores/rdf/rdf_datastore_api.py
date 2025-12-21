@@ -281,7 +281,7 @@ def run(rdf_store_to_serve: DatastoreType,
         access_log = True
 
     uvicorn.run(app,
-                host=RDF_DATASTORE_API_HOST,
+                host="0.0.0.0",
                 port=int(RDF_DATASTORE_API_PORT),
                 # The RDF store is already async, so we don't
                 # want to conflict with multiple threadpools
