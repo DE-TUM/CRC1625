@@ -35,7 +35,7 @@ ODBC_PORT = os.environ.get("VIRTUOSO_ODBC_PORT")
 HOST_DATA_DIR = os.path.join(module_dir, "../../../virtuoso/data")
 CONTAINER_DATA_DIR = "/data"
 
-DOCKER_CONTAINER_NAME = os.environ.get("VIRTUOSO_CONTAINER_NAME")
+DOCKER_CONTAINER_NAME = os.environ.get("VIRTUOSO_DOCKER_CONTAINER_NAME")
 
 class VirtuosoRDFDatastore(RDFDatastore):
     """
