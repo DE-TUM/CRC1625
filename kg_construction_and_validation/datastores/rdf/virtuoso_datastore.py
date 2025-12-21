@@ -35,7 +35,7 @@ ODBC_PORT = os.environ.get("VIRTUOSO_ODBC_PORT")
 HOST_DATA_DIR = os.path.join(module_dir, "../../../virtuoso/data")
 CONTAINER_DATA_DIR = "/data"
 
-DOCKER_CONTAINER_NAME = "virtuoso_CRC_1625"
+DOCKER_CONTAINER_NAME = os.environ.get("VIRTUOSO_CONTAINER_NAME")
 
 class VirtuosoRDFDatastore(RDFDatastore):
     """
@@ -116,11 +116,11 @@ class VirtuosoRDFDatastore(RDFDatastore):
         """
         Run a Virtuoso command over isql
         """
-        cmd = [
+        cmd = [ # TODO do this remotely
             "docker",
             "exec",
             "-i",
-            "virtuoso_CRC_1625",
+            DOCKER_CONTAINER_NAME,
             "isql",
             ODBC_PORT,
             VIRTUOSO_USER,
@@ -257,7 +257,7 @@ class VirtuosoRDFDatastore(RDFDatastore):
             "stop",
             "-t",
             str(timeout),
-            "virtuoso_CRC_1625"
+            DOCKER_CONTAINER_NAME
         ]
         subprocess.run(cmd, check=False, stdout=subprocess.DEVNULL)
 
@@ -274,7 +274,7 @@ class VirtuosoRDFDatastore(RDFDatastore):
         cmd = [
             "docker",
             "start",
-            "virtuoso_CRC_1625"
+            DOCKER_CONTAINER_NAME
         ]
         subprocess.run(cmd, check=False, stdout=subprocess.DEVNULL)
 
