@@ -270,7 +270,7 @@ def run(rdf_store_to_serve: DatastoreType,
     else:
         raise ValueError("Unknown RDF datastore type selected")
 
-    if not rdf_store.is_datastore_running():
+    if not is_in_docker_deployment() and not rdf_store.is_datastore_running():
         logging.info("The datastore is not running. Starting it...")
         rdf_store.start_datastore()
 
