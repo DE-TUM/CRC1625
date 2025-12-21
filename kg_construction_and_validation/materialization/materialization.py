@@ -448,16 +448,27 @@ def create_rml_file(untemplated_yarrrml_file_paths: list[str]):
 
     The result will be written to `final_RML_file_path`
     """
-    yarrrml_to_rml_cmd = [
-        "docker", "run", "--rm",
-        "--user", f"{os.getuid()}:{os.getgid()}",
-        "-v", f"{os.path.join(module_dir, 'mappings/')}:/data:z",
-        "rmlio/yarrrml-parser:latest",
-    ]
 
-    for f in untemplated_yarrrml_file_paths:
-        yarrrml_to_rml_cmd += ["-i", f.replace(os.path.join(module_dir, 'mappings/'), "/data/")]
-    yarrrml_to_rml_cmd += ["-o", final_RML_file_path.replace(os.path.join(module_dir, 'mappings/'), "/data/")]
+    if os.environ.get('IN_DOCKER_DEPLOYMENT', False):
+        # If we are in a docker deployment, assume we have it installed via npm (npm i -g @rmlio/yarrrml-parser)
+        yarrrml_to_rml_cmd = [
+            "yarrrml-parser"
+        ]
+
+        for f in untemplated_yarrrml_file_paths:
+            yarrrml_to_rml_cmd += ["-i", f]
+        yarrrml_to_rml_cmd += ["-o", final_RML_file_path]
+    else:
+        yarrrml_to_rml_cmd = [
+            "docker", "run", "--rm",
+            "--user", f"{os.getuid()}:{os.getgid()}",
+            "-v", f"{os.path.join(module_dir, 'mappings/')}:/data:z",
+            "rmlio/yarrrml-parser:latest",
+        ]
+
+        for f in untemplated_yarrrml_file_paths:
+            yarrrml_to_rml_cmd += ["-i", f.replace(os.path.join(module_dir, 'mappings/'), "/data/")]
+        yarrrml_to_rml_cmd += ["-o", final_RML_file_path.replace(os.path.join(module_dir, 'mappings/'), "/data/")]
 
     try:
         subprocess.run(yarrrml_to_rml_cmd,
