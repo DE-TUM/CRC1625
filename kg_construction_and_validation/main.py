@@ -93,6 +93,29 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
+        "--db_option",
+        type=str,
+        default=None,
+        required=False,
+        help="""Database to use. If none provided, it will be asked via CLI. Possible values:
+            Production DB endpoints:
+            - 'p': Remote production endpoint (only available within the CRC, will not create a local Docker container)
+
+            Production DB dumps:
+            - 'm': Main CRC1625 DB dump (only available within the CRC)
+
+            Validation DB dumps, containing a manually created instance for testing the mappings:
+            - 'v': Validation DB dump, main test
+            - 'v_1': Validation DB dump, subtest 1
+            - 'v_2': Validation DB dump, subtest 2
+            - 'v_3': Validation DB dump, subtest 3
+            - 'v_4': Validation DB dump, subtest 3
+
+            Other DB dumps:
+            - 'c': Clear DB dump, containing no data. Used for the performance tests"""
+    )
+
+    parser.add_argument(
         "--skip_ontologies_upload",
         action="store_true",
         default=False,
@@ -139,6 +162,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     serve_KG(skip_ontologies_upload=args.skip_ontologies_upload,
+             db_option=args.db_option,
              skip_db_setup=args.skip_db_setup,
              skip_materialization=args.skip_materialization,
              skip_postprocessing=args.skip_postprocessing,
