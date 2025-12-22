@@ -107,6 +107,8 @@ services:
       internal_network:
         aliases:
           - virtuoso_CRC_1625
+    environment:
+      - DBA_PASSWORD=${VIRTUOSO_PASS}
     ports: # For debugging
       - "8890:8890"
       - "1111:1111"

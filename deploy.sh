@@ -1,5 +1,7 @@
 #!/bin/sh
 
+source $(pwd)/kg_construction_and_validation/.env
+
 CONTEXT=$(pwd) \
 DEPLOYMENT_PATH=$(pwd)/deployment \
 VIRTUOSO_PATH=$(pwd)/virtuoso \
