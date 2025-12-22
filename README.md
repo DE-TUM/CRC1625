@@ -12,6 +12,7 @@ This project is structured in three different main folders, each containing thei
 - [Virtuoso](virtuoso): Mountpoints for the (optional) `Virtuoso` docker container.
 - [Qlever](qlever): Mountpoints for the (optional) `Qlever` docker container.
 - [Supplemental materials](supplemental_materials): This folder contains the performance test output log, all paper figures and code used to generate them, and additional figures (e.g., CPU and memory usage traces)
+- [Deployment](deployment): Deployment example of the KGC pipeline as an automated process, RDF store and additional systems (WebUI, endpoints...) via `docker-compose`
 
 <div align="center">
 
