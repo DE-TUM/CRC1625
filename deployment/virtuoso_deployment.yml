@@ -10,8 +10,8 @@ services:
   # NiceGUI-based WebUI for the SPARQL endpoint and the handover workflows validation system
   handover_workflows_ui:
     build:
-      context: ..
-      dockerfile: ./deployment/webui.dockerfile
+      context: ${CONTEXT}
+      dockerfile: ${HANDOVER_WORKFLOWS_UI_DOCKERFILE}
     container_name: handover_workflows_ui
     networks:
       internal_network:
@@ -39,14 +39,14 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./certs:/certs
+      - ${DEPLOYMENT_PATH}/nginx.conf:/etc/nginx/nginx.conf
+      - ${DEPLOYMENT_PATH}/certs:/certs
 
   # API for interacting with Virtuoso
   rdf_datastore_api:
     build:
-      context: ..
-      dockerfile: ./deployment/rdf_datastore_api.dockerfile
+      context: ${CONTEXT}
+      dockerfile: ${RDF_DATASTORE_API_DOCKERFILE}
     container_name: rdf_datastore_api
     networks:
       internal_network:
@@ -58,7 +58,7 @@ services:
       - "60001:60001"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # For managing virtuoso's container and sending isql commands
-      - ./virtuoso/data:/app/virtuoso/data # For uploading files, same dir as virtuoso's container
+      - ${VIRTUOSO_PATH}/data:/app/virtuoso/data # For uploading files, same dir as virtuoso's container
     deploy:
       resources:
         limits:
@@ -70,8 +70,8 @@ services:
   # Materialization process
   materialization_service:
     build:
-      context: ..
-      dockerfile: ./deployment/materialization.dockerfile
+      context: ${CONTEXT}
+      dockerfile: ${MATERIALIZATION_DOCKERFILE}
     container_name: materialization_service
     networks:
       internal_network:
@@ -111,8 +111,8 @@ services:
       - "8890:8890"
       - "1111:1111"
     volumes:
-      - ./virtuoso/virtuoso-db:/database
-      - ./virtuoso/data:/data
+      - ${VIRTUOSO_PATH}/virtuoso-db:/database
+      - ${VIRTUOSO_PATH}/data:/data
     deploy:
       resources:
         limits:
