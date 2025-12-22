@@ -13,7 +13,7 @@ services:
       context: ${CONTEXT}
       dockerfile: ${HANDOVER_WORKFLOWS_UI_DOCKERFILE}
     container_name: handover_workflows_ui
-    restart: unless-stopped
+    restart: on-failure
     networks:
       internal_network:
         aliases:
@@ -32,7 +32,7 @@ services:
   proxy:
     image: nginx:alpine
     container_name: reverse_proxy
-    restart: unless-stopped
+    restart: on-failure
     networks:
       internal_network:
         aliases:
@@ -50,7 +50,7 @@ services:
       context: ${CONTEXT}
       dockerfile: ${RDF_DATASTORE_API_DOCKERFILE}
     container_name: rdf_datastore_api
-    restart: unless-stopped
+    restart: on-failure
     networks:
       internal_network:
         aliases:
@@ -76,7 +76,7 @@ services:
       context: ${CONTEXT}
       dockerfile: ${MATERIALIZATION_DOCKERFILE}
     container_name: materialization_service
-    restart: unless-stopped
+    restart: on-failure
     networks:
       internal_network:
         aliases:
@@ -95,7 +95,7 @@ services:
   materialization_scheduler:
     image: docker:cli
     container_name: materialization_scheduler
-    restart: unless-stopped
+    restart: on-failure
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: >
@@ -108,7 +108,7 @@ services:
   virtuoso_db:
     image: openlink/virtuoso-opensource-7
     container_name: virtuoso_CRC_1625
-    restart: unless-stopped
+    restart: on-failure
     networks:
       internal_network:
         aliases:
