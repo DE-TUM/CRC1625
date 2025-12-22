@@ -1,0 +1,122 @@
+# Internal network
+# The containers communicate with each other as follows:
+#    For web requests: Nginx reverse proxy -> WebUI -> RDF API -> Virtuoso
+#    For materializing the KG: Materialization -> RDF API -> Virtuoso
+networks:
+  internal_network:
+    driver: bridge
+
+services:
+  # NiceGUI-based WebUI for the SPARQL endpoint and the handover workflows validation system
+  handover_workflows_ui:
+    build:
+      context: ..
+      dockerfile: ./deployment/webui.dockerfile
+    container_name: handover_workflows_ui
+    networks:
+      internal_network:
+        aliases:
+          - handover_workflows_ui
+    environment:
+      - IN_DOCKER_DEPLOYMENT=true
+    deploy:
+      resources:
+        limits:
+          cpus: '6.0'
+          memory: 5G
+        reservations:
+          memory: 2G
+
+  # Nginx reverse proxy for the WebUI
+  proxy:
+    image: nginx:alpine
+    container_name: reverse_proxy
+    networks:
+      internal_network:
+        aliases:
+          - reverse_proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./certs:/certs
+
+  # API for interacting with Virtuoso
+  rdf_datastore_api:
+    build:
+      context: ..
+      dockerfile: ./deployment/rdf_datastore_api.dockerfile
+    container_name: rdf_datastore_api
+    networks:
+      internal_network:
+        aliases:
+          - rdf_datastore_api
+    environment:
+      - IN_DOCKER_DEPLOYMENT=true
+    ports:
+      - "60001:60001"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # For managing virtuoso's container and sending isql commands
+      - ./virtuoso/data:/app/virtuoso/data # For uploading files, same dir as virtuoso's container
+    deploy:
+      resources:
+        limits:
+          cpus: '6.0'
+          memory: 1G
+        reservations:
+          memory: 250M
+
+  # Materialization process
+  materialization_service:
+    build:
+      context: ..
+      dockerfile: ./deployment/materialization.dockerfile
+    container_name: materialization_service
+    networks:
+      internal_network:
+        aliases:
+          - materialization_service
+    environment:
+      - IN_DOCKER_DEPLOYMENT=true
+    deploy:
+      resources:
+        limits:
+          cpus: '6.0'
+          memory: 4G
+        reservations:
+          memory: 2G
+
+  # Scheduler for the materialization process
+  materialization_scheduler:
+    image: docker:cli
+    container_name: materialization_scheduler
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: >
+      sh -c "while true; do
+        sleep 900;
+        docker restart materialization_service;
+      done"
+
+  # Virtuoso store
+  virtuoso_db:
+    image: openlink/virtuoso-opensource-7
+    container_name: virtuoso_CRC_1625
+    networks:
+      internal_network:
+        aliases:
+          - virtuoso_CRC_1625
+    ports: # For debugging
+      - "8890:8890"
+      - "1111:1111"
+    volumes:
+      - ./virtuoso/virtuoso-db:/database
+      - ./virtuoso/data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '6.0'
+          memory: 20G
+        reservations:
+          memory: 12G
