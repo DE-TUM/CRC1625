@@ -1,6 +1,6 @@
 <div align="center">
 
-# CRC1625 Ontology and Knowledge Graph Construction system
+# Supplemental materials for Managing Materials Science Experimental Data and Workflows using Semantic Technologies
 
 </div>
 
