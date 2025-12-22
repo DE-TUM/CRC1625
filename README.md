@@ -1,6 +1,6 @@
 <div align="center">
 
-# Supplemental materials for Managing Materials Science Experimental Data and Workflows using Semantic Technologies
+# CRC 1625 Ontology and Knowledge Graph implementation
 
 </div>
 
