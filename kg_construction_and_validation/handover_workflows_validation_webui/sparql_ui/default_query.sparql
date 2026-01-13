@@ -39,13 +39,15 @@ PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> # For "rdfs:subClassOf" 
 # For elements
 PREFIX chebi: <http://purl.obolibrary.org/obo/chebi/>
 
-SELECT ?user ?user_name ?measurement ?measurementLabel
+# Retrieve all EDX measurements in .csv format and their creators
+SELECT ?object_id ?measurementLabel ?user ?user_name
 FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 WHERE {
-  # Look for exclusively EDX CSV measurements
   ?measurement a measurement_type:EDX_CSV.
 
+  ?measurement :internalID ?object_id.
   ?measurement rdfs:label ?measurementLabel.
   ?measurement prov:wasAttributedTo ?user.
+
   ?user foaf:name ?user_name.
 }
