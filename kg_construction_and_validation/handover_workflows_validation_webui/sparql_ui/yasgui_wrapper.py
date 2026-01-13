@@ -75,9 +75,32 @@ def yasgui_frame_page():
                 const yasqe = yasgui.getTab().yasqe;
 
                 yasqe.addPrefixes({{
-                    pmdco: "https://w3id.org/pmd/co/",
-                    crc: "https://crc1625.mdi.ruhr-uni-bochum.de/"
+                    pmdco:   "https://w3id.org/pmd/co/",
+                    pmd:   "https://w3id.org/pmd/co/",
+                    crc: "https://crc1625.mdi.ruhr-uni-bochum.de/", 
+                    user:    "https://crc1625.mdi.ruhr-uni-bochum.de/user/",
+                    project:    "https://crc1625.mdi.ruhr-uni-bochum.de/project/",
+                    object: "https://crc1625.mdi.ruhr-uni-bochum.de/object/",
+                    substrate: "https://crc1625.mdi.ruhr-uni-bochum.de/substrate/",
+                    measurement: "https://crc1625.mdi.ruhr-uni-bochum.de/measurement/",
+                    measurement_type: "https://crc1625.mdi.ruhr-uni-bochum.de/measurement_type/",
+                    measurement_area: "https://crc1625.mdi.ruhr-uni-bochum.de/measurement_area/",
+                    bulk_composition: "https://crc1625.mdi.ruhr-uni-bochum.de/bulk_composition/",
+                    EDX_composition: "https://crc1625.mdi.ruhr-uni-bochum.de/EDX_composition/",
+                    idea_or_experiment_plan: "https://crc1625.mdi.ruhr-uni-bochum.de/idea_or_experiment_plan/",
+                    request_for_synthesis: "https://crc1625.mdi.ruhr-uni-bochum.de/request_for_synthesis/",
+                    workflow_instance: "https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/",
+                    workflow_model: "https://crc1625.mdi.ruhr-uni-bochum.de/workflow_model/",
+                    handover: "https://crc1625.mdi.ruhr-uni-bochum.de/handover/",
+                    activity: "https://crc1625.mdi.ruhr-uni-bochum.de/activity/",
+                    rdf:     "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+                    xsd:     "http://www.w3.org/2001/XMLSchema#",
+                    foaf:    "http://xmlns.com/foaf/0.1/",
+                    prov:    "http://www.w3.org/ns/prov#",
+                    rdfs:    "http://www.w3.org/2000/01/rdf-schema#",
                 }});
+                
+                yasqe.collapsePrefixes(true);
             }}
 
             initializeYasgui();
