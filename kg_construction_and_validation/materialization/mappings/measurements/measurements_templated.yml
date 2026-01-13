@@ -9,7 +9,7 @@ mappings:
     s: measurement:$(MeasurementId)
     po:
       - [a, pmdco:ValueObject~iri]
-      - [a, :measurement_type/$(TypeId)~iri] # TODO better, in ontology
+      - [a, measurement_type:$(TypeId)~iri]
       - [:internalID, $(MeasurementId), xsd:integer]
       - [prov:wasAttributedTo, user:$(createdBy)~iri]
       - [:creationDate, $(created), xsd:dateTime]
