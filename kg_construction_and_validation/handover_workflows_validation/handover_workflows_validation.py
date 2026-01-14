@@ -108,8 +108,6 @@ activity_to_iri = {
 iri_to_activity = {v: k for k, v in activity_to_iri.items()}
 
 
-validation_process_pool = ProcessPoolExecutor(max_workers=os.cpu_count())
-
 @dataclass
 class WorkflowModelOptions:
     """

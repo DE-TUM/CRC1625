@@ -20,7 +20,7 @@ async def add_edge_action(source: str,
     State().save_workflow_model_copy()
 
     ui_elements.graph_component.add_edge(source, target)
-    State().current_workflow_model.workflow_model_steps[source].next_steps.add(target)
+    State().current_workflow_model.workflow_model_steps[source].next_steps.append(target)
 
     ui.notify(f"Added edge from '{source}' to '{target}'", type='positive')
 
@@ -61,7 +61,7 @@ def add_step_action(new_step_name: str):
 
     State().save_workflow_model_copy()
 
-    new_step = WorkflowModelStep(next_steps=set())
+    new_step = WorkflowModelStep(next_steps=list())
     State().current_workflow_model.workflow_model_steps[new_step_name] = new_step
     ui_elements.graph_component.add_node(new_step_name,
                                          new_step_name,
