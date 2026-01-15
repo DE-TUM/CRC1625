@@ -741,7 +741,7 @@ async def get_next_validation_steps(workflow_model: WorkflowModel,
         next_steps: list[tuple[WorkflowModelStep, str, int, str, dict[str, str]]] = []
 
         for new_object_id in workflow_instance.step_assignments[next_step_name]:
-            if current_object_id == new_object_id:  # The next target node is the next handover group for the target node
+            if current_object_id == new_object_id:  # The next target node is the current object's next handover group
                 new_target_node = handover_group_pairs.get(target_node)
                 if new_target_node is not None:  # Else, we stop checking TODO handle better
                     next_steps.append((workflow_model.workflow_model_steps[next_step_name],
@@ -762,7 +762,7 @@ async def get_next_validation_steps(workflow_model: WorkflowModel,
 
 
 async def generate_SHACL_shapes_for_workflow(workflow_model: WorkflowModel,
-                                             workflow_instance: WorkflowInstance) -> list[tuple[WorkflowModelStep, str, int, str, str]]:
+                                               workflow_instance: WorkflowInstance) -> list[tuple[WorkflowModelStep, str, int, str, str]]:
     """
     Returns a list of (WorkflowModelStep, workflow step name, sample id, target node IRI, SHACL shape string) for the
     workflow model, following the sample assignments of the workflow instance.
@@ -793,24 +793,57 @@ async def generate_SHACL_shapes_for_workflow(workflow_model: WorkflowModel,
     # model with its corresponding handover workflow model instance
     steps_to_validate: list[tuple[WorkflowModelStep, str, int, str, str]] = []
 
-    # Since we also allow arbitrary objects along the handover workflow models that may reappear at any time at any branch, 
+    # Since we also allow arbitrary objects along the handover workflow models that may reappear at any time at any branch,
     # we also cache their information globally
     cached_object_handover_groups: dict[int, tuple[str, dict[str, str] | None]] = {}
 
     # Start validating from the initial step, for every sample that is assigned to it
+    initial_step = workflow_model.workflow_model_steps[workflow_model.workflow_model_options.initial_step_name]
     for object_id in workflow_instance.step_assignments[workflow_model.workflow_model_options.initial_step_name]:
         first_handover_group = await get_first_handover_group(object_id, cached_object_handover_groups)
         handover_group_pairs = await get_handover_group_pairs(object_id, cached_object_handover_groups)
 
-        if first_handover_group is not None:  # Else, stop checking TODO handle better?
-            initial_step = workflow_model.workflow_model_steps[workflow_model.workflow_model_options.initial_step_name]
+        if first_handover_group is not None:  # Else, stop checking. If the object was generated via mappings, there is always an initial handover group
             steps_to_parse.append((initial_step, workflow_model.workflow_model_options.initial_step_name, object_id, first_handover_group, handover_group_pairs))
 
     while len(steps_to_parse) > 0:
-        (workflow_step, workflow_step_name, object_id, target_node, handover_group_pairs) = steps_to_parse.pop()
+        (current_workflow_step, current_workflow_step_name, current_object_id, current_target_node, current_handover_group_pairs) = steps_to_parse.pop()
 
-        steps_to_validate.append((workflow_step, workflow_step_name, object_id, target_node, generate_group_shape(workflow_step, target_node)))
-        steps_to_parse.extend(await get_next_validation_steps(workflow_model, workflow_instance, workflow_step, object_id, target_node, handover_group_pairs, cached_object_handover_groups))
+        # Generate a SHACL shape for it
+        steps_to_validate.append((current_workflow_step, current_workflow_step_name, current_object_id, current_target_node, generate_group_shape(current_workflow_step, current_target_node)))
+
+        for next_step_name in current_workflow_step.next_steps:
+            next_step = workflow_model.workflow_model_steps[next_step_name]
+            current_step_object_ids =  workflow_instance.step_assignments[current_workflow_step_name]
+            next_step_object_ids = workflow_instance.step_assignments[next_step_name]
+
+            for next_step_object_id in next_step_object_ids:
+                # Continue the validation from its next handover group, if it exists
+                if current_object_id == next_step_object_id:
+                    new_target_node = current_handover_group_pairs.get(current_target_node)
+                    if new_target_node is not None:  # Else, there are no further handover groups - we can stop validating this branch
+                        steps_to_parse.append((next_step,
+                                               next_step_name,
+                                               current_object_id,
+                                               new_target_node,
+                                               current_handover_group_pairs))
+
+                # Continue the validation from any new objects that were not in the current step
+                #
+                # We ensure no duplicates are added when checking the same current step under any
+                # of its other assigned objects
+                else :
+                    # For every object in next step that is not in the current step
+                    for new_object_id in [obj_id for obj_id in next_step_object_ids if obj_id not in current_step_object_ids]:
+                        # TODO: Ugly, but we cannot hash lists so we cannot use a set
+                        next_step_to_parse_with_new_object = (next_step,
+                                                              next_step_name,
+                                                              new_object_id,
+                                                              await get_first_handover_group(new_object_id, cached_object_handover_groups),
+                                                              await get_handover_group_pairs(new_object_id, cached_object_handover_groups))
+
+                        if next_step_to_parse_with_new_object not in steps_to_parse:
+                            steps_to_parse.append(next_step_to_parse_with_new_object)
 
     return steps_to_validate
 
