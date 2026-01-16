@@ -27,6 +27,9 @@ services:
           memory: 4G
         reservations:
           memory: 2G
+    depends_on:
+      - rdf_datastore_api
+      - materialization_service
 
   # Nginx reverse proxy for the WebUI
   proxy:
@@ -69,6 +72,9 @@ services:
           memory: 4G
         reservations:
           memory: 250M
+    depends_on:
+      virtuoso_db:
+        condition: service_healthy
 
   # Materialization process
   materialization_service:
@@ -90,6 +96,8 @@ services:
           memory: 4G
         reservations:
           memory: 2G
+    depends_on:
+      - rdf_datastore_api
 
   # Scheduler for the materialization process
   materialization_scheduler:
@@ -128,3 +136,8 @@ services:
           memory: 18G
         reservations:
           memory: 12G
+    healthcheck:
+      test: ["CMD-SHELL", "isql 1111 dba ${VIRTUOSO_PASS} exec='status();'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
