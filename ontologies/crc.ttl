@@ -15,12 +15,42 @@
 
 <https://crc1625.mdi.ruhr-uni-bochum.de> rdf:type owl:Ontology ;
                                           owl:imports <https://w3id.org/pmd/co/2.0.8> ;
+                                          <http://purl.org/dc/elements/1.1/creator> <https://orcid.org/0009-0006-0232-8677> ;
+                                          <http://purl.org/dc/terms/license> <http://creativecommons.org/licenses/by-sa/4.0/> ;
                                           <http://purl.org/dc/terms/title> "CRC 1625 Ontology"@en ;
-                                          rdfs:comment "CRC 1625 Ontology"@en .
+                                          rdfs:comment "Ontology for the MatInf database of the CRC 1625. Our aim is to represent all experimental data, provenance metadata and workflows present in the MatInf instances, while additionally being compatible with existing Materials Science ontologies."@en .
+
+#################################################################
+#    Annotation properties
+#################################################################
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/objectDescription
+crc:objectDescription rdf:type owl:AnnotationProperty ;
+                      rdfs:comment "The annotation property object description points to the description of the RDMS object it refers to." ;
+                      rdfs:subPropertyOf rdfs:comment ;
+                      rdfs:range rdfs:Literal ;
+                      rdfs:domain prov:Activity ,
+                                  prov:Agent ,
+                                  prov:Entity .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/objectName
+crc:objectName rdf:type owl:AnnotationProperty ;
+               rdfs:comment "The datatype property object description points to the name of the RDMS object it refers to." ;
+               rdfs:subPropertyOf rdfs:label ;
+               rdfs:range rdfs:Literal ;
+               rdfs:domain prov:Activity ,
+                           prov:Agent ,
+                           prov:Entity .
+
 
 #################################################################
 #    Object Properties
 #################################################################
+
+###  http://www.w3.org/ns/prov#wasAssociatedWith
+prov:wasAssociatedWith owl:equivalentProperty crc:assignedTo .
+
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject
 crc:allowedProject rdf:type owl:ObjectProperty ;
@@ -32,11 +62,52 @@ crc:allowedProject rdf:type owl:ObjectProperty ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject
 crc:assignedObject rdf:type owl:ObjectProperty ;
-                   rdfs:subPropertyOf owl:topObjectProperty ;
+                   rdfs:subPropertyOf crc:assignedTo ;
                    rdfs:domain crc:HandoverWorkflowInstanceAssignment ;
                    rdfs:range crc:MaterialsLibrary ;
                    rdfs:comment "Indicates that the Handover workflow assignment is related to the target materials library or sample" ;
                    rdfs:label "Assigned object" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo
+crc:assignedTo rdf:type owl:ObjectProperty ;
+               rdfs:comment """The assigned to object property is used to associate a user or project to a step in the handover workflow. Note that association does not imply authorship, for which the creator property exists.
+
+This is used to associate Handover Groups to specific projects, and invididual Handovers to their corresponding receiver users.""" ;
+               rdfs:label "Assigned to" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/characteristic
+crc:characteristic rdf:type owl:ObjectProperty ;
+                   owl:equivalentProperty pmdco:characteristic ;
+                   rdfs:subPropertyOf owl:topObjectProperty ;
+                   rdfs:comment """The object property characteristic indicates a relationship between a Materials Library, Sample or Measurement Area and anything that further describes it in the RDMS. 
+
+This can be the result of applying an actual characterization technique on a sample (e.g., the results of TEM, EDX...), or associating it with miscellaneous file uploads (photos, documents...). A Measurement Area can also contain characteristics, such as individual EDX composition results.
+
+The entity pointed by at by this property may contain metadata such as creators and dates, whose raw values (e.g. file paths or composition values) can be accessed by the crc:value property""" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/composedof
+crc:composedof rdf:type owl:ObjectProperty ;
+               owl:equivalentProperty pmdco:composedOf ;
+               rdfs:subPropertyOf owl:topObjectProperty ;
+               rdfs:comment "The composed of object property is used to indicate that a Materials Library or Sample is composed of other objects. These can be sample (pieces), treated samples (e.g. annealed samples) or any other kind of derivation that is registered in the RDMS as a separate object for better traceability." .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/creator
+crc:creator rdf:type owl:ObjectProperty ;
+            rdfs:comment "The creator of the object, characterization, etc. it refers to, as indicated in the RDMS." ;
+            rdfs:label "Creator" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/element
+crc:element rdf:type owl:ObjectProperty ;
+            owl:equivalentProperty pmdco:relatesToElement ;
+            rdfs:subPropertyOf owl:topObjectProperty ;
+            rdfs:comment """The element object property relates Materials Libraries, Samples and compositions with the elements they are composed of.
+
+The elements themselves are CheBI entities that can be individually accessed for more information (i.e., the formula for performing string matching)""" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/handoverWorkflowModelInstanceOf
@@ -55,6 +126,15 @@ crc:hasAssignment rdf:type owl:ObjectProperty ;
                   rdfs:label "Has assignment" .
 
 
+###  https://crc1625.mdi.ruhr-uni-bochum.de/input
+crc:input rdf:type owl:ObjectProperty ;
+          owl:equivalentProperty pmdco:input ;
+          rdfs:subPropertyOf owl:topObjectProperty ;
+          rdfs:comment """The object property input is used to point at the anything that influenced or was used by a step in a handover workflow. 
+
+This is employed by the characterization activities (the leaf/most basic step of a handover workflow) to point at the actual results (e.g. a photo or EDX results file) they refer to.""" .
+
+
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/memberOfProject
 crc:memberOfProject rdf:type owl:ObjectProperty ;
                     rdfs:domain pmdco:Person ;
@@ -69,11 +149,29 @@ crc:nextProcessAcrossGroups rdf:type owl:ObjectProperty ;
                             rdfs:label "next process across groups" .
 
 
+###  https://crc1625.mdi.ruhr-uni-bochum.de/nextStep
+crc:nextStep rdf:type owl:ObjectProperty ;
+             owl:equivalentProperty pmdco:nextProcess ;
+             rdfs:subPropertyOf prov:wasInformedBy ;
+             rdfs:comment "The next step object property is used to indicate the next step in a chain of Handover Groups or Handovers." .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/output
+crc:output rdf:type owl:ObjectProperty ;
+           owl:equivalentProperty pmdco:output ;
+           rdfs:subPropertyOf owl:topObjectProperty ;
+           rdfs:comment """The object property output is used to point at the results of a step in a handover workflow.
+
+This is employed by the characterization activities (the leaf/most basic step of a handover workflow) to point at the actual results (e.g. a photo or EDX results file) they refer to.""" .
+
+
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep
 crc:relatesToHandoverWorkflowStep rdf:type owl:ObjectProperty ;
+                                  rdfs:subPropertyOf crc:assignedTo ;
                                   rdfs:domain crc:HandoverWorkflowInstanceAssignment ;
                                   rdfs:range crc:HandoverWorkflowModelStep ;
-                                  rdfs:comment "Indicates that the handover Handover workflow assignment is related to the target Handover workflow model step" .
+                                  rdfs:comment "Indicates that the handover Handover workflow assignment is related to the target Handover workflow model step" ;
+                                  rdfs:label "Relates to Handover Workflow step" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/requiresActivity
@@ -82,6 +180,16 @@ crc:requiresActivity rdf:type owl:ObjectProperty ;
                      rdfs:range crc:CharacterizationActivityModel ;
                      rdfs:comment "Indicates that the handover group that the Handover workflow model step is checking must contain a given activity within its handovers. The type of measurement is indicated by the targeted entity's class, by also belonging to one of the *Process classes (e.g. FIMProcess)" ;
                      rdfs:label "Requires activity" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/substep
+crc:substep rdf:type owl:ObjectProperty ;
+            owl:equivalentProperty pmdco:subordinateProcess ;
+            rdfs:subPropertyOf owl:topObjectProperty ;
+            rdfs:comment """The substep object property is used to indicate a part of a step in a handover workflow that has been broken into smaller (sub)steps. This is also employed in handover workflow models.
+
+More specifically, in a handover workflow, this is employed by Handover Groups to point to the start of the chain of handovers that they represent, and by an inidividual Handover to point to the individual characterization activities that happened inside it.""" ;
+            rdfs:label "substep" .
 
 
 #################################################################
@@ -182,6 +290,15 @@ crc:tolerance rdf:type owl:DatatypeProperty ;
               rdfs:range xsd:double ;
               rdfs:comment "Measured tolerance in a specific measurement area of a sample" ;
               rdfs:label "Tolerance" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/value
+crc:value rdf:type owl:DatatypeProperty ;
+          owl:equivalentProperty pmdco:value ;
+          rdfs:subPropertyOf owl:topDataProperty ;
+          rdfs:comment """The raw value the entity referred by the characteristic object property refers to. 
+
+While the entity pointed by at by the crc:characteristic property may contain metadata such as creators and dates, its raw values (e.g. file paths or composition values) can be accessed by this property.""" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/x_position
