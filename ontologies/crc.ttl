@@ -48,13 +48,6 @@ crc:objectName rdf:type owl:AnnotationProperty ;
 #    Object Properties
 #################################################################
 
-###  http://www.w3.org/ns/prov#wasAssociatedWith
-prov:wasAssociatedWith owl:equivalentProperty crc:assignedTo .
-
-
-###  http://www.w3.org/ns/prov#wasAttributedTo
-prov:wasAttributedTo owl:equivalentProperty crc:creator .
-
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject
 crc:allowedProject rdf:type owl:ObjectProperty ;
@@ -94,7 +87,7 @@ The entity pointed by at by this property may contain metadata such as creators 
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/composedof
-crc:composedof rdf:type owl:ObjectProperty ;
+crc:composedOf rdf:type owl:ObjectProperty ;
                owl:equivalentProperty pmdco:composedOf ;
                rdfs:subPropertyOf owl:topObjectProperty ;
                rdfs:comment "The composed of object property is used to indicate that a Materials Library or Sample is composed of other objects. These can be sample (pieces), treated samples (e.g. annealed samples) or any other kind of derivation that is registered in the RDMS as a separate object for better traceability." .
