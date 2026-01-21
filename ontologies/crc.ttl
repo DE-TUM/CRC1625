@@ -52,6 +52,10 @@ crc:objectName rdf:type owl:AnnotationProperty ;
 prov:wasAssociatedWith owl:equivalentProperty crc:assignedTo .
 
 
+###  http://www.w3.org/ns/prov#wasAttributedTo
+prov:wasAttributedTo owl:equivalentProperty crc:creator .
+
+
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject
 crc:allowedProject rdf:type owl:ObjectProperty ;
                    rdfs:domain crc:HandoverWorkflowModelStep ;
@@ -71,6 +75,7 @@ crc:assignedObject rdf:type owl:ObjectProperty ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo
 crc:assignedTo rdf:type owl:ObjectProperty ;
+               owl:equivalentProperty prov:wasAssociatedWith ;
                rdfs:comment """The assigned to object property is used to associate a user or project to a step in the handover workflow. Note that association does not imply authorship, for which the creator property exists.
 
 This is used to associate Handover Groups to specific projects, and invididual Handovers to their corresponding receiver users.""" ;
@@ -97,6 +102,7 @@ crc:composedof rdf:type owl:ObjectProperty ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/creator
 crc:creator rdf:type owl:ObjectProperty ;
+            owl:equivalentProperty prov:wasAttributedTo ;
             rdfs:comment "The creator of the object, characterization, etc. it refers to, as indicated in the RDMS." ;
             rdfs:label "Creator" .
 
