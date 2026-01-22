@@ -5,7 +5,7 @@ WHERE
 {
   # a/rdfs:subClassOf* is a shorthand for "anything that is either
   # a Materials Library *or* a *subclass* of Materials Library (Samples...)"
-  ?MLOrSample a/rdfs:subClassOf* :MaterialsLibrary.
+  ?MLOrSample a/rdfs:subClassOf* crc:MaterialsLibrary.
 
   ?MLOrSample crc:internalID ?internalID.
   ?MLOrSample crc:creationDate ?creationDate.

@@ -1,5 +1,6 @@
 import os
 import urllib.parse
+from pathlib import Path
 
 from nicegui import app, ui
 from starlette.requests import Request
@@ -62,25 +63,13 @@ def yasgui_frame_page():
         <div id="yasgui"></div>
 
         <script>
-            function initializeYasgui() {{
-                const yasgui = new Yasgui(document.getElementById("yasgui"), {{
-                    requestConfig: {{
-                        endpoint: "{LOCAL_SPARQL_PROXY_ROUTE}"
-                    }},
-                    copyEndpointOnNewTab: true,
-                    showEndpointInput: false,
-                }});
-
-                const defaultQuery = `{DEFAULT_QUERY}`;
-                const tab = yasgui.getTab();
-                tab.setQuery(defaultQuery);
-                
-                console.log(yasgui.getTab());
+            function initializeYasqe(yasgui) {{
                 const yasqe = yasgui.getTab().yasqe;
 
                 yasqe.addPrefixes({{
                     pmdco:   "https://w3id.org/pmd/co/",
                     pmd:   "https://w3id.org/pmd/co/",
+                    chebi: "http://purl.obolibrary.org/obo/chebi/",
                     crc: "https://crc1625.mdi.ruhr-uni-bochum.de/", 
                     user:    "https://crc1625.mdi.ruhr-uni-bochum.de/user/",
                     project:    "https://crc1625.mdi.ruhr-uni-bochum.de/project/",
@@ -106,21 +95,104 @@ def yasgui_frame_page():
                 
                 yasqe.collapsePrefixes(true);
             }}
+        
+            function initializeYasgui() {{
+                const yasgui = new Yasgui(document.getElementById("yasgui"), {{
+                    requestConfig: {{
+                        endpoint: "{LOCAL_SPARQL_PROXY_ROUTE}"
+                    }},
+                    copyEndpointOnNewTab: true,
+                    showEndpointInput: false,
+                }});
 
-            initializeYasgui();
+                const defaultQuery = `{DEFAULT_QUERY}`;
+                const tab = yasgui.getTab();
+                tab.setQuery(defaultQuery);
+                
+                return yasgui;
+            }}
+            
+            yasgui = initializeYasgui();
+            initializeYasqe(yasgui);
+            
+            // Listener for the example queries selector
+            window.addEventListener('message', (event) => {{
+                console.log(event);
+                if (event.data.type === 'set_query') {{
+                    yasgui.getTab().setQuery(event.data.query);
+                    initializeYasqe(yasgui);
+                }}
+            }});
         </script>
     """
 
     ui.add_body_html(content)
 
 
+def load_example_queries() -> list[tuple[str, list[tuple[str, str]]]]:
+    example_queries: dict[str, list[tuple[str, str]]] = {}
+
+    for subdir in Path(os.path.join(module_dir, './example_queries')).iterdir():
+        if subdir.is_dir():
+            for file in subdir.iterdir():
+                if file.is_file():
+                    category = (subdir.name[:1].upper() + subdir.name[1:]).replace("_", " ")
+                    query_name = (file.name[:1].upper() + file.name[1:]).replace("_", " ").replace(".sparql", "")
+
+                    if category not in example_queries:
+                        example_queries[category] = []
+
+                    example_queries[category].append((query_name, open(file).read()))
+
+    # Order by query name
+    for queries_data in example_queries.values():
+        queries_data.sort(key=lambda x: x[0])
+
+    # Turn the dict into a hand-ordered array based on the categories
+    order_mapping = {
+        "Users and projects": 0,
+        "Materials libraries and samples": 1,
+        "Measurements": 2,
+        "Compositions": 3,
+        "Handovers and characterization activities": 4
+    }
+
+    final_ordered_queries = sorted(
+        example_queries.items(),
+        key=lambda item: order_mapping.get(item[0], 99)
+    )
+
+    return final_ordered_queries
+
+
 @ui.page('/sparql')
 async def main_page():
+    def set_query(query_text: str):
+        ui.run_javascript(f'''
+            const iframe = document.querySelector('iframe');
+            
+            if (iframe && iframe.contentWindow) {{
+                iframe.contentWindow.postMessage({{
+                    type: 'set_query',
+                    query: `{query_text}`
+                }}, '*');
+            }}
+        ''')
+
     ui.page_title('CRC 1625 SPARQL Endpoint')
+
+    example_queries: list[tuple[str, list[tuple[str, str]]]] = load_example_queries()
+    with ui.row().classes('items-center gap-2 mb-4'):
+        ui.label('Load an example query:')
+        for category, queries in example_queries:
+            with ui.button(category).props('outline color=primary size=sm'):
+                with ui.menu():
+                    for (query_name, query_content) in queries:
+                        ui.menu_item(query_name, on_click=lambda q=query_content: set_query(q))
 
     with ui.row().classes('items-center gap-2'):
         ui.label('(Optional) Enable inference:')
-        ui.switch('Inference').classes('text-white').bind_value(app.storage.user, 'use_inference').tooltip(
+        ui.switch('Inference').bind_value(app.storage.user, 'use_inference').tooltip(
             'Enabling inference allows querying the data using the PMDco ontology')
 
     with ui.column().classes('w-full h-screen overflow-hidden flex'):

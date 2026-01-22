@@ -39,12 +39,12 @@ WHERE {
   # With this pattern, we get *all* handover groups, including the first one
   ?first_handover_group crc:nextStep* ?handover_group.
 
-  ?handover_group pmdco:subordinateProcess ?first_handover_of_group.
+  ?handover_group crc:substep ?first_handover_of_group.
   # The same way, to get *all* handovers of the group
   ?first_handover_of_group crc:nextStep* ?handover_of_group.
 
   # And all activities
-  ?handover_of_group crc:subset ?activity.
+  ?handover_of_group crc:substep ?activity.
 
   # And we want to get those ML/Samples that contain an XRD activity
   ?activity a crc:XRDProcess.

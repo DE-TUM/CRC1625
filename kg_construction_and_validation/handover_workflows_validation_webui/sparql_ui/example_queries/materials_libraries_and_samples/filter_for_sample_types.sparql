@@ -35,7 +35,7 @@ WHERE {
   # Samples and Stripe samples
   #?Sample a/rdfs:subClassOf* :Sample.
 
-  # An arbitrary combination of any of them (e.g., stress chips and stripe samples)
+  # An arbitrary combination of any of them (e.g., MLs and no gradient samples)
   #?MLOrSample a ?class.
-  #FILTER (?class IN (crc:StressChip, crc:StripeSample))
+  #FILTER (?class IN (crc:MaterialsLibrary, crc:NoGradientSample))
 }
