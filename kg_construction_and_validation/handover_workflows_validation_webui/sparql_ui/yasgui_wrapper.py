@@ -192,8 +192,9 @@ async def main_page():
 
     with ui.row().classes('items-center gap-2'):
         ui.label('(Optional) Enable inference:')
-        ui.switch('Inference').bind_value(app.storage.user, 'use_inference').tooltip(
-            'Enabling inference allows querying the data using the PMDco ontology')
+        ui.switch().bind_value(app.storage.user, 'use_inference')
+        with ui.icon('help'):
+            ui.tooltip('Enabling inference allows querying the data using the PMDco ontology')
 
     with ui.column().classes('w-full h-screen overflow-hidden flex'):
         with ui.row().classes('w-full h-full flex-grow overflow-hidden'):
