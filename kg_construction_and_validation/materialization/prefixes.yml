@@ -17,7 +17,7 @@
   # All entities are split into different namespaces for readability, loosely
   # matching their types in the ontology
   # General for all predicates and classes
-  "" :    https://crc1625.mdi.ruhr-uni-bochum.de/
+  crc:    https://crc1625.mdi.ruhr-uni-bochum.de/
 
   # Users and projects
   user:       https://crc1625.mdi.ruhr-uni-bochum.de/user/

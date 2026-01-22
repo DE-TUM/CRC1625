@@ -75,7 +75,7 @@ create_groups_for_isolated_initial_work_handovers = prefixes + open(os.path.join
 redirect_workflow_instances = prefixes + open(
     os.path.join(module_dir, 'postprocessing_queries/handover_chains/redirect_workflow_instances.sparql')).read()
 
-# Delete all pmdco:nextProcess relations between two handovers in different projects
+# Delete all crc:nextStep relations between two handovers in different projects
 delete_cross_group_links = prefixes + open(
     os.path.join(module_dir, 'postprocessing_queries/handover_chains/delete_cross_group_links.sparql')).read()
 
@@ -154,9 +154,9 @@ def create_handover_group_triples(worker_id: int, chains_batch: list[(str, (str,
                 }
 
             g.add((URIRef(replacements["hnd_group_iri"]), rdf_prefix.type, crc_prefix.HandoverGroup))
-            g.add((URIRef(replacements["hnd_group_iri"]), pmdco_prefix.subordinateProcess, URIRef(replacements["hnd_1_iri"])))
-            g.add((URIRef(replacements["hnd_group_iri"]), rdfs_prefix.label, Literal(replacements["label"])))
-            g.add((URIRef(replacements["hnd_group_iri"]), prov_prefix.wasAssociatedWith, URIRef(replacements["project_iri"])))
+            g.add((URIRef(replacements["hnd_group_iri"]), crc_prefix.substep, URIRef(replacements["hnd_1_iri"])))
+            g.add((URIRef(replacements["hnd_group_iri"]), crc_prefix.objectName, Literal(replacements["label"])))
+            g.add((URIRef(replacements["hnd_group_iri"]), crc_prefix.assignedTo, URIRef(replacements["project_iri"])))
 
             if i + 1 < len(chains):  # Link it with the next group
                 (_, hnd_start_id_next, _, hnd_end_id_next, _, project_iri_next) = chains[i + 1]
@@ -164,7 +164,7 @@ def create_handover_group_triples(worker_id: int, chains_batch: list[(str, (str,
 
                 hnd_group_iri_next = f"https://crc1625.mdi.ruhr-uni-bochum.de/handover/handovers_in_project_{project_name_next}_{hnd_start_id_next}_{hnd_end_id_next}"
 
-                g.add((URIRef(hnd_group_iri), pmdco_prefix.nextProcess, URIRef(hnd_group_iri_next)))
+                g.add((URIRef(hnd_group_iri), crc_prefix.nextStep, URIRef(hnd_group_iri_next)))
 
     file_name = os.path.join(module_dir, f"handover_groups_{worker_id}.ttl")
     g.serialize(destination=os.path.join(module_dir, file_name), format='turtle')
@@ -179,7 +179,7 @@ def create_handover_group_chains():
 
     The conversion is based on the following steps:
         1. Cache all handover pais that are located in different groups, alongside metadata about which sample they belong to, etc.
-        2. Delete the pmdco:nextProcess links between these handovers
+        2. Delete the crc:nextStep links between these handovers
         3. Query for the resulting (isolated) handover chains
         4. Using the cached information from step 1., group the handover chains by the sample they belong to, sort them based
            on their creation dates, create a handover group for each chain and connect them accordingly

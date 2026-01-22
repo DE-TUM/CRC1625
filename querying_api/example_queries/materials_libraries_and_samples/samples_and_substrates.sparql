@@ -1,0 +1,19 @@
+# Get MLs/Samples, misc. metadata about them and the substrate they belong to
+SELECT ?MLOrSample ?externalID ?internalID ?creationDate ?user ?substrate_label
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+WHERE
+{
+  # a/rdfs:subClassOf* is a shorthand for "anything that is either
+  # a Materials Library *or* a *subclass* of Materials Library (Samples...)"
+  ?MLOrSample a/rdfs:subClassOf* :MaterialsLibrary.
+
+  ?MLOrSample :internalID ?internalID.
+  ?MLOrSample :creationDate ?creationDate.
+  ?MLOrSample prov:wasAttributedTo ?user.
+
+  # The substrate is simply one of their characteristics, with a specific
+  # type for them, just like in the RDMS
+  ?MLOrSample pmdco:characteristic ?substrate.
+  ?substrate a :Substrate.
+  ?substrate rdfs:label ?substrate_label.
+}

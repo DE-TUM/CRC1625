@@ -4,16 +4,16 @@ WHERE {
     # All paths between a "main" sample and a piece with no further pieces
     {
         SELECT ?sample ?endPiece (COUNT(?intermediatePiece) AS ?n_intermediate_pieces) WHERE {
-            ?sample a :MaterialsLibrary.
-            ?sample pmdco:composedOf+ ?endPiece.
+            ?sample a crc:MaterialsLibrary.
+            ?sample crc:composedOf+ ?endPiece.
 
             # It needs to have at least one intermediate piece
-            ?sample pmdco:composedOf+ ?intermediatePiece.
-            ?intermediatePiece pmdco:composedOf+ ?endPiece.
+            ?sample crc:composedOf+ ?intermediatePiece.
+            ?intermediatePiece crc:composedOf+ ?endPiece.
 
             # It's a "main" sample
             FILTER NOT EXISTS {
-                ?another_sample pmdco:composedOf ?sample.
+                ?another_sample crc:composedOf ?sample.
             }
         } GROUP BY ?sample ?endPiece
     }
@@ -23,20 +23,20 @@ WHERE {
     # Also take into account samples with only one piece
     {
         SELECT ?sample (COUNT(?end_piece) AS ?n_intermediate_pieces) WHERE {
-            ?sample a :MaterialsLibrary.
-            ?sample pmdco:composedOf ?end_piece.
+            ?sample a crc:MaterialsLibrary.
+            ?sample crc:composedOf ?end_piece.
 
             FILTER NOT EXISTS {
-                ?another_sample pmdco:composedOf ?sample.
+                ?another_sample crc:composedOf ?sample.
             }
 
             FILTER NOT EXISTS {
-                ?end_piece pmdco:composedOf ?sample.
+                ?end_piece crc:composedOf ?sample.
             }
 
             # Exclude those with multiple pieces
             FILTER NOT EXISTS {
-                ?sample pmdco:composedOf ?another_piece.
+                ?sample crc:composedOf ?another_piece.
 
                 FILTER (?another_piece != ?end_piece)
             }

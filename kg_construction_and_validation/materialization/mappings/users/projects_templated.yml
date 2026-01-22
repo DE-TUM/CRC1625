@@ -9,11 +9,11 @@ mappings:
     sources: sql_source
     s: project:$(ClaimValue)
     po:
-      - [a, :Project~iri]
-      - [rdfs:label, $(ClaimValue), xsd:string]
+      - [a, crc:Project~iri]
+      - [crc:objectName, $(ClaimValue), xsd:string]
 
   memberships_of_projects:
     sources: sql_source
     s: user:$(UserId)
     po:
-      - [:memberOfProject, project:$(ClaimValue)~iri]
+      - [crc:memberOfProject, project:$(ClaimValue)~iri]

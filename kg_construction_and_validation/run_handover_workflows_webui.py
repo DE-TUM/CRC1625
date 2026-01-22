@@ -82,5 +82,6 @@ if __name__ in {"__main__", "__mp_main__"}:
            port=os.environ.get("WEBUI_PORT"),
            title="CRC1625 Handover workflows validation prototype",
            reload=False, # Do not enable this for now, it freaks out when detecting changes on .ttl files
+           storage_secret=os.environ.get("WEBUI_STORAGE_SECRET"),
            uvicorn_logging_level=uvicorn_logging_level,
            access_log=access_log)

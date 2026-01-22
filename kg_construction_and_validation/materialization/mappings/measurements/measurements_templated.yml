@@ -10,12 +10,12 @@ mappings:
     po:
       - [a, pmdco:ValueObject~iri]
       - [a, measurement_type:$(TypeId)~iri]
-      - [:internalID, $(MeasurementId), xsd:integer]
-      - [prov:wasAttributedTo, user:$(createdBy)~iri]
-      - [:creationDate, $(created), xsd:dateTime]
-      - [rdfs:label, $(ObjectName), xsd:string]
-      - [rdfs:comment, $(ObjectDescription), xsd:string]
-      - [pmdco:value, $(ObjectFilePath), xsd:string]
+      - [crc:internalID, $(MeasurementId), xsd:integer]
+      - [crc:creator, user:$(createdBy)~iri]
+      - [crc:creationDate, $(created), xsd:dateTime]
+      - [crc:objectName, $(ObjectName), xsd:string]
+      - [crc:objectDescription, $(ObjectDescription), xsd:string]
+      - [crc:value, $(ObjectFilePath), xsd:string]
 
   measurement_type:
     sources: sql_source
@@ -23,5 +23,5 @@ mappings:
     po:
       - [rdfs:subClassOf, pmdco:ValueObject~iri]
       - [rdfs:subClassOf, pmdco:Measurement~iri]
-      - [rdfs:label, $(TypeName), xsd:string]
-      - [:internalID, $(TypeId), xsd:integer]
+      - [crc:objectName, $(TypeName), xsd:string]
+      - [crc:internalID, $(TypeId), xsd:integer]

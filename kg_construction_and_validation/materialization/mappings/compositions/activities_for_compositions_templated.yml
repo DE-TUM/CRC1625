@@ -8,13 +8,13 @@ mappings:
     sources: sql_source
     s: handover:$(HandoverId)
     po:
-      - [pmdco:subordinateProcess, activity:EDX_activity_for_handover_$(HandoverId)~iri]
+      - [crc:substep, activity:EDX_activity_for_handover_$(HandoverId)~iri]
 
 
   activity_metadata_and_link_to_composition:
     sources: sql_source
     s: activity:EDX_activity_for_handover_$(HandoverId)
     po:
-      - [a, :CharacterizationActivityInstance~iri]
-      - [a, :EDXMicroscopyProcess~iri]
-      - [pmdco:output, EDX_composition:$(CompositionId)_in_MA_$(MeasurementArea)~iri]
+      - [a, crc:CharacterizationActivityInstance~iri]
+      - [a, crc:EDXMicroscopyProcess~iri]
+      - [crc:output, EDX_composition:$(CompositionId)_in_MA_$(MeasurementArea)~iri]

@@ -9,4 +9,4 @@ mappings:
     sources: sql_source
     s: object:$(SampleId)
     po:
-      - [:temporaryDatatypeProperty, $(Element), xsd:string]
+      - [crc:temporaryDatatypeProperty, $(Element), xsd:string]

@@ -1,4 +1,4 @@
-@prefix : <https://crc1625.mdi.ruhr-uni-bochum.de/> .
+@prefix crc: <https://crc1625.mdi.ruhr-uni-bochum.de/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix handover: <https://crc1625.mdi.ruhr-uni-bochum.de/handover/> .
 @prefix object: <https://crc1625.mdi.ruhr-uni-bochum.de/object/> .
@@ -11,100 +11,100 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 user:1 a pmdco:Operator ;
-    foaf:givenName "User" ;
-    foaf:name "UserA01" ;
-    foaf:surname "A01" ;
-    :internalID 1 ;
-    :memberOfProject project:A01 .
+    crc:givenName "User" ;
+    crc:name "UserA01" ;
+    crc:surname "A01" ;
+    crc:internalID 1 ;
+    crc:memberOfProject project:A01 .
 
 user:2 a pmdco:Operator ;
-    foaf:givenName "User" ;
-    foaf:name "UserB01" ;
-    foaf:surname "B01" ;
-    :internalID 2 ;
-    :memberOfProject project:B01 .
+    crc:givenName "User" ;
+    crc:name "UserB01" ;
+    crc:surname "B01" ;
+    crc:internalID 2 ;
+    crc:memberOfProject project:B01 .
 
 user:3 a pmdco:Operator ;
-    foaf:givenName "User" ;
-    foaf:name "UserC01" ;
-    foaf:surname "C01" ;
-    :internalID 3 ;
-    :memberOfProject project:C01 .
+    crc:givenName "User" ;
+    crc:name "UserC01" ;
+    crc:surname "C01" ;
+    crc:internalID 3 ;
+    crc:memberOfProject project:C01 .
 
 user:7 a pmdco:Operator ;
-    foaf:givenName "User" ;
-    foaf:name "UserA01_B01" ;
-    foaf:surname "A01_B01" ;
-    :internalID 7 ;
-    :memberOfProject project:A01_B01 .
+    crc:givenName "User" ;
+    crc:name "UserA01_B01" ;
+    crc:surname "A01_B01" ;
+    crc:internalID 7 ;
+    crc:memberOfProject project:A01_B01 .
 
-project:A01 a :Project ;
-    rdfs:label "A01" .
+project:A01 a crc:Project ;
+    crc:objectName "A01" .
 
-project:B01 a :Project ;
-    rdfs:label "B01" .
+project:B01 a crc:Project ;
+    crc:objectName "B01" .
 
-project:C01 a :Project ;
-    rdfs:label "C01" .
+project:C01 a crc:Project ;
+    crc:objectName "C01" .
 
-project:A01_B01 a :Project ;
-    rdfs:label "A01_B01" .
+project:A01_B01 a crc:Project ;
+    crc:objectName "A01_B01" .
 
 object:1 a pmdco:EngineeredMaterial ;
-    rdfs:label "Sample1" ;
-    rdfs:comment "Sample1" ;
-    prov:wasAttributedTo user:1 ;
-    :creationDate "2025-02-05T08:43:52.533000"^^xsd:dateTime ;
-    :externalID 99999 ;
-    :internalID 1 .
+    crc:objectName "Sample1" ;
+    crc:objectDescription "Sample1" ;
+    crc:creator user:1 ;
+    crc:creationDate "2025-02-05T08:43:52.533000"^^xsd:dateTime ;
+    crc:externalID 99999 ;
+    crc:internalID 1 .
 
-workflow_instance:1 a :HandoverWorkflowInstance ;
-    pmdco:input object:1 ;
-    pmdco:subordinateProcess handover:handovers_in_project_A01_initial_work_7 .
+workflow_instance:1 a crc:HandoverWorkflowInstance ;
+    crc:input object:1 ;
+    crc:substep handover:handovers_in_project_A01_initial_work_7 .
 
-handover:initial_work_for_ML_1 a :VirtualHandover ;
-    rdfs:label "Initial work for ML 1" ;
-    rdfs:comment "Measurements and other data added to the ML 1 before any handover occurred" ;
-    prov:wasAssociatedWith user:1 ;
-    prov:wasAttributedTo user:1 ;
-    :creationDate "2025-02-05T08:43:52.533000"^^xsd:dateTime ;
-    pmdco:nextProcess handover:6 .
+handover:initial_work_for_ML_1 a crc:VirtualHandover ;
+    crc:objectName "Initial work for ML 1" ;
+    crc:objectDescription "Measurements and other data added to the ML 1 before any handover occurred" ;
+    crc:assignedTo user:1 ;
+    crc:creator user:1 ;
+    crc:creationDate "2025-02-05T08:43:52.533000"^^xsd:dateTime ;
+    crc:nextStep handover:6 .
 
-handover:6 a :Handover ;
-    rdfs:label "Sample1 Handover 1" ;
-    rdfs:comment "Sample1 Handover 1" ;
-    prov:wasAssociatedWith user:1 ;
-    prov:wasAttributedTo user:1 ;
-    :acceptedDate "2025-02-07T08:43:52.533000"^^xsd:dateTime ;
-    :creationDate "2025-02-07T08:43:52.533000"^^xsd:dateTime ;
-    :internalID 6 ;
-    pmdco:nextProcess handover:7 .
+handover:6 a crc:Handover ;
+    crc:objectName "Sample1 Handover 1" ;
+    crc:objectDescription "Sample1 Handover 1" ;
+    crc:assignedTo user:1 ;
+    crc:creator user:1 ;
+    crc:acceptedDate "2025-02-07T08:43:52.533000"^^xsd:dateTime ;
+    crc:creationDate "2025-02-07T08:43:52.533000"^^xsd:dateTime ;
+    crc:internalID 6 ;
+    crc:nextStep handover:7 .
 
-handover:7 a :Handover ;
-    rdfs:label "Sample1 Handover 2" ;
-    rdfs:comment "Sample1 Handover 2" ;
-    prov:wasAssociatedWith user:1 ;
-    prov:wasAttributedTo user:1 ;
-    :acceptedDate "2025-02-08T08:43:52.533000"^^xsd:dateTime ;
-    :creationDate "2025-02-08T08:43:52.533000"^^xsd:dateTime ;
-    :internalID 7 .
+handover:7 a crc:Handover ;
+    crc:objectName "Sample1 Handover 2" ;
+    crc:objectDescription "Sample1 Handover 2" ;
+    crc:assignedTo user:1 ;
+    crc:creator user:1 ;
+    crc:acceptedDate "2025-02-08T08:43:52.533000"^^xsd:dateTime ;
+    crc:creationDate "2025-02-08T08:43:52.533000"^^xsd:dateTime ;
+    crc:internalID 7 .
 
-handover:8 a :Handover ;
-    rdfs:label "Sample1 Handover 3" ;
-    rdfs:comment "Sample1 Handover 3" ;
-    prov:wasAssociatedWith user:3 ;
-    prov:wasAttributedTo user:1 ;
-    :acceptedDate "2025-02-09T08:43:52.533000"^^xsd:dateTime ;
-    :creationDate "2025-02-09T08:43:52.533000"^^xsd:dateTime ;
-    :internalID 8 .
+handover:8 a crc:Handover ;
+    crc:objectName "Sample1 Handover 3" ;
+    crc:objectDescription "Sample1 Handover 3" ;
+    crc:assignedTo user:3 ;
+    crc:creator user:1 ;
+    crc:acceptedDate "2025-02-09T08:43:52.533000"^^xsd:dateTime ;
+    crc:creationDate "2025-02-09T08:43:52.533000"^^xsd:dateTime ;
+    crc:internalID 8 .
 
-handover:handovers_in_project_A01_initial_work_7 a :HandoverGroup ;
-    rdfs:label "Consecutive handovers within the A01 project" ;
-    prov:wasAssociatedWith project:A01 ;
-    pmdco:nextProcess handover:handovers_in_project_C01_8_8 ;
-    pmdco:subordinateProcess handover:initial_work_for_ML_1 .
+handover:handovers_in_project_A01_initial_work_7 a crc:HandoverGroup ;
+    crc:objectName "Consecutive handovers within the A01 project" ;
+    crc:assignedTo project:A01 ;
+    crc:nextStep handover:handovers_in_project_C01_8_8 ;
+    crc:substep handover:initial_work_for_ML_1 .
 
-handover:handovers_in_project_C01_8_8 a :HandoverGroup ;
-    rdfs:label "Consecutive handovers within the C01 project" ;
-    prov:wasAssociatedWith project:C01 ;
-    pmdco:subordinateProcess handover:8 .
+handover:handovers_in_project_C01_8_8 a crc:HandoverGroup ;
+    crc:objectName "Consecutive handovers within the C01 project" ;
+    crc:assignedTo project:C01 ;
+    crc:substep handover:8 .

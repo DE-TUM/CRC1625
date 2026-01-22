@@ -4,24 +4,24 @@ WHERE {
      # Two or more handovers, where both are non-virtual handovers
      {
         # There any intermediate handovers in the way, or none
-        ?start pmdco:nextProcess+ ?end .
+        ?start crc:nextStep+ ?end .
 
         # start is a handover and thus has an ID
-        ?start :internalID ?start_id.
-        ?end :internalID ?end_id.
+        ?start crc:internalID ?start_id.
+        ?end crc:internalID ?end_id.
 
-        ?start :creationDate ?start_date.
+        ?start crc:creationDate ?start_date.
 
-        ?start prov:wasAssociatedWith ?user_start.
-        ?user_start :memberOfProject ?group.
+        ?start crc:assignedTo ?user_start.
+        ?user_start crc:memberOfProject ?group.
 
         # Ensure they are the start and end of the chain
         MINUS {
-            ?hnd_before_start pmdco:nextProcess ?start.
+            ?hnd_before_start crc:nextStep ?start.
         }
 
         MINUS {
-            ?end pmdco:nextProcess ?hnd_after_end.
+            ?end crc:nextStep ?hnd_after_end.
         }
     }
 
@@ -30,27 +30,27 @@ WHERE {
   	# Two or more handovers, where the first handover is an initial work handover
     {
         # There any intermediate handovers in the way, or none
-        ?start pmdco:nextProcess+ ?end .
+        ?start crc:nextStep+ ?end .
 
         # start It's an initial work handover and thus has no ID, but we can get the sample it belongs to
-        ?workflow_instance pmdco:subordinateProcess ?start.
-        ?workflow_instance pmdco:input ?materials_library.
-        ?materials_library :internalID ?sample_id.
+        ?workflow_instance crc:substep ?start.
+        ?workflow_instance crc:input ?materials_library.
+        ?materials_library crc:internalID ?sample_id.
 
-        ?end :internalID ?end_id.
+        ?end crc:internalID ?end_id.
 
-        ?start :creationDate ?start_date.
+        ?start crc:creationDate ?start_date.
 
-        ?start prov:wasAssociatedWith ?user_start.
-        ?user_start :memberOfProject ?group.
+        ?start crc:assignedTo ?user_start.
+        ?user_start crc:memberOfProject ?group.
 
         # Ensure they are the start and end of the chain
         MINUS {
-            ?hnd_before_start pmdco:nextProcess ?start.
+            ?hnd_before_start crc:nextStep ?start.
         }
 
         MINUS {
-            ?end pmdco:nextProcess ?hnd_after_end.
+            ?end crc:nextStep ?hnd_after_end.
         }
     }
 
@@ -58,34 +58,34 @@ WHERE {
 
   	# Isolated handovers, virtual or not
     {
-    	VALUES ?start_type { :Handover :VirtualHandover }
+    	VALUES ?start_type { crc:Handover crc:VirtualHandover }
 
         ?hnd a ?start_type.
 
         # start It's an initial work handover and thus has no ID, but we can get the sample it belongs to
         OPTIONAL {
-      		?workflow_instance pmdco:subordinateProcess ?hnd .
-        	?workflow_instance pmdco:input ?materials_library.
-        	?materials_library :internalID ?sample_id.
+      		?workflow_instance crc:substep ?hnd .
+        	?workflow_instance crc:input ?materials_library.
+        	?materials_library crc:internalID ?sample_id.
   		}
 
       	OPTIONAL {
-  			?hnd :internalID ?hnd_id
+  			?hnd crc:internalID ?hnd_id
   		}
 
 
-        ?hnd :creationDate ?hnd_date.
+        ?hnd crc:creationDate ?hnd_date.
 
-        ?hnd prov:wasAssociatedWith ?user_hnd.
-        ?user_hnd :memberOfProject ?group.
+        ?hnd crc:assignedTo ?user_hnd.
+        ?user_hnd crc:memberOfProject ?group.
 
         # Ensure that it is isolated
         MINUS {
-            ?hnd_before pmdco:nextProcess ?hnd.
+            ?hnd_before crc:nextStep ?hnd.
         }
 
         MINUS {
-            ?hnd pmdco:nextProcess ?hnd_after.
+            ?hnd crc:nextStep ?hnd_after.
         }
 
     	BIND(?hnd AS ?start)

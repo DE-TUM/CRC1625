@@ -1,0 +1,41 @@
+# Query for Materials Libraries which, in a EDX measurement, have a record of having a volume
+# of more than 50% of gold, alongside metadata about the measurement and measurement area it
+# belongs to
+#
+# This query pattern can be used to filter out MLs/Samples based on whether they have no compositions,
+# a specific number of them, etc.
+#
+SELECT ?ML ?measurement ?measurement_area_position ?value
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+WHERE {
+  # Narrow it down to only Material Libraries
+  ?ML a :MaterialsLibrary.
+  # We can also narrow it down to Samples, or both
+  # ?ML a :Sample.
+  # a/rdfs:subClassOf* is a shorthand for "anything that is either
+  # a Materials Library *or* a *subclass* of Materials Library (Samples...)"
+  # ?ML a/rdfs:subClassOf* :MaterialsLibrary.
+
+  # It is composed of measurement areas, which have compositions as their characteristics
+  # and the position number as their value
+  ?ML pmdco:composedOf ?measurement_area.
+  ?measurement_area pmdco:characteristic ?composition.
+  ?measurement_area pmdco:value ?measurement_area_position.
+
+  # There is a measurement that also has as its characteristic the composition as a whole,
+  # and likewise the individual EDX compositions for each element
+  ?measurement pmdco:characteristic ?composition.
+  ?composition pmdco:characteristic ?edx_composition.
+
+  # Get the EDX compositon that corresponds to gold by accessing its element
+  ?edx_composition pmdco:relatesToElement ?chebi_element.
+  ?chebi_element chebi:formula "Au".
+
+  # And get its value and filter for those higher than 50%
+  ?edx_composition pmdco:value ?value.
+  FILTER(?value > 50.0)
+
+  # Narrow down the classes
+  ?measurement_area a :MeasurementArea.
+  ?composition a :VolumeComposition.
+}

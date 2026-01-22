@@ -6,9 +6,9 @@ FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 {
     {
         SELECT ?handover_w_measurement WHERE {
-            ?handover_w_measurement a :Handover.
+            ?handover_w_measurement a crc:Handover.
 
-            ?handover_w_measurement pmdco:subordinateProcess ?activity.
+            ?handover_w_measurement crc:substep ?activity.
         }
     }
 
@@ -16,7 +16,7 @@ FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 
     {
         SELECT ?handover WHERE {
-            ?handover a :Handover.
+            ?handover a crc:Handover.
         }
     }
 }

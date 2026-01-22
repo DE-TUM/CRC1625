@@ -8,12 +8,12 @@ mappings:
     sources: sql_source
     s: handover:initial_work_for_ML_$(MLId)
     po:
-      - [pmdco:subordinateProcess, activity:misc_activity_for_initial_work_for_ML_$(MLId)~iri]
+      - [crc:substep, activity:misc_activity_for_initial_work_for_ML_$(MLId)~iri]
 
   activity_for_other_types_with_no_handovers:
     sources: sql_source
     s: activity:misc_activity_for_initial_work_for_ML_$(MLId)
     po:
-      - [a, :CharacterizationActivityInstance~iri]
+      - [a, crc:CharacterizationActivityInstance~iri]
       - [a, pmdco:AnalysingProcess~iri]
-      - [pmdco:output, measurement:$(MeasurementId)~iri]
+      - [crc:output, measurement:$(MeasurementId)~iri]

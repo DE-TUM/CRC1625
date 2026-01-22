@@ -8,12 +8,12 @@ mappings:
     sources: sql_source
     s: handover:$(HandoverId)
     po:
-      - [a, :Handover~iri]
-      - [:internalID, $(HandoverId), xsd:integer]
-      - [prov:wasAttributedTo, user:$(createdBy)~iri]
-      - [:creationDate, $(created), xsd:dateTime]
-      - [rdfs:label, $(ObjectName), xsd:string]
-      - [rdfs:comment, $(ObjectDescription), xsd:string]
+      - [a, crc:Handover~iri]
+      - [crc:internalID, $(HandoverId), xsd:integer]
+      - [crc:creator, user:$(createdBy)~iri]
+      - [crc:creationDate, $(created), xsd:dateTime]
+      - [crc:objectName, $(ObjectName), xsd:string]
+      - [crc:objectDescription, $(ObjectDescription), xsd:string]
       # Extra fields for handover
-      - [:acceptedDate, $(DestinationConfirmed), xsd:dateTime]
-      - [prov:wasAssociatedWith, user:$(DestinationUserId)~iri]
+      - [crc:acceptedDate, $(DestinationConfirmed), xsd:dateTime]
+      - [crc:assignedTo, user:$(DestinationUserId)~iri]

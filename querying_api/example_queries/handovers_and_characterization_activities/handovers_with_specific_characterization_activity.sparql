@@ -1,0 +1,51 @@
+# Handovers where an XRD measurement was taken, alongside the sample
+#
+# This query pattern can be used to easily filter for MLs/Samples that
+# have had an specific characterization method applied to them, no matter
+# the type of the object(s) in the RDMS itself (i.e., not caring about
+# different file formats, etc.).
+# Since we are querying based on handovers, we can also easily include more
+# complex restrictions (e.g., we want MLs which had XRD *and* didn't have EDX
+# done before that point)
+#
+# Note that we include DISTINCT in the SELECT clause: this avoids duplicate results if
+# (in this case) the ML/Sample had multiple handovers with XRD activities as part of the
+# same handover group
+SELECT DISTINCT ?MLOrSample ?handover_of_group
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+WHERE {
+  # We follow the handovers workflow from top-to-bottom,
+  # as can also be visualized in the ontology schema
+  #
+  #     Workflow instance -> ML/Sample
+  #             |
+  #             v
+  #     Handover groups chain
+  #             |
+  #             v
+  # Handovers chain for every group
+  #             |
+  #             v
+  # Activities for every handover
+  #             |
+  #             v
+  #        Measurements <- ML/Sample
+  #
+  # Note that, if we don't want to query any information whatsoever from the handover chain,
+  # we can express the query bottom-to-top (ML/Samples that have a measurement part of an XRD activity)
+  #
+  ?workflow_instance pmdco:input ?MLOrSample.
+  ?workflow_instance pmdco:subordinateProcess ?first_handover_group.
+  # With this pattern, we get *all* handover groups, including the first one
+  ?first_handover_group pmdco:nextProcess* ?handover_group.
+
+  ?handover_group pmdco:subordinateProcess ?first_handover_of_group.
+  # The same way, to get *all* handovers of the group
+  ?first_handover_of_group pmdco:nextProcess* ?handover_of_group.
+
+  # And all activities
+  ?handover_of_group pmdco:subordinateProcess ?activity.
+
+  # And we want to get those ML/Samples that contain an XRD activity
+  ?activity a :XRDProcess.
+}

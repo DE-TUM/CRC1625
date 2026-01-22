@@ -6,9 +6,9 @@ WHERE {
       ?measurement a pmdco:ValueObject. # Excludes EDX compositions (pmdco:ChemicalComposition)
 
       # Get their textual label and comment
-      ?measurement rdfs:label ?measurement_label.
+      ?measurement crc:objectName ?measurement_label.
 
-      ?measurement prov:wasAttributedTo ?user.
-      ?user foaf:name ?user_name.
+      ?measurement crc:assignedTo ?user.
+      ?user crc:name ?user_name.
     }
 }

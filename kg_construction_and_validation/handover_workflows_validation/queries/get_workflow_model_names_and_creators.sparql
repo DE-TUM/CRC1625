@@ -1,15 +1,15 @@
 SELECT ?workflow_model_name ?user_id WHERE {
     {
         GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
-            ?s a :HandoverWorkflowModel.
+            ?s a crc:HandoverWorkflowModel.
 
-            ?s rdfs:label ?workflow_model_name.
+            ?s crc:objectName ?workflow_model_name.
 
-            ?s prov:wasAttributedTo ?user.
+            ?s crc:creator ?user.
         }
 
         GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
-            ?user :internalID ?user_id.
+            ?user crc:internalID ?user_id.
         }
     }
 }

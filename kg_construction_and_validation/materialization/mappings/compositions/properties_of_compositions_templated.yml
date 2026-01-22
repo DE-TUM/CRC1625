@@ -8,4 +8,4 @@ mappings:
     sources: sql_source
     s: EDX_composition:$(CompositionId)_in_MA_$(MeasurementArea)
     po:
-      - [:$(propertyname), $(value), xsd:float] # TODO improve
+      - [crc:$(propertyname), $(value), xsd:float] # TODO improve

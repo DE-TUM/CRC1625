@@ -5,23 +5,23 @@ FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 WHERE {
     SELECT ?ML ?measurement ?measurement_area_position ?value
     WHERE {
-      ?ML pmdco:composedOf ?measurement_area.
-      ?measurement_area pmdco:characteristic ?composition.
-      ?measurement_area pmdco:value ?measurement_area_position.
+      ?ML crc:composedOf ?measurement_area.
+      ?measurement_area crc:characteristic ?composition.
+      ?measurement_area crc:value ?measurement_area_position.
 
-      ?measurement pmdco:characteristic ?composition.
-      ?composition pmdco:characteristic ?edx_composition.
+      ?measurement crc:characteristic ?composition.
+      ?composition crc:characteristic ?edx_composition.
 
       # Get the compositon for gold
-      ?edx_composition pmdco:relatesToElement ?chebi_element.
+      ?edx_composition crc:element ?chebi_element.
       ?chebi_element chebi:formula "Au".
 
       # Get its value and filter for those higher than 50%
-      ?edx_composition pmdco:value ?value.
+      ?edx_composition crc:value ?value.
       FILTER(?value > 50.0)
 
       ?ML a/rdfs:subClassOf* pmdco:EngineeredMaterial. # ML or sample
-      ?measurement_area a :MeasurementArea.
-      ?composition a :VolumeComposition.
+      ?measurement_area a crc:MeasurementArea.
+      ?composition a crc:VolumeComposition.
     }
 }

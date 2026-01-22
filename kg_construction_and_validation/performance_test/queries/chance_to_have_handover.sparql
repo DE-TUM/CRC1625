@@ -6,13 +6,13 @@ FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 {
     {
         SELECT DISTINCT ?sample_w_handover WHERE {
-          ?sample_w_handover a :MaterialsLibrary.
+          ?sample_w_handover a crc:MaterialsLibrary.
 
-          ?workflow_instance pmdco:input ?sample_w_handover.
-          ?workflow_instance pmdco:subordinateProcess ?first_handover_group.
+          ?workflow_instance crc:input ?sample_w_handover.
+          ?workflow_instance crc:substep ?first_handover_group.
 
           # The initial handover doesn't count
-          ?first_handover_group pmdco:nextProcess+/pmdco:subordinateProcess ?handover.
+          ?first_handover_group crc:nextStep+/crc:substep ?handover.
         }
     }
 
@@ -20,7 +20,7 @@ FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 
     {
         SELECT ?sample WHERE {
-          ?sample a :MaterialsLibrary.
+          ?sample a crc:MaterialsLibrary.
         }
     }
 }

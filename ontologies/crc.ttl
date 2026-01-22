@@ -109,6 +109,12 @@ crc:element rdf:type owl:ObjectProperty ;
 The elements themselves are CheBI entities that can be individually accessed for more information (i.e., the formula for performing string matching)""" .
 
 
+###  https://crc1625.mdi.ruhr-uni-bochum.de/givenName
+crc:givenName rdf:type owl:ObjectProperty ;
+             owl:equivalentProperty foaf:givenName ;
+             rdfs:comment "The given name of a person" .
+
+
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/handoverWorkflowModelInstanceOf
 crc:handoverWorkflowModelInstanceOf rdf:type owl:ObjectProperty ;
                                     rdfs:domain crc:HandoverWorkflowInstance ;
@@ -139,6 +145,12 @@ crc:memberOfProject rdf:type owl:ObjectProperty ;
                     rdfs:domain pmdco:Person ;
                     rdfs:range crc:Project ;
                     rdfs:label "Member of project"@en .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/name
+crc:name rdf:type owl:ObjectProperty ;
+             owl:equivalentProperty foaf:name ;
+             rdfs:comment "The name of a person" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/nextProcessAcrossGroups
@@ -181,6 +193,18 @@ crc:requiresActivity rdf:type owl:ObjectProperty ;
                      rdfs:label "Requires activity" .
 
 
+###  https://crc1625.mdi.ruhr-uni-bochum.de/resource
+crc:resource rdf:type owl:ObjectProperty ;
+             owl:equivalentProperty pmdco:resource ;
+             rdfs:domain pmdco:ValueObject ;
+             rdfs:comment """The resource object property is used to indicate that an uploaded file in the RDMS is related in some way to a given Materials library / Sample
+
+This property does not explicitly indicate that the given file is generated *for* the object it is connected to; instead, it indicates that they are *related* in a generic way.
+To indicate the former, the connection should instead be the other way around via the crc:characteristic property, as is in the majority of cases.
+             """ ;
+             rdfs:label "Requires activity" .
+
+
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/substep
 crc:substep rdf:type owl:ObjectProperty ;
             owl:equivalentProperty pmdco:subordinateProcess ;
@@ -189,6 +213,12 @@ crc:substep rdf:type owl:ObjectProperty ;
 
 More specifically, in a handover workflow, this is employed by Handover Groups to point to the start of the chain of handovers that they represent, and by an inidividual Handover to point to the individual characterization activities that happened inside it.""" ;
             rdfs:label "substep" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/surname
+crc:surname rdf:type owl:ObjectProperty ;
+             owl:equivalentProperty foaf:surname ;
+             rdfs:comment "The surname of a person" .
 
 
 #################################################################

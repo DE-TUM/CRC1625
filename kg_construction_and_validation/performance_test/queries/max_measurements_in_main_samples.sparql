@@ -1,11 +1,11 @@
 SELECT (AVG(?n_measurements) AS ?max_measurements_in_main_samples) FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph> WHERE {
   SELECT ?sample_w_measurement (COUNT(?measurement) AS ?n_measurements) WHERE {
-    ?sample_w_measurement a :MaterialsLibrary.
+    ?sample_w_measurement a crc:MaterialsLibrary.
 
-    ?sample_w_measurement pmdco:characteristic ?measurement.
+    ?sample_w_measurement crc:characteristic ?measurement.
 
-    MINUS { ?measurement a :VolumeComposition. } # Exclude the 342 EDX compositions
+    MINUS { ?measurement a crc:VolumeComposition. } # Exclude the 342 EDX compositions
     # It's a "main" sample
-    MINUS { ?another_sample pmdco:composedOf ?sample_w_measurement. }
+    MINUS { ?another_sample crc:composedOf ?sample_w_measurement. }
   } GROUP BY ?sample_w_measurement
 }

@@ -10,4 +10,4 @@ mappings:
     s: user:$(Id)
     po:
       - [a, pmdco:Operator~iri]
-      - [:internalID, $(Id), xsd:integer]
+      - [crc:internalID, $(Id), xsd:integer]

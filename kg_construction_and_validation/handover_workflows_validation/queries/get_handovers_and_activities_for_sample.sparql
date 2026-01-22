@@ -1,22 +1,10 @@
 SELECT ?s ?p ?o FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph> WHERE {
     {
-        ?MLOrSample :internalID {object_id}.
+        ?MLOrSample crc:internalID {object_id}.
 
-        ?workflow_instance pmdco:input ?MLOrSample.
+        ?workflow_instance crc:input ?MLOrSample.
 
-        ?workflow_instance pmdco:subordinateProcess/pmdco:nextProcess* ?s. # Handover group
-
-        ?s ?p ?o.
-    }
-
-    UNION
-
-    {
-        ?MLOrSample :internalID {object_id}.
-
-        ?workflow_instance pmdco:input ?MLOrSample.
-
-        ?workflow_instance pmdco:subordinateProcess/pmdco:nextProcess*/pmdco:subordinateProcess/pmdco:nextProcess* ?s. # Handover
+        ?workflow_instance crc:substep/crc:nextStep* ?s. # Handover group
 
         ?s ?p ?o.
     }
@@ -24,11 +12,23 @@ SELECT ?s ?p ?o FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph> WHERE {
     UNION
 
     {
-        ?MLOrSample :internalID {object_id}.
+        ?MLOrSample crc:internalID {object_id}.
 
-        ?workflow_instance pmdco:input ?MLOrSample.
+        ?workflow_instance crc:input ?MLOrSample.
 
-        ?workflow_instance pmdco:subordinateProcess/pmdco:nextProcess*/pmdco:subordinateProcess/pmdco:nextProcess*/pmdco:subordinateProcess ?s. # Activity
+        ?workflow_instance crc:substep/crc:nextStep*/crc:substep/crc:nextStep* ?s. # Handover
+
+        ?s ?p ?o.
+    }
+
+    UNION
+
+    {
+        ?MLOrSample crc:internalID {object_id}.
+
+        ?workflow_instance crc:input ?MLOrSample.
+
+        ?workflow_instance crc:substep/crc:nextStep*/crc:substep/crc:nextStep*/crc:substep ?s. # Activity
 
         ?s rdf:type ?o.
 

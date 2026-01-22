@@ -13,11 +13,16 @@ SELECT
     + CONVERT(VARCHAR, source.ObjectId)) AS sourceIRI,
 
 CASE
-    WHEN source.TypeId IN (-1, 89) THEN 'https://w3id.org/pmd/co/output'
-    WHEN (source.TypeId IN (6, 99) AND target.TypeId IN (6, 99)) THEN 'https://w3id.org/pmd/co/composedOf'
-    WHEN (source.TypeId IN (6, 99) AND target.TypeId NOT IN (6, 99)) THEN 'https://w3id.org/pmd/co/characteristic'
-    WHEN (source.TypeId NOT IN (6, 99) AND target.TypeId IN (6, 99)) THEN 'https://w3id.org/pmd/co/resource'
-    WHEN (source.TypeId NOT IN (6, 99) AND target.TypeId NOT IN (6, 99)) THEN 'https://w3id.org/pmd/co/characteristic'
+    /* Handover / Idea -> Anything else */
+    WHEN source.TypeId IN (-1, 89) THEN 'https://crc1625.mdi.ruhr-uni-bochum.de/output'
+    /* Sample / Comp. sample -> Sample / Comp. sample */
+    WHEN (source.TypeId IN (6, 99) AND target.TypeId IN (6, 99)) THEN 'https://crc1625.mdi.ruhr-uni-bochum.de/composedOf'
+    /* Sample / Comp. sample -> Anything that is not a Sample / Comp. sample (Note: this should not be a handover except in very special cases)*/
+    WHEN (source.TypeId IN (6, 99) AND target.TypeId NOT IN (6, 99)) THEN 'https://crc1625.mdi.ruhr-uni-bochum.de/characteristic'
+    /* Special case: measurement -> Sample / Comp. sample */
+    WHEN (source.TypeId NOT IN (6, 99) AND target.TypeId IN (6, 99)) THEN 'https://crc1625.mdi.ruhr-uni-bochum.de/resource'
+    /* Measurement or other kind of file -> Measurement or other kind of file */
+    WHEN (source.TypeId NOT IN (6, 99) AND target.TypeId NOT IN (6, 99)) THEN 'https://crc1625.mdi.ruhr-uni-bochum.de/characteristic'
 END AS relation,
 
 ('https://crc1625.mdi.ruhr-uni-bochum.de/' +

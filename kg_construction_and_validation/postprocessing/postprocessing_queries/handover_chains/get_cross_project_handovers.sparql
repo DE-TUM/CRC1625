@@ -1,22 +1,22 @@
 SELECT ?start ?end ?sample_id
 WHERE {
     GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
-        ?workflow_instance pmdco:subordinateProcess ?initial_work_handover.
-        ?workflow_instance pmdco:input ?materials_library.
-        ?materials_library :internalID ?sample_id.
+        ?workflow_instance crc:substep ?initial_work_handover.
+        ?workflow_instance crc:input ?materials_library.
+        ?materials_library crc:internalID ?sample_id.
 
         # It can be the initial work handover itself
-        ?initial_work_handover pmdco:nextProcess* ?start.
+        ?initial_work_handover crc:nextStep* ?start.
 
         # They are consecutive, and we do not care if there
         # are preceding or following handovers
-        ?start pmdco:nextProcess ?end .
+        ?start crc:nextStep ?end .
 
-        ?start prov:wasAssociatedWith ?user_start.
-        ?end prov:wasAssociatedWith ?user_end.
+        ?start crc:assignedTo ?user_start.
+        ?end crc:assignedTo ?user_end.
 
-        ?user_start :memberOfProject ?group_start.
-        ?user_end :memberOfProject ?group_end.
+        ?user_start crc:memberOfProject ?group_start.
+        ?user_end crc:memberOfProject ?group_end.
 
         FILTER(?group_start != ?group_end)
     }

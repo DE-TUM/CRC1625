@@ -1,0 +1,21 @@
+# Query that retrieves the measurements and misc. metadata about them by filtering
+# based on their file format.
+#
+# This is equivalent to searching for objects in the RDMS of a specific object type
+#
+SELECT ?user ?user_name ?measurement ?measurementLabel
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+WHERE {
+  # Look for exclusively EDX CSV measurements
+  ?measurement a measurement_type:EDX_CSV.
+  # We can also specify multiple ones at once:
+  # ?measurement a ?measurement_type.
+  # FILTER (?class IN (measurement_type:EDX_CSV, measurement_type:Photo))
+
+  # Get its textual label/name and comment
+  ?measurement rdfs:label ?measurementLabel.
+  # Its author
+  ?measurement prov:wasAttributedTo ?user.
+  # And their name
+  ?user foaf:name ?user_name.
+}

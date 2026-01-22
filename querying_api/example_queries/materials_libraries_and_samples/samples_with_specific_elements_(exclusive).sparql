@@ -1,0 +1,26 @@
+# Get MLs/Samples that are composed of specific elements
+# This is equivalent to the periodic table-based search of the RDMS
+#
+# In this case, we want to retrieve ML/Samples of silver *and* gold,
+# and *no other elements* whatsoever
+SELECT ?MLOrSample
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+WHERE {
+  # a/rdfs:subClassOf* is a shorthand for "anything that is either
+  # a Materials Library *or* a *subclass* of Materials Library (Samples...)"
+  ?MLOrSample a/rdfs:subClassOf* :MaterialsLibrary.
+  ?MLOrSample pmdco:relatesToElement ?element_1, ?element_2.
+
+  # The elements are CheBI entities, which we can query for their formulas. In this case,
+  # we say that one of the elements is gold, and the other silver
+  ?element_1 chebi:formula "Ag".
+  ?element_2 chebi:formula "Au".
+
+  # This is a very simple way of expressing negations in SPARQL. Everything inside
+  # a MINUS essentially means that we *don't* want results (i.e., MLs/Samples) that
+  # have are composed of an extra element which is not ?element_1 or ?element_2
+  MINUS {
+    ?MLOrSample pmdco:relatesToElement ?extra_element.
+    FILTER(?extra_element NOT IN (?element_1, ?element_2))
+  }
+}

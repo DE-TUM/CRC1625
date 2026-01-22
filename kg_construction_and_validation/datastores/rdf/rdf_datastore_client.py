@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 import httpx
 
-from datastores.rdf.rdf_datastore import UpdateType, MAIN_GRAPH_IRI
+from datastores.rdf.rdf_datastore import UpdateType, MAIN_GRAPH_IRI, WORKFLOWS_GRAPH_IRI
 
 module_dir = os.path.dirname(__file__)
 load_dotenv(os.path.join(module_dir, '../../.env'))

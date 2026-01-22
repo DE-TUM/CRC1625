@@ -8,12 +8,12 @@ mappings:
     sources: sql_source
     s: handover:initial_work_for_ML_$(MLId)
     po:
-      - [pmdco:subordinateProcess, activity:EDX_activity_for_initial_work_for_ML_$(MLId)~iri]
+      - [crc:substep, activity:EDX_activity_for_initial_work_for_ML_$(MLId)~iri]
 
   activity_metadata_and_link_to_composition_with_no_handovers:
     sources: sql_source
     s: activity:EDX_activity_for_initial_work_for_ML_$(MLId)
     po:
-      - [a, :CharacterizationActivityInstance~iri]
-      - [a, :EDXMicroscopyProcess~iri]
-      - [pmdco:output, EDX_composition:$(CompositionId)_in_MA_$(MeasurementArea)~iri]
+      - [a, crc:CharacterizationActivityInstance~iri]
+      - [a, crc:EDXMicroscopyProcess~iri]
+      - [crc:output, EDX_composition:$(CompositionId)_in_MA_$(MeasurementArea)~iri]

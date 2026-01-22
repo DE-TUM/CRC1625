@@ -1,0 +1,41 @@
+# The Knowledge Graph also represents the same types of MLs/Samples that
+# the RDMS offers
+#
+# You can use these types to filter them, as can be seen in the rest of the queries
+#
+SELECT DISTINCT *
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+WHERE {
+  # Materials libraries
+  ?ML a :MaterialsLibrary.
+
+  # No gradient samples
+  #?NoGradientSample a :NoGradientSample. # Subclass of :MaterialsLibrary
+
+  # Stress chips
+  #?StressChip a :StressChip. # Subclass of :MaterialsLibrary
+
+  # Samples
+  #?Sample a :Sample. # Subclass of :MaterialsLibrary
+
+  # Stripe samples
+  #?StripeSample a :StripeSample. # Subclass of :Sample
+
+  # Computational samples
+  #?ComputationalSample a :ComputationalSample.
+
+  # Since the classes form a hierarchy, we can also ask for multiple of them at once
+  #
+  # Get all MLs and Samples, no matter their type
+  #
+  # a/rdfs:subClassOf* is a shorthand for "anything that is either
+  # a Materials Library *or* a *subclass* of Materials Library, forming a chain (Samples...)"
+  #?MLOrSample a/rdfs:subClassOf* :MaterialsLibrary.
+
+  # Samples and Stripe samples
+  #?Sample a/rdfs:subClassOf* :Sample.
+
+  # An arbitrary combination of any of them (e.g., stress chips and stripe samples)
+  #?MLOrSample a ?class.
+  #FILTER (?class IN (:StressChip, :StripeSample))
+}

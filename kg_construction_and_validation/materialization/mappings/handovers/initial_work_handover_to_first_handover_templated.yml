@@ -8,4 +8,4 @@ mappings:
     sources: sql_source
     s: handover:initial_work_for_ML_$(MLId)
     po:
-      - [pmdco:nextProcess, handover:$(HandoverId)~iri]
+      - [crc:nextStep, handover:$(HandoverId)~iri]

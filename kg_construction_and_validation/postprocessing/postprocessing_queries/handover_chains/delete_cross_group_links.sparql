@@ -1,25 +1,25 @@
 DELETE {
   GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
-    ?start pmdco:nextProcess ?end.
+    ?start crc:nextStep ?end.
   }
 } WHERE {
     GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
-        VALUES ?start_type { :Handover :VirtualHandover }
+        VALUES ?start_type { crc:Handover crc:VirtualHandover }
 
         ?start a ?start_type.
-        ?end a :Handover.
+        ?end a crc:Handover.
 
         # They are consecutive, and we do not care if there
         # are preceding or following handovers this time
-        ?start pmdco:nextProcess ?end .
+        ?start crc:nextStep ?end .
 
-        ?start prov:wasAssociatedWith ?user_start.
-        ?end prov:wasAssociatedWith ?user_end.
+        ?start crc:assignedTo ?user_start.
+        ?end crc:assignedTo ?user_end.
 
         # All of those except the ones belonging to the same project
         MINUS {
-            ?user_start :memberOfProject ?same_project.
-            ?user_end :memberOfProject ?same_project.
+            ?user_start crc:memberOfProject ?same_project.
+            ?user_end crc:memberOfProject ?same_project.
         }
     }
 }

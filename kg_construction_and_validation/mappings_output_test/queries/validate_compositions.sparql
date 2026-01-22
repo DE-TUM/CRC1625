@@ -2,51 +2,51 @@
 SELECT ?ML ?ma ?edx_composition (COUNT(?composition_element) AS ?comp_elements) WHERE {
     GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
         ?ML a pmdco:EngineeredMaterial.
-        ?ma a :MeasurementArea.
+        ?ma a crc:MeasurementArea.
 
-        ?ML pmdco:composedOf ?ma.
+        ?ML crc:composedOf ?ma.
 
-    	?edx_composition a :VolumeComposition.
-        ?ma pmdco:characteristic ?edx_composition.
+    	?edx_composition a crc:VolumeComposition.
+        ?ma crc:characteristic ?edx_composition.
 
         FILTER NOT EXISTS { # The compositions should only be attached to one measurement
-            ?other_ma a :MeasurementArea.
+            ?other_ma a crc:MeasurementArea.
             ?other_ML a pmdco:EngineeredMaterial.
 
-            ?other_ML pmdco:composedOf ?ma.
+            ?other_ML crc:composedOf ?ma.
             FILTER(?other_ML != ?ML)
         }
 
         FILTER NOT EXISTS { # The compositions are unique too
-            ?other_ma a :MeasurementArea.
+            ?other_ma a crc:MeasurementArea.
 
-            ?other_ma pmdco:characteristic ?edx_composition.
+            ?other_ma crc:characteristic ?edx_composition.
             FILTER(?other_ma != ?ma)
         }
 
         ?edx_measurement a/rdfs:subClassOf pmdco:ValueObject.
-        ?edx_measurement pmdco:characteristic ?edx_composition.
-        ?edx_composition pmdco:characteristic ?composition_element.
+        ?edx_measurement crc:characteristic ?edx_composition.
+        ?edx_composition crc:characteristic ?composition_element.
 
         FILTER NOT EXISTS { # The compositions should only be attached to one measurement
             ?other_measurement a/rdfs:subClassOf pmdco:ValueObject.
-            ?other_measurement pmdco:characteristic ?edx_composition.
+            ?other_measurement crc:characteristic ?edx_composition.
 
             FILTER(?other_measurement != ?edx_measurement)
         }
 
         FILTER NOT EXISTS { # The composition elements should also be unique
-            ?other_comp a :VolumeComposition.
-            ?other_comp pmdco:characteristic ?composition_element.
+            ?other_comp a crc:VolumeComposition.
+            ?other_comp crc:characteristic ?composition_element.
             FILTER(?other_comp != ?edx_composition)
         }
 
         # Tolerance and positions are always hardcoded to the same value
-        ?edx_composition :tolerance "3.0"^^xsd:float.
-        ?edx_composition :x_position "1.0"^^xsd:float.
-        ?edx_composition :y_position "2.0"^^xsd:float.
+        ?edx_composition crc:tolerance "3.0"^^xsd:float.
+        ?edx_composition crc:x_position "1.0"^^xsd:float.
+        ?edx_composition crc:y_position "2.0"^^xsd:float.
 
         # Same for comp. element concentrations, they are always 50%
-        ?composition_element pmdco:value 5e+01.
+        ?composition_element crc:value 5e+01.
     }
 } GROUP BY ?ML ?ma ?edx_composition

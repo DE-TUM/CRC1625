@@ -9,4 +9,4 @@ mappings:
     sources: sql_source
     s: object:$(ObjectId)
     po:
-      - [a, :ComputationalSample~iri]
+      - [a, crc:ComputationalSample~iri]

@@ -8,12 +8,12 @@ mappings:
     sources: sql_source
     s: handover:$(HandoverId)
     po:
-      - [pmdco:subordinateProcess, activity:{measurement_name}_activity_for_handover_$(HandoverId)~iri]
+      - [crc:substep, activity:{measurement_name}_activity_for_handover_$(HandoverId)~iri]
 
   activity_for_measurements_with_explicit_links_to_handovers_{i}:
     sources: sql_source
     s: activity:{measurement_name}_activity_for_handover_$(HandoverId)
     po:
-      - [a, :CharacterizationActivityInstance~iri]
-      - [a, :{measurement_class_name}~iri]
-      - [pmdco:output, measurement:$(MeasurementId)~iri]
+      - [a, crc:CharacterizationActivityInstance~iri]
+      - [a, crc:{measurement_class_name}~iri]
+      - [crc:output, measurement:$(MeasurementId)~iri]

@@ -6,25 +6,25 @@ FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 WHERE {
     {
         SELECT DISTINCT ?sample_w_req WHERE {
-            ?sample_w_req a :MaterialsLibrary
+            ?sample_w_req a crc:MaterialsLibrary
 
             # It's a main sample
             FILTER NOT EXISTS {
-                ?another_sample pmdco:composedOf ?sample_w_req.
+                ?another_sample crc:composedOf ?sample_w_req.
             }
 
             ?sample_w_req prov:wasDerivedFrom ?req.
-            ?req a :RequestForSynthesis.
+            ?req a crc:RequestForSynthesis.
 		}
     }
     UNION
     {
         SELECT ?sample WHERE {
-            ?sample a :MaterialsLibrary.
+            ?sample a crc:MaterialsLibrary.
 
       		# It's a main sample
             FILTER NOT EXISTS {
-                ?another_sample pmdco:composedOf ?sample.
+                ?another_sample crc:composedOf ?sample.
             }
         }
     }

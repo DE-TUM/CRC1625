@@ -8,35 +8,35 @@ mappings:
     sources: sql_source
     s: object:$(MLId)
     po:
-      - [pmdco:composedOf, measurement_area:ma_for_ML_$(MLId)_in_MA_$(MeasurementArea)~iri]
+      - [crc:composedOf, measurement_area:ma_for_ML_$(MLId)_in_MA_$(MeasurementArea)~iri]
 
   measurement_area:
     sources: sql_source
     s: measurement_area:ma_for_ML_$(MLId)_in_MA_$(MeasurementArea)
     po:
-      - [a, :MeasurementArea~iri]
-      - [pmdco:characteristic, EDX_composition:$(CompositionId)_in_MA_$(MeasurementArea)~iri]
-      - [pmdco:value, $(MeasurementArea), xsd:integer]
+      - [a, crc:MeasurementArea~iri]
+      - [crc:characteristic, EDX_composition:$(CompositionId)_in_MA_$(MeasurementArea)~iri]
+      - [crc:value, $(MeasurementArea), xsd:integer]
 
   composition:
     sources: sql_source
     s: EDX_composition:$(CompositionId)_in_MA_$(MeasurementArea)
     po:
-      - [a, :VolumeComposition~iri]
-      - [:internalID, $(CompositionId), xsd:integer]
-      - [pmdco:characteristic, EDX_composition:$(CompositionId)_in_MA_$(MeasurementArea)_element_$(ElementName)~iri]
+      - [a, crc:VolumeComposition~iri]
+      - [crc:internalID, $(CompositionId), xsd:integer]
+      - [crc:characteristic, EDX_composition:$(CompositionId)_in_MA_$(MeasurementArea)_element_$(ElementName)~iri]
 
   composition_element:
     sources: sql_source
     s: EDX_composition:$(CompositionId)_in_MA_$(MeasurementArea)_element_$(ElementName)
     po:
-      - [a,pmdco:ChemicalObject~iri]
-      - [:temporaryDatatypeProperty, $(ElementName), xsd:string]
-      - [pmdco:value, $(ValuePercent), xsd:double]
+      - [a, pmdco:ChemicalObject~iri]
+      - [crc:temporaryDatatypeProperty, $(ElementName), xsd:string]
+      - [crc:value, $(ValuePercent), xsd:double]
 
   measurement_link_to_composition:
     sources: sql_source
     s: measurement:$(OriginalMeasurementId)
     po:
-      - [pmdco:characteristic, EDX_composition:$(CompositionId)_in_MA_$(MeasurementArea)~iri]
+      - [crc:characteristic, EDX_composition:$(CompositionId)_in_MA_$(MeasurementArea)~iri]
 

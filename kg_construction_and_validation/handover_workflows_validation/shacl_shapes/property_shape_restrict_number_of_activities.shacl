@@ -1,8 +1,8 @@
   sh:property [
-    sh:path (pmdco:subordinateProcess [ sh:zeroOrMorePath pmdco:nextProcess ] pmdco:subordinateProcess) ;
+    sh:path (crc:substep [ sh:zeroOrMorePath crc:nextStep ] crc:substep) ;
 
     sh:qualifiedValueShape [
-      sh:class :CharacterizationActivityInstance ;
+      sh:class crc:CharacterizationActivityInstance ;
     ] ;
 
     sh:qualifiedMinCount {number_of_activities} ;

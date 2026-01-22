@@ -14,12 +14,12 @@ FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 
     {
         SELECT ?measurement WHERE {
-      		?sample a :MaterialsLibrary.
-      		?sample pmdco:characteristic ?measurement.
+      		?sample a crc:MaterialsLibrary.
+      		?sample crc:characteristic ?measurement.
             ?measurement a ?measurement_type.
       		?measurement_type rdfs:subClassOf pmdco:Measurement.
 
-            MINUS { ?measurement a :VolumeComposition. } # Exclude the 342 EDX compositions
+            MINUS { ?measurement a crc:VolumeComposition. } # Exclude the 342 EDX compositions
         }
     }
 }

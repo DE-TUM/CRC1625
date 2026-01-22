@@ -19,7 +19,7 @@ PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
 # All entities are split into different namespaces for readability, loosely
 # matching their types in the ontology
 # General prefix for all predicates and classes
-PREFIX : <https://crc1625.mdi.ruhr-uni-bochum.de/>
+PREFIX crc: <https://crc1625.mdi.ruhr-uni-bochum.de/>
 
 # Users and projects
 PREFIX user:    <https://crc1625.mdi.ruhr-uni-bochum.de/user/>

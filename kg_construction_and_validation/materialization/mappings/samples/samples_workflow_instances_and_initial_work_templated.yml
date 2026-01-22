@@ -10,29 +10,29 @@ mappings:
     s: object:$(SampleId)
     po:
       - [a, pmdco:EngineeredMaterial~iri]
-      - [:internalID, $(SampleId), xsd:integer]
-      - [:externalID, $(externalID), xsd:integer]
-      - [prov:wasAttributedTo, user:$(createdBy)~iri]
-      - [:creationDate, $(created), xsd:dateTime]
-      - [rdfs:label, $(ObjectName), xsd:string]
-      - [rdfs:comment, $(ObjectDescription), xsd:string]
+      - [crc:internalID, $(SampleId), xsd:integer]
+      - [crc:externalID, $(externalID), xsd:integer]
+      - [crc:creator, user:$(createdBy)~iri]
+      - [crc:creationDate, $(created), xsd:dateTime]
+      - [crc:objectName, $(ObjectName), xsd:string]
+      - [crc:objectDescription, $(ObjectDescription), xsd:string]
 
   workflow_instances:
     sources: sql_source
     s: workflow_instance:$(SampleId)
     po:
-      - [a, :HandoverWorkflowInstance~iri]
-      - [pmdco:input, object:$(SampleId)~iri]
-      - [pmdco:subordinateProcess, handover:initial_work_for_ML_$(SampleId)~iri]
+      - [a, crc:HandoverWorkflowInstance~iri]
+      - [crc:input, object:$(SampleId)~iri]
+      - [crc:substep, handover:initial_work_for_ML_$(SampleId)~iri]
 
   initial_work_handover:
     sources: sql_source
     s: handover:initial_work_for_ML_$(SampleId)
     po:
-      - [a, :VirtualHandover~iri]
+      - [a, crc:VirtualHandover~iri]
       # Virtual handovers have the same owner and receiver
-      - [prov:wasAssociatedWith, user:$(createdBy)~iri]
-      - [prov:wasAttributedTo, user:$(createdBy)~iri]
-      - [:creationDate, $(created), xsd:dateTime]
-      - [rdfs:label, Initial work for ML $(SampleId), xsd:string]
-      - [rdfs:comment, Measurements and other data added to the ML $(SampleId) before any handover occurred, xsd:string]
+      - [crc:assignedTo, user:$(createdBy)~iri]
+      - [crc:creator, user:$(createdBy)~iri]
+      - [crc:creationDate, $(created), xsd:dateTime]
+      - [crc:objectName, Initial work for ML $(SampleId), xsd:string]
+      - [crc:objectDescription, Measurements and other data added to the ML $(SampleId) before any handover occurred, xsd:string]

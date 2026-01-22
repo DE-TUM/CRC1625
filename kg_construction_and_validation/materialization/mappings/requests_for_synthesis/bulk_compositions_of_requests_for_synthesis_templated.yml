@@ -8,18 +8,18 @@ mappings:
     sources: sql_source
     s: request_for_synthesis:$(ObjectId)
     po:
-      - [pmdco:characteristic, bulk_composition:request_for_synthesis_$(ObjectId)~iri]
+      - [crc:characteristic, bulk_composition:request_for_synthesis_$(ObjectId)~iri]
 
   bulk_composition:
     sources: sql_source
     s: bulk_composition:request_for_synthesis_$(ObjectId)
     po:
-      - [a, :VolumeComposition~iri]
-      - [pmdco:composedOf, bulk_composition:request_for_synthesis_$(ObjectId)_$(ElementName)~iri]
+      - [a, crc:VolumeComposition~iri]
+      - [crc:composedOf, bulk_composition:request_for_synthesis_$(ObjectId)_$(ElementName)~iri]
 
   element_of_bulk_composition:
     sources: sql_source
     s: bulk_composition:request_for_synthesis_$(ObjectId)_$(ElementName)
     po:
-      - [a,pmdco:ChemicalObject~iri]
-      - [pmdco:value, $(ValuePercent), xsd:double]
+      - [a, pmdco:ChemicalObject~iri]
+      - [crc:value, $(ValuePercent), xsd:double]

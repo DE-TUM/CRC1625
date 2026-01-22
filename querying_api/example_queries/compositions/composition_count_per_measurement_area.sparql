@@ -1,0 +1,38 @@
+# For every Materials Library, get its Measurement Areas and the number of volume/EDX compositions
+# that have been uploaded for each one of them
+#
+# Materials Libraries that don't have any volume/EDX measurements will not appear in the results
+#
+# This query pattern can be used to filter out MLs/Samples based on whether they have no compositions,
+# a specific number of them, etc.
+#
+# Note that, since we want their number, we must include a COUNT variable. This requires that we
+# add a GROUP BY clause at the end of the query (explained below)
+# If we want to simply obtain a list of MLs/Samples, we can simply avoid doing the count and the grouping
+#
+SELECT ?ML ?measurement_area_position (COUNT(?composition) AS ?composition_count)
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+WHERE {
+  # Narrow it down to only Material Libraries
+  ?ML a :MaterialsLibrary.
+  # We can also narrow it down to Samples, or both
+  # ?ML a :Sample.
+  # ?ML a/rdfs:subClassOf* pmdco:EngineeredMaterial.
+
+  # It is composed of measurement areas, which have compositions as their characteristics
+  # and the position number as their value
+  ?ML pmdco:composedOf ?measurement_area.
+  ?measurement_area pmdco:characteristic ?composition.
+  ?measurement_area pmdco:value ?measurement_area_position.
+
+  # Narrow down their classes
+  ?measurement_area a :MeasurementArea.
+  ?composition a :VolumeComposition.
+}
+# Since we want to do a COUNT of the compositions attached to every measurement area, we need to
+# indicate the variables we want to group (also known as aggregate) the results by.
+#
+# In this case, we group by all of them except for the COUNTed variable
+GROUP BY ?ML ?measurement_area_position
+# And then we order the results based on the count values, showing the highest first
+ORDER BY DESC(?composition_count)

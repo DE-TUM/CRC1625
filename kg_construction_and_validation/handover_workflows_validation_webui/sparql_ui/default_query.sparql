@@ -45,9 +45,9 @@ FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 WHERE {
   ?measurement a measurement_type:EDX_CSV.
 
-  ?measurement :internalID ?object_id.
-  ?measurement rdfs:label ?measurementLabel.
-  ?measurement prov:wasAttributedTo ?user.
+  ?measurement crc:internalID ?object_id.
+  ?measurement crc:objectName ?measurementLabel.
+  ?measurement crc:creator ?user.
 
-  ?user foaf:name ?user_name.
+  ?user crc:name ?user_name.
 }

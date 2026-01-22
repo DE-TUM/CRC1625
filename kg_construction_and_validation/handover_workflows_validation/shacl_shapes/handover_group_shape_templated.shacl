@@ -1,15 +1,15 @@
 @prefix sh:         <http://www.w3.org/ns/shacl#> .
 @prefix prov:       <http://www.w3.org/ns/prov#> .
 @prefix pmdco:      <https://w3id.org/pmd/co/> .
-@prefix :           <https://crc1625.mdi.ruhr-uni-bochum.de/> .
+@prefix crc:           <https://crc1625.mdi.ruhr-uni-bochum.de/> .
 @prefix project:    <https://crc1625.mdi.ruhr-uni-bochum.de/project/> .
 
-:{handovers_group_shape_name}
+crc:{handovers_group_shape_name}
   a sh:NodeShape ;
   sh:targetNode <{target_node}> ;
 
   sh:property [
-    sh:path prov:wasAssociatedWith ;
+    sh:path crc:assignedTo ;
     sh:in ({target_projects}) ;
     sh:message "The handover group is within an incorrect project"
   ] ;

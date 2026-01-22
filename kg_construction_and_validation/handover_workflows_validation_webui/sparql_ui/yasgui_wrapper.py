@@ -26,7 +26,11 @@ async def sparql_proxy(request: Request):
         return JSONResponse({"error": f"No requests other than POST are allowed"}, status_code=400)
 
     try:
-        response = await rdf_datastore_client.launch_query(parsed_data['query'][0], return_full_response=True)
+        query = parsed_data['query'][0]
+
+        if app.storage.user.get('use_inference', False):
+            query = 'DEFINE input:inference "inference_rules"\n' + query
+        response = await rdf_datastore_client.launch_query(query, return_full_response=True)
 
         return JSONResponse(
             content=response['data'],
@@ -113,6 +117,11 @@ def yasgui_frame_page():
 @ui.page('/sparql')
 async def main_page():
     ui.page_title('CRC 1625 SPARQL Endpoint')
+
+    with ui.row().classes('items-center gap-2'):
+        ui.label('(Optional) Enable inference:')
+        ui.switch('Inference').classes('text-white').bind_value(app.storage.user, 'use_inference').tooltip(
+            'Enabling inference allows querying the data using the PMDco ontology')
 
     with ui.column().classes('w-full h-screen overflow-hidden flex'):
         with ui.row().classes('w-full h-full flex-grow overflow-hidden'):

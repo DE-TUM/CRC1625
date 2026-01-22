@@ -23,7 +23,7 @@ WHERE {
     # Handover workflow steps (outgoing)
     UNION
     {
-      <{handover_workflow_model_iri}> pmdco:subordinateProcess/pmdco:nextProcess* ?s.
+      <{handover_workflow_model_iri}> crc:substep/crc:nextStep* ?s.
       ?s ?p ?o.
     }
 
@@ -32,15 +32,15 @@ WHERE {
     # Due to this, we clean them up or fully delete them at a later step when overwriting
     #UNION
     #{
-    #  <{handover_workflow_model_iri}> pmdco:subordinateProcess/pmdco:nextProcess* ?o.
+    #  <{handover_workflow_model_iri}> crc:substep/crc:nextStep* ?o.
     #  ?s ?p ?o.
     #}
 
     # Handover workflow step activities
     UNION
     {
-      <{handover_workflow_model_iri}> pmdco:subordinateProcess/pmdco:nextProcess* ?step.
-      ?step pmdco:subordinateProcess ?s.
+      <{handover_workflow_model_iri}> crc:substep/crc:nextStep* ?step.
+      ?step crc:substep ?s.
       ?s ?p ?o.
     }
   }

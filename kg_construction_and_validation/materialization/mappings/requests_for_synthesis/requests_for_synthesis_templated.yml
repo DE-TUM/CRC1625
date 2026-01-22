@@ -8,9 +8,9 @@ mappings:
     sources: sql_source
     s: request_for_synthesis:$(ObjectId)
     po:
-      - [a, :RequestForSynthesis~iri]
-      - [:internalID, $(ObjectId), xsd:integer]
-      - [prov:wasAttributedTo, user:$(createdBy)~iri]
-      - [:creationDate, user:$(created)~iri]
-      - [rdfs:label, $(ObjectName), xsd:string]
-      - [rdfs:comment, $(ObjectDescription), xsd:string]
+      - [a, crc:RequestForSynthesis~iri]
+      - [crc:internalID, $(ObjectId), xsd:integer]
+      - [crc:creator, user:$(createdBy)~iri]
+      - [crc:creationDate, user:$(created)~iri]
+      - [crc:objectName, $(ObjectName), xsd:string]
+      - [crc:objectDescription, $(ObjectDescription), xsd:string]

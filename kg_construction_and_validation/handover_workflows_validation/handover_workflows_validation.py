@@ -63,28 +63,7 @@ ont_graph.parse(os.path.join(module_dir, "../../ontologies/crc.ttl"), format="tu
 ont_graph.parse(os.path.join(module_dir, "../../ontologies/pmd_core.ttl"), format="turtle")
 ont_graph.parse(os.path.join(module_dir, "../../ontologies/oce.owl"), format="xml")
 
-activity_to_iri_prefixed = {
-    "Annealing": ":AnnealingProcess",
-    "APT": ":APTProcess",
-    "Bandgap": ":BandgapProcess",
-    "FIM": ":FIMProcess",
-    "LEIS": ":LEISProcess",
-    "Photo": ":PhotoProcess",
-    "PSM": ":PSMProcess",
-    "Report": ":Reportrocess",
-    "Resistance": ":ResistanceProcess",
-    "SDC": ":SDCProcess",
-    "SECCM": ":SECCMProcess",
-    "SEM": ":SEMProcess",
-    "TEM": ":TEMProcess",
-    "Thickness": ":ThicknessProcess",
-    "XPS": ":XPSProcess",
-    "XRD": ":XRDProcess",
-    "EDX": ":EDXMicroscopyProcess",
-    "Others": "pmdco:AnalysingProcess",
-}
-
-activity_to_iri = {
+activity_name_to_iri = {
     "Annealing": str(crc_prefix.AnnealingProcess),
     "APT": str(crc_prefix.APTProcess),
     "Bandgap": str(crc_prefix.BandgapProcess),
@@ -105,7 +84,7 @@ activity_to_iri = {
     "Others": str(pmdco_prefix.AnalysingProcess),
 }
 
-iri_to_activity = {v: k for k, v in activity_to_iri.items()}
+iri_to_activity_name = {v: k for k, v in activity_name_to_iri.items()}
 
 
 @dataclass
@@ -223,15 +202,15 @@ class WorkflowInstance:
 
 
 workflow_model_iri_to_config = {
-    str(rdfs_prefix.label): "workflow_model_name",
-    str(pmdco_prefix.subordinateProcess): "initial_step",
+    str(crc_prefix.objectName): "workflow_model_name",
+    str(crc_prefix.substep): "initial_step",
     str(crc_prefix.allowIntermediateHandoverGroups): "allow_intermediate_handover_groups"
 }
 
 workflow_model_step_iri_to_config = {
     str(crc_prefix.isHandoverWorkflowStepEnabled): "enabled",
-    str(pmdco_prefix.nextProcess): "next_steps",
-    str(rdfs_prefix.comment): "step_description",
+    str(crc_prefix.nextStep): "next_steps",
+    str(crc_prefix.objectDescription): "step_description",
     str(crc_prefix.allowedProject): "projects",
     str(crc_prefix.requiresActivity): "required_activities",
     str(crc_prefix.allowsOtherActivities): "allow_other_activities"
@@ -312,7 +291,9 @@ async def read_workflow_model(workflow_model_name: str, user_id: int) -> None | 
         p = binding["p"]["value"]
         o = Literal(binding["o"]["value"], datatype=binding["o"].get("datatype")).toPython()
 
-        if p == 'http://www.w3.org/2000/01/rdf-schema#label':
+        if p == str(crc_prefix.objectName):
+            # We should separately check the type of each entity, but this
+            # way we avoid launching tons of individual queries
             if "step" not in s:
                 workflow_model.workflow_model_name = o # Set it directly
             else:
@@ -327,7 +308,7 @@ async def read_workflow_model(workflow_model_name: str, user_id: int) -> None | 
             if p in workflow_model_iri_to_config:
                 if "initial_step" in workflow_model_iri_to_config[p]:
                     workflow_model.workflow_model_options.initial_step_name = labels_dict[o]
-                elif p != 'http://www.w3.org/2000/01/rdf-schema#label': # We already set it, and the label is not an option
+                elif p != str(crc_prefix.objectName): # We already set it, and the label is not an option
                     workflow_model.workflow_model_options.set_option(workflow_model_iri_to_config[p], o)
 
         else:  # It's a step
@@ -343,7 +324,7 @@ async def read_workflow_model(workflow_model_name: str, user_id: int) -> None | 
                     case "projects":
                         workflow_step.projects.append(o.rsplit("/", 1)[-1])
                     case "required_activities":
-                        workflow_step.required_activities.append(iri_to_activity[await get_activity_type(o)])
+                        workflow_step.required_activities.append(iri_to_activity_name[await get_activity_type(o)])
                     case _:
                         workflow_step.set_option(workflow_model_step_iri_to_config[p], o)
 
@@ -366,10 +347,10 @@ async def store_workflow_model(workflow_model: WorkflowModel,
     g.add((workflow_model_iri, rdf_prefix.type, crc_prefix.HandoverWorkflowModel))
 
     # Label
-    g.add((workflow_model_iri, rdfs_prefix.label, Literal(workflow_model.workflow_model_name, datatype=XSD.string)))
+    g.add((workflow_model_iri, crc_prefix.objectName, Literal(workflow_model.workflow_model_name, datatype=XSD.string)))
 
     # Attribution
-    g.add((workflow_model_iri, prov_prefix.wasAttributedTo, crc_user_prefix[str(user_id)]))
+    g.add((workflow_model_iri, crc_prefix.creator, crc_user_prefix[str(user_id)]))
 
     # Settings
     g.add((workflow_model_iri, crc_prefix.allowIntermediateHandoverGroups,
@@ -385,19 +366,19 @@ async def store_workflow_model(workflow_model: WorkflowModel,
 
         if step_name == workflow_model.workflow_model_options.initial_step_name:
             # Link to first step
-            g.add((workflow_model_iri, pmdco_prefix.subordinateProcess, step_iri))
+            g.add((workflow_model_iri, crc_prefix.substep, step_iri))
 
         # Type
         g.add((step_iri, rdf_prefix.type, crc_prefix.HandoverWorkflowModelStep))
 
         # Label
-        g.add((step_iri, rdfs_prefix.label, Literal(step_name, datatype=XSD.string)))
+        g.add((step_iri, crc_prefix.objectName, Literal(step_name, datatype=XSD.string)))
 
         # Attribution
-        g.add((step_iri, prov_prefix.wasAttributedTo, crc_user_prefix[str(user_id)]))
+        g.add((step_iri, crc_prefix.creator, crc_user_prefix[str(user_id)]))
 
         # Comment
-        g.add((step_iri, rdfs_prefix.comment, Literal(step.step_description, datatype=XSD.string)))
+        g.add((step_iri, crc_prefix.objectDescription, Literal(step.step_description, datatype=XSD.string)))
 
         # Enabled
         g.add((step_iri, crc_prefix.isHandoverWorkflowStepEnabled, Literal(step.enabled, datatype=XSD.boolean)))
@@ -412,7 +393,7 @@ async def store_workflow_model(workflow_model: WorkflowModel,
                 name_to_uid[next_step_name] = uuid_for_name(next_step_name, user_id)
 
             next_step_iri = crc_workflow_prefix[f"workflow_step_{name_to_uid[next_step_name]}_for_workflow_model_{workflow_model_id}"]
-            g.add((step_iri, pmdco_prefix.nextProcess, next_step_iri))
+            g.add((step_iri, crc_prefix.nextStep, next_step_iri))
 
         # Required activities
         for required_activity in step.required_activities:
@@ -422,10 +403,7 @@ async def store_workflow_model(workflow_model: WorkflowModel,
             g.add((step_iri, crc_prefix.requiresActivity, activity_iri))
 
             # Type(s) of the activity
-            if required_activity == "Others":
-                activity_type_iri = pmdco_prefix[activity_to_iri_prefixed[required_activity].replace("pmdco:", "")]
-            else:
-                activity_type_iri = crc_prefix[activity_to_iri_prefixed[required_activity].replace(":", "")]
+            activity_type_iri = activity_name_to_iri[required_activity]
 
             g.add((activity_iri, rdf_prefix.type, activity_type_iri))
             g.add((activity_iri, rdf_prefix.type, crc_prefix.CharacterizationActivityModel))
@@ -559,10 +537,10 @@ async def create_workflow_instance(workflow_instance: WorkflowInstance,
     g.add((workflow_instance_iri, rdf_prefix.type, crc_prefix.HandoverWorkflowModelInstance))
 
     # Label
-    g.add((workflow_instance_iri, rdfs_prefix.label, Literal(workflow_instance.workflow_instance_name, datatype=XSD.string)))
+    g.add((workflow_instance_iri, crc_prefix.objectName, Literal(workflow_instance.workflow_instance_name, datatype=XSD.string)))
 
     # Attribution
-    g.add((workflow_instance_iri, prov_prefix.wasAttributedTo, crc_user_prefix[str(user_id)]))
+    g.add((workflow_instance_iri, crc_prefix.creator, crc_user_prefix[str(user_id)]))
 
     # Link to workflow model
     g.add((workflow_instance_iri, crc_prefix.handoverWorkflowModelInstanceOf, workflow_model_iri))
@@ -573,7 +551,7 @@ async def create_workflow_instance(workflow_instance: WorkflowInstance,
         g.add((assignment_iri, rdf_prefix.type, crc_prefix.HandoverWorkflowInstanceAssignment))
 
         # Attribution
-        g.add((assignment_iri, prov_prefix.wasAttributedTo, crc_user_prefix[str(user_id)]))
+        g.add((assignment_iri, crc_prefix.creator, crc_user_prefix[str(user_id)]))
 
         # Link to assignment
         g.add((workflow_instance_iri, crc_prefix.hasAssignment, assignment_iri))
@@ -703,10 +681,10 @@ def generate_group_shape(workflow_model_step: WorkflowModelStep, target_node: st
     # Add a restriction for each activity
     activity_shapes = []
     for req_activity in workflow_model_step.required_activities:
-        if req_activity in activity_to_iri_prefixed:
+        if req_activity in activity_name_to_iri:
             activity_shapes.append(
                 shape_require_activity_templated
-                .replace('{activity_class}', activity_to_iri_prefixed[req_activity])
+                .replace('{activity_class}', "<" + activity_name_to_iri[req_activity] + ">")
                 .replace("{measurement_name}", req_activity)
             )
         else:

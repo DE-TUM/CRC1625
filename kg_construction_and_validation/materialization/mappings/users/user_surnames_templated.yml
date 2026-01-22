@@ -9,4 +9,4 @@ mappings:
     sources: sql_source
     s: user:$(UserId)
     po:
-      - [foaf:surname, $(ClaimValue), xsd:string]
+      - [crc:surname, $(ClaimValue), xsd:string]

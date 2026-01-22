@@ -1,97 +1,97 @@
-@prefix ns1: <https://crc1625.mdi.ruhr-uni-bochum.de/> .
+@prefix crc: <https://crc1625.mdi.ruhr-uni-bochum.de/> .
 @prefix ns2: <https://w3id.org/pmd/co/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> a ns1:HandoverWorkflowModel ;
-    rdfs:label "example_workflow"^^xsd:string ;
-    prov:wasAttributedTo <https://crc1625.mdi.ruhr-uni-bochum.de/user/1> ;
-    ns1:allowIntermediateHandoverGroups false ;
-    ns2:subordinateProcess <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_57ce4318-2905-5346-9f82-f364bb1997d9_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> a crc:HandoverWorkflowModel ;
+    crc:objectName "example_workflow"^^xsd:string ;
+    crc:creator <https://crc1625.mdi.ruhr-uni-bochum.de/user/1> ;
+    crc:allowIntermediateHandoverGroups false ;
+    crc:substep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_57ce4318-2905-5346-9f82-f364bb1997d9_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> .
 
-ns1:APT_activity_for_workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9 a ns1:APTProcess,
-        ns1:CharacterizationActivityModel .
+crc:APT_activity_for_workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9 a crc:APTProcess,
+        crc:CharacterizationActivityModel .
 
-ns1:EDX_activity_for_workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101 a ns1:CharacterizationActivityModel,
-        ns1:EDXMicroscopyProcess .
+crc:EDX_activity_for_workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101 a crc:CharacterizationActivityModel,
+        crc:EDXMicroscopyProcess .
 
-ns1:Others_activity_for_workflow_step_57ce4318-2905-5346-9f82-f364bb1997d9 a ns1:CharacterizationActivityModel,
+crc:Others_activity_for_workflow_step_57ce4318-2905-5346-9f82-f364bb1997d9 a crc:CharacterizationActivityModel,
         ns2:AnalysingProcess .
 
-ns1:Others_activity_for_workflow_step_ea96b670-d757-546e-9bbe-6728cc30b1c0 a ns1:CharacterizationActivityModel,
+crc:Others_activity_for_workflow_step_ea96b670-d757-546e-9bbe-6728cc30b1c0 a crc:CharacterizationActivityModel,
         ns2:AnalysingProcess .
 
-ns1:SECCM_activity_for_workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9 a ns1:CharacterizationActivityModel,
-        ns1:SECCMProcess .
+crc:SECCM_activity_for_workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9 a crc:CharacterizationActivityModel,
+        crc:SECCMProcess .
 
-ns1:SECCM_activity_for_workflow_step_cd529f81-0704-5956-8d2e-6d588ec5625d a ns1:CharacterizationActivityModel,
-        ns1:SECCMProcess .
+crc:SECCM_activity_for_workflow_step_cd529f81-0704-5956-8d2e-6d588ec5625d a crc:CharacterizationActivityModel,
+        crc:SECCMProcess .
 
-ns1:SECCM_activity_for_workflow_step_f19e2cd8-4d3a-5547-989c-c5b4db109d7f a ns1:CharacterizationActivityModel,
-        ns1:SECCMProcess .
+crc:SECCM_activity_for_workflow_step_f19e2cd8-4d3a-5547-989c-c5b4db109d7f a crc:CharacterizationActivityModel,
+        crc:SECCMProcess .
 
-ns1:SEM_activity_for_workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101 a ns1:CharacterizationActivityModel,
-        ns1:SEMProcess .
+crc:SEM_activity_for_workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101 a crc:CharacterizationActivityModel,
+        crc:SEMProcess .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_57ce4318-2905-5346-9f82-f364bb1997d9_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> a ns1:HandoverWorkflowModelStep ;
-    rdfs:label "step_1"^^xsd:string ;
-    rdfs:comment """Initial work of Sample 1
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_57ce4318-2905-5346-9f82-f364bb1997d9_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> a crc:HandoverWorkflowModelStep ;
+    crc:objectName "step_1"^^xsd:string ;
+    crc:objectDescription """Initial work of Sample 1
 """^^xsd:string ;
-    ns1:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/A01> ;
-    ns1:allowsOtherActivities false ;
-    ns1:isHandoverWorkflowStepEnabled true ;
-    ns1:requiresActivity ns1:Others_activity_for_workflow_step_57ce4318-2905-5346-9f82-f364bb1997d9 ;
-    ns2:nextProcess <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> .
+    crc:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/A01> ;
+    crc:allowsOtherActivities false ;
+    crc:isHandoverWorkflowStepEnabled true ;
+    crc:requiresActivity crc:Others_activity_for_workflow_step_57ce4318-2905-5346-9f82-f364bb1997d9 ;
+    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> a ns1:HandoverWorkflowModelStep ;
-    rdfs:label "step_2"^^xsd:string ;
-    rdfs:comment """Handovers 1 and 2
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> a crc:HandoverWorkflowModelStep ;
+    crc:objectName "step_2"^^xsd:string ;
+    crc:objectDescription """Handovers 1 and 2
 """^^xsd:string ;
-    ns1:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/S> ;
-    ns1:allowsOtherActivities true ;
-    ns1:isHandoverWorkflowStepEnabled true ;
-    ns1:requiresActivity ns1:APT_activity_for_workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9,
-        ns1:SECCM_activity_for_workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9 ;
-    ns2:nextProcess <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_f19e2cd8-4d3a-5547-989c-c5b4db109d7f_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> .
+    crc:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/S> ;
+    crc:allowsOtherActivities true ;
+    crc:isHandoverWorkflowStepEnabled true ;
+    crc:requiresActivity crc:APT_activity_for_workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9,
+        crc:SECCM_activity_for_workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9 ;
+    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_f19e2cd8-4d3a-5547-989c-c5b4db109d7f_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_cd529f81-0704-5956-8d2e-6d588ec5625d_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> a ns1:HandoverWorkflowModelStep ;
-    rdfs:label "step_6"^^xsd:string ;
-    rdfs:comment """Handover 6
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_cd529f81-0704-5956-8d2e-6d588ec5625d_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> a crc:HandoverWorkflowModelStep ;
+    crc:objectName "step_6"^^xsd:string ;
+    crc:objectDescription """Handover 6
 """^^xsd:string ;
-    ns1:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/C01> ;
-    ns1:allowsOtherActivities false ;
-    ns1:isHandoverWorkflowStepEnabled true ;
-    ns1:requiresActivity ns1:SECCM_activity_for_workflow_step_cd529f81-0704-5956-8d2e-6d588ec5625d .
+    crc:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/C01> ;
+    crc:allowsOtherActivities false ;
+    crc:isHandoverWorkflowStepEnabled true ;
+    crc:requiresActivity crc:SECCM_activity_for_workflow_step_cd529f81-0704-5956-8d2e-6d588ec5625d .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> a ns1:HandoverWorkflowModelStep ;
-    rdfs:label "step_5"^^xsd:string ;
-    rdfs:comment """Handovers 4 and 5
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> a crc:HandoverWorkflowModelStep ;
+    crc:objectName "step_5"^^xsd:string ;
+    crc:objectDescription """Handovers 4 and 5
 """^^xsd:string ;
-    ns1:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/S> ;
-    ns1:allowsOtherActivities false ;
-    ns1:isHandoverWorkflowStepEnabled true ;
-    ns1:requiresActivity ns1:EDX_activity_for_workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101,
-        ns1:SEM_activity_for_workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101 ;
-    ns2:nextProcess <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_cd529f81-0704-5956-8d2e-6d588ec5625d_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> .
+    crc:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/S> ;
+    crc:allowsOtherActivities false ;
+    crc:isHandoverWorkflowStepEnabled true ;
+    crc:requiresActivity crc:EDX_activity_for_workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101,
+        crc:SEM_activity_for_workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101 ;
+    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_cd529f81-0704-5956-8d2e-6d588ec5625d_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_ea96b670-d757-546e-9bbe-6728cc30b1c0_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> a ns1:HandoverWorkflowModelStep ;
-    rdfs:label "step_4"^^xsd:string ;
-    rdfs:comment """Initial work of annealed sample 1
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_ea96b670-d757-546e-9bbe-6728cc30b1c0_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> a crc:HandoverWorkflowModelStep ;
+    crc:objectName "step_4"^^xsd:string ;
+    crc:objectDescription """Initial work of annealed sample 1
 """^^xsd:string ;
-    ns1:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/A01> ;
-    ns1:allowsOtherActivities false ;
-    ns1:isHandoverWorkflowStepEnabled true ;
-    ns1:requiresActivity ns1:Others_activity_for_workflow_step_ea96b670-d757-546e-9bbe-6728cc30b1c0 ;
-    ns2:nextProcess <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> .
+    crc:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/A01> ;
+    crc:allowsOtherActivities false ;
+    crc:isHandoverWorkflowStepEnabled true ;
+    crc:requiresActivity crc:Others_activity_for_workflow_step_ea96b670-d757-546e-9bbe-6728cc30b1c0 ;
+    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_f19e2cd8-4d3a-5547-989c-c5b4db109d7f_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> a ns1:HandoverWorkflowModelStep ;
-    rdfs:label "step_3"^^xsd:string ;
-    rdfs:comment """Handover 3
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_f19e2cd8-4d3a-5547-989c-c5b4db109d7f_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> a crc:HandoverWorkflowModelStep ;
+    crc:objectName "step_3"^^xsd:string ;
+    crc:objectDescription """Handover 3
 """^^xsd:string ;
-    ns1:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/C01> ;
-    ns1:allowsOtherActivities false ;
-    ns1:isHandoverWorkflowStepEnabled true ;
-    ns1:requiresActivity ns1:SECCM_activity_for_workflow_step_f19e2cd8-4d3a-5547-989c-c5b4db109d7f ;
-    ns2:nextProcess <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_ea96b670-d757-546e-9bbe-6728cc30b1c0_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> .
+    crc:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/C01> ;
+    crc:allowsOtherActivities false ;
+    crc:isHandoverWorkflowStepEnabled true ;
+    crc:requiresActivity crc:SECCM_activity_for_workflow_step_f19e2cd8-4d3a-5547-989c-c5b4db109d7f ;
+    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_ea96b670-d757-546e-9bbe-6728cc30b1c0_for_workflow_model_41ea0079-8314-501d-ab2f-76af21d6bfe6> .
 

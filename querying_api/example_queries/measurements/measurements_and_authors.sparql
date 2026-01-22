@@ -1,0 +1,17 @@
+SELECT ?user ?user_name ?measurement ?measurement_label
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+WHERE {
+  # pmdco:ValueObject is the high-level type for any kind of measurement in the
+  # RMDS (i.e., an object in the RDMS that is linked to a ML/Sample that is not
+  # another ML/sample, special object such as a handover, etc.). It also does not
+  # include
+  ?measurement a pmdco:ValueObject.
+
+  # Get their textual label and comment
+  ?measurement rdfs:label ?measurement_label.
+
+  # Get its author
+  ?measurement prov:wasAttributedTo ?user.
+  # and their name
+  ?user foaf:name ?user_name.
+}

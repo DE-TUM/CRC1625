@@ -10,7 +10,8 @@ import time
 import datastores.sql.sql_db as sql_db
 import materialization.materialization as materialization
 import postprocessing.postprocessing as postprocessing
-from datastores.rdf import rdf_datastore_client
+from datastores.rdf import rdf_datastore_client, rdf_datastore
+from datastores.rdf.rdf_datastore_api import rdf_store
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -72,6 +73,10 @@ def serve_KG(skip_ontologies_upload: bool = True,
 
     if not skip_ontologies_upload:
         upload_ontology_files(ontology_files)
+        if rdf_datastore_client.run_sync(rdf_datastore_client.get_datastore_type()) == "virtuoso":
+            # We have to enable inference rules manually (ugh)
+            rdf_datastore_client.run_sync(rdf_datastore_client.run_isql(f"rdfs_rule_set ('inference_rules', '{rdf_datastore.MAIN_GRAPH_IRI}');"))
+            rdf_datastore_client.run_sync(rdf_datastore_client.run_isql(f"rdfs_rule_set ('inference_rules', '{rdf_datastore.WORKFLOWS_GRAPH_IRI}');"))
 
     file_upload_end = time.perf_counter() - file_upload_start
 

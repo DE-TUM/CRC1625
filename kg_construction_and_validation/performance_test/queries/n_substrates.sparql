@@ -1,3 +1,3 @@
 SELECT (COUNT(?substrate) AS ?n_substrates) FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph> WHERE {
-    ?substrate a :Substrate
+    ?substrate a crc:Substrate
 }
