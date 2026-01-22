@@ -7,22 +7,22 @@ SELECT DISTINCT *
 FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 WHERE {
   # Materials libraries
-  ?ML a :MaterialsLibrary.
+  ?ML a crc:MaterialsLibrary.
 
   # No gradient samples
-  #?NoGradientSample a :NoGradientSample. # Subclass of :MaterialsLibrary
+  #?NoGradientSample a crc:NoGradientSample. # Subclass of :MaterialsLibrary
 
   # Stress chips
-  #?StressChip a :StressChip. # Subclass of :MaterialsLibrary
+  #?StressChip a crc:StressChip. # Subclass of :MaterialsLibrary
 
   # Samples
-  #?Sample a :Sample. # Subclass of :MaterialsLibrary
+  #?Sample a crc:Sample. # Subclass of :MaterialsLibrary
 
   # Stripe samples
-  #?StripeSample a :StripeSample. # Subclass of :Sample
+  #?StripeSample a crc:StripeSample. # Subclass of :Sample
 
   # Computational samples
-  #?ComputationalSample a :ComputationalSample.
+  #?ComputationalSample a crc:ComputationalSample.
 
   # Since the classes form a hierarchy, we can also ask for multiple of them at once
   #
@@ -30,12 +30,12 @@ WHERE {
   #
   # a/rdfs:subClassOf* is a shorthand for "anything that is either
   # a Materials Library *or* a *subclass* of Materials Library, forming a chain (Samples...)"
-  #?MLOrSample a/rdfs:subClassOf* :MaterialsLibrary.
+  #?MLOrSample a/rdfs:subClassOf* crc:MaterialsLibrary.
 
   # Samples and Stripe samples
   #?Sample a/rdfs:subClassOf* :Sample.
 
   # An arbitrary combination of any of them (e.g., stress chips and stripe samples)
   #?MLOrSample a ?class.
-  #FILTER (?class IN (:StressChip, :StripeSample))
+  #FILTER (?class IN (crc:StressChip, crc:StripeSample))
 }

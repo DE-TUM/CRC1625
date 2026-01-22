@@ -9,33 +9,33 @@ SELECT ?ML ?measurement ?measurement_area_position ?value
 FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 WHERE {
   # Narrow it down to only Material Libraries
-  ?ML a :MaterialsLibrary.
+  ?ML a crc:MaterialsLibrary.
   # We can also narrow it down to Samples, or both
-  # ?ML a :Sample.
+  # ?ML a crc:Sample.
   # a/rdfs:subClassOf* is a shorthand for "anything that is either
   # a Materials Library *or* a *subclass* of Materials Library (Samples...)"
-  # ?ML a/rdfs:subClassOf* :MaterialsLibrary.
+  # ?ML a/rdfs:subClassOf* crc:MaterialsLibrary.
 
   # It is composed of measurement areas, which have compositions as their characteristics
   # and the position number as their value
-  ?ML pmdco:composedOf ?measurement_area.
-  ?measurement_area pmdco:characteristic ?composition.
-  ?measurement_area pmdco:value ?measurement_area_position.
+  ?ML crc:composedOf ?measurement_area.
+  ?measurement_area crc:characteristic ?composition.
+  ?measurement_area crc:value ?measurement_area_position.
 
   # There is a measurement that also has as its characteristic the composition as a whole,
   # and likewise the individual EDX compositions for each element
-  ?measurement pmdco:characteristic ?composition.
-  ?composition pmdco:characteristic ?edx_composition.
+  ?measurement crc:characteristic ?composition.
+  ?composition crc:characteristic ?edx_composition.
 
   # Get the EDX compositon that corresponds to gold by accessing its element
-  ?edx_composition pmdco:relatesToElement ?chebi_element.
+  ?edx_composition crc:element ?chebi_element.
   ?chebi_element chebi:formula "Au".
 
   # And get its value and filter for those higher than 50%
-  ?edx_composition pmdco:value ?value.
+  ?edx_composition crc:value ?value.
   FILTER(?value > 50.0)
 
   # Narrow down the classes
-  ?measurement_area a :MeasurementArea.
-  ?composition a :VolumeComposition.
+  ?measurement_area a crc:MeasurementArea.
+  ?composition a crc:VolumeComposition.
 }

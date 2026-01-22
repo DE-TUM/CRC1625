@@ -8,15 +8,15 @@ WHERE {
   ?user a pmdco:Operator.
 
   # Name, given name and surname
-  ?user foaf:name ?name.
+  ?user crc:name ?name.
 
   # Some users don't have given names and surnames in the RDMS
   # The OPTIONAL pattern avoids excluding those users if they don't have them
   OPTIONAL {
-    ?user foaf:givenName ?givenName.
-    ?user foaf:surname ?surname.
+    ?user crc:givenName ?givenName.
+    ?user crc:surname ?surname.
   }
 
   # The project they belong to (A06, B01...)
-  ?user :memberOfProject ?project.
+  ?user crc:memberOfProject ?project.
 }

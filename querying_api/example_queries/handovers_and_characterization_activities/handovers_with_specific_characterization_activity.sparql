@@ -34,18 +34,18 @@ WHERE {
   # Note that, if we don't want to query any information whatsoever from the handover chain,
   # we can express the query bottom-to-top (ML/Samples that have a measurement part of an XRD activity)
   #
-  ?workflow_instance pmdco:input ?MLOrSample.
-  ?workflow_instance pmdco:subordinateProcess ?first_handover_group.
+  ?workflow_instance crc:input ?MLOrSample.
+  ?workflow_instance crc:substep ?first_handover_group.
   # With this pattern, we get *all* handover groups, including the first one
-  ?first_handover_group pmdco:nextProcess* ?handover_group.
+  ?first_handover_group crc:nextStep* ?handover_group.
 
   ?handover_group pmdco:subordinateProcess ?first_handover_of_group.
   # The same way, to get *all* handovers of the group
-  ?first_handover_of_group pmdco:nextProcess* ?handover_of_group.
+  ?first_handover_of_group crc:nextStep* ?handover_of_group.
 
   # And all activities
-  ?handover_of_group pmdco:subordinateProcess ?activity.
+  ?handover_of_group crc:subset ?activity.
 
   # And we want to get those ML/Samples that contain an XRD activity
-  ?activity a :XRDProcess.
+  ?activity a crc:XRDProcess.
 }

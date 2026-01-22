@@ -8,10 +8,10 @@ WHERE {
   ?measurement a pmdco:ValueObject.
 
   # Get their textual label and comment
-  ?measurement rdfs:label ?measurement_label.
+  ?measurement crc:objectName ?measurement_label.
 
   # Get its author
-  ?measurement prov:wasAttributedTo ?user.
+  ?measurement crc:creator ?user.
   # and their name
-  ?user foaf:name ?user_name.
+  ?user crc:name ?user_name.
 }

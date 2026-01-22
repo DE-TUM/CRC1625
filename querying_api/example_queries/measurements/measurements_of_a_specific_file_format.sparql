@@ -13,9 +13,9 @@ WHERE {
   # FILTER (?class IN (measurement_type:EDX_CSV, measurement_type:Photo))
 
   # Get its textual label/name and comment
-  ?measurement rdfs:label ?measurementLabel.
+  ?measurement crc:objectName ?measurementLabel.
   # Its author
-  ?measurement prov:wasAttributedTo ?user.
+  ?measurement crc:creator ?user.
   # And their name
-  ?user foaf:name ?user_name.
+  ?user crc:name ?user_name.
 }

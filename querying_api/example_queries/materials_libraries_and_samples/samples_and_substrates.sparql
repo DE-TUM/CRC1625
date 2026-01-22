@@ -7,13 +7,13 @@ WHERE
   # a Materials Library *or* a *subclass* of Materials Library (Samples...)"
   ?MLOrSample a/rdfs:subClassOf* :MaterialsLibrary.
 
-  ?MLOrSample :internalID ?internalID.
-  ?MLOrSample :creationDate ?creationDate.
-  ?MLOrSample prov:wasAttributedTo ?user.
+  ?MLOrSample crc:internalID ?internalID.
+  ?MLOrSample crc:creationDate ?creationDate.
+  ?MLOrSample crc:creator ?user.
 
   # The substrate is simply one of their characteristics, with a specific
   # type for them, just like in the RDMS
-  ?MLOrSample pmdco:characteristic ?substrate.
-  ?substrate a :Substrate.
-  ?substrate rdfs:label ?substrate_label.
+  ?MLOrSample crc:characteristic ?substrate.
+  ?substrate a crc:Substrate.
+  ?substrate crc:objectName ?substrate_label.
 }

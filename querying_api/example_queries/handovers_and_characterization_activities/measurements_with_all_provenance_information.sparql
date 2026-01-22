@@ -26,22 +26,22 @@ WHERE {
     # Note that, if we don't want to query any information whatsoever from the handover chain,
     # we can express the query bottom-to-top (ML/Samples that have a measurement part of an XRD activity)
     #
-    ?workflow_instance pmdco:input ?sample.
-    ?workflow_instance pmdco:subordinateProcess ?first_handover_group.
+    ?workflow_instance crc:input ?sample.
+    ?workflow_instance crc:substep ?first_handover_group.
     # With this pattern, we get *all* handover groups, including the first one
-    ?first_handover_group pmdco:nextProcess* ?handover_group.
+    ?first_handover_group crc:nextStep* ?handover_group.
 
 
-    ?handover_group pmdco:subordinateProcess ?first_handover_of_group.
+    ?handover_group crc:substep ?first_handover_of_group.
     # The same way, to get *all* handovers of the group
-    ?first_handover_of_group pmdco:nextProcess* ?handover_of_group.
+    ?first_handover_of_group crc:nextStep* ?handover_of_group.
 
     # We now go until the bottom/root of the hierarchy, until reaching the measurement itself
-    ?handover_of_group pmdco:subordinateProcess ?activity.
-    ?activity pmdco:output ?measurement.
+    ?handover_of_group crc:substep ?activity.
+    ?activity crc:output ?measurement.
 
     # And we get the ML/Sample to whicht the measurement corresponds
-    ?MLOrSample pmdco:characteristic ?measurement.
+    ?MLOrSample crc:characteristic ?measurement.
 
     # And narrow down the types
     # pmdco:ValueObject is the high-level type for any kind of measurement in the

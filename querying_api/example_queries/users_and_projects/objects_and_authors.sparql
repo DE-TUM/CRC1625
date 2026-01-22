@@ -5,18 +5,18 @@ FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 WHERE {
   # a/rdfs:subClassOf* is a shorthand for "anything that is either
   # a Materials Library *or* a *subclass* of Materials Library (Samples...)"
-  ?ML a/rdfs:subClassOf* :MaterialsLibrary.
+  ?ML a/rdfs:subClassOf* crc:MaterialsLibrary.
 
   # Get their label/name and comment
-  ?ML rdfs:label ?ML_label.
+  ?ML crc:objectName ?ML_label.
 
-  # Some objects don't have a comment in the RDMS
+  # Some objects don't have a comment/description in the RDMS
   # The OPTIONAL pattern avoids excluding those MLs/Samples if they don't have them
   OPTIONAL {
-    ?ML rdfs:comment ?ML_comment.
+    ?ML crc:objectDescription ?ML_comment.
   }
 
   # Get the user who created it and their name
-  ?ML prov:wasAttributedTo ?user .
-  ?user foaf:name ?name.
+  ?ML crc:creator ?user .
+  ?user crc:name ?name.
 }
