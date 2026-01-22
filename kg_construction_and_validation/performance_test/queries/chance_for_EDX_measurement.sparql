@@ -17,7 +17,7 @@ FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
       		?sample a crc:MaterialsLibrary.
       		?sample crc:characteristic ?measurement.
             ?measurement a ?measurement_type.
-      		?measurement_type rdfs:subClassOf pmdco:Measurement.
+      		?measurement_type rdfs:subClassOf crc:Measurement.
 
             MINUS { ?measurement a crc:VolumeComposition. } # Exclude the 342 EDX compositions
         }

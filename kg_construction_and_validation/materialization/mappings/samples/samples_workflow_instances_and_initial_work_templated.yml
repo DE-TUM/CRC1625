@@ -9,7 +9,7 @@ mappings:
     sources: sql_source
     s: object:$(SampleId)
     po:
-      - [a, pmdco:EngineeredMaterial~iri]
+      - [a, crc:EngineeredMaterial~iri]
       - [crc:internalID, $(SampleId), xsd:integer]
       - [crc:externalID, $(externalID), xsd:integer]
       - [crc:creator, user:$(createdBy)~iri]

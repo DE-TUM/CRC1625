@@ -10,28 +10,28 @@
 @prefix workflow_instance: <https://crc1625.mdi.ruhr-uni-bochum.de/workflow_instance/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-user:1 a pmdco:Operator ;
+user:1 a crc:User ;
     crc:givenName "User" ;
     crc:name "UserA01" ;
     crc:surname "A01" ;
     crc:internalID 1 ;
     crc:memberOfProject project:A01 .
 
-user:2 a pmdco:Operator ;
+user:2 a crc:User ;
     crc:givenName "User" ;
     crc:name "UserB01" ;
     crc:surname "B01" ;
     crc:internalID 2 ;
     crc:memberOfProject project:B01 .
 
-user:3 a pmdco:Operator ;
+user:3 a crc:User ;
     crc:givenName "User" ;
     crc:name "UserC01" ;
     crc:surname "C01" ;
     crc:internalID 3 ;
     crc:memberOfProject project:C01 .
 
-user:7 a pmdco:Operator ;
+user:7 a crc:User ;
     crc:givenName "User" ;
     crc:name "UserA01_B01" ;
     crc:surname "A01_B01" ;
@@ -50,7 +50,7 @@ project:C01 a crc:Project ;
 project:A01_B01 a crc:Project ;
     crc:objectName "A01_B01" .
 
-object:1 a pmdco:EngineeredMaterial ;
+object:1 a crc:EngineeredMaterial ;
     crc:objectName "Sample1" ;
     crc:objectDescription "Sample1" ;
     crc:creator user:1 ;

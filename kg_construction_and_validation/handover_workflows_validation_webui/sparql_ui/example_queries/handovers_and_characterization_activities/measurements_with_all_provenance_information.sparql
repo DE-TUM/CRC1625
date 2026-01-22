@@ -44,9 +44,9 @@ WHERE {
     ?MLOrSample crc:characteristic ?measurement.
 
     # And narrow down the types
-    # pmdco:ValueObject is the high-level type for any kind of measurement in the
+    # crc:UploadedFile is the high-level type for any kind of measurement in the
     # RMDS (i.e., an object in the RDMS that is linked to a ML/Sample that is not
     # another ML/sample, special object such as a handover, etc.). It also does not
     # include
-    ?measurement a pmdco:ValueObject.
+    ?measurement a crc:UploadedFile.
 }

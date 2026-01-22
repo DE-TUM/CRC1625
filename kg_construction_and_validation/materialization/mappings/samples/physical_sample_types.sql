@@ -13,5 +13,5 @@ SELECT vro.vroObjectInfo.ObjectId,
 FROM vro.vroObjectInfo
 LEFT JOIN vro.vroPropertyInt ON vro.vroObjectInfo.ObjectId = vro.vroPropertyInt.ObjectId
 WHERE vro.vroObjectInfo.TypeId = 6 /* Sample */
-AND vro.vroPropertyInt.Value IN (1, 2, 3, 4 , 5) /* The rest will be pmdco:EngineeredMaterial, via samples_workflow_instances_and_initial_work_templated.yml */
+AND vro.vroPropertyInt.Value IN (1, 2, 3, 4 , 5) /* The rest will be crc:EngineeredMaterial, via samples_workflow_instances_and_initial_work_templated.yml */
 AND vro.vroPropertyInt.PropertyName = 'Type'

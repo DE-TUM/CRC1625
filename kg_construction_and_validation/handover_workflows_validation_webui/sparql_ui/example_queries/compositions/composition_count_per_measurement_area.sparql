@@ -17,7 +17,7 @@ WHERE {
   ?ML a crc:MaterialsLibrary.
   # We can also narrow it down to Samples, or both
   # ?ML a crc:Sample.
-  # ?ML a/rdfs:subClassOf* pmdco:EngineeredMaterial.
+  # ?ML a/rdfs:subClassOf* crc:EngineeredMaterial.
 
   # It is composed of measurement areas, which have compositions as their characteristics
   # and the position number as their value

@@ -21,5 +21,5 @@ mappings:
     sources: sql_source
     s: bulk_composition:request_for_synthesis_$(ObjectId)_$(ElementName)
     po:
-      - [a, pmdco:ChemicalObject~iri]
+      - [a, crc:ChemicalObject~iri]
       - [crc:value, $(ValuePercent), xsd:double]

@@ -1,7 +1,7 @@
 # Ensures that MLs 1 and 2 have 342 unique MAs, 2 unique compositions and 2 unique composition elements, each with sound metadata.
 SELECT ?ML ?ma ?edx_composition (COUNT(?composition_element) AS ?comp_elements) WHERE {
     GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
-        ?ML a pmdco:EngineeredMaterial.
+        ?ML a crc:EngineeredMaterial.
         ?ma a crc:MeasurementArea.
 
         ?ML crc:composedOf ?ma.
@@ -11,7 +11,7 @@ SELECT ?ML ?ma ?edx_composition (COUNT(?composition_element) AS ?comp_elements) 
 
         FILTER NOT EXISTS { # The compositions should only be attached to one measurement
             ?other_ma a crc:MeasurementArea.
-            ?other_ML a pmdco:EngineeredMaterial.
+            ?other_ML a crc:EngineeredMaterial.
 
             ?other_ML crc:composedOf ?ma.
             FILTER(?other_ML != ?ML)
@@ -24,12 +24,12 @@ SELECT ?ML ?ma ?edx_composition (COUNT(?composition_element) AS ?comp_elements) 
             FILTER(?other_ma != ?ma)
         }
 
-        ?edx_measurement a/rdfs:subClassOf pmdco:ValueObject.
+        ?edx_measurement a/rdfs:subClassOf crc:UploadedFile.
         ?edx_measurement crc:characteristic ?edx_composition.
         ?edx_composition crc:characteristic ?composition_element.
 
         FILTER NOT EXISTS { # The compositions should only be attached to one measurement
-            ?other_measurement a/rdfs:subClassOf pmdco:ValueObject.
+            ?other_measurement a/rdfs:subClassOf crc:UploadedFile.
             ?other_measurement crc:characteristic ?edx_composition.
 
             FILTER(?other_measurement != ?edx_measurement)

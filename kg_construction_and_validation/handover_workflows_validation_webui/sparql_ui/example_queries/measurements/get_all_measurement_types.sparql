@@ -7,6 +7,6 @@
 SELECT ?measurement_type ?type_id_in_RDMS
 FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 WHERE {
-  ?measurement_type rdfs:subClassOf pmdco:Measurement.
+  ?measurement_type rdfs:subClassOf crc:Measurement.
   ?measurement_type crc:internalID ?type_id_in_RDMS.
 }

@@ -2,7 +2,7 @@ SELECT (COUNT(*) AS ?benchmark_count)
 FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 WHERE {
     SELECT ?user ?name ?givenName ?surname ?project WHERE {
-      ?user a pmdco:Operator. # Class that all users belong to, we can exclude it as there are no other entities with crc:name, etc.
+      ?user a crc:User. # Class that all users belong to, we can exclude it as there are no other entities with crc:name, etc.
 
       # Name, given name and surname
       ?user crc:name ?name.

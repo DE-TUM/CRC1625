@@ -9,7 +9,7 @@ WHERE {
   # A user and its name
   # Class that all persons belong to, note that we can exclude it in this query as there
   # are no other entities with crc:name, etc.
-  ?user a pmdco:Operator.
+  ?user a crc:User.
   # Its name
   ?user crc:name ?name.
 

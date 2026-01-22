@@ -20,7 +20,7 @@ WHERE {
       ?edx_composition crc:value ?value.
       FILTER(?value > 50.0)
 
-      ?ML a/rdfs:subClassOf* pmdco:EngineeredMaterial. # ML or sample
+      ?ML a/rdfs:subClassOf* crc:EngineeredMaterial. # ML or sample
       ?measurement_area a crc:MeasurementArea.
       ?composition a crc:VolumeComposition.
     }

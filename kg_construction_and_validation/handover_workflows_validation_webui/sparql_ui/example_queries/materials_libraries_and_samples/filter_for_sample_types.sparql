@@ -10,16 +10,16 @@ WHERE {
   ?ML a crc:MaterialsLibrary.
 
   # No gradient samples
-  #?NoGradientSample a crc:NoGradientSample. # Subclass of :MaterialsLibrary
+  #?NoGradientSample a crc:NoGradientSample. # Subclass of crc:MaterialsLibrary
 
   # Stress chips
-  #?StressChip a crc:StressChip. # Subclass of :MaterialsLibrary
+  #?StressChip a crc:StressChip. # Subclass of crc:MaterialsLibrary
 
   # Samples
-  #?Sample a crc:Sample. # Subclass of :MaterialsLibrary
+  #?Sample a crc:Sample. # Subclass of crc:MaterialsLibrary
 
   # Stripe samples
-  #?StripeSample a crc:StripeSample. # Subclass of :Sample
+  #?StripeSample a crc:StripeSample. # Subclass of crc:Sample
 
   # Computational samples
   #?ComputationalSample a crc:ComputationalSample.
@@ -33,7 +33,7 @@ WHERE {
   #?MLOrSample a/rdfs:subClassOf* crc:MaterialsLibrary.
 
   # Samples and Stripe samples
-  #?Sample a/rdfs:subClassOf* :Sample.
+  #?Sample a/rdfs:subClassOf* crc:Sample.
 
   # An arbitrary combination of any of them (e.g., MLs and no gradient samples)
   #?MLOrSample a ?class.

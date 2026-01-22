@@ -14,6 +14,6 @@ WHERE {
 
         ?sample crc:characteristic ?measurement.
 
-        ?measurement a pmdco:ValueObject.
+        ?measurement a crc:UploadedFile.
     }
 }

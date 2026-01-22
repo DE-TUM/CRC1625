@@ -8,7 +8,7 @@ mappings:
     sources: sql_source
     s: measurement:$(MeasurementId)
     po:
-      - [a, pmdco:ValueObject~iri]
+      - [a, crc:UploadedFile~iri]
       - [a, measurement_type:$(TypeId)~iri]
       - [crc:internalID, $(MeasurementId), xsd:integer]
       - [crc:creator, user:$(createdBy)~iri]
@@ -21,7 +21,7 @@ mappings:
     sources: sql_source
     s: measurement_type:$(TypeId)
     po:
-      - [rdfs:subClassOf, pmdco:ValueObject~iri]
-      - [rdfs:subClassOf, pmdco:Measurement~iri]
+      - [rdfs:subClassOf, crc:UploadedFile~iri] # eq. -> subclass of ValueObject
+      - [rdfs:subClassOf, crc:Measurement~iri] # eq. -> subclass of ValueScope
       - [crc:objectName, $(TypeName), xsd:string]
       - [crc:internalID, $(TypeId), xsd:integer]

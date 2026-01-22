@@ -30,7 +30,7 @@ mappings:
     sources: sql_source
     s: EDX_composition:$(CompositionId)_in_MA_$(MeasurementArea)_element_$(ElementName)
     po:
-      - [a, pmdco:ChemicalObject~iri]
+      - [a, crc:ChemicalObject~iri]
       - [crc:temporaryDatatypeProperty, $(ElementName), xsd:string]
       - [crc:value, $(ValuePercent), xsd:double]
 

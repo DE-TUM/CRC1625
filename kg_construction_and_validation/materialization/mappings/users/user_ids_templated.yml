@@ -9,5 +9,5 @@ mappings:
     sources: sql_source
     s: user:$(Id)
     po:
-      - [a, pmdco:Operator~iri]
+      - [a, crc:User~iri]
       - [crc:internalID, $(Id), xsd:integer]
