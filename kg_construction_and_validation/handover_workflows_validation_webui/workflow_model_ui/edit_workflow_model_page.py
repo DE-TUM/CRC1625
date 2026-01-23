@@ -46,11 +46,11 @@ async def handle_return_button():
                     async def save_and_exit_and_close():
                         await overwrite_workflow_model(State().current_workflow_model, State().user_id)
                         return_dialog.close()
-                        ui.navigate.to('/')
+                        ui.navigate.to('/workflows')
 
                     async def navigate_without_saving():
                         return_dialog.close()
-                        ui.navigate.to('/')
+                        ui.navigate.to('/workflows')
 
                     ui.button('Save and exit', on_click=save_and_exit_and_close).props("color='green'")
                     ui.button('Exit without saving', on_click=navigate_without_saving).props("color='red'")
@@ -59,7 +59,7 @@ async def handle_return_button():
         # 4. Open the dialog immediately after definition
         return_dialog.open()
     else:
-        ui.navigate.to('/')
+        ui.navigate.to('/workflows')
 
 
 def handle_undo_button():
@@ -98,7 +98,7 @@ async def handle_save_button():
     ui.notify("The changes have been saved", type='positive')
 
 
-@ui.page('/edit_workflow_model/{workflow_model_name}/{user_id}')
+@ui.page('/workflows/edit_workflow_model/{workflow_model_name}/{user_id}')
 async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
     State().user_id = user_id  # TODO
 

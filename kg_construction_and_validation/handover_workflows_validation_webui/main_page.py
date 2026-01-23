@@ -8,11 +8,11 @@ from handover_workflows_validation_webui.state import State
 
 def edit_handover_workflow_instance_button_click():
     ui.navigate.to(
-        f'/edit_workflow_instance/{State().current_workflow_model.workflow_model_name}/{State().current_workflow_instance.workflow_instance_name}/{State().user_id}')
+        f'/workflows/edit_workflow_instance/{State().current_workflow_model.workflow_model_name}/{State().current_workflow_instance.workflow_instance_name}/{State().user_id}')
 
 
 def edit_handover_workflow_model_button_click():
-    ui.navigate.to(f'/edit_workflow_model/{State().current_workflow_model.workflow_model_name}/{State().user_id}')
+    ui.navigate.to(f'/workflows/edit_workflow_model/{State().current_workflow_model.workflow_model_name}/{State().user_id}')
 
 
 def handle_workflow_instance_table_click(workflow_instance: WorkflowInstance, right_drawer):
@@ -137,8 +137,8 @@ async def handle_workflow_models_table_click(workflow_model_name: str, user_id: 
                     await check_and_update_icon(validation_icon_column, State().current_workflow_model, workflow_instance)
 
 
-@ui.page('/')
-async def main_page():
+@ui.page('/workflows')
+async def workflows_page():
     main_content = ui.column().classes('w-full')
 
     with ui.header(elevated=True).style('background-color: #17365c').classes('items-center justify-between p-2 h-15'):
@@ -157,3 +157,26 @@ async def main_page():
 
     with ui.page_scroller(position='bottom-right', x_offset=20, y_offset=20):
         ui.button('Scroll to Top')
+
+
+@ui.page('/')
+async def landing_page():
+    with ui.header(elevated=True).style('background-color: #17365c').classes('items-center justify-between p-2 h-15'):
+        ui.label('Handover workflows validation prototype UI').classes('text-2xl font-bold')
+
+    with ui.footer().style('background-color: #17365c').classes('items-center justify-between p-2 h-15'):
+        ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-xl font-medium')
+        ui.image('/assets/crc_logo_white_letters.png').classes('w-15')
+
+    with ui.row().classes('w-full justify-center gap-8 m-8'):
+        with ui.card().tight().classes('w-128 h-100 cursor-pointer hover:shadow-lg') \
+                .on('click', lambda: ui.navigate.to('/workflows')):
+            ui.image('assets/workflows_validation_header.png').props('fit=scale-down').classes('h-90')
+            with ui.column().classes('p-4 w-full').style('background-color: #d7e3f4'):
+                ui.label('Access the workflows dashboard').classes('text-h6')
+
+        with ui.card().tight().classes('w-128 h-100 cursor-pointer hover:shadow-lg') \
+                .on('click', lambda: ui.navigate.to('/sparql')):
+            ui.image('assets/sparql_endpoint_header.png').props('fit=scale-down').classes('h-90')
+            with ui.column().classes('p-4 w-full').style('background-color: #d7e3f4'):
+                ui.label('Access the SPARQL querying interface').classes('text-h6')
