@@ -1,4 +1,4 @@
-@prefix : <https://crc1625.mdi.ruhr-uni-bochum.de#> .
+@prefix : <https://crc1625.mdi.ruhr-uni-bochum.de/> .
 @prefix crc: <https://crc1625.mdi.ruhr-uni-bochum.de/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -11,7 +11,7 @@
 @prefix chebi: <http://purl.obolibrary.org/obo/chebi/> .
 @prefix pmdco: <https://w3id.org/pmd/co/> .
 @prefix prov-o: <http://www.w3.org/ns/prov-o#> .
-@base <https://crc1625.mdi.ruhr-uni-bochum.de#> .
+@base <https://crc1625.mdi.ruhr-uni-bochum.de/> .
 
 <https://crc1625.mdi.ruhr-uni-bochum.de> rdf:type owl:Ontology ;
                                           owl:imports <https://w3id.org/pmd/co/2.0.8> ;
@@ -352,8 +352,8 @@ crc:y_position rdf:type owl:DatatypeProperty ;
 #    Classes
 #################################################################
 
-###  https://crc1625.mdi.ruhr-uni-bochum.de#CharacterizationActivity
-:CharacterizationActivity rdf:type owl:Class ;
+###  https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity
+crc:CharacterizationActivity rdf:type owl:Class ;
                           rdfs:subClassOf pmdco:Process ;
                           rdfs:comment """A process that represents to the act of applying a measurement technique on an object in the CRC. Further specified by its subclasses.
 
@@ -365,7 +365,7 @@ An entity of this class or any of its subclasses indicates the nature of its mea
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/APTProcess
 crc:APTProcess rdf:type owl:Class ;
-               rdfs:subClassOf :CharacterizationActivity ,
+               rdfs:subClassOf crc:CharacterizationActivity ,
                                crc:UnidentifiableProcess ,
                                pmdco:AnalysingProcess ;
                rdfs:comment "A process where APT measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." ;
@@ -374,13 +374,13 @@ crc:APTProcess rdf:type owl:Class ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/AnnealingProcess
 crc:AnnealingProcess rdf:type owl:Class ;
-                     rdfs:subClassOf :CharacterizationActivity ,
+                     rdfs:subClassOf crc:CharacterizationActivity ,
                                      pmdco:AnalysingProcess .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/BandgapProcess
 crc:BandgapProcess rdf:type owl:Class ;
-                   rdfs:subClassOf :CharacterizationActivity ,
+                   rdfs:subClassOf crc:CharacterizationActivity ,
                                    crc:UnidentifiableProcess ,
                                    pmdco:AnalysingProcess ;
                    rdfs:comment "A process where Bandgap measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
@@ -395,7 +395,7 @@ crc:BulkComposition rdf:type owl:Class ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance
 crc:CharacterizationActivityInstance rdf:type owl:Class ;
-                                     rdfs:subClassOf :CharacterizationActivity ,
+                                     rdfs:subClassOf crc:CharacterizationActivity ,
                                                      crc:ProcessInstance ;
                                      rdfs:comment """A process that has as output a series of measurements of the same nature (e.g. EDX, TEM, FIM...) within the same handover of a sample in time, that results in one or more files being uploaded to the RDMS.
 
@@ -405,7 +405,7 @@ This is an additional abstraction that acts as a subordinate process of a handov
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel
 crc:CharacterizationActivityModel rdf:type owl:Class ;
-                                  rdfs:subClassOf :CharacterizationActivity ,
+                                  rdfs:subClassOf crc:CharacterizationActivity ,
                                                   crc:ProcessModel ;
                                   rdfs:comment """A process indicating that a Handover workflow model step desires a set of measurements of the same time.
 
@@ -425,7 +425,7 @@ crc:ComputationalSample rdf:type owl:Class ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess
 crc:EDXMicroscopyProcess rdf:type owl:Class ;
-                         rdfs:subClassOf :CharacterizationActivity ,
+                         rdfs:subClassOf crc:CharacterizationActivity ,
                                          crc:UnidentifiableProcess ,
                                          pmdco:MicroscopyProcess ;
                          rdfs:comment "A process where EDX measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." ;
@@ -439,7 +439,7 @@ crc:EngineeredMaterial rdf:type owl:Class ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/FIMProcess
 crc:FIMProcess rdf:type owl:Class ;
-               rdfs:subClassOf :CharacterizationActivity ,
+               rdfs:subClassOf crc:CharacterizationActivity ,
                                crc:UnidentifiableProcess ,
                                pmdco:AnalysingProcess ;
                rdfs:comment "A process where FIM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
@@ -532,7 +532,7 @@ crc:IdentifiableProcess rdf:type owl:Class ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/LEISProcess
 crc:LEISProcess rdf:type owl:Class ;
-                rdfs:subClassOf :CharacterizationActivity ,
+                rdfs:subClassOf crc:CharacterizationActivity ,
                                 crc:UnidentifiableProcess ,
                                 pmdco:AnalysingProcess ;
                 rdfs:comment "A process where LEIS measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
@@ -570,14 +570,14 @@ crc:NoGradientSample rdf:type owl:Class ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/PSMProcess
 crc:PSMProcess rdf:type owl:Class ;
-               rdfs:subClassOf :CharacterizationActivity ,
+               rdfs:subClassOf crc:CharacterizationActivity ,
                                crc:UnidentifiableProcess ,
                                pmdco:AnalysingProcess .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/PhotoProcess
 crc:PhotoProcess rdf:type owl:Class ;
-                 rdfs:subClassOf :CharacterizationActivity ,
+                 rdfs:subClassOf crc:CharacterizationActivity ,
                                  crc:UnidentifiableProcess ,
                                  pmdco:AnalysingProcess .
 
@@ -610,7 +610,7 @@ crc:Publication rdf:type owl:Class ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/ReportProcess
 crc:ReportProcess rdf:type owl:Class ;
-                  rdfs:subClassOf :CharacterizationActivity ,
+                  rdfs:subClassOf crc:CharacterizationActivity ,
                                   crc:UnidentifiableProcess .
 
 
@@ -625,7 +625,7 @@ Note that other parameters will be modelled in the future."""@en ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/ResistanceProcess
 crc:ResistanceProcess rdf:type owl:Class ;
-                      rdfs:subClassOf :CharacterizationActivity ,
+                      rdfs:subClassOf crc:CharacterizationActivity ,
                                       crc:UnidentifiableProcess ,
                                       pmdco:AnalysingProcess ;
                       rdfs:comment "A process where Resistance measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
@@ -633,7 +633,7 @@ crc:ResistanceProcess rdf:type owl:Class ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/SDCProcess
 crc:SDCProcess rdf:type owl:Class ;
-               rdfs:subClassOf :CharacterizationActivity ,
+               rdfs:subClassOf crc:CharacterizationActivity ,
                                crc:UnidentifiableProcess ,
                                pmdco:AnalysingProcess ;
                rdfs:comment "A process where SDC measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
@@ -641,7 +641,7 @@ crc:SDCProcess rdf:type owl:Class ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess
 crc:SECCMProcess rdf:type owl:Class ;
-                 rdfs:subClassOf :CharacterizationActivity ,
+                 rdfs:subClassOf crc:CharacterizationActivity ,
                                  crc:UnidentifiableProcess ,
                                  pmdco:AnalysingProcess ;
                  rdfs:comment "A process where SECCM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
@@ -649,7 +649,7 @@ crc:SECCMProcess rdf:type owl:Class ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess
 crc:SEMProcess rdf:type owl:Class ;
-               rdfs:subClassOf :CharacterizationActivity ,
+               rdfs:subClassOf crc:CharacterizationActivity ,
                                crc:UnidentifiableProcess ,
                                pmdco:AnalysingProcess ;
                rdfs:comment "A process where SEM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
@@ -694,7 +694,7 @@ crc:SynthesisReport rdf:type owl:Class ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/TEMProcess
 crc:TEMProcess rdf:type owl:Class ;
-               rdfs:subClassOf :CharacterizationActivity ,
+               rdfs:subClassOf crc:CharacterizationActivity ,
                                crc:UnidentifiableProcess ,
                                pmdco:AnalysingProcess ;
                rdfs:comment "A process where TEM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
@@ -702,7 +702,7 @@ crc:TEMProcess rdf:type owl:Class ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/ThicknessProcess
 crc:ThicknessProcess rdf:type owl:Class ;
-                     rdfs:subClassOf :CharacterizationActivity ,
+                     rdfs:subClassOf crc:CharacterizationActivity ,
                                      crc:UnidentifiableProcess ,
                                      pmdco:AnalysingProcess ;
                      rdfs:comment "A process where Thickness measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
@@ -740,7 +740,7 @@ crc:VolumeComposition rdf:type owl:Class ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess
 crc:XPSProcess rdf:type owl:Class ;
-               rdfs:subClassOf :CharacterizationActivity ,
+               rdfs:subClassOf crc:CharacterizationActivity ,
                                crc:UnidentifiableProcess ,
                                pmdco:AnalysingProcess ;
                rdfs:comment "A process where XPS measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
@@ -748,7 +748,7 @@ crc:XPSProcess rdf:type owl:Class ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/XRDProcess
 crc:XRDProcess rdf:type owl:Class ;
-               rdfs:subClassOf :CharacterizationActivity ,
+               rdfs:subClassOf crc:CharacterizationActivity ,
                                crc:UnidentifiableProcess ,
                                pmdco:AnalysingProcess ;
                rdfs:comment "A process where XRD measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
