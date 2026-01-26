@@ -194,49 +194,53 @@ async def main_page():
 
     ui.page_title('CRC 1625 SPARQL Endpoint')
 
-    with ui.dialog().props('full-width full-height') as diagrams_dialog, ui.card().props('full-width full-height'):
-        diagram_selector_crc_prefixes = ui.button("Diagrams with CRC 1625 ontology prefixes (recommended for CRC 1625 users)").props('outline color=primary size=sm')
-        diagram_selector_pmdco_prefixes = ui.button("Diagrams with PMDco ontology prefixes (recommended for external users)").props('outline color=primary size=sm')
+    with ui.left_drawer().style('background-color: #d7e3f4'):
+        ui.label('Documentation').classes('text-xl font-bold')
 
-        pdf_column = ui.column().classes('w-full h-full')
-        def set_diagram(path):
-            pdf_column.clear()
-            with pdf_column.classes('w-full h-full'):
-                ui.html(
-                    f'<embed src="{path}" type="application/pdf" style="width:100%; height:100%; border:none;">',
-                    sanitize=False
-                ).classes('w-full h-full')
+        ui.label('Ontology diagrams').classes('text-m font-bold')
+        with ui.dialog().props('full-width full-height') as diagrams_dialog, ui.card().props('full-width full-height'):
+            diagram_selector_crc_prefixes = ui.button("Diagrams with CRC 1625 ontology prefixes (recommended for CRC 1625 users)").props('outline color=primary size=sm')
+            diagram_selector_pmdco_prefixes = ui.button("Diagrams with PMDco ontology prefixes (recommended for external users)").props('outline color=primary size=sm')
 
-        set_diagram(default_diagram_path)
+            pdf_column = ui.column().classes('w-full h-full')
+            def set_diagram(path):
+                pdf_column.clear()
+                with pdf_column.classes('w-full h-full'):
+                    ui.html(
+                        f'<embed src="{path}" type="application/pdf" style="width:100%; height:100%; border:none;">',
+                        sanitize=False
+                    ).classes('w-full h-full')
 
-        with diagram_selector_crc_prefixes:
-            with ui.menu():
-                for category, path in diagram_paths_crc_prefix:
-                    ui.menu_item((category[:1].upper() + category[1:]).replace("_", " "), on_click=lambda p=path: set_diagram(p))
+            set_diagram(default_diagram_path)
 
-        with diagram_selector_pmdco_prefixes:
-            with ui.menu():
-                for category, path in diagram_paths_pmdco_prefix:
-                    ui.menu_item((category[:1].upper() + category[1:]).replace("_", " "), on_click=lambda p=path: set_diagram(p))
-
-        ui.button('Close', on_click=diagrams_dialog.close)
-
-    ui.button("Open ontology diagrams").props('outline color=primary size=sm').on_click(diagrams_dialog.open)
-
-    example_queries: list[tuple[str, list[tuple[str, str]]]] = load_example_queries()
-    with ui.row().classes('items-center gap-2 mb-4'):
-        ui.label('Load an example query:')
-        for category, queries in example_queries:
-            with ui.button(category).props('outline color=primary size=sm'):
+            with diagram_selector_crc_prefixes:
                 with ui.menu():
-                    for (query_name, query_content) in queries:
-                        ui.menu_item(query_name, on_click=lambda q=query_content: set_query(q))
+                    for category, path in diagram_paths_crc_prefix:
+                        ui.menu_item((category[:1].upper() + category[1:]).replace("_", " "), on_click=lambda p=path: set_diagram(p))
 
-    with ui.row().classes('items-center gap-2'):
-        ui.label('(Optional) Enable inference:')
-        ui.switch().bind_value(app.storage.user, 'use_inference')
-        with ui.icon('help'):
-            ui.tooltip('Enabling inference allows querying the data using the PMDco ontology')
+            with diagram_selector_pmdco_prefixes:
+                with ui.menu():
+                    for category, path in diagram_paths_pmdco_prefix:
+                        ui.menu_item((category[:1].upper() + category[1:]).replace("_", " "), on_click=lambda p=path: set_diagram(p))
+
+            ui.button('Close', on_click=diagrams_dialog.close)
+        ui.button("Open ontology diagrams").props('color=primary size=sm').on_click(diagrams_dialog.open)
+
+        ui.label('Example queries').classes('text-m font-bold')
+        example_queries: list[tuple[str, list[tuple[str, str]]]] = load_example_queries()
+        for category, queries in example_queries:
+            with ui.row().classes('items-center'):
+                with ui.button(category).props('color=primary size=sm'):
+                    with ui.menu():
+                        for (query_name, query_content) in queries:
+                            ui.menu_item(query_name, on_click=lambda q=query_content: set_query(q))
+
+        ui.label('Querying options').classes('text-xl font-bold')
+        with ui.row().classes('items-center gap-2'):
+            ui.label('(Optional) Enable inference:')
+            ui.switch().bind_value(app.storage.user, 'use_inference')
+            with ui.icon('help'):
+                ui.tooltip('Enabling inference allows querying the data using the PMDco ontology')
 
     with ui.column().classes('w-full h-screen overflow-hidden flex'):
         with ui.row().classes('w-full h-full flex-grow overflow-hidden'):
