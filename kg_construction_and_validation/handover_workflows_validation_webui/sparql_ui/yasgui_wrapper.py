@@ -3,6 +3,7 @@ import urllib.parse
 from pathlib import Path
 
 from nicegui import app, ui
+from nicegui_pdf import PdfViewer
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
@@ -11,7 +12,19 @@ from datastores.rdf import rdf_datastore_client
 LOCAL_SPARQL_PROXY_ROUTE = "/api/sparql"
 
 module_dir = os.path.dirname(__file__)
-DEFAULT_QUERY = open(os.path.join(module_dir, "./default_query.sparql"), 'r').read()
+default_query_path = open(os.path.join(module_dir, "./default_query.sparql"), 'r').read()
+
+# Preload ontology documentation diagrams
+diagram_paths_crc_prefix = []
+diagram_paths_pmdco_prefix = []
+
+for subdir in Path(os.path.join(module_dir, '../assets/diagrams/crc_prefixes/')).iterdir():
+    if subdir.is_dir():
+        category = subdir.name
+        diagram_paths_crc_prefix.append((category, app.add_static_file(local_file=os.path.join(module_dir, f'../assets/diagrams/crc_prefixes/{category}/{category}.pdf'))))
+        diagram_paths_pmdco_prefix.append((category, app.add_static_file(local_file=os.path.join(module_dir, f'../assets/diagrams/pmdco_prefixes/{category}/{category}.pdf'))))
+
+default_diagram_path = app.add_static_file(local_file=os.path.join(module_dir, f'../assets/diagrams/crc_prefixes/measurements_and_compositions/measurements_and_compositions.pdf'))
 
 
 @app.post(LOCAL_SPARQL_PROXY_ROUTE)
@@ -105,7 +118,7 @@ def yasgui_frame_page():
                     showEndpointInput: false,
                 }});
 
-                const defaultQuery = `{DEFAULT_QUERY}`;
+                const defaultQuery = `{default_query_path}`;
                 const tab = yasgui.getTab();
                 tab.setQuery(defaultQuery);
                 
@@ -180,6 +193,35 @@ async def main_page():
         ''')
 
     ui.page_title('CRC 1625 SPARQL Endpoint')
+
+    with ui.dialog().props('full-width full-height') as diagrams_dialog, ui.card().props('full-width full-height'):
+        diagram_selector_crc_prefixes = ui.button("Diagrams with CRC 1625 ontology prefixes (recommended for CRC 1625 users)").props('outline color=primary size=sm')
+        diagram_selector_pmdco_prefixes = ui.button("Diagrams with PMDco ontology prefixes (recommended for external users)").props('outline color=primary size=sm')
+
+        pdf_column = ui.column().classes('w-full h-full')
+        def set_diagram(path):
+            pdf_column.clear()
+            with pdf_column.classes('w-full h-full'):
+                ui.html(
+                    f'<embed src="{path}" type="application/pdf" style="width:100%; height:100%; border:none;">',
+                    sanitize=False
+                ).classes('w-full h-full')
+
+        set_diagram(default_diagram_path)
+
+        with diagram_selector_crc_prefixes:
+            with ui.menu():
+                for category, path in diagram_paths_crc_prefix:
+                    ui.menu_item((category[:1].upper() + category[1:]).replace("_", " "), on_click=lambda p=path: set_diagram(p))
+
+        with diagram_selector_pmdco_prefixes:
+            with ui.menu():
+                for category, path in diagram_paths_pmdco_prefix:
+                    ui.menu_item((category[:1].upper() + category[1:]).replace("_", " "), on_click=lambda p=path: set_diagram(p))
+
+        ui.button('Close', on_click=diagrams_dialog.close)
+
+    ui.button("Open ontology diagrams").props('outline color=primary size=sm').on_click(diagrams_dialog.open)
 
     example_queries: list[tuple[str, list[tuple[str, str]]]] = load_example_queries()
     with ui.row().classes('items-center gap-2 mb-4'):
