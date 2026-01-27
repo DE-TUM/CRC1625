@@ -3,7 +3,6 @@ import urllib.parse
 from pathlib import Path
 
 from nicegui import app, ui
-from nicegui_pdf import PdfViewer
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
