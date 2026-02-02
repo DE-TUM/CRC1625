@@ -6,11 +6,13 @@ FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 {
     {
         SELECT DISTINCT ?sample_w_measurement WHERE {
-            ?sample_w_measurement a crc:MaterialsLibrary.
+            ?sample_w_measurement a/rdfs:subClassOf* crc:MaterialsLibrary.
 
             ?sample_w_measurement crc:characteristic ?measurement.
 
-      		MINUS { ?measurement a crc:VolumeComposition. } # Exclude the 342 EDX compositions
+      		?measurement a ?measurement_type.
+      		?measurement_type rdfs:subClassOf crc:Measurement.
+
       		# It's a sample piece
             ?another_sample crc:composedOf ?sample_w_measurement.
         }
@@ -20,7 +22,7 @@ FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 
     {
         SELECT ?sample WHERE {
-            ?sample a crc:MaterialsLibrary.
+            ?sample a/rdfs:subClassOf* crc:MaterialsLibrary.
 
             # It's a sample piece
             ?another_sample crc:composedOf ?sample.

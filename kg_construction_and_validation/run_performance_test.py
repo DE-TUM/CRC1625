@@ -157,37 +157,34 @@ def get_runs_configuration_from_datastore(sql_db: MSSQLDB, n_repetitions: int=1)
              skip_db_setup=True,
              skip_materialization=False)
 
-    n_users = asyncio.run(get_value_from_query(n_users_query, "n_users", int))
-    n_projects = asyncio.run(get_value_from_query(n_projects_query, "n_projects", int))
-    n_samples = asyncio.run(get_value_from_query(n_samples_query, "n_samples", int))
+    n_users = get_value_from_query(n_users_query, "n_users", int)
+    n_projects = get_value_from_query(n_projects_query, "n_projects", int)
+    n_samples = get_value_from_query(n_samples_query, "n_samples", int)
 
-    n_substrates = asyncio.run(get_value_from_query(n_substrates_query, "n_substrates", int))
-    chance_to_have_idea = asyncio.run(get_value_from_query(chance_to_have_idea_query, "chance_to_have_idea", float))
-    chance_to_have_request_for_synthesis = asyncio.run(get_value_from_query(chance_to_have_request_for_synthesis_query, "chance_to_have_request_for_synthesis", float))
+    n_substrates = get_value_from_query(n_substrates_query, "n_substrates", int)
+    chance_to_have_idea = get_value_from_query(chance_to_have_idea_query, "chance_to_have_idea", float)
+    chance_to_have_request_for_synthesis = get_value_from_query(chance_to_have_request_for_synthesis_query, "chance_to_have_request_for_synthesis", float)
 
-    chance_to_have_piece = asyncio.run(get_value_from_query(chance_to_have_piece_query, "chance_to_have_piece", float))
-    max_piece_depth = math.ceil(asyncio.run(get_value_from_query(max_piece_depth_query, "max_piece_depth", float)))
+    chance_to_have_piece = get_value_from_query(chance_to_have_piece_query, "chance_to_have_piece", float)
+    max_piece_depth = math.ceil(get_value_from_query(max_piece_depth_query, "max_piece_depth", float))
 
-    chance_to_have_handover = asyncio.run(get_value_from_query(chance_to_have_handover_query, "chance_to_have_handover", float))
-    max_handovers = math.ceil(asyncio.run(get_value_from_query(max_handovers_query, "max_handovers", float)))
+    chance_to_have_handover = get_value_from_query(chance_to_have_handover_query, "chance_to_have_handover", float)
+    max_handovers = math.ceil(get_value_from_query(max_handovers_query, "max_handovers", float))
 
-    chance_to_have_measurement_in_main_sample = asyncio.run(get_value_from_query(chance_to_have_measurement_in_main_sample_query,
-                                                                  "chance_to_have_measurement_in_main_sample", float))
-    max_measurements_in_main_samples = math.ceil(asyncio.run(get_value_from_query(max_measurements_in_main_samples_query,
-                                                                     "max_measurements_in_main_samples", float)))
-    chance_to_have_measurement_in_sample_piece = asyncio.run(get_value_from_query(chance_to_have_measurement_in_sample_piece_query,
-                                                         "chance_to_have_measurement_in_sample_piece", float))
-    max_measurements_in_sample_pieces = math.ceil(asyncio.run(get_value_from_query(max_measurements_in_sample_pieces_query,
-                                                            "max_measurements_in_sample_pieces", float)))
+    chance_to_have_measurement_in_main_sample = get_value_from_query(chance_to_have_measurement_in_main_sample_query, "chance_to_have_measurement_in_main_sample", float)
+    max_measurements_in_main_samples = math.ceil(get_value_from_query(max_measurements_in_main_samples_query, "max_measurements_in_main_samples", float))
+    chance_to_have_measurement_in_sample_piece = get_value_from_query(chance_to_have_measurement_in_sample_piece_query,"chance_to_have_measurement_in_sample_piece", float)
+    max_measurements_in_sample_pieces = math.ceil(get_value_from_query(max_measurements_in_sample_pieces_query, "max_measurements_in_sample_pieces", float))
 
-    chance_for_EDX_measurement = asyncio.run(get_value_from_query(chance_for_EDX_measurement_query,
-                                                            "chance_for_EDX_measurement", float))
+    chance_for_EDX_measurement = get_value_from_query(chance_for_EDX_measurement_query, "chance_for_EDX_measurement", float)
 
     logging.info("Completed! Resetting datastores...")
     stop_datastores(args, sql_db)
 
     runs_configuration_w_o_repetitions = [
         {
+            "multiplier": 1,
+
             "num_users": n_users,
             "num_areas": 3,
             "num_projects": n_projects,
@@ -211,88 +208,10 @@ def get_runs_configuration_from_datastore(sql_db: MSSQLDB, n_repetitions: int=1)
             "chance_for_EDX_measurement": chance_for_EDX_measurement
         },
 
-        # 1.25x the number of users, projects and overall activity
-        {
-            "num_users": int(n_users * 1.25),
-            "num_areas": int(3 * 1.25),
-            "num_projects": int(n_projects * 1.25),
-
-            "num_main_samples": [n_samples, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10_000],
-            "chance_to_have_piece": soft_scale_root(chance_to_have_piece, 1.25),
-            "max_piece_depth": int(max_piece_depth * 1.25),
-
-            "num_substrates": int(n_substrates * 1.25),
-            "chance_to_have_idea": soft_scale_root(chance_to_have_idea, 1.25),
-            "chance_to_have_request_for_synthesis": soft_scale_root(chance_to_have_request_for_synthesis, 1.25),
-
-            "chance_to_have_handover": soft_scale_root(chance_to_have_handover, 1.25),
-            "max_handovers_per_sample": int(max_handovers * 1.25),
-
-            "chance_to_have_measurement_in_main_sample": soft_scale_root(chance_to_have_measurement_in_main_sample,
-                                                                         1.25),
-            "max_measurements_in_main_samples": int(max_measurements_in_main_samples * 1.25),
-            "chance_to_have_measurement_in_sample_piece": soft_scale_root(chance_to_have_measurement_in_sample_piece,
-                                                                          1.25),
-            "max_measurements_in_sample_pieces": int(max_measurements_in_sample_pieces * 1.25),
-
-            "chance_for_EDX_measurement": soft_scale_root(chance_for_EDX_measurement, 1.25)
-        },
-
-        # 1.5x the number of users, projects and overall activity
-        {
-            "num_users": int(n_users * 1.5),
-            "num_areas": int(3 * 1.5),
-            "num_projects": int(n_projects * 1.5),
-
-            "num_main_samples": [n_samples, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10_000],
-            "chance_to_have_piece": soft_scale_root(chance_to_have_piece, 1.5),
-            "max_piece_depth": int(max_piece_depth * 1.5),
-
-            "num_substrates": int(n_substrates * 1.5),
-            "chance_to_have_idea": soft_scale_root(chance_to_have_idea, 1.5),
-            "chance_to_have_request_for_synthesis": soft_scale_root(chance_to_have_request_for_synthesis, 1.5),
-
-            "chance_to_have_handover": soft_scale_root(chance_to_have_handover, 1.5),
-            "max_handovers_per_sample": int(max_handovers * 1.5),
-
-            "chance_to_have_measurement_in_main_sample": soft_scale_root(chance_to_have_measurement_in_main_sample, 1.5),
-            "max_measurements_in_main_samples": int(max_measurements_in_main_samples * 1.5),
-            "chance_to_have_measurement_in_sample_piece": soft_scale_root(chance_to_have_measurement_in_sample_piece,
-                                                                          1.5),
-            "max_measurements_in_sample_pieces": int(max_measurements_in_sample_pieces * 1.5),
-
-            "chance_for_EDX_measurement": soft_scale_root(chance_for_EDX_measurement, 1.5)
-        },
-
-        # 1.75x the number of users, projects and overall activity
-        {
-            "num_users": int(n_users * 1.75),
-            "num_areas": int(3 * 1.75),
-            "num_projects": int(n_projects * 1.75),
-
-            "num_main_samples": [n_samples, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10_000],
-            "chance_to_have_piece": soft_scale_root(chance_to_have_piece, 1.75),
-            "max_piece_depth": int(max_piece_depth * 1.75),
-
-            "num_substrates": int(n_substrates * 1.75),
-            "chance_to_have_idea": soft_scale_root(chance_to_have_idea, 1.75),
-            "chance_to_have_request_for_synthesis": soft_scale_root(chance_to_have_request_for_synthesis, 1.75),
-
-            "chance_to_have_handover": soft_scale_root(chance_to_have_handover, 1.75),
-            "max_handovers_per_sample": int(max_handovers * 1.75),
-
-            "chance_to_have_measurement_in_main_sample": soft_scale_root(chance_to_have_measurement_in_main_sample,
-                                                                         1.75),
-            "max_measurements_in_main_samples": int(max_measurements_in_main_samples * 1.75),
-            "chance_to_have_measurement_in_sample_piece": soft_scale_root(chance_to_have_measurement_in_sample_piece,
-                                                                          1.75),
-            "max_measurements_in_sample_pieces": int(max_measurements_in_sample_pieces * 1.75),
-
-            "chance_for_EDX_measurement": soft_scale_root(chance_for_EDX_measurement, 1.75)
-        },
-
         # 2x the number of users, projects and overall activity
         {
+            "multiplier": 2,
+
             "num_users": n_users * 2,
             "num_areas": 3 * 2,
             "num_projects": n_projects * 2,
@@ -314,6 +233,60 @@ def get_runs_configuration_from_datastore(sql_db: MSSQLDB, n_repetitions: int=1)
             "max_measurements_in_sample_pieces": max_measurements_in_sample_pieces * 2,
 
             "chance_for_EDX_measurement": soft_scale_root(chance_for_EDX_measurement, 2)
+        },
+
+        # 4x the number of users, projects and overall activity
+        {
+            "multiplier": 4,
+
+            "num_users": n_users * 4,
+            "num_areas": 3 * 4,
+            "num_projects": n_projects * 4,
+
+            "num_main_samples": [n_samples, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10_000],
+            "chance_to_have_piece": soft_scale_root(chance_to_have_piece, 4),
+            "max_piece_depth": int(max_piece_depth * 4),
+
+            "num_substrates": n_substrates * 4,
+            "chance_to_have_idea": soft_scale_root(chance_to_have_idea, 4),
+            "chance_to_have_request_for_synthesis": soft_scale_root(chance_to_have_request_for_synthesis, 4),
+
+            "chance_to_have_handover": soft_scale_root(chance_to_have_handover, 4),
+            "max_handovers_per_sample": max_handovers * 4,
+
+            "chance_to_have_measurement_in_main_sample": soft_scale_root(chance_to_have_measurement_in_main_sample, 4),
+            "max_measurements_in_main_samples": max_measurements_in_main_samples * 4,
+            "chance_to_have_measurement_in_sample_piece": soft_scale_root(chance_to_have_measurement_in_sample_piece, 4),
+            "max_measurements_in_sample_pieces": max_measurements_in_sample_pieces * 4,
+
+            "chance_for_EDX_measurement": soft_scale_root(chance_for_EDX_measurement, 4)
+        },
+
+        # 8x the number of users, projects and overall activity
+        {
+            "multiplier": 8,
+
+            "num_users": n_users * 8,
+            "num_areas": 3 * 8,
+            "num_projects": n_projects * 8,
+
+            "num_main_samples": [n_samples, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10_000],
+            "chance_to_have_piece": soft_scale_root(chance_to_have_piece, 8),
+            "max_piece_depth": int(max_piece_depth * 8),
+
+            "num_substrates": n_substrates * 8,
+            "chance_to_have_idea": soft_scale_root(chance_to_have_idea, 8),
+            "chance_to_have_request_for_synthesis": soft_scale_root(chance_to_have_request_for_synthesis, 8),
+
+            "chance_to_have_handover": soft_scale_root(chance_to_have_handover, 8),
+            "max_handovers_per_sample": max_handovers * 8,
+
+            "chance_to_have_measurement_in_main_sample": soft_scale_root(chance_to_have_measurement_in_main_sample, 8),
+            "max_measurements_in_main_samples": max_measurements_in_main_samples * 8,
+            "chance_to_have_measurement_in_sample_piece": soft_scale_root(chance_to_have_measurement_in_sample_piece, 8),
+            "max_measurements_in_sample_pieces": max_measurements_in_sample_pieces * 8,
+
+            "chance_for_EDX_measurement": soft_scale_root(chance_for_EDX_measurement, 8)
         }
     ]
 
@@ -425,6 +398,13 @@ if __name__ == "__main__":
         Note that there is already a default file located at ./performance_test/runs_configuration"""
     )
 
+    parser.add_argument(
+        "--evaluate_only_sql_queries",
+        action="store_true",
+        default=False,
+        help="""Only run SQL queries during materialization. Used to purely evaluate SQL runtime."""
+    )
+
     args = parser.parse_args()
 
     sql_db = MSSQLDB()
@@ -449,26 +429,13 @@ if __name__ == "__main__":
                     logging.info("Run already completed, skipping...")
                     continue
 
-                # TODO this is DB-backup-specific
-                max_measurements_in_main_samples = run_config["max_measurements_in_main_samples"]
-                if max_measurements_in_main_samples == 4:
+                multiplier = ""
+                if run_config["multiplier"] == 1:
                     multiplier = "No multiplier"
-                elif max_measurements_in_main_samples == 5:
-                    multiplier = "1.25"
-                elif max_measurements_in_main_samples == 6:
-                    multiplier = "1.5"
-                elif max_measurements_in_main_samples == 7:
-                    multiplier = "1.75"
-                elif max_measurements_in_main_samples == 8:
-                    multiplier = "2"
                 else:
-                    continue
-
-                if multiplier != "2" or num_main_samples != 10_000:
-                    continue
+                    run_config["multiplier"] = str(multiplier)
 
                 logging.info(f"Executing test for multiplier '{multiplier}', n_samples {num_main_samples}, n_run: {run_config['n_run']}")
-
 
                 backup_identifier = f"performance_test_db_dump_{num_main_samples}_main_samples_multiplier_{multiplier}_run_{run_config['n_run']}"
 

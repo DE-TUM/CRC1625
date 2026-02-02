@@ -1,9 +1,7 @@
-SELECT (AVG(?count) AS ?max_handovers) FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph> WHERE {
+SELECT (MAX(?count) AS ?max_handovers) FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph> WHERE {
   {
     {
         SELECT ?sample (COUNT(?handover) AS ?count) WHERE {
-          ?sample a crc:MaterialsLibrary.
-
           ?workflow_instance crc:input ?sample.
           ?workflow_instance crc:substep ?first_handover_group.
 

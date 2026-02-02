@@ -1,3 +1,4 @@
+
 SELECT
   (COUNT(?sample_w_handover) as ?count_w)
   (COUNT(?sample) as ?total_samples)
@@ -6,8 +7,6 @@ FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 {
     {
         SELECT DISTINCT ?sample_w_handover WHERE {
-          ?sample_w_handover a crc:MaterialsLibrary.
-
           ?workflow_instance crc:input ?sample_w_handover.
           ?workflow_instance crc:substep ?first_handover_group.
 
@@ -20,7 +19,7 @@ FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 
     {
         SELECT ?sample WHERE {
-          ?sample a crc:MaterialsLibrary.
+          ?sample a/rdfs:subClassOf* crc:MaterialsLibrary.
         }
     }
 }

@@ -6,7 +6,7 @@ FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 WHERE {
     {
         SELECT DISTINCT ?sample_w_idea WHERE {
-            ?sample_w_idea a crc:MaterialsLibrary
+            ?sample_w_idea a/rdfs:subClassOf* crc:MaterialsLibrary
 
             # It's a main sample
             FILTER NOT EXISTS {
@@ -20,7 +20,7 @@ WHERE {
     UNION
     {
         SELECT ?sample WHERE {
-            ?sample a crc:MaterialsLibrary.
+            ?sample a/rdfs:subClassOf* crc:MaterialsLibrary.
 
       		# It's a main sample
             FILTER NOT EXISTS {
