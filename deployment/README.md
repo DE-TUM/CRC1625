@@ -14,4 +14,5 @@ This setup contains containers and configurations for:
 ## Requirements
 - Set up certificates for your domain, store them inside a `certs` folder inside this folder and set them on the `nginx.conf` file. Alternatively, you can simply skip the proxy and publish the `8080` port form the WebUI.
 - Set up a `virtuoso_deployment.env` file. A `virtuoso_deployment.env.example` is provided containing all connection details, without auth.
+- The virtuoso container, whose settings are persisted across container deletions, requires several tweaks. Please check `../virtuoso/README.md` for this.
 - Run `deploy.sh` from the parent folder. You can add `-d` to the `docker compose` command to detach it into another process.

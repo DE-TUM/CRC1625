@@ -1,6 +1,8 @@
 # Virtuoso Docker container folder
 
-This is the folder for the (optional) local `Virtuoso` docker container. It will employ this directory as the mountpoint for `/data` inside
+**Warning: We recommend using the docker-compose deployment. This setup is only used for debugging and performance testing.**
+
+This is the folder for the **optional** local `Virtuoso` docker container. It will employ this directory as the mountpoint for `/data` inside
 the container. This is **required** as the system will store and attempt to upload serialized RDF triples from there.
 
 It needs to expose a SPARQL endpoint at http://127.0.0.1:8891, and accept ODBC requests at the `1111` port for user/password dba/dba (pending to change on production settings)
@@ -16,6 +18,7 @@ docker run -d \
   -p 1111:1111 \
   -v $(pwd)/virtuoso-db:/database \
   -v $(pwd)/data:/data \
+  -e DBA_PASSWORD=your_dba_password_as_in_the_env_file \
    openlink/virtuoso-opensource-7
 ```
 
@@ -23,6 +26,29 @@ docker run -d \
   - [Make virtuoso correctly treat untyped and typed xsd:string literals as the same during comparisons](https://github.com/openlink/virtuoso-opensource/issues/728#issuecomment-1937376203)
   - Add `/data` under `DirsAllowed` in the `virtuoso.ini` file
   - Increase `MaxVectorSize` in the `virtuoso.ini` file to, e.g., 4000000
+  - Set up proper SPARQL UPDATE and INSET user permissions using conductor. An easy (but more unsafe) way to do this is to execute the following via ISQL:
+
+```
+-- Set default permissions
+UPDATE DB.DBA.SYS_USERS 
+   SET U_DEF_PERMS = '110100005R' 
+ WHERE U_NAME = 'SPARQL';
+
+-- Grant required EXECUTE rights
+GRANT EXECUTE ON DB.DBA.SPARQL_EVAL TO "SPARQL";
+GRANT EXECUTE ON DB.DBA.SPARQL_UPDATE TO "SPARQL";
+GRANT EXECUTE ON DB.DBA.SPARQL_INSERT_DICT_CONTENT TO "SPARQL";
+GRANT EXECUTE ON DB.DBA.SPARQL_DELETE_DICT_CONTENT TO "SPARQL";
+
+-- Grant triple-level graph write access
+GRANT INSERT, DELETE ON DB.DBA.RDF_QUAD TO "SPARQL";
+
+-- Grant internal role required for SPARQL Update support
+GRANT "SPARQL_UPDATE" TO "SPARQL";
+
+-- Finalize with a checkpoint
+checkpoint;
+```
 
 #### The following configuration tweaks are **recommended**:
   - General performance tweaks are also recommended, such as increasing its maximum allowed memory usage. 
