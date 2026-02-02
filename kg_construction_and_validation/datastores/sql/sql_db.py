@@ -83,11 +83,7 @@ class MSSQLDB():
             if not response.text:
                 return (False, query)
             else:
-                try:
-                    df = pd.DataFrame.from_dict(response.json())
-                except Exception as e:
-                    print("EXCEPTION:", query, "FILENAME", csv_filename)
-                    return e
+                df = pd.DataFrame.from_dict(response.json())
         else:
             df = pd.read_sql(query, create_engine(f'mssql+pymssql://{MSSQL_USER}:{MSSQL_PASSWORD.replace("@", "%40")}@{MSSQL_HOST}:{MSSQL_PORT}/RUB_INF'))
 
@@ -206,7 +202,7 @@ class MSSQLDB():
                     cwd=module_dir
                 ).check_returncode()
 
-                time.sleep(15) # Allow MSSQL to create the DB and allow connections
+                time.sleep(30) # Allow MSSQL to create the DB and allow connections
             except Exception as e:
                 raise CalledProcessError(f"Error when setting up the MSSQL container: {e}")
 
