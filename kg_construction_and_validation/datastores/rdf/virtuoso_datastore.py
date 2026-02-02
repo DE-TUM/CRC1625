@@ -245,7 +245,7 @@ class VirtuosoRDFDatastore(RDFDatastore):
             self._run_isql("checkpoint;")
 
 
-    def stop_datastore(self, timeout: int = 60 * 5):
+    def stop_datastore(self, timeout: int = 60):
         """
         Stops the virtuoso container. The output is not checked, as sometimes virtuoso takes slightly more time to stop
         than docker is willing to wait, which we set to 60 seconds (up from default 10 seconds).
@@ -264,7 +264,7 @@ class VirtuosoRDFDatastore(RDFDatastore):
         logging.info("Virtuoso datastore stopped")
 
 
-    def start_datastore(self, timeout: int = 60 * 5):
+    def start_datastore(self, timeout: int = 60):
         """
         Starts the virtuoso container, and waits 5 minutes for it to allocate all its memory and be fully operational.
         This timeout can be controlled by the timeout parameter.
@@ -283,7 +283,7 @@ class VirtuosoRDFDatastore(RDFDatastore):
         logging.info("Virtuoso datastore started")
 
 
-    def restart_datastore(self, timeout: int = 60 * 5):
+    def restart_datastore(self, timeout: int = 60):
         """
         Restarts the virtuoso container.
         This timeout can be controlled by the timeout parameter, and is applied to the stopping and starting phases separately.
