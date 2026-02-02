@@ -212,7 +212,7 @@ async def rpc_start_datastore() -> Dict[str, str]:
         return {"status": "success"}
 
     try:
-        await rdf_store.start_datastore()
+        rdf_store.start_datastore()
 
         return {"status": "success"}
     except Exception as e:
@@ -227,7 +227,7 @@ async def rpc_stop_datastore() -> Dict[str, str]:
         return {"status": "success"}
 
     try:
-        await rdf_store.stop_datastore()
+        rdf_store.stop_datastore()
 
         return {"status": "success"}
     except Exception as e:
@@ -242,7 +242,7 @@ async def rpc_restart_datastore() -> Dict[str, str]:
         return {"status": "success"}
 
     try:
-        await rdf_store.restart_datastore()
+        rdf_store.restart_datastore()
 
         return {"status": "success"}
     except Exception as e:

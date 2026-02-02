@@ -182,19 +182,19 @@ async def start_datastore():
     """
     Returns the name of the underlying RDF datastore
     """
-    return (await _get("start_datastore")).json()['data']
+    return (await _get("start_datastore")).json()["status"]
 
 async def stop_datastore():
     """
     Returns the name of the underlying RDF datastore
     """
-    return (await _get("stop_datastore")).json()['data']
+    return (await _get("stop_datastore")).json()["status"]
 
 async def restart_datastore():
     """
     Returns the name of the underlying RDF datastore
     """
-    return (await _get("restart_datastore")).json()['data']
+    return (await _get("restart_datastore")).json()["status"]
 
 async def get_datastore_type():
     """
