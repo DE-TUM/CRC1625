@@ -44,7 +44,7 @@ prefixes = open(os.path.join(module_dir, './mappings_output_test/queries/prefixe
 
 n_users_query = prefixes + open(os.path.join(module_dir, './performance_test/queries/n_users.sparql')).read()
 n_projects_query = prefixes + open(os.path.join(module_dir, './performance_test/queries/n_projects.sparql')).read()
-n_samples_query = prefixes + open(os.path.join(module_dir, './performance_test/queries/n_samples.sparql')).read()
+n_samples_query = prefixes + open(os.path.join(module_dir, './performance_test/queries/n_main_samples.sparql')).read()
 
 chance_to_have_piece_query = prefixes + open(
     os.path.join(module_dir, './performance_test/queries/chance_to_have_piece.sparql')).read()
