@@ -1,4 +1,5 @@
-SELECT (MAX(?count) AS ?max_handovers) FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph> WHERE {
+SELECT (AVG(?count) AS ?max_handovers) FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph> WHERE {
+  # We select the AVG handovers because otherwise it will very quickly explode to very unrealistic levels when scaled
   {
     {
         SELECT ?sample (COUNT(?handover) AS ?count) WHERE {
