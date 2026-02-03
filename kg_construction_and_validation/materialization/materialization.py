@@ -24,8 +24,8 @@ import sys
 import time
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from pathlib import Path
-from typing import final
 
+import morph_kgc
 import psutil
 from tqdm import tqdm
 
@@ -516,20 +516,19 @@ def run_mappings_queries(db: MSSQLDB,
 
 def execute_mappings(use_rmlstreamer: bool = False):
     """
-    Runs RMLMapper or RMLStreamer over `final_RML_file_path`, writing the results to `materialized_triples_file_path`
+    Runs Morph-KGC or RMLStreamer over `final_RML_file_path`, writing the results to `materialized_triples_file_path`
     """
     # Let's be generous and offer it half of the system's RAM
     max_heap = int(psutil.virtual_memory().total * 0.5 / (1024 ** 3))
 
     if not use_rmlstreamer:
-        cmd = [
-            "java",
-            f"-Xmx{max_heap}g",
-            "-cp", f"{os.path.join(module_dir, 'rmlmapper.jar:sqljdbc')}", "be.ugent.rml.cli.Main",
-            "-m", final_RML_file_path,
-            "-o", materialized_triples_file_path
-        ]
-
+        config = f"""
+            [DataSource1]
+            mappings: {final_RML_file_path}
+        """
+        graph = morph_kgc.materialize(config)
+        graph.serialize(destination=materialized_triples_file_path,
+                        format="turtle")
     else:
         cmd = [
             "java", "-jar", os.path.join(module_dir, 'RMLStreamer.jar'), "toFile",
@@ -546,13 +545,12 @@ def execute_mappings(use_rmlstreamer: bool = False):
                         outfile.write(infile.read())
                     os.remove(file_path)
 
-
-    try:
-        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, text=True).check_returncode()
-    except subprocess.CalledProcessError as e:
-        logging.error(f"RMLMapper materialization process failed with return code {e.returncode}")
-        logging.error(f"Error output:\n{e.stderr}")
-        raise
+        try:
+            subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, text=True).check_returncode()
+        except subprocess.CalledProcessError as e:
+            logging.error(f"RMLMapper materialization process failed with return code {e.returncode}")
+            logging.error(f"Error output:\n{e.stderr}")
+            raise
 
 
 def run_mappings(db: MSSQLDB,
