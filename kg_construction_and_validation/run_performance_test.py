@@ -433,7 +433,7 @@ if __name__ == "__main__":
                 if run_config["multiplier"] == 1:
                     multiplier = "No multiplier"
                 else:
-                    run_config["multiplier"] = str(multiplier)
+                    multiplier = str(run_config["multiplier"])
 
                 logging.info(f"Executing test for multiplier '{multiplier}', n_samples {num_main_samples}, n_run: {run_config['n_run']}")
 
