@@ -525,9 +525,11 @@ def execute_mappings(use_rmlstreamer: bool = False):
             [DataSource1]
             mappings: {final_RML_file_path}
         """
-        graph = morph_kgc.materialize(config)
-        graph.serialize(destination=materialized_triples_file_path,
-                        format="nt")
+        triples = morph_kgc.materialize_set(config)
+        with open(materialized_triples_file_path, 'w', encoding='utf-8', buffering=8 * 1024 * 1024) as f:
+            for triple in triples:
+                f.write(triple)
+                f.write(' .\n')
     else:
         cmd = [
             "java", "-jar", os.path.join(module_dir, 'RMLStreamer.jar'), "toFile",
