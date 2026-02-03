@@ -527,7 +527,7 @@ def execute_mappings(use_rmlstreamer: bool = False):
         """
         graph = morph_kgc.materialize(config)
         graph.serialize(destination=materialized_triples_file_path,
-                        format="turtle")
+                        format="nt")
     else:
         cmd = [
             "java", "-jar", os.path.join(module_dir, 'RMLStreamer.jar'), "toFile",
@@ -582,7 +582,6 @@ def run_mappings(db: MSSQLDB,
     resource_usage_tracker.start()
 
     performance_log: dict[str: float | dict[str: float]] = dict()
-    performance_log["per_mapping_times"] = {}
 
     if skip_materialization:
         logging.info("Skipping materialization. Note that the system will assume the materialized files already exist.")
