@@ -496,6 +496,8 @@ def run_mappings_queries(db: MSSQLDB,
 
     yarrrml_files_to_convert = []
 
+    start_sql_querying_time = time.perf_counter()
+
     with ThreadPoolExecutor(os.cpu_count()) as executor:
         futures = []
 
@@ -506,7 +508,7 @@ def run_mappings_queries(db: MSSQLDB,
             for future in as_completed(futures):
                 (yielded_results, query) = future.result()
                 if yielded_results:
-                    yarrrml_files_to_convert.append(sql_query_to_yarrrml_file_path[query])
+                    yarrrml_files_to_convert.append((sql_query_to_yarrrml_file_path[query], time.perf_counter() - start_sql_querying_time))
                 # Else: we don't do anything for that mapping
 
                 pbar.update(1)
@@ -518,9 +520,6 @@ def execute_mappings(use_rmlstreamer: bool = False):
     """
     Runs Morph-KGC or RMLStreamer over `final_RML_file_path`, writing the results to `materialized_triples_file_path`
     """
-    # Let's be generous and offer it half of the system's RAM
-    max_heap = int(psutil.virtual_memory().total * 0.5 / (1024 ** 3))
-
     if not use_rmlstreamer:
         config = f"""
             [DataSource1]
@@ -595,13 +594,14 @@ def run_mappings(db: MSSQLDB,
 
     logging.info("Executing SQL queries...")
     time_query_execution_start = time.perf_counter()
-    yarrrml_files_to_convert = run_mappings_queries(db, untemplated_yarrrml_file_names_and_jobs)
-    performance_log["query_execution"] = time.perf_counter() - time_query_execution_start
-    logging.info(f" YARRRML files whose queries yielded results: {len(yarrrml_files_to_convert)} / {len(untemplated_yarrrml_file_names_and_jobs)}")
+    mappings_queries_results = run_mappings_queries(db, untemplated_yarrrml_file_names_and_jobs)
+    performance_log["query_execution_real_time"] = time.perf_counter() - time_query_execution_start
+    performance_log["per_mapping_query_execution_times"] = mappings_queries_results
+    logging.info(f" YARRRML files whose queries yielded results: {len(mappings_queries_results)} / {len(untemplated_yarrrml_file_names_and_jobs)}")
 
     logging.info("Converting YARRRML mappings to RML...")
     time_yarrrml_to_rml_conversion_start = time.perf_counter()
-    create_rml_file(yarrrml_files_to_convert)
+    create_rml_file([query for query, time in mappings_queries_results])
     performance_log["yarrrml_to_rml_conversion_real_time"] = time.perf_counter() - time_yarrrml_to_rml_conversion_start
 
 
