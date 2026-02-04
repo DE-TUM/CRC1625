@@ -528,7 +528,8 @@ def execute_mappings(use_rmlstreamer: bool = False):
         triples = morph_kgc.materialize_set(config)
         with open(materialized_triples_file_path, 'w', encoding='utf-8', buffering=8 * 1024 * 1024) as f:
             for triple in triples:
-                f.write(triple)
+                # Fix broken quote-escaping from morphKGC
+                f.write(triple.replace(r'\\"', r'\"'))
                 f.write(' .\n')
     else:
         cmd = [
