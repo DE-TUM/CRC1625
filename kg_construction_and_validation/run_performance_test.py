@@ -208,6 +208,33 @@ def get_runs_configuration_from_datastore(sql_db: MSSQLDB, n_repetitions: int=1)
             "chance_for_EDX_measurement": chance_for_EDX_measurement
         },
 
+        # 1.5x the number of users, projects and overall activity
+        {
+            "multiplier": 1.5,
+
+            "num_users": n_users * 1.5,
+            "num_areas": 3 * 1.5,
+            "num_projects": n_projects * 1.5,
+
+            "num_main_samples": [n_samples, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10_000],
+            "chance_to_have_piece": soft_scale_root(chance_to_have_piece, 1.5),
+            "max_piece_depth": int(max_piece_depth * 1.5),
+
+            "num_substrates": n_substrates * 1.5,
+            "chance_to_have_idea": soft_scale_root(chance_to_have_idea, 1.5),
+            "chance_to_have_request_for_synthesis": soft_scale_root(chance_to_have_request_for_synthesis, 1.5),
+
+            "chance_to_have_handover": soft_scale_root(chance_to_have_handover, 1.5),
+            "max_handovers_per_sample": max_handovers * 1.5,
+
+            "chance_to_have_measurement_in_main_sample": soft_scale_root(chance_to_have_measurement_in_main_sample, 1.5),
+            "max_measurements_in_main_samples": max_measurements_in_main_samples * 1.5,
+            "chance_to_have_measurement_in_sample_piece": soft_scale_root(chance_to_have_measurement_in_sample_piece, 1.5),
+            "max_measurements_in_sample_pieces": max_measurements_in_sample_pieces * 1.5,
+
+            "chance_for_EDX_measurement": soft_scale_root(chance_for_EDX_measurement, 1.5)
+        },
+
         # 2x the number of users, projects and overall activity
         {
             "multiplier": 2,
@@ -233,60 +260,6 @@ def get_runs_configuration_from_datastore(sql_db: MSSQLDB, n_repetitions: int=1)
             "max_measurements_in_sample_pieces": max_measurements_in_sample_pieces * 2,
 
             "chance_for_EDX_measurement": soft_scale_root(chance_for_EDX_measurement, 2)
-        },
-
-        # 4x the number of users, projects and overall activity
-        {
-            "multiplier": 4,
-
-            "num_users": n_users * 4,
-            "num_areas": 3 * 4,
-            "num_projects": n_projects * 4,
-
-            "num_main_samples": [n_samples, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10_000],
-            "chance_to_have_piece": soft_scale_root(chance_to_have_piece, 4),
-            "max_piece_depth": int(max_piece_depth * 4),
-
-            "num_substrates": n_substrates * 4,
-            "chance_to_have_idea": soft_scale_root(chance_to_have_idea, 4),
-            "chance_to_have_request_for_synthesis": soft_scale_root(chance_to_have_request_for_synthesis, 4),
-
-            "chance_to_have_handover": soft_scale_root(chance_to_have_handover, 4),
-            "max_handovers_per_sample": max_handovers * 4,
-
-            "chance_to_have_measurement_in_main_sample": soft_scale_root(chance_to_have_measurement_in_main_sample, 4),
-            "max_measurements_in_main_samples": max_measurements_in_main_samples * 4,
-            "chance_to_have_measurement_in_sample_piece": soft_scale_root(chance_to_have_measurement_in_sample_piece, 4),
-            "max_measurements_in_sample_pieces": max_measurements_in_sample_pieces * 4,
-
-            "chance_for_EDX_measurement": soft_scale_root(chance_for_EDX_measurement, 4)
-        },
-
-        # 8x the number of users, projects and overall activity
-        {
-            "multiplier": 8,
-
-            "num_users": n_users * 8,
-            "num_areas": 3 * 8,
-            "num_projects": n_projects * 8,
-
-            "num_main_samples": [n_samples, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10_000],
-            "chance_to_have_piece": soft_scale_root(chance_to_have_piece, 8),
-            "max_piece_depth": int(max_piece_depth * 8),
-
-            "num_substrates": n_substrates * 8,
-            "chance_to_have_idea": soft_scale_root(chance_to_have_idea, 8),
-            "chance_to_have_request_for_synthesis": soft_scale_root(chance_to_have_request_for_synthesis, 8),
-
-            "chance_to_have_handover": soft_scale_root(chance_to_have_handover, 8),
-            "max_handovers_per_sample": max_handovers * 8,
-
-            "chance_to_have_measurement_in_main_sample": soft_scale_root(chance_to_have_measurement_in_main_sample, 8),
-            "max_measurements_in_main_samples": max_measurements_in_main_samples * 8,
-            "chance_to_have_measurement_in_sample_piece": soft_scale_root(chance_to_have_measurement_in_sample_piece, 8),
-            "max_measurements_in_sample_pieces": max_measurements_in_sample_pieces * 8,
-
-            "chance_for_EDX_measurement": soft_scale_root(chance_for_EDX_measurement, 8)
         }
     ]
 
