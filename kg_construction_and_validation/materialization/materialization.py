@@ -374,9 +374,6 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                             (os.path.join(module_dir, "mappings/generic_relations/object_to_object_templated.yml"), False),
 
                             (os.path.join(module_dir, "mappings/compositions/compositions_metadata_templated.yml"), True),
-                            (os.path.join(module_dir, "mappings/compositions/activities_for_compositions_templated.yml"), True),
-                            (os.path.join(module_dir, "mappings/compositions/activities_for_compositions_prior_to_first_handover_templated.yml"), True),
-                            (os.path.join(module_dir, "mappings/compositions/activities_for_compositions_with_no_handovers_templated.yml"), True),
                             (os.path.join(module_dir, "mappings/compositions/properties_of_compositions_templated.yml"), True)
                        ]
 
