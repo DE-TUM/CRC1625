@@ -46,7 +46,6 @@ WHERE {
     # And narrow down the types
     # crc:UploadedFile is the high-level type for any kind of measurement in the
     # RMDS (i.e., an object in the RDMS that is linked to a ML/Sample that is not
-    # another ML/sample, special object such as a handover, etc.). It also does not
-    # include
+    # another ML/sample, special object such as a handover, etc.)
     ?measurement a crc:UploadedFile.
 }
