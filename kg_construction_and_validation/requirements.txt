@@ -53,7 +53,7 @@ python-socketio==5.15.1
 pytz==2025.2
 PyYAML==6.0.3
 qlever==0.5.35
-rdflib==7.5.0
+rdflib>=7.1.0
 requests==2.32.5
 requests-sse==0.5.2
 simple-websocket==1.1.0
