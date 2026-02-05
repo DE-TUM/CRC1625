@@ -10,12 +10,11 @@ RUN mkdir ./kg_construction_and_validation
 COPY --exclude=*.bak ./kg_construction_and_validation ./kg_construction_and_validation
 COPY ./deployment/virtuoso_deployment.env ./kg_construction_and_validation/.env
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt update && apt install -y --no-install-recommends \
     build-essential \
     openjdk-21-jre-headless \
     nodejs \
-    npm \
-    && rm -rf /var/lib/apt/lists/*
+    npm
 
 # https://docs.docker.com/engine/install/debian/#install-using-the-repository
 RUN apt install ca-certificates curl
