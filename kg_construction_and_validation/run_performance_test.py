@@ -212,25 +212,25 @@ def get_runs_configuration_from_datastore(sql_db: MSSQLDB, n_repetitions: int=1)
         {
             "multiplier": 1.5,
 
-            "num_users": n_users * 1.5,
-            "num_areas": 3 * 1.5,
-            "num_projects": n_projects * 1.5,
+            "num_users": int(n_users * 1.5),
+            "num_areas": int(3 * 1.5),
+            "num_projects": int(n_projects * 1.5),
 
             "num_main_samples": [n_samples, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10_000],
             "chance_to_have_piece": soft_scale_root(chance_to_have_piece, 1.5),
             "max_piece_depth": int(max_piece_depth * 1.5),
 
-            "num_substrates": n_substrates * 1.5,
+            "num_substrates": int(n_substrates * 1.5),
             "chance_to_have_idea": soft_scale_root(chance_to_have_idea, 1.5),
             "chance_to_have_request_for_synthesis": soft_scale_root(chance_to_have_request_for_synthesis, 1.5),
 
             "chance_to_have_handover": soft_scale_root(chance_to_have_handover, 1.5),
-            "max_handovers_per_sample": max_handovers * 1.5,
+            "max_handovers_per_sample": int(max_handovers * 1.5),
 
             "chance_to_have_measurement_in_main_sample": soft_scale_root(chance_to_have_measurement_in_main_sample, 1.5),
-            "max_measurements_in_main_samples": max_measurements_in_main_samples * 1.5,
+            "max_measurements_in_main_samples": int(max_measurements_in_main_samples * 1.5),
             "chance_to_have_measurement_in_sample_piece": soft_scale_root(chance_to_have_measurement_in_sample_piece, 1.5),
-            "max_measurements_in_sample_pieces": max_measurements_in_sample_pieces * 1.5,
+            "max_measurements_in_sample_pieces": int(max_measurements_in_sample_pieces * 1.5),
 
             "chance_for_EDX_measurement": soft_scale_root(chance_for_EDX_measurement, 1.5)
         },
@@ -239,25 +239,25 @@ def get_runs_configuration_from_datastore(sql_db: MSSQLDB, n_repetitions: int=1)
         {
             "multiplier": 2,
 
-            "num_users": n_users * 2,
-            "num_areas": 3 * 2,
-            "num_projects": n_projects * 2,
+            "num_users": int(n_users * 2),
+            "num_areas": int(3 * 2),
+            "num_projects": int(n_projects * 2),
 
             "num_main_samples": [n_samples, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10_000],
             "chance_to_have_piece": soft_scale_root(chance_to_have_piece, 2),
             "max_piece_depth": int(max_piece_depth * 2),
 
-            "num_substrates": n_substrates * 2,
+            "num_substrates": int(n_substrates * 2),
             "chance_to_have_idea": soft_scale_root(chance_to_have_idea, 2),
             "chance_to_have_request_for_synthesis": soft_scale_root(chance_to_have_request_for_synthesis, 2),
 
             "chance_to_have_handover": soft_scale_root(chance_to_have_handover, 2),
-            "max_handovers_per_sample": max_handovers * 2,
+            "max_handovers_per_sample": int(max_handovers * 2),
 
             "chance_to_have_measurement_in_main_sample": soft_scale_root(chance_to_have_measurement_in_main_sample, 2),
-            "max_measurements_in_main_samples": max_measurements_in_main_samples * 2,
+            "max_measurements_in_main_samples": int(max_measurements_in_main_samples * 2),
             "chance_to_have_measurement_in_sample_piece": soft_scale_root(chance_to_have_measurement_in_sample_piece, 2),
-            "max_measurements_in_sample_pieces": max_measurements_in_sample_pieces * 2,
+            "max_measurements_in_sample_pieces": int(max_measurements_in_sample_pieces * 2),
 
             "chance_for_EDX_measurement": soft_scale_root(chance_for_EDX_measurement, 2)
         }
