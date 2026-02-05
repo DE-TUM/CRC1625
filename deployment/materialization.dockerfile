@@ -10,14 +10,14 @@ COPY --exclude=*.bak ./kg_construction_and_validation ./kg_construction_and_vali
 COPY ./ontologies ./ontologies 
 COPY ./deployment/virtuoso_deployment.env ./kg_construction_and_validation/.env
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt update && apt install -y --no-install-recommends \
     build-essential \
     openjdk-21-jre-headless \
     nodejs \
     npm
 
 # https://docs.docker.com/engine/install/debian/#install-using-the-repository
-RUN apt install ca-certificates curl
+RUN apt install -y --no-install-recommends ca-certificates curl
 RUN install -m 0755 -d /etc/apt/keyrings
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
 RUN chmod a+r /etc/apt/keyrings/docker.asc
@@ -27,7 +27,7 @@ Suites: $(. /etc/os-release && echo "$VERSION_CODENAME")\n\
 Components: stable\n\
 Signed-By: /etc/apt/keyrings/docker.asc" > /etc/apt/sources.list.d/docker.sources \
 # All that for this...
-RUN apt install docker-ce-cli
+RUN apt install -y --no-install-recommends docker-ce-cli
 
 RUN rm -rf /var/lib/apt/lists/*
 
