@@ -25,7 +25,7 @@ RUN echo "Types: deb\n\
 URIs: https://download.docker.com/linux/debian\n\
 Suites: $(. /etc/os-release && echo "$VERSION_CODENAME")\n\
 Components: stable\n\
-Signed-By: /etc/apt/keyrings/docker.asc" > /etc/apt/sources.list.d/docker.sources \
+Signed-By: /etc/apt/keyrings/docker.asc" > /etc/apt/sources.list.d/docker.sources
 # All that for this...
 RUN apt update && install -y --no-install-recommends docker-ce-cli
 
