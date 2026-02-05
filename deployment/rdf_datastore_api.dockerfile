@@ -1,4 +1,4 @@
-FROM amd64/alpine
+FROM python:3.12-slim
 
 WORKDIR /app
 
@@ -10,7 +10,12 @@ RUN mkdir ./kg_construction_and_validation
 COPY --exclude=*.bak ./kg_construction_and_validation ./kg_construction_and_validation
 COPY ./deployment/virtuoso_deployment.env ./kg_construction_and_validation/.env
 
-RUN apk add --update --no-cache python3 py3-pip build-base python3-dev musl-dev linux-headers docker && ln -sf python3 /usr/bin/python
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    openjdk-21-jre-headless \
+    nodejs \
+    npm \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN python3 -m venv /opt/venv
 RUN /opt/venv/bin/pip install --no-cache --upgrade pip setuptools
