@@ -27,7 +27,7 @@ Suites: $(. /etc/os-release && echo "$VERSION_CODENAME")\n\
 Components: stable\n\
 Signed-By: /etc/apt/keyrings/docker.asc" > /etc/apt/sources.list.d/docker.sources \
 # All that for this...
-RUN apt install -y --no-install-recommends docker-ce-cli
+RUN apt update && apt install -y --no-install-recommends docker-ce-cli
 
 RUN rm -rf /var/lib/apt/lists/*
 
