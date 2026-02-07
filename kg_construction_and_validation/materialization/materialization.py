@@ -527,8 +527,8 @@ def execute_mappings(use_rmlstreamer: bool = False):
         """
         triples = morph_kgc.materialize_set(config)
 
-        # We write the materialized triples into n_physical_cores equally sized files
-        n_files = max(1, os.cpu_count() // 2)
+        # We write the materialized triples into n_logical_cores equally sized files
+        n_files = max(1, os.cpu_count())
         chunk_size = math.ceil(len(triples) / n_files)
         it = iter(triples)
 
