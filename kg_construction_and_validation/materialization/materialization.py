@@ -19,10 +19,12 @@ How to run:
     - Call the run_mappings function
 """
 import logging
+import math
 import multiprocessing
 import sys
 import time
 from concurrent.futures import as_completed, ThreadPoolExecutor
+from itertools import islice
 from pathlib import Path
 
 import morph_kgc
@@ -379,7 +381,8 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
 
 # RML file all the YARRRML mappings must coalesce to
 final_RML_file_path = os.path.join(module_dir, 'mappings/final_RML_file.rml')
-materialized_triples_file_path = os.path.join(module_dir, 'materialized_triples/materialized_triples.ttl')
+base_materialized_triples_file_path = os.path.join(module_dir, 'materialized_triples/materialized_triples.ttl')
+split_materialized_triples_file_paths = []
 rmlstreamer_path = os.path.join(module_dir, 'materialized_triples')
 
 
@@ -523,10 +526,27 @@ def execute_mappings(use_rmlstreamer: bool = False):
             mappings: {final_RML_file_path}
         """
         triples = morph_kgc.materialize_set(config)
-        with open(materialized_triples_file_path, 'w', encoding='utf-8', buffering=8 * 1024 * 1024) as f:
+
+        # We write the materialized triples into n_physical_cores equally sized files
+        n_files = max(1, os.cpu_count() // 2)
+        chunk_size = math.ceil(len(triples) / n_files)
+        it = iter(triples)
+
+
+        for i in range(n_files):
+            base, ext = os.path.splitext(base_materialized_triples_file_path)
+            part_path = f"{base}_{i}{ext}"
+
+            with open(part_path, 'w', encoding='utf-8', buffering=8 * 1024 * 1024) as f:
+                for triple in islice(it, chunk_size):
+                    f.write(triple.replace(r'\\"', r'\"'))
+                    f.write(' .\n')
+
+            split_materialized_triples_file_paths.append(part_path)
+
+        with open(base_materialized_triples_file_path, 'w', encoding='utf-8', buffering=8 * 1024 * 1024) as f:
             for triple in triples:
-                # Fix broken quote-escaping from morphKGC
-                f.write(triple.replace(r'\\"', r'\"'))
+                f.write(triple.replace(r'\\"', r'\"')) # Fix broken quote-escaping from morphKGC
                 f.write(' .\n')
     else:
         cmd = [
@@ -535,14 +555,12 @@ def execute_mappings(use_rmlstreamer: bool = False):
             "-o", rmlstreamer_path
         ]
 
-        with open(materialized_triples_file_path, 'wb') as outfile:
-            for filename in sorted(os.listdir(rmlstreamer_path)):
-                file_path = os.path.join(rmlstreamer_path, filename)
+        for filename in sorted(os.listdir(rmlstreamer_path)):
+            file_path = os.path.join(rmlstreamer_path, filename)
 
-                if os.path.isfile(file_path) and file_path != os.path.abspath(materialized_triples_file_path):
-                    with open(file_path, 'rb') as infile:
-                        outfile.write(infile.read())
-                    os.remove(file_path)
+            if os.path.isfile(file_path) and file_path != os.path.abspath(base_materialized_triples_file_path):
+                os.rename(file_path, file_path + ".ttl")
+                split_materialized_triples_file_paths.append(file_path + ".ttl")
 
         try:
             subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, text=True).check_returncode()
@@ -585,7 +603,7 @@ def run_mappings(db: MSSQLDB,
 
     if skip_materialization:
         logging.info("Skipping materialization. Note that the system will assume the materialized files already exist.")
-        return [materialized_triples_file_path], performance_log, list(resource_usage)
+        return [base_materialized_triples_file_path], performance_log, list(resource_usage)
 
     logging.info("Filling the templated YARRRML mappings...")
     untemplated_yarrrml_file_names_and_jobs = prepare_YARRRML_files()
@@ -621,4 +639,4 @@ def run_mappings(db: MSSQLDB,
         if os.path.exists(csv_file):
             os.remove(csv_file)
 
-    return [materialized_triples_file_path], performance_log, list(resource_usage)
+    return split_materialized_triples_file_paths, performance_log, list(resource_usage)
