@@ -239,10 +239,11 @@ class VirtuosoRDFDatastore(RDFDatastore):
         to, e.g., clear the workflows graph
         """
         async with self.rwlock.writer_lock:
-            self._run_isql("log_enable(3,1);")  # Autocommit mode, write transactions to log. Avoids running out of memory on large graphs
+            self._run_isql("log_enable(2,1);")  # Autocommit mode, do *not* write transactions to log. Avoids running out of memory on large graphs
             # self.run_isql("SPARQL CLEAR GRAPH  <https://crc1625.mdi.ruhr-uni-bochum.de/graph>;")
             self._run_isql(f"DELETE FROM rdf_quad WHERE g = iri_to_id ('{graph_iri}');")
             self._run_isql("checkpoint;")
+            self._run_isql("log_enable(3,1);")
 
 
     def stop_datastore(self, timeout: int = 60):
@@ -279,6 +280,8 @@ class VirtuosoRDFDatastore(RDFDatastore):
         subprocess.run(cmd, check=False, stdout=subprocess.DEVNULL)
 
         time.sleep(timeout)
+
+        self._run_isql("log_enable(3,1);") # Make sure autocommit+logging is enabled
 
         logging.info("Virtuoso datastore started")
 

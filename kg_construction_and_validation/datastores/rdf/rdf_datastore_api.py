@@ -100,7 +100,8 @@ async def rpc_launch_updates(payload: UpdatesRequest):
                 actions.append((query_or_file_str, update_type))
             else:
                 random_filename = get_random_file_name(file_extension_or_none)
-                open(f"{random_filename}", "w").write(query_or_file_str)
+                with open(random_filename, "w") as f:
+                    f.write(query_or_file_str)
                 actions.append((random_filename, update_type))
 
         await rdf_store.launch_updates(
@@ -126,7 +127,8 @@ async def rpc_upload_file(payload: FileUploadRequest):
     """
     try:
         random_filename = get_random_file_name(payload.file_extension)
-        open(f"{random_filename}", "w").write(payload.file_as_str)
+        with open(random_filename, "w") as f:
+            f.write(payload.file_as_str)
 
         await rdf_store.upload_file(
             file=random_filename,
@@ -150,7 +152,8 @@ async def rpc_bulk_file_load(payload: BulkFileUploadRequest):
         file_paths = []
         for file_as_str, extension in payload.files_as_str:
             random_filename = get_random_file_name(extension)
-            open(f"{random_filename}", "w").write(file_as_str)
+            with open(random_filename, "w") as f:
+                f.write(file_as_str)
             file_paths.append(random_filename)
 
         await rdf_store.bulk_file_load(
