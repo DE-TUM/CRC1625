@@ -539,15 +539,10 @@ def execute_mappings(use_rmlstreamer: bool = False):
 
             with open(part_path, 'w', encoding='utf-8', buffering=8 * 1024 * 1024) as f:
                 for triple in islice(it, chunk_size):
-                    f.write(triple.replace(r'\\"', r'\"'))
+                    f.write(triple.replace(r'\\"', r'\"')) # Fix broken quote-escaping from morphKGC
                     f.write(' .\n')
 
             split_materialized_triples_file_paths.append(part_path)
-
-        with open(base_materialized_triples_file_path, 'w', encoding='utf-8', buffering=8 * 1024 * 1024) as f:
-            for triple in triples:
-                f.write(triple.replace(r'\\"', r'\"')) # Fix broken quote-escaping from morphKGC
-                f.write(' .\n')
     else:
         cmd = [
             "java", "-jar", os.path.join(module_dir, 'RMLStreamer.jar'), "toFile",
