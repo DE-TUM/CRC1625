@@ -172,8 +172,8 @@ class VirtuosoRDFDatastore(RDFDatastore):
             self._run_isql(f"DELETE FROM DB.DBA.load_list;")  # This took a while to discover...
             self._run_isql(f"ld_dir('{CONTAINER_DATA_DIR}', '*.ttl', '{graph_iri}');")
 
-            with ThreadPoolExecutor(max_workers=16) as executor:
-                futures = [executor.submit(self._run_isql, "rdf_loader_run();") for _ in range(0, 16)]
+            with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
+                futures = [executor.submit(self._run_isql, "rdf_loader_run();") for _ in range(0, os.cpu_count())]
                 for future in as_completed(futures):
                     future.result()
 
