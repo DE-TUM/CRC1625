@@ -122,7 +122,7 @@ def create_workflow_model_step_controls():
                         rename_input.value = State().selected_node
                         ui.button('Rename', on_click=lambda: change_step_name_action(
                             rename_input.value
-                        ))
+                        )).props("color=blue")
 
                 with ui.column(align_items='center'):
                     ui.label('Workflow step description').classes('text-sm font-bold text-gray-600')
@@ -132,7 +132,7 @@ def create_workflow_model_step_controls():
                             State().selected_node].step_description
                         ui.button('Rename', on_click=lambda: change_step_description_action(
                             description_input.value,
-                        ))
+                        )).props("color=blue")
 
             ui.separator().classes('my-2')
 

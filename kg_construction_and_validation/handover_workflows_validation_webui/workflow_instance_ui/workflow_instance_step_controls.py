@@ -59,7 +59,7 @@ def create_workflow_instance_step_controls():
                 with ui.column():
                     ui.button('Assign', on_click=lambda:
                     add_edge_action(source_node_input_add.value, target_node_input_add.value)
-                              ).classes('w-full mt-2')
+                              ).classes('w-full mt-2').props("color=blue")
 
             ui.label('Disconnect steps').classes('text-sm font-bold text-gray-600')
             with ui.grid(columns=3).classes('w-full items-center gap-4'):

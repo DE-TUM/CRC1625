@@ -1,8 +1,7 @@
 from nicegui import ui
 
 from handover_workflows_validation.handover_workflows_validation import get_workflow_model_names_and_creator_user_ids, \
-    get_workflow_instances_of_model, read_workflow_model, WorkflowInstance, is_workflow_instance_valid, generate_SHACL_shapes_for_workflow, \
-    generate_data_graphs_for_workfow_steps, WorkflowModelStep, validate_workflow_model_step
+    get_workflow_instances_of_model, read_workflow_model, WorkflowInstance, is_workflow_instance_valid
 from handover_workflows_validation_webui.state import State
 
 
@@ -38,9 +37,10 @@ def handle_workflow_instance_table_click(workflow_instance: WorkflowInstance, ri
 
 
 async def create_workflow_models_table(main_content, right_drawer):
-    ui.label('List of predefined workflows').classes('text-xl font-bold')
+    ui.label('Your workflow models').classes('text-xl font-bold')
 
     workflow_model_table = []
+
     for workflow_model_name, user_id in await get_workflow_model_names_and_creator_user_ids():
         workflow_model_table.append(
             {
@@ -53,13 +53,11 @@ async def create_workflow_models_table(main_content, right_drawer):
         results_container.clear()
         with results_container:
             for row in rows:
-                with ui.button(on_click=lambda r=row: handle_workflow_models_table_click(r['workflow_model_name'], r['user_id'],
-                                                                                         main_content, right_drawer)).props(
-                    'flat').classes('w-full p-0'):
-                    with ui.row().classes('w-full border-b border-gray-200 py-2 items-center'):
-                        ui.label(str(row['workflow_model_name'])).classes('w-1/2 text-left')
-
-                        ui.label(str(row['user_id'])).classes('w-0 flex-grow text-right')
+                with ui.button(on_click=lambda r=row: handle_workflow_models_table_click(r['workflow_model_name'], r['user_id'], main_content, right_drawer)).props('no-caps unelevated').classes('w-full'):
+                    with ui.row().classes('w-full py-1 items-center'):
+                        ui.label(str(row['workflow_model_name'])).classes('w-1/2 text-left').style('color: #000000')
+                        ui.space()
+                        ui.label(str(row['user_id'])).classes('w-0 flex-grow text-right').style('color: #000000')
 
     def filter_table(search_input: ui.input):
         search_term = search_input.value.lower()
@@ -92,7 +90,6 @@ async def check_and_update_icon(validation_icon_column: ui.column, workflow_mode
         else:
             ui.icon('error').classes('text-red-6')
 
-
 async def handle_workflow_models_table_click(workflow_model_name: str, user_id: int, main_content, right_drawer):
     State().current_workflow_model = await read_workflow_model(workflow_model_name, user_id)
 
@@ -110,48 +107,60 @@ async def handle_workflow_models_table_click(workflow_model_name: str, user_id: 
             ui.label(f"Workflow instances of '{workflow_model_name}'").classes('text-lg font-semibold')
             ui.button("Edit Workflow model").on_click(
                 lambda: edit_handover_workflow_model_button_click()
-            )
+            ).props('color=blue')
 
-        with ui.row().classes('w-full border-b-2 border-gray-400 py-2 font-bold'):
+        with ui.row().classes('w-full border-b-2 border-gray-400 py-1 font-bold'):
             ui.label('Workflow Instance name').classes('w-1/3 text-left')
             ui.label('Associated Materials libraries or Samples').classes('w-1/3 text-left')
             ui.label('Validation status').classes('w-0 flex-grow text-left')
 
         for (workflow_instance_name, user_id), workflow_instance in State().workflow_instances_of_current_workflow_model.items():
-            with ui.button(on_click=lambda r=workflow_instance: handle_workflow_instance_table_click(r, right_drawer)).props('flat').classes('w-full p-0'):
-                with ui.row().classes('w-full border-b border-gray-200 py-2 items-center'):
-                    ui.label(workflow_instance_name).classes('w-1/3 text-left')
+            with ui.button(on_click=lambda r=workflow_instance: handle_workflow_instance_table_click(r, right_drawer)).props('no-caps unelevated color=secondary').classes('w-full p-1'):
+                with ui.row().classes('w-full py-1 items-center'):
+                    ui.label(workflow_instance_name).classes('w-1/3 text-left').style('color: #000000')
 
                     associated_objects = set()
                     for assignments in workflow_instance.step_assignments.values():
                         for assignment in assignments:
                             associated_objects.add(str(assignment))
 
-                    ui.label(', '.join(sorted(associated_objects))).classes('w-1/3 text-left')
+                    ui.label(', '.join(sorted(associated_objects))).classes('w-1/3 text-left').style('color: #000000')
 
-                    validation_icon_column = ui.column().classes('w-0 flex-grow text-left')
+                    validation_icon_column = ui.column().classes('w-0 flex-grow text-left').style('color: #000000')
                     with validation_icon_column:
                         ui.spinner()
 
                     # TODO avoid lockups here
                     await check_and_update_icon(validation_icon_column, State().current_workflow_model, workflow_instance)
 
-
 @ui.page('/workflows')
-async def workflows_page():
+async def workflows_page(demo: str = ""):
+    if demo == "demo":
+        # Become Sir SHACLot
+        State().demo_mode = True
+        State().user_id = -1
+
     main_content = ui.column().classes('w-full')
 
-    with ui.header(elevated=True).classes('items-center justify-between p-2 h-15'):
-        ui.label('Handover workflows validation prototype UI').classes('text-2xl font-bold')
+    with ui.header().classes('items-center p-2 h-14'):
+        ui.label('Handover workflows validation prototype UI').classes('text-xl').style('color: #000000')
+        ui.space()
+        if True:  # TODO integrate auth
+            ui.label('Welcome, Sir SHACLot (demo user)!').classes('text-xl').style('color: #000000')
+            ui.button('Log out', color='red', on_click=lambda: ui.navigate.to("/")).props('size=m').style('color: #000000')
+        else:
+            ui.button('Log in', color='green').props('size=m').style('color: #000000')
+            ui.button('Log in (as demo user)', color='blue').props('size=m').style('color: #000000')
 
-    with ui.footer().classes('items-center justify-between p-2 h-15'):
-        ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-xl font-medium')
-        ui.image('/assets/crc_logo_white_letters.png').classes('w-15')
+    with ui.footer().classes('items-center p-2 h-11'):
+        ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-m').style('color: #000000')
+        ui.space()
+        ui.image('/assets/crc_logo_black_letters_wide.png').classes('w-26')
 
-    right_drawer = ui.right_drawer(fixed=False).style('background-color: #d7e3f4').props('bordered')
+    right_drawer = ui.right_drawer(fixed=False).props('bordered')
     right_drawer.hide()
 
-    with ui.left_drawer().style('background-color: #d7e3f4'):
+    with ui.left_drawer().style('background-color: #deeefc'):
         await create_workflow_models_table(main_content, right_drawer)
 
 
@@ -161,14 +170,22 @@ async def workflows_page():
 
 @ui.page('/')
 async def landing_page():
-    with ui.header(elevated=True).classes('items-center justify-between p-2 h-15'):
-        ui.label('Handover workflows validation prototype UI').classes('text-2xl font-bold')
+    with ui.header().classes('items-center p-2 h-14'):
+        ui.label('Handover workflows validation prototype UI').classes('text-xl').style('color: #000000')
+        ui.space()
+        if False: # TODO integrate auth
+            ui.label('Welcome, demo user!').classes('text-xl').style('color: #000000')
+            ui.button('Log out', color='red', on_click=lambda: ui.navigate.to("/")).props('size=m').style('color: #000000')
+        else:
+            ui.button('Log in', color='green').props('size=m').style('color: #000000')
+            ui.button('Log in (as demo user)', color='blue', on_click=lambda: ui.navigate.to("/workflows?demo=demo")).props('size=m').style('color: #000000')
 
-    with ui.footer().classes('items-center justify-between p-2 h-15'):
-        ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-xl font-medium')
-        ui.image('/assets/crc_logo_white_letters.png').classes('w-15')
+    with ui.footer().classes('items-center p-2 h-11').style('background-color: #ffffff'):
+        ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-m').style('color: #000000')
+        ui.space()
+        ui.image('/assets/crc_logo_black_letters_wide.png').classes('w-26')
 
-    with ui.row().classes('w-full justify-center gap-8 m-8'):
+    with ui.row().classes('w-full justify-center gap-8 p-8'):
         with ui.card().tight().classes('w-128 h-100 cursor-pointer hover:shadow-lg') \
                 .on('click', lambda: ui.navigate.to('/workflows')):
             ui.image('assets/workflows_validation_header.png').props('fit=scale-down').classes('h-90')

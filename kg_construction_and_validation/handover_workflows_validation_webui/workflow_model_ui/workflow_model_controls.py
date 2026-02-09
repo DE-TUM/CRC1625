@@ -105,7 +105,7 @@ def create_graph_controls():
             new_step_input = ui.input('Workflow step name').classes('flex-grow')
             ui.button('Add step', on_click=lambda: add_step_action(
                 new_step_input.value
-            ))
+            )).props("color=blue")
 
         ui.separator().classes('my-2')
 
@@ -115,7 +115,7 @@ def create_graph_controls():
                 options=sorted(list(State().current_workflow_model.workflow_model_steps.keys())))
             ui.button('Remove step', on_click=lambda: remove_step_action(
                 remove_step_select.value
-            ))
+            )).props("color=red")
 
         ui.separator().classes('my-2')
 
@@ -133,7 +133,7 @@ def create_graph_controls():
             with ui.column():
                 ui.button('Connect', on_click=lambda:
                 add_edge_action(source_node_input_add.value, target_node_input_add.value)
-                          ).classes('w-full mt-2')
+                          ).classes('w-full mt-2').props("color=blue")
 
         ui.label('Disconnect steps').classes('text-sm font-bold text-gray-600')
         with ui.grid(columns=3).classes('w-full items-center gap-4'):

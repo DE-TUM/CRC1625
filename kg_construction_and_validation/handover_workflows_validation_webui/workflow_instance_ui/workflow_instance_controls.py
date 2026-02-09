@@ -69,7 +69,7 @@ def create_graph_controls():
             new_object_input = ui.input('Materials Library / Sample ID').classes('flex-grow')
             ui.button('Add step', on_click=lambda: add_object_action(
                 new_object_input.value
-            ))
+            )).props("color=blue")
 
         ui.separator().classes('my-2')
 
@@ -79,4 +79,4 @@ def create_graph_controls():
                 options=[str(obj) for obj in sorted(list(State().existing_objects))])
             ui.button('Remove step', on_click=lambda: remove_object_action(
                 remove_object_select.value
-            ))
+            )).props("color=red")

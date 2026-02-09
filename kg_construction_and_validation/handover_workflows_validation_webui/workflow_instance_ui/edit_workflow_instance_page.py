@@ -111,10 +111,13 @@ def handle_undo_button():
 
 
 async def handle_save_button():
-    await run.io_bound(overwrite_workflow_instance, State().current_workflow_instance, State().user_id)
-    State().changes_are_saved = True
-    State().workflow_model_history = []
-    ui.notify("The changes have been saved", type='positive')
+    if State().demo_mode:
+        ui.notify("You cannot save changes as a demo user", type='negative')
+    else:
+        await run.io_bound(overwrite_workflow_instance, State().current_workflow_instance, State().user_id)
+        State().changes_are_saved = True
+        State().workflow_model_history = []
+        ui.notify("The changes have been saved", type='positive')
 
 
 @ui.page('/workflows/edit_workflow_instance/{workflow_model_name}/{workflow_instance_name}/{user_id}')
@@ -136,16 +139,24 @@ async def edit_workflow_instance_page(workflow_model_name: str, workflow_instanc
 
     State().calculate_existing_objects()
 
-    with ui.header(elevated=True).classes('items-center justify-between p-2 h-15'):
-        ui.label(f"Editing Workflow Instance '{State().current_workflow_instance.workflow_instance_name}'").classes('text-2xl font-bold mb-4')
+    with ui.header().classes('items-center p-2 h-14'):
+        ui.label(f"Editing Workflow Instance '{State().current_workflow_instance.workflow_instance_name}'").classes('text-xl').style('color: #000000')
+        ui.space()
+        if True:  # TODO integrate auth
+            ui.label('Welcome, Sir SHACLot (demo user)!').classes('text-xl').style('color: #000000')
+            ui.button('Log out', color='red', on_click=lambda: ui.navigate.to("/")).props('size=m').style('color: #000000')
+        else:
+            ui.button('Log in', color='green').props('size=m').style('color: #000000')
+            ui.button('Log in (as demo user)', color='blue').props('size=m').style('color: #000000')
 
-    with ui.footer().classes('items-center justify-between p-2 h-15'):
-        ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-xl font-medium')
-        ui.image('/assets/crc_logo_white_letters.png').classes('w-15')
+    with ui.footer().classes('items-center p-2 h-11'):
+        ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-m').style('color: #000000')
+        ui.space()
+        ui.image('/assets/crc_logo_black_letters_wide.png').classes('w-26')
 
     with ui.grid(columns=3):
         with ui.column(align_items='stretch'):
-            ui.button('Return to main page', on_click=lambda: handle_return_button())
+            ui.button('Return to main page', on_click=lambda: handle_return_button()).props("color=blue")
         with ui.column(align_items='stretch'):
             ui.button('Undo last change', on_click=lambda: handle_undo_button()).props("color=red")
         with ui.column(align_items='stretch'):

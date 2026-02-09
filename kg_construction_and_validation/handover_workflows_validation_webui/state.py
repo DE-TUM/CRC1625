@@ -40,6 +40,7 @@ class State:
             'store': None,
             'workflow_model_history': [],
             'workflow_instance_history': [],
+            'demo_mode': False
         }
 
         for key, default_value in defaults.items():
@@ -179,3 +180,11 @@ class State:
             self.selected_node, self.current_workflow_instance = self.workflow_instance_history.pop()
 
         self.calculate_existing_objects()
+
+    @property
+    def demo_mode(self) -> bool:
+        return self._storage['demo_mode']
+
+    @demo_mode.setter
+    def demo_mode(self, value: bool):
+        self._storage['demo_mode'] = value
