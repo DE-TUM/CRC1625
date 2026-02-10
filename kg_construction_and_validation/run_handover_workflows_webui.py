@@ -90,6 +90,13 @@ if __name__ in {"__main__", "__mp_main__"}:
         help="Debugging mode: clear the workflows graph before starting the WebUI"
     )
 
+    parser.add_argument(
+        "--reload_on_changes",
+        action="store_true",
+        default=False,
+        help="Debugging mode: reload the webserver when files are changed. Note that it may go haywire when running validation."
+    )
+
 
     args = parser.parse_args()
 
@@ -113,7 +120,7 @@ if __name__ in {"__main__", "__mp_main__"}:
     ui.run(host="0.0.0.0",
            port=int(os.environ.get("WEBUI_PORT")),
            title="CRC1625 Handover workflows validation prototype",
-           reload=True, # Do not enable this for now, it freaks out when detecting changes on .ttl files
+           reload=args.reload_on_changes, # Do not enable this for now, it freaks out when detecting changes on .ttl files
            storage_secret=os.environ.get("WEBUI_STORAGE_SECRET"),
            uvicorn_logging_level=uvicorn_logging_level,
            access_log=access_log)
