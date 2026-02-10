@@ -187,9 +187,10 @@ async def workflows_page(demo: str = ""):
         if True:  # TODO integrate auth
             ui.label('Welcome, Sir SHACLot (demo user)!').classes('text-xl').style('color: #000000')
             ui.button('Log out', color='negative', on_click=lambda: ui.navigate.to("/")).props('size=m')
+            ui.button('Return to main page', color='info', on_click=lambda: ui.navigate.to("/")).props('size=m')
         else:
-            ui.button('Log in', color='positive').props('size=m').style('color: #000000')
-            ui.button('Log in (as demo user)', color='positive').props('size=m').style('color: #000000')
+            ui.button('Log in', color='info').props('size=m').style('color: #000000')
+            ui.button('Log in (as demo user)', color='info').props('size=m').style('color: #000000')
 
     with ui.footer().classes('items-center p-2 h-11'):
         ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-m').style('color: #000000')
@@ -209,13 +210,12 @@ async def landing_page():
         ui.label('Handover workflows validation prototype UI').classes('text-xl').style('color: #000000')
         ui.space()
         if False: # TODO integrate auth
-            ui.label('Welcome, demo user!').classes('text-xl').style('color: #000000')
-            ui.button('Log out', color='red', on_click=lambda: ui.navigate.to("/")).props('size=m').style('color: #000000')
+            ui.button('Log out', color='negative', on_click=lambda: ui.navigate.to("/")).props('size=m')
         else:
-            ui.button('Log in', color='green').props('size=m').style('color: #000000')
-            ui.button('Log in (as demo user)', color='blue', on_click=lambda: ui.navigate.to("/workflows?demo=demo")).props('size=m').style('color: #000000')
+            ui.button('Log in', color='info').props('size=m')
+            ui.button('Log in (as demo user)', color='info', on_click=lambda: ui.navigate.to("/workflows?demo=demo")).props('size=m')
 
-    with ui.footer().classes('items-center p-2 h-11').style('background-color: #ffffff'):
+    with ui.footer().classes('items-center p-2 h-11'):
         ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-m').style('color: #000000')
         ui.space()
         ui.image('/assets/crc_logo_black_letters_wide.png').classes('w-26')
@@ -224,11 +224,11 @@ async def landing_page():
         with ui.card().tight().classes('w-128 h-100 cursor-pointer hover:shadow-lg') \
                 .on('click', lambda: ui.navigate.to('/workflows')):
             ui.image('assets/workflows_validation_header.png').props('fit=scale-down').classes('h-90')
-            with ui.column().classes('p-4 w-full').style('background-color: #d7e3f4'):
+            with ui.column().classes('p-4 w-full bg-secondary'):
                 ui.label('Access the workflows dashboard').classes('text-h6')
 
         with ui.card().tight().classes('w-128 h-100 cursor-pointer hover:shadow-lg') \
                 .on('click', lambda: ui.navigate.to('/sparql')):
             ui.image('assets/sparql_endpoint_header.png').props('fit=scale-down').classes('h-90')
-            with ui.column().classes('p-4 w-full').style('background-color: #d7e3f4'):
+            with ui.column().classes('p-4 w-full bg-secondary'):
                 ui.label('Access the SPARQL querying interface').classes('text-h6')

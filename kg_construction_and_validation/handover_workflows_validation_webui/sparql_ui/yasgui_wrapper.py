@@ -193,13 +193,13 @@ async def main_page():
 
     ui.page_title('CRC 1625 SPARQL Endpoint')
 
-    with ui.left_drawer().style('background-color: #d7e3f4'):
+    with ui.left_drawer().classes('bg-secondary'):
         ui.label('Documentation').classes('text-xl font-bold')
 
         ui.label('Ontology diagrams').classes('text-m font-bold')
         with ui.dialog().props('full-width full-height') as diagrams_dialog, ui.card().props('full-width full-height'):
-            diagram_selector_crc_prefixes = ui.button(text="Diagrams with CRC 1625 ontology prefixes (recommended for CRC 1625 users)", icon='menu').props('outline color=primary size=sm')
-            diagram_selector_pmdco_prefixes = ui.button(text="Diagrams with PMDco ontology prefixes (recommended for external users)", icon='menu').props('outline color=primary size=sm')
+            diagram_selector_crc_prefixes = ui.button(text="Diagrams with CRC 1625 ontology prefixes (recommended for CRC 1625 users)", color='info', icon='menu').props('outline size=sm')
+            diagram_selector_pmdco_prefixes = ui.button(text="Diagrams with PMDco ontology prefixes (recommended for external users)", color='info', icon='menu').props('outline size=sm')
 
             pdf_column = ui.column().classes('w-full h-full')
             def set_diagram(path):
@@ -222,15 +222,15 @@ async def main_page():
                     for category, path in diagram_paths_pmdco_prefix:
                         ui.menu_item((category[:1].upper() + category[1:]).replace("_", " "), on_click=lambda p=path: set_diagram(p))
 
-            ui.button('Close', on_click=diagrams_dialog.close)
-        ui.button(text='Open ontology diagrams', icon='menu').props('color=primary size=sm').on_click(diagrams_dialog.open)
+            ui.button('Close', color='negative', on_click=diagrams_dialog.close)
+        ui.button(text='Open ontology diagrams', color='info', icon='menu').classes('w-full').props('size=sm align="left"').on_click(diagrams_dialog.open)
 
         ui.label('Example queries').classes('text-m font-bold')
         example_queries: list[tuple[str, list[tuple[str, str]]]] = load_example_queries()
         with ui.column().classes('w-full'):
             for category, queries in example_queries:
-                with ui.row().classes('w-full items-stretch'):
-                    with ui.button(text=category, icon='menu').props('color=primary size=sm'):
+                with ui.row().classes('w-full'):
+                    with ui.button(text=category, color='info', icon='menu').props('size=sm align="left"').classes('w-full'):
                         with ui.menu().props('fit'):
                             for (query_name, query_content) in queries:
                                 ui.menu_item(query_name, on_click=lambda q=query_content: set_query(q)).classes('w-full')
@@ -238,7 +238,7 @@ async def main_page():
         ui.label('Querying options').classes('text-xl font-bold')
         with ui.row().classes('items-center gap-2'):
             ui.label('(Optional) Enable inference:')
-            ui.switch().bind_value(app.storage.user, 'use_inference')
+            ui.switch().bind_value(app.storage.user, 'use_inference').props('color=info')
             with ui.icon('help'):
                 ui.tooltip('Enabling inference allows querying the data using the PMDco ontology')
 
@@ -255,8 +255,13 @@ async def main_page():
             ui.html(iframe_html, sanitize=False).classes('w-full h-full flex-grow')
 
     with ui.header(elevated=True).classes('items-center justify-between p-2 h-15'):
-        ui.label(f"CRC 1625 SPARQL endpoint").classes('text-xl font-medium')
+        ui.label(f"CRC 1625 SPARQL endpoint").classes('text-xl font-medium').style('color: #000000')
+        ui.space()
+        if True:  # TODO integrate auth
+            ui.label('Welcome, Sir SHACLot (demo user)!').classes('text-xl').style('color: #000000')
+            ui.button('Log out', color='negative', on_click=lambda: ui.navigate.to("/")).props('size=m')
+            ui.button('Return to main page', color='info', on_click=lambda: ui.navigate.to("/")).props('size=m')
 
     with ui.footer().classes('items-center justify-between p-2 h-15'):
-        ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-xl font-medium')
+        ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-xl font-medium').style('color: #000000')
         ui.image('/assets/crc_logo_white_letters.png').classes('w-15')

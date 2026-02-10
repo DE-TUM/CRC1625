@@ -114,8 +114,8 @@ async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
             ui.label('Welcome, Sir SHACLot (demo user)!').classes('text-xl').style('color: #000000')
             ui.button('Log out', color='negative', on_click=lambda: ui.navigate.to("/")).props('size=m').style('color: #000000')
         else:
-            ui.button('Log in', color='info').props('size=m').style('color: #000000')
-            ui.button('Log in (as demo user)', color='info').props('size=m').style('color: #000000')
+            ui.button('Log in', color='info').props('size=m')
+            ui.button('Log in (as demo user)', color='info').props('size=m')
 
     with ui.footer().classes('items-center p-2 h-11'):
         ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-m').style('color: #000000')
