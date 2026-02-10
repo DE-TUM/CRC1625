@@ -1,74 +1,98 @@
 from nicegui import ui
 
 from handover_workflows_validation.handover_workflows_validation import get_workflow_model_names_and_creator_user_ids, \
-    get_workflow_instances_of_model, read_workflow_model, WorkflowInstance, is_workflow_instance_valid
-from handover_workflows_validation_webui.state import State
+    get_workflow_instances_of_model, read_workflow_model, store_workflow_model, WorkflowInstance, is_workflow_instance_valid, WorkflowModel, \
+    create_workflow_instance
+from handover_workflows_validation_webui.state import State, get_state
 
 
 def edit_handover_workflow_instance_button_click():
     ui.navigate.to(
-        f'/workflows/edit_workflow_instance/{State().current_workflow_model.workflow_model_name}/{State().current_workflow_instance.workflow_instance_name}/{State().user_id}')
+        f'/workflows/edit_workflow_instance/{get_state().current_workflow_model.workflow_model_name}/{get_state().current_workflow_instance.workflow_instance_name}/{get_state().user_id}')
 
 
 def edit_handover_workflow_model_button_click():
-    ui.navigate.to(f'/workflows/edit_workflow_model/{State().current_workflow_model.workflow_model_name}/{State().user_id}')
+    ui.navigate.to(f'/workflows/edit_workflow_model/{get_state().current_workflow_model.workflow_model_name}/{get_state().user_id}')
 
 
 def handle_workflow_instance_table_click(workflow_instance: WorkflowInstance, right_drawer):
     right_drawer.clear()
 
-    State().current_workflow_instance = workflow_instance
+    get_state().current_workflow_instance = workflow_instance
 
     with right_drawer:
         right_drawer_label = ui.label('Workflow instance options').classes('text-xl font-bold')
 
         with ui.column().classes('w-full items-center gap-2'):
-            ui.button("Edit").props("color='green-6'").classes('w-full p-0').on_click(
+            ui.button("Edit", color='info').classes('w-full p-0').on_click(
                 lambda: edit_handover_workflow_instance_button_click()
             )
-            ui.button("Save as predefined workflow").classes('w-full p-0').props("color='blue-6'")
-            ui.button("Delete").props("color='red-6'").classes('w-full p-0')
+            ui.button("Delete", color='negative').classes('w-full p-0')
 
         right_drawer_label.set_text(
-            f"Workflow instance '{State().current_workflow_instance.workflow_instance_name}' options")
+            f"Workflow instance '{get_state().current_workflow_instance.workflow_instance_name}' options")
     right_drawer.show()
 
-    ui.notify(f'Selected Workflow Instance {State().current_workflow_instance.workflow_instance_name}', color='info')
+    ui.notify(f'Selected Workflow Instance {get_state().current_workflow_instance.workflow_instance_name}', color='info')
 
 
 async def create_workflow_models_table(main_content, right_drawer):
     ui.label('Your workflow models').classes('text-xl font-bold')
 
-    workflow_model_table = []
+    async def create_workflow_models_table():
+        workflow_models_table = set()
 
-    for workflow_model_name, user_id in await get_workflow_model_names_and_creator_user_ids():
-        workflow_model_table.append(
-            {
-                "workflow_model_name": workflow_model_name,
-                "user_id": user_id,
-            }
-        )
+        for workflow_model_name, user_id in await get_workflow_model_names_and_creator_user_ids():
+            workflow_models_table.add(
+                (
+                    workflow_model_name,
+                    user_id,
+                )
+            )
+
+        return workflow_models_table
 
     def show_table(results_container: ui.column, rows):
         results_container.clear()
+
         with results_container:
             for row in rows:
-                with ui.button(on_click=lambda r=row: handle_workflow_models_table_click(r['workflow_model_name'], r['user_id'], main_content, right_drawer)).props('no-caps unelevated').classes('w-full'):
+                with ui.button(on_click=lambda r=row: show_workflow_model_instances(r[0], r[1], main_content, right_drawer)).props('no-caps unelevated').classes('w-full'):
                     with ui.row().classes('w-full py-1 items-center'):
-                        ui.label(str(row['workflow_model_name'])).classes('w-1/2 text-left').style('color: #000000')
+                        ui.label(str(row[0])).classes('w-1/2 text-left').style('color: #000000')
                         ui.space()
-                        ui.label(str(row['user_id'])).classes('w-0 flex-grow text-right').style('color: #000000')
+                        ui.label(str(row[1])).classes('w-0 flex-grow text-right').style('color: #000000')
 
-    def filter_table(search_input: ui.input):
+    def filter_table(search_input: ui.input, workflow_models_table):
         search_term = search_input.value.lower()
 
         filtered_rows = [
-            row for row in workflow_model_table if search_term in row['workflow_model_name'].lower()
+            row for row in workflow_models_table if search_term in row[0].lower()
         ]
 
         show_table(results_container, filtered_rows)
 
-    search_input = ui.input(placeholder='Search by name...').classes('w-full').on_value_change(lambda: filter_table(search_input))
+    async def create_empty_workflow_model(workflow_model_name: str, results_container, workflow_models_table):
+        if get_state().demo_mode:
+            ui.notify("You cannot create new models as a demo user", type='warning')
+            return
+
+        workflow_model = WorkflowModel()
+        workflow_model.workflow_model_name = workflow_model_name
+
+        await store_workflow_model(workflow_model, get_state().user_id)
+
+        print(workflow_models_table)
+        workflow_models_table.add(
+            (
+                workflow_model_name,
+                get_state().user_id,
+            )
+        )
+        print(workflow_models_table)
+        show_table(results_container, workflow_models_table)
+
+    search_input = ui.input(placeholder='Search by name...').classes('w-full').on_value_change(lambda: filter_table(search_input, workflow_models_table))
 
     with ui.row().classes('w-full border-b-2 border-gray-400 py-2 font-bold'):
         ui.label('Workflow model').classes('w-1/2 text-left')
@@ -76,7 +100,10 @@ async def create_workflow_models_table(main_content, right_drawer):
 
     results_container = ui.column().classes('w-full')
 
-    show_table(results_container, workflow_model_table)
+    workflow_models_table = await create_workflow_models_table()
+    show_table(results_container, workflow_models_table)
+
+    ui.button("Add a new workflow model", color='info', on_click=lambda: create_empty_workflow_model("New workflow model", results_container, workflow_models_table))
 
 
 async def check_and_update_icon(validation_icon_column: ui.column, workflow_model, workflow_instance):
@@ -90,31 +117,31 @@ async def check_and_update_icon(validation_icon_column: ui.column, workflow_mode
         else:
             ui.icon('error').classes('text-red-6')
 
-async def handle_workflow_models_table_click(workflow_model_name: str, user_id: int, main_content, right_drawer):
-    State().current_workflow_model = await read_workflow_model(workflow_model_name, user_id)
+async def show_workflow_model_instances(workflow_model_name: str, user_id: int, main_content, right_drawer):
+    get_state().current_workflow_model = await read_workflow_model(workflow_model_name, user_id)
 
-    State().workflow_instances_of_current_workflow_model = await get_workflow_instances_of_model(
+    get_state().workflow_instances_of_current_workflow_model = await get_workflow_instances_of_model(
         workflow_model_name,
         user_id
     )
 
-    State().user_id = user_id  # TODO where better? + Auth
+    get_state().user_id = user_id  # TODO where better? + Auth
 
     main_content.clear()
 
     with main_content:
         with ui.grid(columns=2):
             ui.label(f"Workflow instances of '{workflow_model_name}'").classes('text-lg font-semibold')
-            ui.button("Edit Workflow model").on_click(
+            ui.button("Edit Workflow model", color='info').on_click(
                 lambda: edit_handover_workflow_model_button_click()
-            ).props('color=blue')
+            )
 
         with ui.row().classes('w-full border-b-2 border-gray-400 py-1 font-bold'):
             ui.label('Workflow Instance name').classes('w-1/3 text-left')
             ui.label('Associated Materials libraries or Samples').classes('w-1/3 text-left')
             ui.label('Validation status').classes('w-0 flex-grow text-left')
 
-        for (workflow_instance_name, user_id), workflow_instance in State().workflow_instances_of_current_workflow_model.items():
+        for (workflow_instance_name, user_id), workflow_instance in get_state().workflow_instances_of_current_workflow_model.items():
             with ui.button(on_click=lambda r=workflow_instance: handle_workflow_instance_table_click(r, right_drawer)).props('no-caps unelevated color=secondary').classes('w-full p-1'):
                 with ui.row().classes('w-full py-1 items-center'):
                     ui.label(workflow_instance_name).classes('w-1/3 text-left').style('color: #000000')
@@ -130,15 +157,27 @@ async def handle_workflow_models_table_click(workflow_model_name: str, user_id: 
                     with validation_icon_column:
                         ui.spinner()
 
-                    # TODO avoid lockups here
-                    await check_and_update_icon(validation_icon_column, State().current_workflow_model, workflow_instance)
+                    await check_and_update_icon(validation_icon_column, get_state().current_workflow_model, workflow_instance)
+
+        async def create_empty_workflow_instance(workflow_model_name: str, workflow_instance_name: str, main_content, right_drawer):
+            workflow_instance = WorkflowInstance()
+            workflow_instance.workflow_model_name = workflow_model_name
+            workflow_instance.workflow_instance_name = workflow_instance_name
+
+            await create_workflow_instance(workflow_instance, get_state().user_id)
+            # Show them again
+            await show_workflow_model_instances(workflow_model_name, get_state().user_id, main_content, right_drawer)
+
+        # TODO fix: the query expects the instance to have assignments etc., and the new one doesnt, so it is not shown
+        ui.button("Add a new workflow instance", color='info', on_click=lambda: create_empty_workflow_instance(workflow_model_name, "New workflow instance", main_content, right_drawer))
+
 
 @ui.page('/workflows')
 async def workflows_page(demo: str = ""):
     if demo == "demo":
         # Become Sir SHACLot
-        State().demo_mode = True
-        State().user_id = -1
+        get_state().demo_mode = True
+        get_state().user_id = -1
 
     main_content = ui.column().classes('w-full')
 
@@ -147,10 +186,10 @@ async def workflows_page(demo: str = ""):
         ui.space()
         if True:  # TODO integrate auth
             ui.label('Welcome, Sir SHACLot (demo user)!').classes('text-xl').style('color: #000000')
-            ui.button('Log out', color='red', on_click=lambda: ui.navigate.to("/")).props('size=m').style('color: #000000')
+            ui.button('Log out', color='negative', on_click=lambda: ui.navigate.to("/")).props('size=m')
         else:
-            ui.button('Log in', color='green').props('size=m').style('color: #000000')
-            ui.button('Log in (as demo user)', color='blue').props('size=m').style('color: #000000')
+            ui.button('Log in', color='positive').props('size=m').style('color: #000000')
+            ui.button('Log in (as demo user)', color='positive').props('size=m').style('color: #000000')
 
     with ui.footer().classes('items-center p-2 h-11'):
         ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-m').style('color: #000000')
@@ -160,12 +199,8 @@ async def workflows_page(demo: str = ""):
     right_drawer = ui.right_drawer(fixed=False).props('bordered')
     right_drawer.hide()
 
-    with ui.left_drawer().style('background-color: #deeefc'):
+    with ui.left_drawer().classes('bg-secondary'):
         await create_workflow_models_table(main_content, right_drawer)
-
-
-    with ui.page_scroller(position='bottom-right', x_offset=20, y_offset=20):
-        ui.button('Scroll to Top')
 
 
 @ui.page('/')

@@ -103,13 +103,17 @@ if __name__ in {"__main__", "__mp_main__"}:
 
     app.add_static_files("/assets", ASSETS_FOLDER)
 
-    app.colors(primary='#b1d2f0',
-               secondary='#deeefc')
+    app.colors(primary='#dbdbdb',
+               secondary='#f0f0f0',
+               positive='#369c4e',
+               negative='#d40820',
+               info='#5898d4',
+               warning='#e88b00')
 
     ui.run(host="0.0.0.0",
            port=int(os.environ.get("WEBUI_PORT")),
            title="CRC1625 Handover workflows validation prototype",
-           reload=False, # Do not enable this for now, it freaks out when detecting changes on .ttl files
+           reload=True, # Do not enable this for now, it freaks out when detecting changes on .ttl files
            storage_secret=os.environ.get("WEBUI_STORAGE_SECRET"),
            uvicorn_logging_level=uvicorn_logging_level,
            access_log=access_log)

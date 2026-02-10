@@ -1,7 +1,7 @@
 from nicegui import ui
 
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import NodeType
-from handover_workflows_validation_webui.state import State, ui_elements
+from handover_workflows_validation_webui.state import ui_elements, get_state
 from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_step_controls import \
     create_workflow_instance_step_controls
 
@@ -11,18 +11,18 @@ def add_object_action(new_object_id: str | None):
         ui.notify("Please indicate a Materials Library / Sample ID to add", type='warning')
         return
 
-    if int(new_object_id) in State().existing_objects:
+    if int(new_object_id) in get_state().existing_objects:
         ui.notify(f"The Materials Library / Sample ID '{new_object_id}' is already present in the Workflow Instance",
                   type='negative')
         return
 
-    State().save_workflow_instance_copy()
+    get_state().save_workflow_instance_copy()
 
     ui_elements.graph_component.add_node(new_object_id,
                                          new_object_id,
                                          NodeType.node_type_object,
                                          coloring_ids=['object'])
-    State().existing_objects.add(int(new_object_id))
+    get_state().existing_objects.add(int(new_object_id))
 
     ui.notify(f"Added Materials Library / Sample ID '{new_object_id}'", type='positive')
 
@@ -40,14 +40,14 @@ def remove_object_action(object_id_to_remove: str):
         ui.notify("Please indicate a Materials Library / Sample ID to remove", type='warning')
         return
 
-    State().save_workflow_model_copy()
+    get_state().save_workflow_model_copy()
 
-    for assignment in State().current_workflow_instance.step_assignments.values():
+    for assignment in get_state().current_workflow_instance.step_assignments.values():
         if int(object_id_to_remove) in assignment:
             assignment.remove(int(object_id_to_remove))
 
     ui_elements.graph_component.remove_node(object_id_to_remove)
-    State().existing_objects.remove(int(object_id_to_remove))
+    get_state().existing_objects.remove(int(object_id_to_remove))
 
     ui.notify(f"Removed Materials Library / Sample ID '{object_id_to_remove}'", type='positive')
 
@@ -67,16 +67,16 @@ def create_graph_controls():
         ui.label('Add a Materials Library / Sample ID').classes('text-sm font-bold text-gray-600')
         with ui.row().classes('w-full items-center'):
             new_object_input = ui.input('Materials Library / Sample ID').classes('flex-grow')
-            ui.button('Add step', on_click=lambda: add_object_action(
+            ui.button('Add step', color='info', on_click=lambda: add_object_action(
                 new_object_input.value
-            )).props("color=blue")
+            ))
 
         ui.separator().classes('my-2')
 
         ui.label('Remove a Materials Library / Sample ID').classes('text-sm font-bold text-gray-600')
         with ui.row().classes('w-full items-center'):
             remove_object_select = ui.select(
-                options=[str(obj) for obj in sorted(list(State().existing_objects))])
-            ui.button('Remove step', on_click=lambda: remove_object_action(
+                options=[str(obj) for obj in sorted(list(get_state().existing_objects))])
+            ui.button('Remove step', color='negative', on_click=lambda: remove_object_action(
                 remove_object_select.value
-            )).props("color=red")
+            ))

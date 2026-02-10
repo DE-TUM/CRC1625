@@ -3,7 +3,7 @@ from nicegui import ui
 from handover_workflows_validation.handover_workflows_validation import read_workflow_model, WorkflowModel, \
     overwrite_workflow_model
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, NodeType
-from handover_workflows_validation_webui.state import State, ui_elements
+from handover_workflows_validation_webui.state import ui_elements, get_state
 from handover_workflows_validation_webui.workflow_model_ui.workflow_model_controls import create_graph_controls
 from handover_workflows_validation_webui.workflow_model_ui.workflow_model_step_controls import \
     create_workflow_model_step_controls
@@ -31,20 +31,21 @@ def handle_node_click(e):
     node_id = e.get('id')
     node_label = e.get('label')
 
-    State().selected_node = node_id
+    get_state().selected_node = node_id
     create_workflow_model_step_controls()
     ui.notify(f"Step selected: {node_label}", type='info')
 
 
 async def handle_return_button():
-    if not State().changes_are_saved:
+    if not get_state().changes_are_saved and not get_state().demo_mode:
         with ui.dialog() as return_dialog:
             with ui.card(align_items='center'):
                 with ui.row(align_items='center').classes('w-full justify-center'):
                     ui.label('The workflow model has been modified. Save changes and exit?')
 
                     async def save_and_exit_and_close():
-                        await overwrite_workflow_model(State().current_workflow_model, State().user_id)
+                        await overwrite_workflow_model(get_state().current_workflow_model, get_state().user_id)
+
                         return_dialog.close()
                         ui.navigate.to('/workflows')
 
@@ -52,9 +53,9 @@ async def handle_return_button():
                         return_dialog.close()
                         ui.navigate.to('/workflows')
 
-                    ui.button('Save and exit', on_click=save_and_exit_and_close).props("color='green'")
-                    ui.button('Exit without saving', on_click=navigate_without_saving).props("color='red'")
-                    ui.button('Cancel', on_click=return_dialog.close)
+                    ui.button('Save and exit', color='positive', on_click=save_and_exit_and_close)
+                    ui.button('Exit without saving', color='negative', on_click=navigate_without_saving)
+                    ui.button('Cancel', color='negative', on_click=return_dialog.close)
 
         # 4. Open the dialog immediately after definition
         return_dialog.open()
@@ -63,13 +64,13 @@ async def handle_return_button():
 
 
 def handle_undo_button():
-    if len(State().workflow_model_history) == 0:
+    if len(get_state().workflow_model_history) == 0:
         ui.notify("No changes have been performed yet!", type='warning')
     else:
-        State().undo_workflow_model_change()
+        get_state().undo_workflow_model_change()
 
         # Reload Cytoscape
-        graph_data = workflow_model_to_nodes_and_edges(State().current_workflow_model)
+        graph_data = workflow_model_to_nodes_and_edges(get_state().current_workflow_model)
         ui_elements.graph_component_column.clear()
         with ui_elements.graph_component_column:
             ui_elements.graph_component = CytoscapeComponent(
@@ -87,36 +88,34 @@ def handle_undo_button():
         with ui_elements.node_controls_column:
             create_workflow_model_step_controls()
 
-        ui_elements.graph_component.select_node(State().selected_node)
+        ui_elements.graph_component.select_node(get_state().selected_node)
         ui.notify("The last change has been undone", type='positive')
 
 
 async def handle_save_button():
-    if State().demo_mode:
+    if get_state().demo_mode:
         ui.notify("You cannot save changes as a demo user", type='negative')
     else:
-        await overwrite_workflow_model(State().current_workflow_model, State().user_id)
-        State().changes_are_saved = True
-        State().workflow_model_history = []
+        await overwrite_workflow_model(get_state().current_workflow_model, get_state().user_id)
+        get_state().changes_are_saved = True
+        get_state().workflow_model_history = []
         ui.notify("The changes have been saved", type='positive')
 
 
 @ui.page('/workflows/edit_workflow_model/{workflow_model_name}/{user_id}')
 async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
-    State().user_id = user_id  # TODO
-
-    if State().current_workflow_model is None:  # The page has been reloaded
-        State().current_workflow_model = await read_workflow_model(workflow_model_name, user_id)
+    if get_state().current_workflow_model is None:  # The page has been reloaded
+        get_state().current_workflow_model = await read_workflow_model(workflow_model_name, user_id)
 
     with ui.header().classes('items-center p-2 h-14'):
         ui.label(f"Editing Workflow Model '{workflow_model_name}'").classes('text-xl').style('color: #000000')
         ui.space()
         if True:  # TODO integrate auth
             ui.label('Welcome, Sir SHACLot (demo user)!').classes('text-xl').style('color: #000000')
-            ui.button('Log out', color='red', on_click=lambda: ui.navigate.to("/")).props('size=m').style('color: #000000')
+            ui.button('Log out', color='negative', on_click=lambda: ui.navigate.to("/")).props('size=m').style('color: #000000')
         else:
-            ui.button('Log in', color='green').props('size=m').style('color: #000000')
-            ui.button('Log in (as demo user)', color='blue').props('size=m').style('color: #000000')
+            ui.button('Log in', color='info').props('size=m').style('color: #000000')
+            ui.button('Log in (as demo user)', color='info').props('size=m').style('color: #000000')
 
     with ui.footer().classes('items-center p-2 h-11'):
         ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-m').style('color: #000000')
@@ -125,13 +124,13 @@ async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
 
     with ui.grid(columns=3):
         with ui.column(align_items='stretch'):
-            ui.button('Return to main page', on_click=handle_return_button).props("color=blue")
+            ui.button('Return to main page', color='info', on_click=handle_return_button)
         with ui.column(align_items='stretch'):
-            ui.button('Undo last change', on_click=handle_undo_button).props("color=red")
+            ui.button('Undo last change', color='negative', on_click=handle_undo_button)
         with ui.column(align_items='stretch'):
-            ui.button('Save all changes', on_click=handle_save_button).props("color=green")
+            ui.button('Save all changes', color='positive', on_click=handle_save_button)
 
-    graph_data = workflow_model_to_nodes_and_edges(State().current_workflow_model)
+    graph_data = workflow_model_to_nodes_and_edges(get_state().current_workflow_model)
 
     with ui.grid(columns=1).classes('w-full gap-8'):
         graph_component_column = ui.column()
@@ -148,7 +147,10 @@ async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
             node_controls_column = ui.column()
 
         if graph_data['nodes']:
-            State().selected_node = State().current_workflow_model.workflow_model_options.initial_step_name
+            get_state().selected_node = get_state().current_workflow_model.workflow_model_options.initial_step_name
+        else:
+            # We need to reset it anyways
+            get_state().selected_node = ""
 
         ui_elements.graph_component = graph_component
         ui_elements.graph_component_column = graph_component_column
@@ -161,4 +163,4 @@ async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
         with node_controls_column:
             create_workflow_model_step_controls()
 
-        graph_component.select_node(State().selected_node)
+        graph_component.select_node(get_state().selected_node)

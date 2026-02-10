@@ -188,3 +188,15 @@ class State:
     @demo_mode.setter
     def demo_mode(self, value: bool):
         self._storage['demo_mode'] = value
+
+
+# Use a singleton pattern
+_state_instance = None
+
+def get_state():
+    global _state_instance
+
+    if _state_instance is None:
+        _state_instance = State()
+
+    return _state_instance
