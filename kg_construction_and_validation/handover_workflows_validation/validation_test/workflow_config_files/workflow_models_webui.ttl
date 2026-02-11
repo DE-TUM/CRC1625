@@ -8,180 +8,180 @@
     crc:objectName "Demo workflow"^^xsd:string ;
     crc:creator <https://crc1625.mdi.ruhr-uni-bochum.de/user/-1> ;
     crc:allowIntermediateHandoverGroups false ;
-    crc:substep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_57ce4318-2905-5346-9f82-f364bb1997d9_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> .
+    crc:substep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_0fe3cb1d-a808-549d-bd35-b33948c2b417_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> .
 
-crc:EDX_activity_for_workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9 a crc:ActivityModel,
+crc:EDX_activity_for_workflow_step_1ee82e48-6709-5fba-b324-cfc183840618 a crc:ActivityModel,
         crc:EDXMicroscopyProcess .
 
-crc:EDX_activity_for_workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101 a crc:ActivityModel,
+crc:EDX_activity_for_workflow_step_6a7651e6-800b-5e76-ae96-4d792c89b689 a crc:ActivityModel,
         crc:EDXMicroscopyProcess .
 
-crc:Others_activity_for_workflow_step_57ce4318-2905-5346-9f82-f364bb1997d9 a crc:ActivityModel,
+crc:Others_activity_for_workflow_step_0fe3cb1d-a808-549d-bd35-b33948c2b417 a crc:ActivityModel,
         pmdco:AnalysingProcess .
 
-crc:Others_activity_for_workflow_step_ea96b670-d757-546e-9bbe-6728cc30b1c0 a crc:ActivityModel,
+crc:Others_activity_for_workflow_step_79d1eede-f7f6-50f4-a63d-e1d14ec66de2 a crc:ActivityModel,
         pmdco:AnalysingProcess .
 
-crc:SECCM_activity_for_workflow_step_cd529f81-0704-5956-8d2e-6d588ec5625d a crc:ActivityModel,
+crc:SECCM_activity_for_workflow_step_ac9663d1-c008-5477-ac20-75abe10d3d4d a crc:ActivityModel,
         crc:SECCMProcess .
 
-crc:SECCM_activity_for_workflow_step_f19e2cd8-4d3a-5547-989c-c5b4db109d7f a crc:ActivityModel,
+crc:SECCM_activity_for_workflow_step_7f125bd5-6f1b-562d-ad8b-2574dae79c86 a crc:ActivityModel,
         crc:SECCMProcess .
 
-crc:SEM_activity_for_workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9 a crc:ActivityModel,
+crc:SEM_activity_for_workflow_step_1ee82e48-6709-5fba-b324-cfc183840618 a crc:ActivityModel,
         crc:SEMProcess .
 
-crc:SEM_activity_for_workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101 a crc:ActivityModel,
+crc:SEM_activity_for_workflow_step_6a7651e6-800b-5e76-ae96-4d792c89b689 a crc:ActivityModel,
         crc:SEMProcess .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_57ce4318-2905-5346-9f82-f364bb1997d9_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> a crc:HandoverWorkflowModelStep ;
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_0fe3cb1d-a808-549d-bd35-b33948c2b417_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> a crc:HandoverWorkflowModelStep ;
     crc:objectName "step_1"^^xsd:string ;
     crc:objectDescription """Initial work of Sample 1
 """^^xsd:string ;
     crc:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/A01> ;
     crc:allowsOtherActivities false ;
     crc:isHandoverWorkflowStepEnabled true ;
-    crc:requiresActivity crc:Others_activity_for_workflow_step_57ce4318-2905-5346-9f82-f364bb1997d9 ;
-    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> .
+    crc:requiresActivity crc:Others_activity_for_workflow_step_0fe3cb1d-a808-549d-bd35-b33948c2b417 ;
+    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_1ee82e48-6709-5fba-b324-cfc183840618_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> a crc:HandoverWorkflowModelStep ;
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_1ee82e48-6709-5fba-b324-cfc183840618_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> a crc:HandoverWorkflowModelStep ;
     crc:objectName "step_2"^^xsd:string ;
     crc:objectDescription """Handovers 1 and 2
 """^^xsd:string ;
     crc:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/S> ;
     crc:allowsOtherActivities false ;
     crc:isHandoverWorkflowStepEnabled true ;
-    crc:requiresActivity crc:EDX_activity_for_workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9,
-        crc:SEM_activity_for_workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9 ;
-    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_f19e2cd8-4d3a-5547-989c-c5b4db109d7f_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> .
+    crc:requiresActivity crc:EDX_activity_for_workflow_step_1ee82e48-6709-5fba-b324-cfc183840618,
+        crc:SEM_activity_for_workflow_step_1ee82e48-6709-5fba-b324-cfc183840618 ;
+    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_7f125bd5-6f1b-562d-ad8b-2574dae79c86_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_cd529f81-0704-5956-8d2e-6d588ec5625d_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> a crc:HandoverWorkflowModelStep ;
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_ac9663d1-c008-5477-ac20-75abe10d3d4d_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> a crc:HandoverWorkflowModelStep ;
     crc:objectName "step_6"^^xsd:string ;
     crc:objectDescription """Handover 6
 """^^xsd:string ;
     crc:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/C01> ;
     crc:allowsOtherActivities false ;
     crc:isHandoverWorkflowStepEnabled true ;
-    crc:requiresActivity crc:SECCM_activity_for_workflow_step_cd529f81-0704-5956-8d2e-6d588ec5625d .
+    crc:requiresActivity crc:SECCM_activity_for_workflow_step_ac9663d1-c008-5477-ac20-75abe10d3d4d .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> a crc:HandoverWorkflowModelStep ;
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_6a7651e6-800b-5e76-ae96-4d792c89b689_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> a crc:HandoverWorkflowModelStep ;
     crc:objectName "step_5"^^xsd:string ;
     crc:objectDescription """Handovers 4 and 5
 """^^xsd:string ;
     crc:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/S> ;
     crc:allowsOtherActivities false ;
     crc:isHandoverWorkflowStepEnabled true ;
-    crc:requiresActivity crc:EDX_activity_for_workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101,
-        crc:SEM_activity_for_workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101 ;
-    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_cd529f81-0704-5956-8d2e-6d588ec5625d_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> .
+    crc:requiresActivity crc:EDX_activity_for_workflow_step_6a7651e6-800b-5e76-ae96-4d792c89b689,
+        crc:SEM_activity_for_workflow_step_6a7651e6-800b-5e76-ae96-4d792c89b689 ;
+    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_ac9663d1-c008-5477-ac20-75abe10d3d4d_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_ea96b670-d757-546e-9bbe-6728cc30b1c0_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> a crc:HandoverWorkflowModelStep ;
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_79d1eede-f7f6-50f4-a63d-e1d14ec66de2_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> a crc:HandoverWorkflowModelStep ;
     crc:objectName "step_4"^^xsd:string ;
     crc:objectDescription """Initial work of annealed sample 1
 """^^xsd:string ;
     crc:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/A01> ;
     crc:allowsOtherActivities false ;
     crc:isHandoverWorkflowStepEnabled true ;
-    crc:requiresActivity crc:Others_activity_for_workflow_step_ea96b670-d757-546e-9bbe-6728cc30b1c0 ;
-    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> .
+    crc:requiresActivity crc:Others_activity_for_workflow_step_79d1eede-f7f6-50f4-a63d-e1d14ec66de2 ;
+    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_6a7651e6-800b-5e76-ae96-4d792c89b689_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_f19e2cd8-4d3a-5547-989c-c5b4db109d7f_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> a crc:HandoverWorkflowModelStep ;
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_7f125bd5-6f1b-562d-ad8b-2574dae79c86_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> a crc:HandoverWorkflowModelStep ;
     crc:objectName "step_3"^^xsd:string ;
     crc:objectDescription """Handover 3
 """^^xsd:string ;
     crc:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/C01> ;
     crc:allowsOtherActivities false ;
     crc:isHandoverWorkflowStepEnabled true ;
-    crc:requiresActivity crc:SECCM_activity_for_workflow_step_f19e2cd8-4d3a-5547-989c-c5b4db109d7f ;
-    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_ea96b670-d757-546e-9bbe-6728cc30b1c0_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> .
+    crc:requiresActivity crc:SECCM_activity_for_workflow_step_7f125bd5-6f1b-562d-ad8b-2574dae79c86 ;
+    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_79d1eede-f7f6-50f4-a63d-e1d14ec66de2_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> .
 
 <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> a crc:HandoverWorkflowModel ;
     crc:objectName "Demo workflow 2"^^xsd:string ;
     crc:creator <https://crc1625.mdi.ruhr-uni-bochum.de/user/-1> ;
     crc:allowIntermediateHandoverGroups false ;
-    crc:substep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_57ce4318-2905-5346-9f82-f364bb1997d9_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> .
+    crc:substep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_0fe3cb1d-a808-549d-bd35-b33948c2b417_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> .
 
-crc:EDX_activity_for_workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9 a crc:ActivityModel,
+crc:EDX_activity_for_workflow_step_1ee82e48-6709-5fba-b324-cfc183840618 a crc:ActivityModel,
         crc:EDXMicroscopyProcess .
 
-crc:EDX_activity_for_workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101 a crc:ActivityModel,
+crc:EDX_activity_for_workflow_step_6a7651e6-800b-5e76-ae96-4d792c89b689 a crc:ActivityModel,
         crc:EDXMicroscopyProcess .
 
-crc:Others_activity_for_workflow_step_57ce4318-2905-5346-9f82-f364bb1997d9 a crc:ActivityModel,
+crc:Others_activity_for_workflow_step_0fe3cb1d-a808-549d-bd35-b33948c2b417 a crc:ActivityModel,
         pmdco:AnalysingProcess .
 
-crc:Others_activity_for_workflow_step_ea96b670-d757-546e-9bbe-6728cc30b1c0 a crc:ActivityModel,
+crc:Others_activity_for_workflow_step_79d1eede-f7f6-50f4-a63d-e1d14ec66de2 a crc:ActivityModel,
         pmdco:AnalysingProcess .
 
-crc:SECCM_activity_for_workflow_step_cd529f81-0704-5956-8d2e-6d588ec5625d a crc:ActivityModel,
+crc:SECCM_activity_for_workflow_step_ac9663d1-c008-5477-ac20-75abe10d3d4d a crc:ActivityModel,
         crc:SECCMProcess .
 
-crc:SECCM_activity_for_workflow_step_f19e2cd8-4d3a-5547-989c-c5b4db109d7f a crc:ActivityModel,
+crc:SECCM_activity_for_workflow_step_7f125bd5-6f1b-562d-ad8b-2574dae79c86 a crc:ActivityModel,
         crc:SECCMProcess .
 
-crc:SEM_activity_for_workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9 a crc:ActivityModel,
+crc:SEM_activity_for_workflow_step_1ee82e48-6709-5fba-b324-cfc183840618 a crc:ActivityModel,
         crc:SEMProcess .
 
-crc:SEM_activity_for_workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101 a crc:ActivityModel,
+crc:SEM_activity_for_workflow_step_6a7651e6-800b-5e76-ae96-4d792c89b689 a crc:ActivityModel,
         crc:SEMProcess .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_57ce4318-2905-5346-9f82-f364bb1997d9_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> a crc:HandoverWorkflowModelStep ;
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_0fe3cb1d-a808-549d-bd35-b33948c2b417_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> a crc:HandoverWorkflowModelStep ;
     crc:objectName "step_1"^^xsd:string ;
     crc:objectDescription """Initial work of Sample 1
 """^^xsd:string ;
     crc:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/A01> ;
     crc:allowsOtherActivities false ;
     crc:isHandoverWorkflowStepEnabled true ;
-    crc:requiresActivity crc:Others_activity_for_workflow_step_57ce4318-2905-5346-9f82-f364bb1997d9 ;
-    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> .
+    crc:requiresActivity crc:Others_activity_for_workflow_step_0fe3cb1d-a808-549d-bd35-b33948c2b417 ;
+    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_1ee82e48-6709-5fba-b324-cfc183840618_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> a crc:HandoverWorkflowModelStep ;
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_1ee82e48-6709-5fba-b324-cfc183840618_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> a crc:HandoverWorkflowModelStep ;
     crc:objectName "step_2"^^xsd:string ;
     crc:objectDescription """Handovers 1 and 2
 """^^xsd:string ;
     crc:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/S> ;
     crc:allowsOtherActivities false ;
     crc:isHandoverWorkflowStepEnabled true ;
-    crc:requiresActivity crc:EDX_activity_for_workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9,
-        crc:SEM_activity_for_workflow_step_fc08b2d8-c55f-559d-b8e6-20bd25344ff9 ;
-    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_f19e2cd8-4d3a-5547-989c-c5b4db109d7f_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> .
+    crc:requiresActivity crc:EDX_activity_for_workflow_step_1ee82e48-6709-5fba-b324-cfc183840618,
+        crc:SEM_activity_for_workflow_step_1ee82e48-6709-5fba-b324-cfc183840618 ;
+    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_7f125bd5-6f1b-562d-ad8b-2574dae79c86_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_cd529f81-0704-5956-8d2e-6d588ec5625d_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> a crc:HandoverWorkflowModelStep ;
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_ac9663d1-c008-5477-ac20-75abe10d3d4d_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> a crc:HandoverWorkflowModelStep ;
     crc:objectName "step_6"^^xsd:string ;
     crc:objectDescription """Handover 6
 """^^xsd:string ;
     crc:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/C01> ;
     crc:allowsOtherActivities false ;
     crc:isHandoverWorkflowStepEnabled true ;
-    crc:requiresActivity crc:SECCM_activity_for_workflow_step_cd529f81-0704-5956-8d2e-6d588ec5625d .
+    crc:requiresActivity crc:SECCM_activity_for_workflow_step_ac9663d1-c008-5477-ac20-75abe10d3d4d .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> a crc:HandoverWorkflowModelStep ;
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_6a7651e6-800b-5e76-ae96-4d792c89b689_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> a crc:HandoverWorkflowModelStep ;
     crc:objectName "step_5"^^xsd:string ;
     crc:objectDescription """Handovers 4 and 5
 """^^xsd:string ;
     crc:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/S> ;
     crc:allowsOtherActivities false ;
     crc:isHandoverWorkflowStepEnabled true ;
-    crc:requiresActivity crc:EDX_activity_for_workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101,
-        crc:SEM_activity_for_workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101 ;
-    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_cd529f81-0704-5956-8d2e-6d588ec5625d_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> .
+    crc:requiresActivity crc:EDX_activity_for_workflow_step_6a7651e6-800b-5e76-ae96-4d792c89b689,
+        crc:SEM_activity_for_workflow_step_6a7651e6-800b-5e76-ae96-4d792c89b689 ;
+    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_ac9663d1-c008-5477-ac20-75abe10d3d4d_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_ea96b670-d757-546e-9bbe-6728cc30b1c0_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> a crc:HandoverWorkflowModelStep ;
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_79d1eede-f7f6-50f4-a63d-e1d14ec66de2_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> a crc:HandoverWorkflowModelStep ;
     crc:objectName "step_4"^^xsd:string ;
     crc:objectDescription """Initial work of annealed sample 1
 """^^xsd:string ;
     crc:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/A01> ;
     crc:allowsOtherActivities false ;
     crc:isHandoverWorkflowStepEnabled true ;
-    crc:requiresActivity crc:Others_activity_for_workflow_step_ea96b670-d757-546e-9bbe-6728cc30b1c0 ;
-    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_31e01b29-b373-5942-9caf-c0ae7bc5b101_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> .
+    crc:requiresActivity crc:Others_activity_for_workflow_step_79d1eede-f7f6-50f4-a63d-e1d14ec66de2 ;
+    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_6a7651e6-800b-5e76-ae96-4d792c89b689_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> .
 
-<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_f19e2cd8-4d3a-5547-989c-c5b4db109d7f_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> a crc:HandoverWorkflowModelStep ;
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_7f125bd5-6f1b-562d-ad8b-2574dae79c86_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> a crc:HandoverWorkflowModelStep ;
     crc:objectName "step_3"^^xsd:string ;
     crc:objectDescription """Handover 3
 """^^xsd:string ;
     crc:allowedProject <https://crc1625.mdi.ruhr-uni-bochum.de/project/C01> ;
     crc:allowsOtherActivities false ;
     crc:isHandoverWorkflowStepEnabled true ;
-    crc:requiresActivity crc:SECCM_activity_for_workflow_step_f19e2cd8-4d3a-5547-989c-c5b4db109d7f ;
-    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_ea96b670-d757-546e-9bbe-6728cc30b1c0_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> .
+    crc:requiresActivity crc:SECCM_activity_for_workflow_step_7f125bd5-6f1b-562d-ad8b-2574dae79c86 ;
+    crc:nextStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_79d1eede-f7f6-50f4-a63d-e1d14ec66de2_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> .

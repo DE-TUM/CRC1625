@@ -114,28 +114,22 @@ async def handle_save_button():
     if get_state().demo_mode:
         ui.notify("You cannot save changes as a demo user", type='negative')
     else:
-        await run.io_bound(overwrite_workflow_instance, get_state().current_workflow_instance, get_state().user_id)
+        await overwrite_workflow_instance(get_state().current_workflow_instance, get_state().user_id)
         get_state().changes_are_saved = True
         get_state().workflow_model_history = []
         ui.notify("The changes have been saved", type='positive')
 
 
-@ui.page('/workflows/edit_workflow_instance/{workflow_model_name}/{workflow_instance_name}/{user_id}')
-async def edit_workflow_instance_page(workflow_model_name: str, workflow_instance_name: str, user_id: int):
-    get_state().user_id = user_id  # TODO
-
+@ui.page('/workflows/edit_workflow_instance/{workflow_model_name}/{workflow_model_creator_user_id}/{workflow_instance_name}/{workflow_instance_creator_user_id}')
+async def edit_workflow_instance_page(workflow_model_name: str,
+                                      workflow_model_creator_user_id: int,
+                                      workflow_instance_name: str,
+                                      workflow_instance_creator_user_id: int):
     if get_state().current_workflow_model is None:  # The page has been reloaded
-        get_state().current_workflow_model = await read_workflow_model(workflow_model_name, user_id)
-        get_state().workflow_instances_of_current_workflow_model = await get_workflow_instances_of_model(workflow_model_name, user_id)
+        get_state().current_workflow_model = await read_workflow_model(workflow_model_name, workflow_model_creator_user_id)
 
-        # results = await asyncio.gather(
-        #    read_workflow_model_task,
-        #    get_workflow_instances_of_model_task
-        # )
-        # get_state().current_workflow_model = results[0]
-        # get_state().workflow_instances_of_current_workflow_model = results[1]
-
-        get_state().current_workflow_instance = get_state().workflow_instances_of_current_workflow_model[(workflow_instance_name, user_id)]
+    get_state().workflow_instances_of_current_workflow_model = await get_workflow_instances_of_model(get_state().current_workflow_model)
+    get_state().current_workflow_instance = get_state().workflow_instances_of_current_workflow_model[(workflow_instance_name, workflow_instance_creator_user_id)]
 
     get_state().calculate_existing_objects()
 

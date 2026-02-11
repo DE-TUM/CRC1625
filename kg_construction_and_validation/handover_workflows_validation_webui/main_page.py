@@ -1,14 +1,16 @@
+import asyncio
+
 from nicegui import ui
 
 from handover_workflows_validation.handover_workflows_validation import get_workflow_model_names_and_creator_user_ids, \
     get_workflow_instances_of_model, read_workflow_model, store_workflow_model, WorkflowInstance, is_workflow_instance_valid, WorkflowModel, \
     create_workflow_instance
-from handover_workflows_validation_webui.state import State, get_state
+from handover_workflows_validation_webui.state import get_state
 
 
 def edit_handover_workflow_instance_button_click():
     ui.navigate.to(
-        f'/workflows/edit_workflow_instance/{get_state().current_workflow_model.workflow_model_name}/{get_state().current_workflow_instance.workflow_instance_name}/{get_state().user_id}')
+        f'/workflows/edit_workflow_instance/{get_state().current_workflow_model.workflow_model_name}/{get_state().current_workflow_model.creator_user_id}/{get_state().current_workflow_instance.workflow_instance_name}/{get_state().current_workflow_instance.creator_user_id}')
 
 
 def edit_handover_workflow_model_button_click():
@@ -82,14 +84,12 @@ async def create_workflow_models_table(main_content, right_drawer):
 
         await store_workflow_model(workflow_model, get_state().user_id)
 
-        print(workflow_models_table)
         workflow_models_table.add(
             (
                 workflow_model_name,
                 get_state().user_id,
             )
         )
-        print(workflow_models_table)
         show_table(results_container, workflow_models_table)
 
     search_input = ui.input(placeholder='Search by name...').classes('w-full').on_value_change(lambda: filter_table(search_input, workflow_models_table))
@@ -117,17 +117,13 @@ async def check_and_update_icon(validation_icon_column: ui.column, workflow_mode
         else:
             ui.icon('error').classes('text-red-6')
 
-async def show_workflow_model_instances(workflow_model_name: str, user_id: int, main_content, right_drawer):
-    get_state().current_workflow_model = await read_workflow_model(workflow_model_name, user_id)
-
-    get_state().workflow_instances_of_current_workflow_model = await get_workflow_instances_of_model(
-        workflow_model_name,
-        user_id
-    )
-
-    get_state().user_id = user_id  # TODO where better? + Auth
+async def show_workflow_model_instances(workflow_model_name: str, workflow_model_creator_user_id: int, main_content, right_drawer):
+    # Load the selected workflow model
+    get_state().current_workflow_model = await read_workflow_model(workflow_model_name, workflow_model_creator_user_id)
+    get_state().workflow_instances_of_current_workflow_model = await get_workflow_instances_of_model(get_state().current_workflow_model)
 
     main_content.clear()
+
 
     with main_content:
         with ui.grid(columns=2):
@@ -141,10 +137,11 @@ async def show_workflow_model_instances(workflow_model_name: str, user_id: int, 
             ui.label('Associated Materials libraries or Samples').classes('w-1/3 text-left')
             ui.label('Validation status').classes('w-0 flex-grow text-left')
 
-        for (workflow_instance_name, user_id), workflow_instance in get_state().workflow_instances_of_current_workflow_model.items():
+        validation_jobs = []
+        for workflow_instance in get_state().workflow_instances_of_current_workflow_model.values():
             with ui.button(on_click=lambda r=workflow_instance: handle_workflow_instance_table_click(r, right_drawer)).props('no-caps unelevated color=secondary').classes('w-full p-1'):
                 with ui.row().classes('w-full py-1 items-center'):
-                    ui.label(workflow_instance_name).classes('w-1/3 text-left').style('color: #000000')
+                    ui.label(workflow_instance.workflow_instance_name).classes('w-1/3 text-left').style('color: #000000')
 
                     associated_objects = set()
                     for assignments in workflow_instance.step_assignments.values():
@@ -157,20 +154,26 @@ async def show_workflow_model_instances(workflow_model_name: str, user_id: int, 
                     with validation_icon_column:
                         ui.spinner()
 
-                    await check_and_update_icon(validation_icon_column, get_state().current_workflow_model, workflow_instance)
+                    validation_jobs.append(check_and_update_icon(validation_icon_column, get_state().current_workflow_model, workflow_instance))
 
-        async def create_empty_workflow_instance(workflow_model_name: str, workflow_instance_name: str, main_content, right_drawer):
+        async def create_empty_workflow_instance(workflow_instance_name: str, main_content, right_drawer):
             workflow_instance = WorkflowInstance()
-            workflow_instance.workflow_model_name = workflow_model_name
+            workflow_instance.workflow_model_name = get_state().current_workflow_model.workflow_model_name
             workflow_instance.workflow_instance_name = workflow_instance_name
 
-            await create_workflow_instance(workflow_instance, get_state().user_id)
+            # We must add step assignments, even if they don't hold references to any objects
+            for step_name in get_state().current_workflow_model.workflow_model_steps:
+                workflow_instance.step_assignments[step_name] = []
+
+            await create_workflow_instance(workflow_instance, get_state().current_workflow_model)
             # Show them again
-            await show_workflow_model_instances(workflow_model_name, get_state().user_id, main_content, right_drawer)
+            await show_workflow_model_instances(workflow_model_name, workflow_model_creator_user_id, main_content, right_drawer)
 
-        # TODO fix: the query expects the instance to have assignments etc., and the new one doesnt, so it is not shown
-        ui.button("Add a new workflow instance", color='info', on_click=lambda: create_empty_workflow_instance(workflow_model_name, "New workflow instance", main_content, right_drawer))
+        ui.button("Add a new workflow instance", color='info',
+                  on_click=lambda: create_empty_workflow_instance(f"New workflow instance of {get_state().current_workflow_model.workflow_model_name}", main_content, right_drawer))
 
+        # Run validation and update the spinners
+        await asyncio.gather(*validation_jobs)
 
 @ui.page('/workflows')
 async def workflows_page(demo: str = ""):
@@ -178,6 +181,8 @@ async def workflows_page(demo: str = ""):
         # Become Sir SHACLot
         get_state().demo_mode = True
         get_state().user_id = -1
+    else: # TODO until auth
+        get_state().user_id = 0
 
     main_content = ui.column().classes('w-full')
 

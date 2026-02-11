@@ -176,8 +176,13 @@ class WorkflowModel:
     workflow_model_options: WorkflowModelOptions = field(default_factory=WorkflowModelOptions)
     workflow_model_steps: dict[str, WorkflowModelStep] = field(default_factory=dict)
 
+    """
+    User ID of the creator and owner of this WorkflowInstance
+    """
+    creator_user_id: int = -1
+
     def __hash__(self):
-        return hash(self.workflow_model_name)
+        return hash(self.workflow_model_name+str(self.creator_user_id))
 
 
 @dataclass
@@ -197,8 +202,13 @@ class WorkflowInstance:
     """
     step_assignments: dict[str, list[int]] = field(default_factory=dict)
 
+    """
+    User ID of the creator and owner of this WorkflowInstance
+    """
+    creator_user_id: int = -1
+
     def __hash__(self):
-        return hash(self.workflow_model_name)
+        return hash(self.workflow_instance_name+str(self.creator_user_id))
 
 
 workflow_model_iri_to_config = {
@@ -269,14 +279,15 @@ async def get_workflow_model_names_from_user(user_id: int) -> list[str]:
     return workflow_models_list
 
 
-async def read_workflow_model(workflow_model_name: str, user_id: int) -> None | WorkflowModel:
+async def read_workflow_model(workflow_model_name: str, workflow_model_creator_user_id: int) -> None | WorkflowModel:
     """
-    Returns the WorkflowModel identified by the provided name
+    Returns the WorkflowModel identified by the provided name and its creator's user ID
     """
 
     workflow_model = WorkflowModel()
+    workflow_model.creator_user_id = workflow_model_creator_user_id
 
-    workflow_model_id = uuid_for_name(workflow_model_name, user_id)
+    workflow_model_id = uuid_for_name(workflow_model_name, workflow_model_creator_user_id)
     workflow_model_iri = crc_workflow_prefix["workflow_model_" + workflow_model_id]
 
     result = await rdf_datastore_client.launch_query(workflow_model_details_query.replace("{entity_iri}", workflow_model_iri))
@@ -332,7 +343,6 @@ async def read_workflow_model(workflow_model_name: str, user_id: int) -> None | 
 
 
 async def store_workflow_model(workflow_model: WorkflowModel,
-                               user_id: int,
                                return_file: bool = False) -> str | None:
     """
     Serializes the workflow model into RDF and stores it
@@ -340,7 +350,7 @@ async def store_workflow_model(workflow_model: WorkflowModel,
     g = Graph()
     name_to_uid = dict()
 
-    workflow_model_id = uuid_for_name(workflow_model.workflow_model_name, user_id)
+    workflow_model_id = uuid_for_name(workflow_model.workflow_model_name, workflow_model.creator_user_id)
     workflow_model_iri = crc_workflow_prefix["workflow_model_" + workflow_model_id]
 
     # Type
@@ -350,7 +360,7 @@ async def store_workflow_model(workflow_model: WorkflowModel,
     g.add((workflow_model_iri, crc_prefix.objectName, Literal(workflow_model.workflow_model_name, datatype=XSD.string)))
 
     # Attribution
-    g.add((workflow_model_iri, crc_prefix.creator, crc_user_prefix[str(user_id)]))
+    g.add((workflow_model_iri, crc_prefix.creator, crc_user_prefix[str(workflow_model.creator_user_id)]))
 
     # Settings
     g.add((workflow_model_iri, crc_prefix.allowIntermediateHandoverGroups,
@@ -360,7 +370,7 @@ async def store_workflow_model(workflow_model: WorkflowModel,
     step_options: WorkflowModelStep
     for step_name, step in workflow_model.workflow_model_steps.items():
         if step_name not in name_to_uid:
-            name_to_uid[step_name] = uuid_for_name(step_name, user_id)
+            name_to_uid[step_name] = uuid_for_name(step_name, workflow_model.creator_user_id)
 
         step_iri = crc_workflow_prefix[f"workflow_step_{name_to_uid[step_name]}_for_workflow_model_{workflow_model_id}"]
 
@@ -375,7 +385,7 @@ async def store_workflow_model(workflow_model: WorkflowModel,
         g.add((step_iri, crc_prefix.objectName, Literal(step_name, datatype=XSD.string)))
 
         # Attribution
-        g.add((step_iri, crc_prefix.creator, crc_user_prefix[str(user_id)]))
+        g.add((step_iri, crc_prefix.creator, crc_user_prefix[str(workflow_model.creator_user_id)]))
 
         # Comment
         g.add((step_iri, crc_prefix.objectDescription, Literal(step.step_description, datatype=XSD.string)))
@@ -390,7 +400,7 @@ async def store_workflow_model(workflow_model: WorkflowModel,
         # Next steps
         for next_step_name in step.next_steps:
             if next_step_name not in name_to_uid:
-                name_to_uid[next_step_name] = uuid_for_name(next_step_name, user_id)
+                name_to_uid[next_step_name] = uuid_for_name(next_step_name, workflow_model.creator_user_id)
 
             next_step_iri = crc_workflow_prefix[f"workflow_step_{name_to_uid[next_step_name]}_for_workflow_model_{workflow_model_id}"]
             g.add((step_iri, crc_prefix.nextStep, next_step_iri))
@@ -423,12 +433,11 @@ async def store_workflow_model(workflow_model: WorkflowModel,
 
 
 async def delete_workflow_model(workflow_model: WorkflowModel,
-                          user_id: int,
-                          return_query: bool = False) -> str | None:
+                                return_query: bool = False) -> str | None:
     """
     Deletes the workflow model of a given user from the rdf_datastore_client
     """
-    workflow_model_id = uuid_for_name(workflow_model.workflow_model_name, user_id)
+    workflow_model_id = uuid_for_name(workflow_model.workflow_model_name, workflow_model.creator_user_id)
     workflow_model_iri = crc_workflow_prefix["workflow_model_" + workflow_model_id]
 
     query = delete_handover_workflow_model_query.replace("{handover_workflow_model_iri}", workflow_model_iri)
@@ -441,15 +450,13 @@ async def delete_workflow_model(workflow_model: WorkflowModel,
 
 
 async def clean_workflow_instance_steps(workflow_model: WorkflowModel,
-                                        user_id: int,
                                         return_queries: bool = False) -> list[str] | None:
-    workflow_instances = await get_workflow_instances_of_model(workflow_model.workflow_model_name,
-                                                               user_id)
+    workflow_instances = await get_workflow_instances_of_model(workflow_model)
 
     queries = []
 
-    for (workflow_instance_name, user_id) in workflow_instances.keys():
-        workflow_instance_id = uuid_for_name(workflow_instance_name, user_id)
+    for workflow_instance in workflow_instances:
+        workflow_instance_id = uuid_for_name(workflow_instance.workflow_instance_name, workflow_instance.creator_user_id)
         workflow_instance_iri = crc_workflow_prefix["workflow_instance_" + workflow_instance_id]
 
         query = clean_handover_workflow_instance_steps_query.replace("{handover_workflow_instance_iri}", workflow_instance_iri)
@@ -465,25 +472,21 @@ async def clean_workflow_instance_steps(workflow_model: WorkflowModel,
         return None
 
 
-async def overwrite_workflow_model(workflow_model: WorkflowModel,
-                             user_id: int):
+async def overwrite_workflow_model(workflow_model: WorkflowModel):
     """
-    Deletes the workflow model of a given user, and stores it again
+    Given an (updated) workflow model, deletes the existing, corresponding workflow model, and stores it again
     """
-    actions = [(await (delete_workflow_model(workflow_model, user_id, return_query=True)), UpdateType.query),
-                (await (store_workflow_model(workflow_model, user_id, return_file=True)), UpdateType.file_upload)]
-    # actions.append((clean_workflow_instance_steps(workflow_model, user_id, rdf_datastore_client, return_query=True), UpdateType.query))
+    actions = [(await (delete_workflow_model(workflow_model, return_query=True)), UpdateType.query),
+                (await (store_workflow_model(workflow_model, return_file=True)), UpdateType.file_upload)]
 
     await rdf_datastore_client.launch_updates(actions, graph_iri=WORKFLOWS_GRAPH_IRI, delete_files_after_upload=True)
 
 
-async def get_workflow_instances_of_model(workflow_model_name: str,
-                                          user_id: int) -> dict[tuple[str, int], WorkflowInstance]:
+async def get_workflow_instances_of_model(workflow_model: WorkflowModel) -> dict[tuple[str, int], WorkflowInstance]:
     """
-    Returns a dict of (Workflow instance name, creator's user id) -> WorkflowInstance assigned to the provided model
+        Returns a dict of (Workflow instance name, creator's user id) -> WorkflowInstance assigned to the provided model
     """
-
-    workflow_model_id = uuid_for_name(workflow_model_name, user_id)
+    workflow_model_id = uuid_for_name(workflow_model.workflow_model_name, workflow_model.creator_user_id)
     workflow_model_iri = crc_workflow_prefix["workflow_model_" + workflow_model_id]
 
     # Workflow (instance name, user_id) -> WorkflowInstance
@@ -492,34 +495,39 @@ async def get_workflow_instances_of_model(workflow_model_name: str,
     result = await rdf_datastore_client.launch_query(query)
     data = result["results"]["bindings"]
     if not data:
-        return dict()
+        return []
 
     for binding in data:
         workflow_instance_name: str = binding["workflow_instance_name"]["value"]
         step_name: str = binding["step_name"]["value"]
-        object_id: int = int(binding["object_id"]["value"])
+        # The step may not have any assigned objects
+        object_id: int | None = None
+        if "object_id" in binding:
+            object_id: int = int(binding["object_id"]["value"])
         user_id: int = int(binding["user_id"]["value"])
 
         if (workflow_instance_name, user_id) not in workflow_instances:
             workflow_instance = WorkflowInstance()
 
             workflow_instance.workflow_instance_name = workflow_instance_name
-            workflow_instance.workflow_model_name = workflow_model_name
+            workflow_instance.workflow_model_name = workflow_model.workflow_model_name
+            workflow_instance.creator_user_id = user_id
 
             workflow_instances[(workflow_instance_name, user_id)] = workflow_instance
 
         workflow_instance_to_modify = workflow_instances[(workflow_instance_name, user_id)]
 
+
         if step_name not in workflow_instance_to_modify.step_assignments:
             workflow_instance_to_modify.step_assignments[step_name] = []
-
-        workflow_instance_to_modify.step_assignments[step_name].append(object_id)
+            if object_id:
+                workflow_instance_to_modify.step_assignments[step_name].append(object_id)
 
     return workflow_instances
 
 
 async def create_workflow_instance(workflow_instance: WorkflowInstance,
-                                   user_id: int,
+                                   workflow_model: WorkflowModel,
                                    return_file: bool = False) -> str | None:
     """
     Serializes the workflow instance into RDF and stores it
@@ -527,10 +535,10 @@ async def create_workflow_instance(workflow_instance: WorkflowInstance,
 
     g = Graph()
 
-    workflow_model_id = uuid_for_name(workflow_instance.workflow_model_name, user_id)
+    workflow_model_id = uuid_for_name(workflow_model.workflow_model_name, workflow_model.creator_user_id)
     workflow_model_iri = crc_workflow_prefix["workflow_model_" + workflow_model_id]
 
-    workflow_instance_id = uuid_for_name(workflow_instance.workflow_instance_name, user_id)
+    workflow_instance_id = uuid_for_name(workflow_instance.workflow_instance_name, workflow_instance.creator_user_id)
     workflow_instance_iri = crc_workflow_prefix["workflow_instance_" + workflow_instance_id]
 
     # Type
@@ -540,7 +548,7 @@ async def create_workflow_instance(workflow_instance: WorkflowInstance,
     g.add((workflow_instance_iri, crc_prefix.objectName, Literal(workflow_instance.workflow_instance_name, datatype=XSD.string)))
 
     # Attribution
-    g.add((workflow_instance_iri, crc_prefix.creator, crc_user_prefix[str(user_id)]))
+    g.add((workflow_instance_iri, crc_prefix.creator, crc_user_prefix[str(workflow_instance.creator_user_id)]))
 
     # Link to workflow model
     g.add((workflow_instance_iri, crc_prefix.handoverWorkflowModelInstanceOf, workflow_model_iri))
@@ -551,13 +559,13 @@ async def create_workflow_instance(workflow_instance: WorkflowInstance,
         g.add((assignment_iri, rdf_prefix.type, crc_prefix.HandoverWorkflowInstanceAssignment))
 
         # Attribution
-        g.add((assignment_iri, crc_prefix.creator, crc_user_prefix[str(user_id)]))
+        g.add((assignment_iri, crc_prefix.creator, crc_user_prefix[str(workflow_instance.creator_user_id)]))
 
         # Link to assignment
         g.add((workflow_instance_iri, crc_prefix.hasAssignment, assignment_iri))
 
         # Link to step
-        step_iri = crc_workflow_prefix[f"workflow_step_{uuid_for_name(step_name, user_id)}_for_workflow_model_{workflow_model_id}"]
+        step_iri = crc_workflow_prefix[f"workflow_step_{uuid_for_name(step_name, workflow_instance.creator_user_id)}_for_workflow_model_{workflow_model_id}"]
         g.add((assignment_iri, crc_prefix.relatesToHandoverWorkflowStep, step_iri))
 
     # We are guaranteed the same order of keys() and values()
@@ -580,12 +588,11 @@ async def create_workflow_instance(workflow_instance: WorkflowInstance,
 
 
 async def delete_workflow_instance(workflow_instance: WorkflowInstance,
-                                   user_id: int,
                                    return_query: bool = False):
     """
     Deletes the workflow instance corresponding to the provided one, and stores it again
     """
-    workflow_instance_id = uuid_for_name(workflow_instance.workflow_instance_name, user_id)
+    workflow_instance_id = uuid_for_name(workflow_instance.workflow_instance_name, workflow_instance.creator_user_id)
     workflow_instance_iri = crc_workflow_prefix["workflow_instance_" + workflow_instance_id]
 
     query = delete_handover_workflow_instance_query.replace("{handover_workflow_instance_iri}", workflow_instance_iri)
@@ -596,13 +603,13 @@ async def delete_workflow_instance(workflow_instance: WorkflowInstance,
         await rdf_datastore_client.launch_updates(updates, workflow_instance_iri)
 
 
-async def overwrite_workflow_instance(workflow_instance: WorkflowInstance, user_id: int):
+async def overwrite_workflow_instance(workflow_instance: WorkflowInstance, workflow_model: WorkflowModel):
     """
-    Deletes the workflow model corresponding to the provided one, and stores it again
+    Given an (updated) workflow instance and the workflow model it refers to, deletes the existing, corresponding workflow instance, and stores it again
     """
     actions = []
-    actions.append((await delete_workflow_instance(workflow_instance, user_id, return_query=True), UpdateType.query))
-    actions.append((await create_workflow_instance(workflow_instance, user_id, return_file=True), UpdateType.file_upload))
+    actions.append((await delete_workflow_instance(workflow_instance, return_query=True), UpdateType.query))
+    actions.append((await create_workflow_instance(workflow_instance, workflow_model, return_file=True), UpdateType.file_upload))
 
     await rdf_datastore_client.launch_updates(actions, graph_iri=WORKFLOWS_GRAPH_IRI, delete_files_after_upload=True)
 

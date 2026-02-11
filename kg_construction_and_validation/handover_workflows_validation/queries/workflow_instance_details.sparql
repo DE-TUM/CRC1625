@@ -3,21 +3,27 @@ SELECT DISTINCT ?workflow_instance_name ?step_name ?object_id ?user_id WHERE {
         GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
             ?workflow_instance crc:handoverWorkflowModelInstanceOf <{workflow_model_iri}>.
             ?workflow_instance crc:objectName ?workflow_instance_name.
-            ?workflow_instance crc:hasAssignment ?workflow_step_assignment.
             ?workflow_instance crc:creator ?user.
 
-            ?workflow_step_assignment crc:assignedObject ?assigned_ML_or_sample.
+            ?workflow_instance crc:hasAssignment ?workflow_step_assignment.
             ?workflow_step_assignment crc:relatesToHandoverWorkflowStep ?workflow_step_iri.
             ?workflow_step_iri crc:objectName ?step_name.
         }
 
-        # We don't combine it to avoid issues with Qlever
-        GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
-            ?assigned_ML_or_sample crc:internalID ?object_id.
-        }
-
         GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
             ?user crc:internalID ?user_id.
+        }
+
+        # The step may or may not have assigned objects
+        OPTIONAL {
+            GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
+                ?workflow_step_assignment crc:assignedObject ?assigned_ML_or_sample.
+            }
+
+            # We don't combine it to avoid issues with Qlever
+            GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
+                ?assigned_ML_or_sample crc:internalID ?object_id.
+            }
         }
     }
 }

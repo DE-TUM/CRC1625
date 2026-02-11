@@ -44,7 +44,7 @@ async def handle_return_button():
                     ui.label('The workflow model has been modified. Save changes and exit?')
 
                     async def save_and_exit_and_close():
-                        await overwrite_workflow_model(get_state().current_workflow_model, get_state().user_id)
+                        await overwrite_workflow_model(get_state().current_workflow_model)
 
                         return_dialog.close()
                         ui.navigate.to('/workflows')
@@ -96,7 +96,7 @@ async def handle_save_button():
     if get_state().demo_mode:
         ui.notify("You cannot save changes as a demo user", type='negative')
     else:
-        await overwrite_workflow_model(get_state().current_workflow_model, get_state().user_id)
+        await overwrite_workflow_model(get_state().current_workflow_model)
         get_state().changes_are_saved = True
         get_state().workflow_model_history = []
         ui.notify("The changes have been saved", type='positive')

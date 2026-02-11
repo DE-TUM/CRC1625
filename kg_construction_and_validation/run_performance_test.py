@@ -445,7 +445,8 @@ if __name__ == "__main__":
                 mappings_performance_log, resource_usage_mappings, performance_log_postprocessing, resource_usage_postprocessing,  file_upload_time = (
                     serve_KG(skip_ontologies_upload=False,
                              skip_db_setup=True,
-                             skip_materialization=False))
+                             skip_materialization=False,
+                             delete_materialized_triples_files=False))
 
                 if not args.evaluate_only_sql_queries:
                     n_triples = get_value_from_query(count_triples_query, "n_triples", int)
