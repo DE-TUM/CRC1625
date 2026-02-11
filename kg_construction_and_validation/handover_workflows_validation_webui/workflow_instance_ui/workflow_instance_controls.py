@@ -61,7 +61,7 @@ def remove_object_action(object_id_to_remove: str):
 
 
 def create_graph_controls():
-    with ui.card().classes('w-full'):
+    with ui.card().classes('w-full bg-secondary'):
         ui.label('Workflow Instance options').classes('text-lg font-semibold')
 
         ui.label('Add a Materials Library / Sample ID').classes('text-sm font-bold text-gray-600')

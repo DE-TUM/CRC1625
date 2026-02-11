@@ -128,7 +128,7 @@ def create_workflow_model_step_controls():
     ui_elements.node_controls_column.clear()
 
     with ui_elements.node_controls_column:
-        with (ui.card().classes('w-full')):
+        with ui.card().classes('w-full bg-secondary'):
             # If the model is empty or nothing is selected somehow, so empty controls
             if get_state().selected_node:
                 ui.label(f"Step options for '{get_state().selected_node}'").classes('text-lg font-semibold')

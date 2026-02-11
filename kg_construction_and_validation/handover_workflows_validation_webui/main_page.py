@@ -197,7 +197,7 @@ async def workflows_page(demo: str = ""):
         ui.space()
         ui.image('/assets/crc_logo_black_letters_wide.png').classes('w-26')
 
-    right_drawer = ui.right_drawer(fixed=False).props('bordered')
+    right_drawer = ui.right_drawer(fixed=False).classes('bg-secondary')
     right_drawer.hide()
 
     with ui.left_drawer().classes('bg-secondary'):

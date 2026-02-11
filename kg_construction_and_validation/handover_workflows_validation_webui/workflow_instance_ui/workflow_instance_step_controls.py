@@ -42,7 +42,7 @@ def create_workflow_instance_step_controls():
     ui_elements.node_controls_column.clear()
 
     with ui_elements.node_controls_column:
-        with (ui.card().classes('w-full')):
+        with ui.card().classes('w-full bg-secondary'):
             ui.label(f"Step options for '{get_state().selected_node}'").classes('text-lg font-semibold')
 
             ui.label('Assign Materials Library / Sample to step').classes('text-sm font-bold text-gray-600')

@@ -97,7 +97,7 @@ def remove_step_action(node_to_remove: str):
 
 
 def create_graph_controls():
-    with ui.card().classes('w-full'):
+    with ui.card().classes('w-full bg-secondary'):
         ui.label('Workflow Model options').classes('text-lg font-semibold')
 
         ui.label('Add workflow step').classes('text-sm font-bold text-gray-600')
