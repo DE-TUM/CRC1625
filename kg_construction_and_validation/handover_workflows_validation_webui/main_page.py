@@ -107,15 +107,20 @@ async def create_workflow_models_table(main_content, right_drawer):
 
 
 async def check_and_update_icon(validation_icon_column: ui.column, workflow_model, workflow_instance):
-    valid = await is_workflow_instance_valid(workflow_model, workflow_instance)
+    validation_status = await is_workflow_instance_valid(workflow_model, workflow_instance)
 
     validation_icon_column.clear()
     with validation_icon_column:
-        if valid:
-            ui.icon('check_circle').classes('text-green-6')
-            #ui.image('/assets/heppy.png').classes('w-8')
-        else:
-            ui.icon('error').classes('text-red-6')
+        with ui.row():
+            if validation_status == validation_status.Valid:
+                ui.icon('check_circle').classes('text-green-6')
+            elif validation_status == validation_status.Warning:
+                ui.icon('warning').classes('text-orange-6')
+            else:
+                ui.icon('error').classes('text-red-6')
+
+            with ui.icon('o_help').classes('text-sm'):
+                ui.tooltip(validation_status.description)
 
 async def show_workflow_model_instances(workflow_model_name: str, workflow_model_creator_user_id: int, main_content, right_drawer):
     # Load the selected workflow model

@@ -22,6 +22,7 @@ import os
 import uuid
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, field
+from enum import Enum
 
 from pyshacl import validate
 from rdflib import Graph, URIRef, Literal, Namespace, XSD
@@ -131,6 +132,7 @@ class WorkflowModelStep:
     """
     next_steps: list[str] = field(default_factory=list)
 
+    step_name: str = "Unnamed step"
     step_description: str = "No description"
 
     """
@@ -174,6 +176,11 @@ class WorkflowModel:
     workflow_model_name: str = field(default_factory=str)
 
     workflow_model_options: WorkflowModelOptions = field(default_factory=WorkflowModelOptions)
+
+    """
+    Steps of the workflow, indexed by name for faster lookups and to enforce unique IDs. The steps
+    themselves indicate their successors, if any
+    """
     workflow_model_steps: dict[str, WorkflowModelStep] = field(default_factory=dict)
 
     """
@@ -326,6 +333,7 @@ async def read_workflow_model(workflow_model_name: str, workflow_model_creator_u
             step_name = labels_dict[s]
             if step_name not in workflow_model.workflow_model_steps:
                 workflow_model.workflow_model_steps[step_name] = WorkflowModelStep()
+                workflow_model.workflow_model_steps[step_name].step_name = step_name
 
             workflow_step = workflow_model.workflow_model_steps[step_name]
             if p in workflow_model_step_iri_to_config:
@@ -366,8 +374,6 @@ async def store_workflow_model(workflow_model: WorkflowModel,
     g.add((workflow_model_iri, crc_prefix.allowIntermediateHandoverGroups,
            Literal(workflow_model.workflow_model_options.allow_intermediate_handover_groups, datatype=XSD.boolean)))
 
-    step_name: str
-    step_options: WorkflowModelStep
     for step_name, step in workflow_model.workflow_model_steps.items():
         if step_name not in name_to_uid:
             name_to_uid[step_name] = uuid_for_name(step_name, workflow_model.creator_user_id)
@@ -449,29 +455,6 @@ async def delete_workflow_model(workflow_model: WorkflowModel,
         return None
 
 
-async def clean_workflow_instance_steps(workflow_model: WorkflowModel,
-                                        return_queries: bool = False) -> list[str] | None:
-    workflow_instances = await get_workflow_instances_of_model(workflow_model)
-
-    queries = []
-
-    for workflow_instance in workflow_instances:
-        workflow_instance_id = uuid_for_name(workflow_instance.workflow_instance_name, workflow_instance.creator_user_id)
-        workflow_instance_iri = crc_workflow_prefix["workflow_instance_" + workflow_instance_id]
-
-        query = clean_handover_workflow_instance_steps_query.replace("{handover_workflow_instance_iri}", workflow_instance_iri)
-        if return_queries:
-            queries.append(query)
-        else:
-            updates = [(query, UpdateType.query)]
-            await rdf_datastore_client.launch_updates(updates, graph_iri=WORKFLOWS_GRAPH_IRI)
-
-    if return_queries:
-        return queries
-    else:
-        return None
-
-
 async def overwrite_workflow_model(workflow_model: WorkflowModel):
     """
     Given an (updated) workflow model, deletes the existing, corresponding workflow model, and stores it again
@@ -495,7 +478,7 @@ async def get_workflow_instances_of_model(workflow_model: WorkflowModel) -> dict
     result = await rdf_datastore_client.launch_query(query)
     data = result["results"]["bindings"]
     if not data:
-        return []
+        return {}
 
     for binding in data:
         workflow_instance_name: str = binding["workflow_instance_name"]["value"]
@@ -520,8 +503,9 @@ async def get_workflow_instances_of_model(workflow_model: WorkflowModel) -> dict
 
         if step_name not in workflow_instance_to_modify.step_assignments:
             workflow_instance_to_modify.step_assignments[step_name] = []
-            if object_id:
-                workflow_instance_to_modify.step_assignments[step_name].append(object_id)
+
+        if object_id is not None:
+            workflow_instance_to_modify.step_assignments[step_name].append(object_id)
 
     return workflow_instances
 
@@ -617,7 +601,7 @@ async def overwrite_workflow_instance(workflow_instance: WorkflowInstance, workf
 async def get_handover_group_pairs(object_id: int,
                                    cached_object_handover_groups: dict[int, tuple[str, dict[str, str] | None]]) -> dict[str, str]:
     if object_id in cached_object_handover_groups and cached_object_handover_groups[object_id][1] is not None:
-        return cached_object_handover_groups[object_id][1]
+        return cached_object_handover_groups[object_id][1] # Return the handover group pairs
 
     handover_groups: dict[str, str] = {}
 
@@ -632,7 +616,8 @@ async def get_handover_group_pairs(object_id: int,
     for binding in result["results"]["bindings"]:
         handover_groups[binding["handover_group_1"]["value"]] = binding["handover_group_2"]["value"]
 
-    cached_object_handover_groups[object_id] = (cached_object_handover_groups[object_id][0], handover_groups)
+    cached_object_handover_groups[object_id] = (cached_object_handover_groups[object_id][0], # First handover group
+                                                handover_groups) # And all handover groups
 
     return handover_groups
 
@@ -643,7 +628,7 @@ async def get_first_handover_group(object_id: int,
     Returns the IRI of the first handover group the given materials library or sample has
     """
     if object_id in cached_object_handover_groups:
-        return cached_object_handover_groups[object_id][0]
+        return cached_object_handover_groups[object_id][0] # Return the first handover group
 
     if (await rdf_datastore_client.get_datastore_type()) == "virtuoso":
         # Virtuoso is very finicky when matching ints
@@ -704,83 +689,68 @@ def generate_group_shape(workflow_model_step: WorkflowModelStep, target_node: st
     return step_shape.replace('{activity_shapes}', '\n\n'.join(activity_shapes).lstrip())
 
 
-async def get_next_validation_steps(workflow_model: WorkflowModel,
-                                    workflow_instance: WorkflowInstance,
-                                    current_workflow_step: WorkflowModelStep,
-                                    current_object_id: int,
-                                    target_node: str,
-                                    handover_group_pairs: dict[str, str],
-                                    cached_object_handover_groups: dict[int, tuple[str, dict[str, str] | None]]) -> list[tuple[WorkflowModelStep, str, int, str, dict[str, str]]]:
+@dataclass
+class StepValidationInfo:
     """
-    Returns a list of (WorkflowModelStep, next_step_name, object_id, target node IRI) tuples given the current
-    step, sample ID and target node
-
-    Depending on the configuration, multiple entries may be generated for the same step on different samples
-
-    If the list is empty, no more steps need to be executed
+    Convenience class for a Workflow model step and its validation status wrt. an
+    object and one of its handover groups
     """
-    if len(current_workflow_step.next_steps) > 0:
-        next_step_name = next(iter(current_workflow_step.next_steps))  # TODO implement OR of n>1 steps (or do it via SHACL itself?)
+    workflow_model_step: WorkflowModelStep = None
+    object_id: int = 0 # ML / Sample ID
+    target_node: str = "" # Handover group IRI
 
-        # List of (step, object_id, target_node)
-        next_steps: list[tuple[WorkflowModelStep, str, int, str, dict[str, str]]] = []
 
-        for new_object_id in workflow_instance.step_assignments[next_step_name]:
-            if current_object_id == new_object_id:  # The next target node is the current object's next handover group
-                new_target_node = handover_group_pairs.get(target_node)
-                if new_target_node is not None:  # Else, we stop checking TODO handle better
-                    next_steps.append((workflow_model.workflow_model_steps[next_step_name],
-                                       next_step_name,
-                                       current_object_id,
-                                       new_target_node,
-                                       handover_group_pairs))
-            else:  # We have a new sample, so we must continue the workflow from the new sample's *first* handover group
-                next_steps.append((workflow_model.workflow_model_steps[next_step_name],
-                                   next_step_name,
-                                   new_object_id,
-                                   await get_first_handover_group(new_object_id, cached_object_handover_groups),
-                                   await get_handover_group_pairs(new_object_id, cached_object_handover_groups)))
-
-        return next_steps
-    else:
-        return []
+@dataclass
+class StepToValidate:
+    """
+    Convenience class for a Workflow model step and its validation status wrt. an
+    object and one of its handover groups, alongside the generated SHACL shape for it
+    """
+    step_information: StepValidationInfo = field(default_factory=StepValidationInfo)
+    shacl_shape: str = "" # Syntactically valid SHACL shape as a string
 
 
 async def generate_SHACL_shapes_for_workflow(workflow_model: WorkflowModel,
-                                               workflow_instance: WorkflowInstance) -> list[tuple[WorkflowModelStep, str, int, str, str]]:
+                                             workflow_instance: WorkflowInstance) -> tuple[list[StepToValidate], list[StepValidationInfo]]:
     """
-    Returns a list of (WorkflowModelStep, workflow step name, sample id, target node IRI, SHACL shape string) for the
-    workflow model, following the sample assignments of the workflow instance.
+    Returns a list of steps to validate for the workflow model, following the sample assignments of the workflow instance,
+    and a list of references to workflow model steps for which an object did not have a corresponding handover group for it
+    (i.e., more steps than handover groups).
 
     It will iteratively follow the steps chain and generating as many shapes for a step as there are samples assigned to it,
     without checking for loops. If a sample has less handover groups than steps, the remaining SHACL shapes will not be
     generated and the validation on that branch will stop.
 
     Only the SHACL shape string is needed for the validation, the rest of the entries are for traceability / debugging
-
-    :returns: A stack of (handover workflow model step, handover workflow model step name, object ID, target node, SHACL shape),
-    containing all the individual validation jobs that must be performed to completely validate the handover workflow
-    model with its corresponding handover workflow model instance
     """
 
     # To simplify the algorithm, we employ two stacks
     #
-    # Stack of (handover workflow model step, handover workflow model step name, object ID, target node, handover_group_pairs_dict),
-    # containing workflow model steps and the target node (ML or sample) they must validate. The algorithm will iteratively extract
+    # Stack of steps to parse. The algorithm will iteratively extract
     # entries from this stack, and:
     #   - Generate their corresponding SHACL shapes and insert them into steps_to_validate
-    #   - Insert in this list the following handover workflow model steps after the current step (one for every object they are assigned to).
-    #     If any of the objects does not contain more handover groups to continue the validation, nothing will be inserted for that object
-    steps_to_parse: list[tuple[WorkflowModelStep, str, int, str, dict[str, str]]] = []
+    #   - Insert in this list the following handover workflow model step to parse after the current step (one for every object they are assigned to).
+    #     If any of the objects does not contain more handover groups to continue the validation, nothing will be inserted for that object in this list
+    @dataclass
+    class StepToParse:
+        step_information: StepValidationInfo = field(default_factory=StepValidationInfo)
+        handover_group_pairs: dict[str, str] = field(default_factory=dict)
+
+    steps_to_parse: list[StepToParse] = []
     #
-    # Stack of (handover workflow model step, handover workflow model step name, object ID, target node, SHACL shape),
-    # containing all the individual validation jobs that must be performed to completely validate the handover workflow
+    # Stack of steps to validate, containing all the individual validation jobs that must be performed to completely validate the handover workflow
     # model with its corresponding handover workflow model instance
-    steps_to_validate: list[tuple[WorkflowModelStep, str, int, str, str]] = []
+    steps_to_validate: list[StepToValidate] = []
 
     # Since we also allow arbitrary objects along the handover workflow models that may reappear at any time at any branch,
     # we also cache their information globally
+    # dict of Object ID -> tuple of (first_handover_group_iri, dict of handover_group_iri -> next_handover_group_iri)
     cached_object_handover_groups: dict[int, tuple[str, dict[str, str] | None]] = {}
+
+    # List of (handover workflow model step, object ID, target node), containing
+    # references to workflow model steps for which the given object ID did not have a target node for it (i.e., not
+    # enough handover groups), alongside the last handover group that exists
+    steps_with_no_target_node: list[StepValidationInfo] = []
 
     # Start validating from the initial step, for every sample that is assigned to it
     initial_step = workflow_model.workflow_model_steps[workflow_model.workflow_model_options.initial_step_name]
@@ -789,29 +759,46 @@ async def generate_SHACL_shapes_for_workflow(workflow_model: WorkflowModel,
         handover_group_pairs = await get_handover_group_pairs(object_id, cached_object_handover_groups)
 
         if first_handover_group is not None:  # Else, stop checking. If the object was generated via mappings, there is always an initial handover group
-            steps_to_parse.append((initial_step, workflow_model.workflow_model_options.initial_step_name, object_id, first_handover_group, handover_group_pairs))
+            step_to_parse = StepToParse()
+            step_to_parse.step_information.workflow_model_step = initial_step
+            step_to_parse.step_information.object_id = object_id
+            step_to_parse.step_information.target_node = first_handover_group
+            step_to_parse.handover_group_pairs = handover_group_pairs
+            steps_to_parse.append(step_to_parse)
 
     while len(steps_to_parse) > 0:
-        (current_workflow_step, current_workflow_step_name, current_object_id, current_target_node, current_handover_group_pairs) = steps_to_parse.pop()
+        step_to_parse: StepToParse = steps_to_parse.pop()
 
-        # Generate a SHACL shape for it
-        steps_to_validate.append((current_workflow_step, current_workflow_step_name, current_object_id, current_target_node, generate_group_shape(current_workflow_step, current_target_node)))
+        step_to_validate: StepToValidate = StepToValidate()
+        step_to_validate.step_information = step_to_parse.step_information
+        step_to_validate.shacl_shape = generate_group_shape(step_to_parse.step_information.workflow_model_step, step_to_validate.step_information.target_node)
+        steps_to_validate.append(step_to_validate)
 
-        for next_step_name in current_workflow_step.next_steps:
+        current_step_information = step_to_parse.step_information
+        for next_step_name in current_step_information.workflow_model_step.next_steps:
             next_step = workflow_model.workflow_model_steps[next_step_name]
-            current_step_object_ids =  workflow_instance.step_assignments[current_workflow_step_name]
+            current_step_object_ids =  workflow_instance.step_assignments[current_step_information.workflow_model_step.step_name]
             next_step_object_ids = workflow_instance.step_assignments[next_step_name]
 
             for next_step_object_id in next_step_object_ids:
                 # Continue the validation from its next handover group, if it exists
-                if current_object_id == next_step_object_id:
-                    new_target_node = current_handover_group_pairs.get(current_target_node)
-                    if new_target_node is not None:  # Else, there are no further handover groups - we can stop validating this branch
-                        steps_to_parse.append((next_step,
-                                               next_step_name,
-                                               current_object_id,
-                                               new_target_node,
-                                               current_handover_group_pairs))
+                if current_step_information.object_id == next_step_object_id:
+                    new_target_node = step_to_parse.handover_group_pairs.get(current_step_information.target_node)
+                    if new_target_node is not None:
+                        new_step_to_parse = StepToParse()
+                        new_step_to_parse.step_information.workflow_model_step = next_step # New step
+                        new_step_to_parse.step_information.object_id = current_step_information.object_id # Same object
+                        new_step_to_parse.step_information.target_node = new_target_node # New target node
+                        new_step_to_parse.handover_group_pairs = step_to_parse.handover_group_pairs # Keep the cache
+
+
+
+                        steps_to_parse.append(new_step_to_parse)
+                    else:
+                        # There are no further handover groups - we can stop validating this branch
+                        #
+                        # We save a reference to this to report it
+                        steps_with_no_target_node.append(step_to_parse.step_information)
 
                 # Continue the validation from any new objects that were not in the current step
                 #
@@ -820,20 +807,19 @@ async def generate_SHACL_shapes_for_workflow(workflow_model: WorkflowModel,
                 else :
                     # For every object in next step that is not in the current step
                     for new_object_id in [obj_id for obj_id in next_step_object_ids if obj_id not in current_step_object_ids]:
-                        # TODO: Ugly, but we cannot hash lists so we cannot use a set
-                        next_step_to_parse_with_new_object = (next_step,
-                                                              next_step_name,
-                                                              new_object_id,
-                                                              await get_first_handover_group(new_object_id, cached_object_handover_groups),
-                                                              await get_handover_group_pairs(new_object_id, cached_object_handover_groups))
+                        new_step_to_parse = StepToParse()
+                        new_step_to_parse.step_information.workflow_model_step = next_step  # New step
+                        new_step_to_parse.step_information.object_id = new_object_id  # New object
+                        new_step_to_parse.step_information.target_node = await get_first_handover_group(new_object_id, cached_object_handover_groups)
+                        new_step_to_parse.handover_group_pairs = await get_handover_group_pairs(new_object_id, cached_object_handover_groups)
 
-                        if next_step_to_parse_with_new_object not in steps_to_parse:
-                            steps_to_parse.append(next_step_to_parse_with_new_object)
+                        if new_step_to_parse not in steps_to_parse:
+                            steps_to_parse.append(new_step_to_parse)
 
-    return steps_to_validate
+    return steps_to_validate, steps_with_no_target_node
 
 
-async def get_data_graph_for_object_id(object_id: str):
+async def get_data_graph_for_object_id(object_id: int) -> tuple[int, Graph]:
     """
     Generate a .ttl file for pySHACL by querying for the handover groups, handovers and activities of the given sample
 
@@ -867,16 +853,14 @@ async def get_data_graph_for_object_id(object_id: str):
     return object_id, g
 
 
-async def generate_data_graphs_for_workfow_steps(steps_to_validate):
+async def generate_data_graphs_for_workfow_steps(steps_to_validate: list[StepToValidate]):
     data_graphs = dict()
-    tasks = []
-    object_ids_to_fetch = set()
 
-    for (workflow_step, workflow_step_name, object_id, target_node, shacl_rules) in steps_to_validate:
-        if object_id not in object_ids_to_fetch:
-            object_ids_to_fetch.add(object_id)
-            tasks.append(get_data_graph_for_object_id(object_id))
-
+    object_ids_to_fetch = {
+        step.step_information.object_id
+        for step in steps_to_validate
+    }
+    tasks = [get_data_graph_for_object_id(obj_id) for obj_id in object_ids_to_fetch]
     results = await asyncio.gather(*tasks)
 
     for object_id, data_graph in results:
@@ -885,77 +869,101 @@ async def generate_data_graphs_for_workfow_steps(steps_to_validate):
     return data_graphs
 
 
-def validate_workflow_model_step(data_graph, object_id, shacl_rules, target_node, workflow_step, workflow_step_name, results):
+@dataclass
+class ValidationResult:
+    step_to_validate: StepToValidate = field(default_factory=StepToValidate)
+    conforms: bool = False
+    pyshacl_output: str = ""
+
+def validate_workflow_model_step(data_graph, step_to_validate: StepToValidate, results: list[ValidationResult]):
     shacl_graph = Graph()
-    shacl_graph.parse(data=shacl_rules, format="turtle")
+    shacl_graph.parse(data=step_to_validate.shacl_shape, format="turtle")
 
-    conforms, results_graph, results_text = validate(data_graph=data_graph,
-                                                     shacl_graph=shacl_graph,
-                                                     ont_graph=ont_graph,
-                                                     inference=None,  # 'rdfs',
-                                                     abort_on_first=False,
-                                                     allow_infos=False,
-                                                     allow_warnings=False,
-                                                     meta_shacl=False,
-                                                     advanced=False,
-                                                     js=False,
-                                                     # sparql_mode=True, # TODO check it out, could it be faster this way?
-                                                     debug=False)
+    conforms, results_graph, pyshacl_output = validate(data_graph=data_graph,
+                                                       shacl_graph=shacl_graph,
+                                                       ont_graph=ont_graph,
+                                                       inference=None,  # 'rdfs',
+                                                       abort_on_first=False,
+                                                       allow_infos=False,
+                                                       allow_warnings=False,
+                                                       meta_shacl=False,
+                                                       advanced=False,
+                                                       js=False,
+                                                       # sparql_mode=True, # TODO check it out, could it be faster this way?
+                                                       debug=False)
+    validation_result = ValidationResult()
+    validation_result.step_to_validate = step_to_validate
+    validation_result.conforms = conforms
+    validation_result.pyshacl_output = pyshacl_output
+    results.append(validation_result)
 
-    results.append((workflow_step, workflow_step_name, object_id, target_node, shacl_rules, conforms, results_text))
 
+def validate_SHACL_rules(steps_to_validate: list[StepToValidate], data_graphs) -> list[ValidationResult]:
+    results: list[ValidationResult] = []
 
-def validate_SHACL_rules(steps_to_validate: list[tuple[WorkflowModelStep, str, str]], data_graphs) -> list[tuple[WorkflowModelStep, int, str, str, bool, str]]:
-    results: list[tuple[WorkflowModelStep, int, str, str, bool, str]] = []
-
-    for (workflow_step, workflow_step_name, object_id, target_node, shacl_rules) in steps_to_validate:
-        validate_workflow_model_step(data_graphs[object_id], object_id, shacl_rules, target_node, workflow_step, workflow_step_name, results)
+    # (workflow_step, workflow_step_name, object_id, target_node, shacl_rules)
+    for step_to_validate in steps_to_validate:
+        validate_workflow_model_step(data_graphs[step_to_validate.step_information.object_id],
+                                     step_to_validate,
+                                     results)
 
     return results
 
 
-def validation_task_wrapper(data_graphs, object_id, shacl_rules, target_node, workflow_step, workflow_step_name):
-    local_results = []
+def validation_task_wrapper(data_graphs, step_to_validate: StepToValidate) -> ValidationResult :
+    local_results: list[ValidationResult] = []
 
-    validate_workflow_model_step(data_graphs[object_id],
-                                 object_id,
-                                 shacl_rules,
-                                 target_node,
-                                 workflow_step,
-                                 workflow_step_name,
+    validate_workflow_model_step(data_graphs[step_to_validate.step_information.object_id],
+                                 step_to_validate,
                                  local_results)
 
     return local_results[0]
 
 
-async def is_workflow_instance_valid(workflow_model, workflow_instance) -> bool:
+class ValidationStatus(Enum):
+    Valid = 1
+    Warning = 2
+    Error = 3
+
+    @property
+    def description(self):
+        descriptions = {
+            ValidationStatus.Valid: "All steps were validated successfully.",
+            ValidationStatus.Warning: "All steps were validated successfully, but some handover workflows were incomplete.",
+            ValidationStatus.Error: "One or more steps failed validation."
+        }
+        return descriptions[self]
+
+async def is_workflow_instance_valid(workflow_model, workflow_instance) -> ValidationStatus:
     """
-    Returns True if the workflow model and its model instance match with the handover workflow they refer to, False otherwise
+    Returns a ValidationStatus of for the provided workflow model against its instance's assignments
 
     generate_SHACL_shapes_for_workflow and validate_SHACL_rules can be run separately if more details are needed (e.g., which
     steps are valid and which aren't, and the reasons why)
 
     Optimized for parallelism (or, at least, for python's "parallelism")
     """
-    steps_to_validate = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance)
+    steps_to_validate, steps_with_no_target_node = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance)
     data_graphs = await generate_data_graphs_for_workfow_steps(steps_to_validate)
 
     with ProcessPoolExecutor() as executor:
         tasks = []
 
-        for (workflow_step, workflow_step_name, object_id, target_node, shacl_rules) in steps_to_validate:
+        for step_to_validate in steps_to_validate:
             task = asyncio.get_running_loop().run_in_executor(
                 executor,
                 validation_task_wrapper,
                 data_graphs,
-                object_id,
-                shacl_rules,
-                target_node,
-                workflow_step,
-                workflow_step_name
+                step_to_validate
             )
             tasks.append(task)
 
-        results = await asyncio.gather(*tasks)
+        results: list[ValidationResult] = await asyncio.gather(*tasks)
 
-    return all(result[5] for result in results)
+    all_steps_conform = all(result.conforms for result in results)
+    if all_steps_conform and len(steps_with_no_target_node) == 0:
+        return ValidationStatus.Valid
+    elif all_steps_conform:
+        return ValidationStatus.Warning
+    else:
+        return ValidationStatus.Error

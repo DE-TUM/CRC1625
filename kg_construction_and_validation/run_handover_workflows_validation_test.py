@@ -13,7 +13,6 @@ import asyncio
 import logging
 import os
 import sys
-import time
 import traceback
 
 from datastores.rdf import rdf_datastore_client
@@ -36,6 +35,7 @@ sample_name_to_id = {
     'AnnealedSample1Piece2': 4,
 }
 
+
 async def run_test(path: str,
                    step_validities: dict[str, dict[int, bool]]):
     """
@@ -53,35 +53,41 @@ async def run_test(path: str,
     await rdf_datastore_client.upload_file(path + "_workflow_instance.ttl", graph_iri=WORKFLOWS_GRAPH_IRI)
 
     workflow_model = await read_workflow_model("example_workflow", 1)
-    workflow_instance = list((await get_workflow_instances_of_model("example_workflow", 1)).values())[0] # There's only one, no need to look it up
+    workflow_instance = list((await get_workflow_instances_of_model(workflow_model)).values())[0] # There's only one, no need to look it up
 
-    steps_to_validate = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance)
+    steps_to_validate, steps_with_no_target_node = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance)
     data_graphs = await generate_data_graphs_for_workfow_steps(steps_to_validate)
     results = validate_SHACL_rules(steps_to_validate, data_graphs)
 
-    for (workflow_step, workflow_step_name, sample_id, target_node, shacl_rules, conforms, results_text) in results:
-        if conforms != step_validities[workflow_step_name][sample_id]:
+    for validation_result in results:
+        step_name = validation_result.step_to_validate.step_information.workflow_model_step.step_name
+        object_id = validation_result.step_to_validate.step_information.object_id
+        target_node = validation_result.step_to_validate.step_information.target_node
+        shacl_shape = validation_result.step_to_validate.shacl_shape
+
+        if validation_result.conforms != step_validities[step_name][object_id]:
             raise ValueError(f"""
             Mismatching validation for {path}. 
-            Step: {workflow_step_name}
+            Step: {step_name}
             Target node: {target_node}
-            Sample: {sample_id}
-            SHACL rules: {shacl_rules}
-            Expected validation result: {step_validities[workflow_step_name][sample_id]}
-            Validation result: {conforms}
-            SHACL message: {results_text}
+            Object ID: {object_id}
+            SHACL shape: {shacl_shape}
+            Expected validation result: {step_validities[step_name][object_id]}
+            Validation result: {validation_result.conforms}
+            SHACL message: {validation_result.pyshacl_output}
             """)
         else:
             # Clear the sample and the step if there are no samples remaining, to mark that they were
             # validated
-            del step_validities[workflow_step_name][sample_id]
-            if len(step_validities[workflow_step_name]) == 0:
-                del step_validities[workflow_step_name]
+            del step_validities[step_name][object_id]
+            if len(step_validities[step_name]) == 0:
+                del step_validities[step_name]
 
     if len(step_validities) != 0:
         raise ValueError(f"""
         Some validation steps were not executed: {step_validities}
         """)
+
 
 async def run_incorrect_activities_tests():
     await run_test(os.path.join(module_dir,'handover_workflows_validation/validation_test/workflow_config_files/incorrect_activities/step_1'),
@@ -123,6 +129,7 @@ async def run_incorrect_activities_tests():
                  'step_5': {sample_name_to_id['AnnealedSample1']: True},
                  'step_6': {sample_name_to_id['AnnealedSample1Piece1']: True, sample_name_to_id['AnnealedSample1Piece2']: True}
              })
+
     await run_test(os.path.join(module_dir, 'handover_workflows_validation/validation_test/workflow_config_files/incorrect_activities/step_5'),
              {
                  'step_1': {sample_name_to_id['Sample1']: True},
