@@ -12,11 +12,10 @@ by writing them to RDF directly. They are intended to be stored in an RDF graph.
 An example usage of this API can be found on run_workflow_validation_test.py, which performs
 a full test of its correctness. RDF representations off the tested workflows can be found
 on ./validation_test, alongside user-friendly .yml representations that were used to
-bootstrap them.
-
-Note: no user-facing UI is available yet. The UI is meant to hook to this API and abstract
-users from the actual representation of the workflows.
+bootstrap them. Moreover, the WebUI uses it extensively for reading and writing workflow models
+and instances.
 """
+
 import asyncio
 import os
 import uuid
@@ -421,7 +420,7 @@ async def store_workflow_model(workflow_model: WorkflowModel,
             # Type(s) of the activity
             activity_type_iri = activity_name_to_iri[required_activity]
 
-            g.add((activity_iri, rdf_prefix.type, activity_type_iri))
+            g.add((activity_iri, rdf_prefix.type, URIRef(activity_type_iri)))
             g.add((activity_iri, rdf_prefix.type, crc_prefix.CharacterizationActivityModel))
 
         # Allow other activities

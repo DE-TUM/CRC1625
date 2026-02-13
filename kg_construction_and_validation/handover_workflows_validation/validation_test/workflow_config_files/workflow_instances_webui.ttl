@@ -72,8 +72,7 @@
     crc:relatesToHandoverWorkflowStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_6a7651e6-800b-5e76-ae96-4d792c89b689_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> .
 
 <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_5_of_workflow_instance_b5b3ebd3-d827-50ad-bc0b-089f95ef0a42> a crc:HandoverWorkflowInstanceAssignment ;
-    crc:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/-12>,
-        <https://crc1625.mdi.ruhr-uni-bochum.de/object/-13> ;
+    crc:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/-11>; # We cannot continue from -11
     crc:relatesToHandoverWorkflowStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_ac9663d1-c008-5477-ac20-75abe10d3d4d_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> .
 
 

@@ -4,7 +4,7 @@
 <https://crc1625.mdi.ruhr-uni-bochum.de/user/-1> <https://crc1625.mdi.ruhr-uni-bochum.de/givenName> "Sir".
 <https://crc1625.mdi.ruhr-uni-bochum.de/user/-1> <https://crc1625.mdi.ruhr-uni-bochum.de/surname> "SHACLot".
 <https://crc1625.mdi.ruhr-uni-bochum.de/user/-1> <https://crc1625.mdi.ruhr-uni-bochum.de/name> "Demo user".
-
+<https://crc1625.mdi.ruhr-uni-bochum.de/user/-1> <https://crc1625.mdi.ruhr-uni-bochum.de/memberOfProject> <https://crc1625.mdi.ruhr-uni-bochum.de/project/A06>.
 
 ######################################
 
