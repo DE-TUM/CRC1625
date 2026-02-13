@@ -7,6 +7,9 @@ from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_
 
 
 def add_object_action(new_object_id: str | None):
+    # Remove the previous node colors
+    ui_elements.graph_component.clear_validation_results()
+
     if not new_object_id:
         ui.notify("Please indicate a Materials Library / Sample ID to add", type='warning')
         return
@@ -36,6 +39,9 @@ def add_object_action(new_object_id: str | None):
 
 
 def remove_object_action(object_id_to_remove: str):
+    # Remove the previous node colors
+    ui_elements.graph_component.clear_validation_results()
+
     if not object_id_to_remove:
         ui.notify("Please indicate a Materials Library / Sample ID to remove", type='warning')
         return

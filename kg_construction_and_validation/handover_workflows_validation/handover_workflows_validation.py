@@ -747,8 +747,9 @@ async def generate_SHACL_shapes_for_workflow(workflow_model: WorkflowModel,
     cached_object_handover_groups: dict[int, tuple[str, dict[str, str] | None]] = {}
 
     # List of (handover workflow model step, object ID, target node), containing
-    # references to workflow model steps for which the given object ID did not have a target node for it (i.e., not
-    # enough handover groups), alongside the last handover group that exists
+    # references to the *first* workflow model steps for which the given object ID
+    # did not have a target node for (i.e., not enough handover groups), alongside
+    # the last handover group that exists
     steps_with_no_target_node: list[StepValidationInfo] = []
 
     # Start validating from the initial step, for every sample that is assigned to it
@@ -797,7 +798,11 @@ async def generate_SHACL_shapes_for_workflow(workflow_model: WorkflowModel,
                         # There are no further handover groups - we can stop validating this branch
                         #
                         # We save a reference to this to report it
-                        steps_with_no_target_node.append(step_to_parse.step_information)
+                        step_with_no_target_node = StepValidationInfo()
+                        step_with_no_target_node.workflow_model_step = next_step
+                        step_with_no_target_node.target_node = step_to_parse.step_information.target_node
+                        step_with_no_target_node.object_id = current_step_information.object_id
+                        steps_with_no_target_node.append(step_with_no_target_node)
 
                 # Continue the validation from any new objects that were not in the current step
                 #

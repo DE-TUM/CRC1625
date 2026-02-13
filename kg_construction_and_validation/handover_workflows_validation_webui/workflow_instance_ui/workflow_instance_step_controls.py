@@ -5,6 +5,9 @@ from handover_workflows_validation_webui.state import ui_elements, get_state
 
 async def add_edge_action(step_name: str | None,
                           object_id: str | None):
+    # Remove the previous node colors
+    ui_elements.graph_component.clear_validation_results()
+
     if not step_name or not object_id:
         ui.notify("Please indicate both a Materials Library / Sample ID and a step", type='warning')
         return
@@ -22,6 +25,9 @@ async def add_edge_action(step_name: str | None,
 
 async def remove_edge_action(step_name: str,
                              object_id: str):
+    # Remove the previous node colors
+    ui_elements.graph_component.clear_validation_results()
+
     if not step_name or not object_id:
         ui.notify("Please indicate both a Materials Library / Sample ID and a step", type='warning')
         return

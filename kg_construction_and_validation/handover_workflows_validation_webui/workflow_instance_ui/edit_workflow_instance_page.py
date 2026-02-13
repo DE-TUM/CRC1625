@@ -1,7 +1,8 @@
 from nicegui import ui, run
 
 from handover_workflows_validation.handover_workflows_validation import read_workflow_model, WorkflowModel, \
-    get_workflow_instances_of_model, WorkflowInstance, overwrite_workflow_instance
+    get_workflow_instances_of_model, WorkflowInstance, overwrite_workflow_instance, generate_SHACL_shapes_for_workflow, generate_data_graphs_for_workfow_steps, \
+    validate_SHACL_rules
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, NodeType
 from handover_workflows_validation_webui.state import ui_elements, get_state
 from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_controls import create_graph_controls
@@ -20,8 +21,16 @@ def workflow_model_and_instance_to_nodes_and_edges(workflow_model: WorkflowModel
     edges = list()
 
     for step_name, step in workflow_model.workflow_model_steps.items():
-        nodes.append({'data': {'id': step_name, 'label': step_name, 'projects': step.projects, 'activities': step.required_activities,
-                               'identifiers_for_coloring': step.required_activities}, "classes": [NodeType.node_type_step.value]})
+        nodes.append({
+            'data': {
+                'id': step_name,
+                'label': step_name,
+                'projects': step.projects,
+                'activities': step.required_activities,
+                'identifiers_for_coloring': step.required_activities
+            },
+            'classes': [NodeType.node_type_step.value]
+        })
 
         for next_step_name in step.next_steps:
             edges.append({'data': {'source': step_name, 'target': next_step_name}})
@@ -29,12 +38,29 @@ def workflow_model_and_instance_to_nodes_and_edges(workflow_model: WorkflowModel
     for assigned_step_name, assigned_objects in workflow_instance.step_assignments.items():
         for assigned_object in assigned_objects:
             # We set as the node's ids for coloring a single list containing 'object'
-            if {'data': {'id': assigned_object, 'label': assigned_object, 'identifiers_for_coloring': ['object']},
-                "classes": [NodeType.node_type_step.value]} not in nodes:
-                nodes.append({'data': {'id': assigned_object, 'label': f'ML / Sample {assigned_object}', 'identifiers_for_coloring': ['object']},
-                              "classes": [NodeType.node_type_object.value]})
+            if {
+                'data': {
+                    'id': assigned_object,
+                    'label': assigned_object,
+                    'identifiers_for_coloring': ['object']
+                },
+                'classes': [NodeType.node_type_step.value]
+            } not in nodes:
+                nodes.append({
+                    'data': {
+                        'id': assigned_object,
+                        'label': f'ML / Sample {assigned_object}',
+                        'identifiers_for_coloring': ['object']
+                    },
+                    'classes': [NodeType.node_type_object.value]
+                })
 
-            edges.append({'data': {'source': assigned_step_name, 'target': assigned_object}})
+            edges.append({
+                'data': {
+                    'source': assigned_step_name,
+                    'target': assigned_object
+                }
+            })
 
     return {
         'nodes': nodes,
@@ -120,6 +146,38 @@ async def handle_save_button():
         ui.notify("The changes have been saved", type='positive')
 
 
+async def run_validation():
+    # Remove the previous node colors
+    ui_elements.graph_component.clear_validation_results()
+
+    steps_to_validate, steps_with_no_target_node = await generate_SHACL_shapes_for_workflow(get_state().current_workflow_model,
+                                                                                            get_state().current_workflow_instance)
+    data_graphs = await generate_data_graphs_for_workfow_steps(steps_to_validate)
+    results = validate_SHACL_rules(steps_to_validate, data_graphs)
+
+    colored_steps = set()
+    for validation_result in results:
+        step_name = validation_result.step_to_validate.step_information.workflow_model_step.step_name
+        # TODO we can additionally distinguish between objects
+        #object_id = validation_result.step_to_validate.step_information.object_id
+
+        if validation_result.conforms:
+            ui_elements.graph_component.set_node_as_valid(step_name)
+        else:
+            ui_elements.graph_component.set_node_as_invalid(step_name)
+
+        colored_steps.add(step_name)
+
+    for step_with_no_target_node in steps_with_no_target_node:
+        ui_elements.graph_component.set_node_as_missing(step_with_no_target_node.workflow_model_step.step_name)
+        colored_steps.add(step_with_no_target_node.workflow_model_step.step_name)
+
+    # Technically we can just do this and not check the steps with no target nodes, but
+    # we may want to distinguish them / show different info in the future
+    for step_name in get_state().current_workflow_model.workflow_model_steps:
+        if step_name not in colored_steps:
+            ui_elements.graph_component.set_node_as_missing(step_name)
+
 @ui.page('/workflows/edit_workflow_instance/{workflow_model_name}/{workflow_model_creator_user_id}/{workflow_instance_name}/{workflow_instance_creator_user_id}')
 async def edit_workflow_instance_page(workflow_model_name: str,
                                       workflow_model_creator_user_id: int,
@@ -148,13 +206,15 @@ async def edit_workflow_instance_page(workflow_model_name: str,
         ui.space()
         ui.image('/assets/crc_logo_black_letters_wide.png').classes('w-26')
 
-    with ui.grid(columns=3):
+    with ui.grid(columns=4):
         with ui.column(align_items='stretch'):
             ui.button('Return to main page', color='info', on_click=lambda: handle_return_button())
         with ui.column(align_items='stretch'):
             ui.button('Undo last change', color='negative', on_click=lambda: handle_undo_button())
         with ui.column(align_items='stretch'):
             ui.button('Save all changes', color='positive', on_click=lambda: handle_save_button())
+        with ui.column(align_items='stretch'):
+            ui.button('Validate workflow', color='info', on_click=lambda: run_validation())
 
     graph_data = workflow_model_and_instance_to_nodes_and_edges(get_state().current_workflow_model,
                                                                 get_state().current_workflow_instance)

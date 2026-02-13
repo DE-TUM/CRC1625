@@ -89,8 +89,28 @@ export default {
           selector: '.selected',
           style: {
             'border-width': 4,
-            'border-color': '#FF4136',
+            'border-color': '#5898d4',
             'font-weight': 'bold',
+          }
+        },
+
+        // Node coloring according to validation results
+        {
+          selector: '.valid_step',
+          style: {
+            'background-color': '#369c4e',
+          }
+        },
+          {
+          selector: '.invalid_step',
+          style: {
+            'background-color': '#d40820',
+          }
+        },
+        {
+          selector: '.missing_step',
+          style: {
+            'background-color': '#e88b00',
           }
         },
 
@@ -221,6 +241,33 @@ export default {
       const node = this.cy.$id(id);
       if (node.length > 0) {
         node.addClass('selected');
+      }
+    },
+
+    clearValidationResults() {
+      this.cy.elements().removeClass('valid_step');
+      this.cy.elements().removeClass('invalid_step');
+      this.cy.elements().removeClass('missing_step');
+    },
+
+    setNodeAsValid(id) {
+      const node = this.cy.$id(id);
+      if (node.length > 0) {
+        node.addClass('valid_step');
+      }
+    },
+
+    setNodeAsInvalid(id) {
+      const node = this.cy.$id(id);
+      if (node.length > 0) {
+        node.addClass('invalid_step');
+      }
+    },
+
+    setNodeAsMissing(id) {
+      const node = this.cy.$id(id);
+      if (node.length > 0) {
+        node.addClass('missing_step');
       }
     },
 

@@ -16,8 +16,6 @@ class CytoscapeComponent(Element, component='cytoscape_component.js'):
     NiceGUI Element implementation for integrating Cytoscape as a custom Vue component
     """
 
-    # Adapted from: https: // github.com / stardog - union / stardog - examples / blob / develop / weblog / stardog - d3 / js / stardogd3.js
-
     # Adapted from: https://github.com/stardog-union/stardog-examples/blob/develop/weblog/stardog-d3/js/stardogd3.js
     colors = ['#68bdf6',  # light blue
               '#6dce9e',  # green #1
@@ -119,6 +117,18 @@ class CytoscapeComponent(Element, component='cytoscape_component.js'):
 
     def select_node(self, node_id: str) -> None:
         self.run_method('selectNode', node_id)
+
+    def set_node_as_valid(self, node_id: str) -> None:
+        self.run_method('setNodeAsValid', node_id)
+
+    def set_node_as_invalid(self, node_id: str) -> None:
+        self.run_method('setNodeAsInvalid', node_id)
+
+    def set_node_as_missing(self, node_id: str) -> None:
+        self.run_method('setNodeAsMissing', node_id)
+
+    def clear_validation_results(self) -> None:
+        self.run_method('clearValidationResults')
 
     def add_activity(self, node_id: str, new_activities: list[str], added_activity: str) -> None:
         self.run_method('addActivity', node_id, added_activity, self._get_node_color(new_activities))
