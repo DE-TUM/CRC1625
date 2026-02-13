@@ -21,13 +21,21 @@ user_details_query = prefixes + open(os.path.join(module_dir, 'queries/user_deta
 
 @dataclass
 class WorkflowsPageState:
+    """
+    State dataclass containing references to UI elements and contents of pages in this module.
+    Initialized by accessing the main page and thus local to the user.
+    """
     main_content: Column = None
     right_drawer: RightDrawer = None
-    search_input: Input = None
-    creator_selector: Select = None
+    search_input_workflow_models: Input = None
+    creator_selector_workflow_models: Select = None
     workflow_models_table_container: Column = None
     workflow_models_set: set[tuple[str, str]] = field(default_factory=set)
     filtered_workflow_models_list: list[tuple[str, str]] = field(default_factory=list)
+    filtered_workflow_instances_of_current_workflow_model: list[WorkflowInstance] = field(default_factory=list)
+    workflow_instances_container: Column = None
+    search_input_workflow_instances: Input = None
+    sample_input_workflow_instances: Select = None
 
 
 def edit_handover_workflow_instance_button_click():
@@ -86,7 +94,7 @@ def handle_workflow_instance_table_click(workflow_instance: WorkflowInstance, wo
 
 
 def populate_workflow_models_table(workflows_page_state: WorkflowsPageState):
-    search_term = workflows_page_state.search_input.value.lower()
+    search_term = workflows_page_state.search_input_workflow_models.value.lower()
 
     # Filter them by name
     if search_term:
@@ -97,12 +105,13 @@ def populate_workflow_models_table(workflows_page_state: WorkflowsPageState):
         workflows_page_state.filtered_workflow_models_list = workflows_page_state.workflow_models_set
 
     # Filter them by user ID
-    workflows_page_state.filtered_workflow_models_list = [
-        row for row in workflows_page_state.filtered_workflow_models_list if str(workflows_page_state.creator_selector.value) == row[1]
-    ]
+    if workflows_page_state.creator_selector_workflow_models.value:
+        workflows_page_state.filtered_workflow_models_list = [
+            row for row in workflows_page_state.filtered_workflow_models_list if str(workflows_page_state.creator_selector_workflow_models.value) == row[1]
+        ]
 
     # Sort them by name
-    workflows_page_state.filtered_workflow_models_list.sort(key=lambda x: x[0].lower())
+    list(workflows_page_state.filtered_workflow_models_list).sort(key=lambda x: x[0].lower())
 
     # Show them
     workflows_page_state.workflow_models_table_container.clear()
@@ -117,6 +126,113 @@ def populate_workflow_models_table(workflows_page_state: WorkflowsPageState):
                     ui.label(str(row[1])).classes('w-0 flex-grow text-right').style('color: #000000')
 
 
+async def create_empty_workflow_instance(workflow_instance_name: str,
+                                         workflows_page_state: WorkflowsPageState):
+    workflow_instance = WorkflowInstance()
+    workflow_instance.workflow_model_name = get_state().current_workflow_model.workflow_model_name
+    workflow_instance.workflow_instance_name = workflow_instance_name
+
+    # We must add step assignments, even if they don't hold references to any objects
+    for step_name in get_state().current_workflow_model.workflow_model_steps:
+        workflow_instance.step_assignments[step_name] = []
+
+    await create_workflow_instance(workflow_instance, get_state().current_workflow_model)
+    # Show them again
+    await show_workflow_model_instances(get_state().current_workflow_model.workflow_model_name,
+                                        get_state().current_workflow_model.creator_user_id,
+                                        workflows_page_state)
+
+
+async def populate_workflow_instances_table(workflows_page_state: WorkflowsPageState):
+    workflows_page_state.workflow_instances_container.clear()
+
+    with (workflows_page_state.workflow_instances_container):
+        # Workflow instances list
+        with ui.row().classes('w-full border-b-2 border-gray-400 py-1 font-bold'):
+            ui.label('Workflow Instance name').classes('w-1/3 text-left')
+            ui.label('Associated Materials libraries or Samples').classes('w-1/3 text-left')
+            ui.label('Validation status').classes('w-0 flex-grow text-left')
+
+        async def validate_workflow(validation_icon_column, workflow_model, workflow_instance):
+            """
+            Runs validation for the workflow model and instance pair, and updates the corresponding icon according to the results
+            """
+            validation_status = await is_workflow_instance_valid(workflow_model, workflow_instance)
+
+            validation_icon_column.clear()
+            with validation_icon_column:
+                with ui.row():
+                    if validation_status == validation_status.Valid:
+                        ui.icon('check_circle').classes('text-green-6')
+                    elif validation_status == validation_status.Warning:
+                        ui.icon('warning').classes('text-orange-6')
+                    else:
+                        ui.icon('error').classes('text-red-6')
+
+                    with ui.icon('o_help').classes('text-sm'):
+                        ui.tooltip(validation_status.description)
+
+        # First pass over workflow instances to populate the sample ID filter
+        search_input_workflow_instances_options: list[str] = []
+        sample_input_workflow_instances_options: set[int] = set()
+        for workflow_instance in get_state().workflow_instances_of_current_workflow_model.values():
+            search_input_workflow_instances_options.append(workflow_instance.workflow_instance_name)
+            for step_assignment_samples in workflow_instance.step_assignments.values():
+                sample_input_workflow_instances_options.update(step_assignment_samples)
+
+        sample_input_workflow_instances_options_list = list(sample_input_workflow_instances_options)
+        sorted(sample_input_workflow_instances_options_list)
+
+        workflows_page_state.search_input_workflow_instances.set_autocomplete(search_input_workflow_instances_options)
+        workflows_page_state.sample_input_workflow_instances.set_options(sample_input_workflow_instances_options_list)
+
+        # Second pass over the workflow instances to show thet able and run validation jobs
+        validation_jobs = []
+        for workflow_instance in get_state().workflow_instances_of_current_workflow_model.values():
+            # Filter by name
+            if workflows_page_state.search_input_workflow_instances.value:
+                if workflows_page_state.search_input_workflow_instances.value not in workflow_instance.workflow_instance_name.lower():
+                    continue
+
+            print(workflows_page_state.sample_input_workflow_instances.value)
+            if workflows_page_state.sample_input_workflow_instances.value:
+                has_sample = False
+                for step_assignment_samples in workflow_instance.step_assignments.values():
+                    for selection_value in workflows_page_state.sample_input_workflow_instances.value:
+                        if selection_value in step_assignment_samples:
+                            has_sample = True
+                            break
+
+                if not has_sample:
+                    continue
+
+            with ui.button(on_click=lambda r=workflow_instance: handle_workflow_instance_table_click(r, workflows_page_state)).props(
+                    'no-caps unelevated color=secondary').classes('w-full p-1'):
+                with ui.row().classes('w-full py-1 items-center'):
+                    ui.label(workflow_instance.workflow_instance_name).classes('w-1/3 text-left').style('color: #000000')
+
+                    associated_objects = set()
+                    for assignments in workflow_instance.step_assignments.values():
+                        for assignment in assignments:
+                            associated_objects.add(str(assignment))
+
+                    ui.label(', '.join(sorted(associated_objects))).classes('w-1/3 text-left').style('color: #000000')
+
+                    # The third column is shown as a spinner until the async validation jobs are run
+                    validation_icon_column = ui.column().classes('w-0 flex-grow text-left').style('color: #000000')
+                    with validation_icon_column:
+                        ui.spinner()
+
+                    validation_jobs.append(validate_workflow(validation_icon_column, get_state().current_workflow_model, workflow_instance))
+
+        ui.button("Add a new workflow instance", color='info',
+                  on_click=lambda: create_empty_workflow_instance(f"New workflow instance of {get_state().current_workflow_model.workflow_model_name}",
+                                                                  workflows_page_state))
+
+        # Run validation and update the spinners
+        await asyncio.gather(*validation_jobs)
+
+
 async def show_workflow_model_instances(workflow_model_name: str,
                                         workflow_model_creator_user_id: int,
                                         workflows_page_state: WorkflowsPageState):
@@ -126,6 +242,7 @@ async def show_workflow_model_instances(workflow_model_name: str,
     # Load the selected workflow model and its instances
     get_state().current_workflow_model = await read_workflow_model(workflow_model_name, workflow_model_creator_user_id)
     get_state().workflow_instances_of_current_workflow_model = await get_workflow_instances_of_model(get_state().current_workflow_model)
+    workflows_page_state.filtered_workflow_instances_of_current_workflow_model = get_state().workflow_instances_of_current_workflow_model
 
     workflows_page_state.main_content.clear()
     with workflows_page_state.main_content:
@@ -156,72 +273,23 @@ async def show_workflow_model_instances(workflow_model_name: str,
                     lambda: ui.notify("You cannot create new models as a demo user", type='negative')
                 )
 
-        # Workflow instances list
-        with ui.row().classes('w-full border-b-2 border-gray-400 py-1 font-bold'):
-            ui.label('Workflow Instance name').classes('w-1/3 text-left')
-            ui.label('Associated Materials libraries or Samples').classes('w-1/3 text-left')
-            ui.label('Validation status').classes('w-0 flex-grow text-left')
+        # Search and filtering
+        with ui.row():
+            with ui.column():
+                ui.label("Filter by workflow instance name:")
+                workflows_page_state.search_input_workflow_instances = ui.input(placeholder='Name...').props('clearable').classes('w-full')
+                workflows_page_state.search_input_workflow_instances.on_value_change(lambda: populate_workflow_instances_table(workflows_page_state))
+            with ui.column():
+                ui.label("Filter by Sample ID:")
+                workflows_page_state.sample_input_workflow_instances = ui.select(with_input=True,
+                                                                                 multiple=True,
+                                                                                 clearable=True,
+                                                                                 options=[]).on_value_change(lambda: populate_workflow_instances_table(workflows_page_state))
 
-        async def validate_workflow(validation_icon_column, workflow_model, workflow_instance):
-            """
-            Runs validation for the workflow model and instance pair, and updates the corresponding icon according to the results
-            """
-            validation_status = await is_workflow_instance_valid(workflow_model, workflow_instance)
+        workflows_page_state.workflow_instances_container = ui.column().classes('w-full')
 
-            validation_icon_column.clear()
-            with validation_icon_column:
-                with ui.row():
-                    if validation_status == validation_status.Valid:
-                        ui.icon('check_circle').classes('text-green-6')
-                    elif validation_status == validation_status.Warning:
-                        ui.icon('warning').classes('text-orange-6')
-                    else:
-                        ui.icon('error').classes('text-red-6')
 
-                    with ui.icon('o_help').classes('text-sm'):
-                        ui.tooltip(validation_status.description)
-
-        # Validation jobs for each of the instances
-        validation_jobs = []
-        for workflow_instance in get_state().workflow_instances_of_current_workflow_model.values():
-            with ui.button(on_click=lambda r=workflow_instance: handle_workflow_instance_table_click(r, workflows_page_state)).props('no-caps unelevated color=secondary').classes('w-full p-1'):
-                with ui.row().classes('w-full py-1 items-center'):
-                    ui.label(workflow_instance.workflow_instance_name).classes('w-1/3 text-left').style('color: #000000')
-
-                    associated_objects = set()
-                    for assignments in workflow_instance.step_assignments.values():
-                        for assignment in assignments:
-                            associated_objects.add(str(assignment))
-
-                    ui.label(', '.join(sorted(associated_objects))).classes('w-1/3 text-left').style('color: #000000')
-
-                    # The third column is shown as a spinner until the async validation jobs are run
-                    validation_icon_column = ui.column().classes('w-0 flex-grow text-left').style('color: #000000')
-                    with validation_icon_column:
-                        ui.spinner()
-
-                    validation_jobs.append(validate_workflow(validation_icon_column, get_state().current_workflow_model, workflow_instance))
-
-        async def create_empty_workflow_instance(workflow_instance_name: str, workflows_page_state: WorkflowsPageState):
-            workflow_instance = WorkflowInstance()
-            workflow_instance.workflow_model_name = get_state().current_workflow_model.workflow_model_name
-            workflow_instance.workflow_instance_name = workflow_instance_name
-
-            # We must add step assignments, even if they don't hold references to any objects
-            for step_name in get_state().current_workflow_model.workflow_model_steps:
-                workflow_instance.step_assignments[step_name] = []
-
-            await create_workflow_instance(workflow_instance, get_state().current_workflow_model)
-            # Show them again
-            await show_workflow_model_instances(workflow_model_name,
-                                                workflow_model_creator_user_id,
-                                                workflows_page_state)
-
-        ui.button("Add a new workflow instance", color='info',
-                  on_click=lambda: create_empty_workflow_instance(f"New workflow instance of {get_state().current_workflow_model.workflow_model_name}", workflows_page_state))
-
-        # Run validation and update the spinners
-        await asyncio.gather(*validation_jobs)
+    await populate_workflow_instances_table(workflows_page_state)
 
 
 async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPageState):
@@ -266,19 +334,20 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
         populate_workflow_models_table(workflows_page_state)
 
     with ui.column():
-        ui.label("Filter by workflow name:")
-        workflows_page_state.search_input = ui.input(placeholder='Name...').classes('w-full')
+        ui.label("Filter by workflow model name:")
+        workflows_page_state.search_input_workflow_models = ui.input(placeholder='Name...').props('clearable').classes('w-full')
 
     with ui.column():
         ui.label("Filter by owner:")
         user_details = await get_user_details()
         creator_selector_dict = {user_id : f"{user_name} ({project.replace('_', ', ')})" for user_id, (user_name, project) in user_details.items()}
-        workflows_page_state.creator_selector = ui.select(options=creator_selector_dict,
-                                                          with_input=True,
-                                                          value=get_state().user_id)
+        workflows_page_state.creator_selector_workflow_models = ui.select(options=creator_selector_dict,
+                                                                          with_input=True,
+                                                                          clearable=True,
+                                                                          value=get_state().user_id)
 
-    workflows_page_state.creator_selector.on_value_change(lambda: populate_workflow_models_table(workflows_page_state))
-    workflows_page_state.search_input.on_value_change(lambda: populate_workflow_models_table(workflows_page_state))
+    workflows_page_state.creator_selector_workflow_models.on_value_change(lambda: populate_workflow_models_table(workflows_page_state))
+    workflows_page_state.search_input_workflow_models.on_value_change(lambda: populate_workflow_models_table(workflows_page_state))
 
     # Workflow models table
     async def create_workflow_models_set() -> set[tuple[str, str]]:
@@ -317,9 +386,11 @@ async def workflows_page(demo: str = ""):
         # Become Sir SHACLot
         get_state().demo_mode = True
         get_state().user_id = -1
-    else: # TODO until auth
-        get_state().demo_mode = False
-        get_state().user_id = 0
+    else: # TODO until auth is implemented we force everyone to be the sir SHACLot
+        get_state().demo_mode = True
+        get_state().user_id = -1
+        #get_state().demo_mode = False
+        #get_state().user_id = 0
 
     workflows_page_state = WorkflowsPageState()
     workflows_page_state.main_content = ui.column().classes('w-full')

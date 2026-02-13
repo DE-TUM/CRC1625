@@ -20,6 +20,9 @@ ui_elements = UIElements()
 
 @dataclass
 class State:
+    """
+    State class for user data. Anything that needs to be stored across pages belongs here.
+    """
     _storage: dict = field(init=False, repr=False)
 
     def __post_init__(self):
