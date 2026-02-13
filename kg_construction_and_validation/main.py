@@ -4,6 +4,7 @@ Main script used to execute the complete KG generation pipeline. It can be calle
 """
 import argparse
 import logging
+import os
 import sys
 import time
 
@@ -11,7 +12,6 @@ import datastores.sql.sql_db as sql_db
 import materialization.materialization as materialization
 import postprocessing.postprocessing as postprocessing
 from datastores.rdf import rdf_datastore_client, rdf_datastore
-from datastores.rdf.rdf_datastore_api import rdf_store
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -19,6 +19,8 @@ logging.basicConfig(
     format='[%(asctime)s] %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
+
+module_dir = os.path.dirname(__file__)
 
 # List of ontologies to upload to the KG
 ontology_files = [
@@ -69,7 +71,7 @@ def serve_KG(skip_ontologies_upload: bool = True,
 
     file_upload_start = time.perf_counter()
 
-    upload_materialized_triples(materialized_files, delete_materialized_triples_files)
+    upload_materialized_triples(materialized_files, delete_materialized_triples_files=True)
 
     if not skip_ontologies_upload:
         upload_ontology_files(ontology_files)
@@ -90,6 +92,9 @@ def serve_KG(skip_ontologies_upload: bool = True,
 
     if not skip_db_setup and not db.is_remote:
         db.stop_DB()
+
+    # Load Sir SHACLot alongside his demo MLs/Samples and handover workflows
+    rdf_datastore_client.run_sync(rdf_datastore_client.upload_file(os.path.join(module_dir, "handover_workflows_validation/validation_test/validation_test_triples_webui.ttl")))
 
     return performance_log_mappings, resource_usage_mappings, performance_log_postprocessing, resource_usage_postprocessing, file_upload_end
 
@@ -161,8 +166,6 @@ if __name__ == "__main__":
         default=False,
         help="Use RMLStreamer instead of RMLMapper. Only recommended for very large databases due to its overhead"
     )
-
-
 
     args = parser.parse_args()
 
