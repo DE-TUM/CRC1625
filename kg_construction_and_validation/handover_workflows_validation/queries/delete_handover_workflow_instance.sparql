@@ -14,7 +14,7 @@ WHERE {
     # Immediate neighborhood (outgoing) of its assignments
     UNION
     {
-      <{handover_workflow_instance_iri}> :hasAssignment ?s.
+      <{handover_workflow_instance_iri}> crc:hasAssignment ?s.
       ?s ?p ?o.
     }
   }

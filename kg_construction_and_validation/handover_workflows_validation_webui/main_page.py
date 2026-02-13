@@ -12,7 +12,7 @@ from nicegui.elements.select import Select
 from datastores.rdf import rdf_datastore_client
 from handover_workflows_validation.handover_workflows_validation import get_workflow_model_names_and_creator_user_ids, \
     get_workflow_instances_of_model, read_workflow_model, store_workflow_model, WorkflowInstance, is_workflow_instance_valid, WorkflowModel, \
-    create_workflow_instance
+    create_workflow_instance, delete_workflow_instance
 from handover_workflows_validation_webui.state import get_state
 
 module_dir = os.path.dirname(__file__)
@@ -42,6 +42,31 @@ def edit_handover_workflow_instance_button_click():
     ui.navigate.to(
         f'/workflows/edit_workflow_instance/{get_state().current_workflow_model.workflow_model_name}/{get_state().current_workflow_model.creator_user_id}/{get_state().current_workflow_instance.workflow_instance_name}/{get_state().current_workflow_instance.creator_user_id}')
 
+
+async def handle_workflow_instance_deletion(workflows_page_state: WorkflowsPageState):
+    await delete_workflow_instance(get_state().current_workflow_instance)
+    ui.notify(f'Workflow Instance {get_state().current_workflow_instance.workflow_instance_name} deleted', color='positive')
+    # Force the suer to select the workflow model again
+    workflows_page_state.main_content.clear()
+    workflows_page_state.right_drawer.clear()
+
+
+async def delete_workflow_instance_button_click(workflows_page_state: WorkflowsPageState):
+    if get_state().demo_mode:
+        ui.notify("You cannot delete workflow isntances as a demo user", type='negative')
+        return
+    elif get_state().user_id != get_state().current_workflow_instance.creator_user_id:
+        ui.notify(f"You are not the owner of this workflow instance, so you cannot delete it", type='negative')
+        return
+
+    with ui.dialog() as workflow_instance_deletion_dialog:
+        with ui.card(align_items='center'):
+            with ui.row(align_items='center').classes('w-full justify-center'):
+                ui.label('Are you sure you want to delete this Workflow Instance?')
+                ui.button('Yes', color='positive', on_click=lambda: handle_workflow_instance_deletion(workflows_page_state))
+                ui.button('Cancel', color='negative', on_click=workflow_instance_deletion_dialog.close)
+
+    workflow_instance_deletion_dialog.open()
 
 def edit_handover_workflow_model_button_click():
     ui.navigate.to(f'/workflows/edit_workflow_model/{get_state().current_workflow_model.workflow_model_name}/{get_state().user_id}')
@@ -80,10 +105,12 @@ def handle_workflow_instance_table_click(workflow_instance: WorkflowInstance, wo
         right_drawer_label = ui.label('Workflow instance options').classes('text-xl font-bold')
 
         with ui.column().classes('w-full items-center gap-2'):
-            ui.button("Edit", color='info').classes('w-full p-0').on_click(
+            ui.button("View Workflow Instance", color='info').classes('w-full p-0').on_click(
                 lambda: edit_handover_workflow_instance_button_click()
             )
-            ui.button("Delete", color='negative').classes('w-full p-0')
+            ui.button("Delete Workflow Instance", color='negative').classes('w-full p-0').on_click(
+                lambda: delete_workflow_instance_button_click(workflows_page_state)
+            )
 
         right_drawer_label.set_text(
             f"Workflow instance '{get_state().current_workflow_instance.workflow_instance_name}' options")
@@ -256,12 +283,12 @@ async def show_workflow_model_instances(workflow_model_name: str,
         # Workflow model edit and copy buttons
         with ui.row():
             if workflow_model_creator_user_id == get_state().user_id:
-                ui.button("Edit Workflow model", color='info').on_click(
+                ui.button("View Workflow model", color='info').on_click(
                     lambda: edit_handover_workflow_model_button_click()
                 )
             else:
-                ui.button("Edit Workflow model", color='gray').on_click(
-                    lambda: ui.notify(f"You are not the owner of this workflow model, but you can create a copy of it.", type='negative')
+                ui.button("View Workflow model", color='gray').on_click(
+                    lambda: ui.notify(f"You are not the owner of this workflow model, but you can create a copy of it", type='negative')
                 )
 
             if not get_state().demo_mode:
