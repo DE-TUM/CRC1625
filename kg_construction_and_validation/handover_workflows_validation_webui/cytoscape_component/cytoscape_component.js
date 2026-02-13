@@ -1,6 +1,25 @@
 export default {
   template: `
-    <div style="width: 100%; height: 500px; display: block; border: 1px solid #ddd; border-radius: 8px;"></div>
+    <div style="position: relative; width: 100%; height: 500px;">
+      <div ref="cy" style="width: 100%; height: 100%; display: block; border: 1px solid #ddd; border-radius: 8px;"></div>
+      <div v-if="hoverData" 
+           :style="{ 
+             position: 'absolute', 
+             top: hoverPos.y + 'px', 
+             left: hoverPos.x + 'px', 
+             background: '#333', 
+             color: '#fff', 
+             padding: '8px', 
+             borderRadius: '4px', 
+             fontSize: '12px', 
+             zIndex: 10, 
+             pointerEvents: 'none',
+             transform: 'translate(-50%, -120%)',
+             whiteSpace: 'pre-wrap'
+           }">
+        <strong>Validation result:</strong> {{ hoverData }}
+      </div>
+    </div>
   `,
 
   props: {
@@ -8,9 +27,16 @@ export default {
     edges: Array,
   },
 
+  data() {
+    return {
+      hoverData: null,
+      hoverPos: { x: 0, y: 0 }
+    };
+  },
+
   mounted() {
     this.cy = cytoscape({
-      container: this.$el,
+      container: this.$refs.cy,
 
       elements: {
         nodes: this.nodes,
@@ -33,20 +59,12 @@ export default {
               const activityText = '\n'+activities.join('\n');
 
               const projects = ele.data('projects') || "";
-              if (projects.length === 0) {
-                return `${label}\n${activityText}`;
-              } else if (projects.length === 1) {
-                console.log("1:", projects);
-                return `${label}\n${activityText}\n\nProject ${projects[0]}`;
-              } else {
-                console.log(">1:", projects);
-                return `${label}\n${activityText}\n\nProjects\n${projects.join(',\n')}`;
-              }
+              if (projects.length === 0) return `${label}\n${activityText}`;
+              if (projects.length === 1) return `${label}\n${activityText}\n\nProject ${projects[0]}`;
 
+              return `${label}\n${activityText}\n\nProjects\n${projects.join(',\n')}`;
             },
-            'background-color': (ele) => {
-              return ele.data('color') || '#0074D9';
-            },
+            'background-color': (ele) => ele.data('color') || '#0074D9',
             'color': '#000000',
             'text-valign': 'bottom',
             'text-margin-y': '5px',
@@ -56,7 +74,6 @@ export default {
             'text-wrap': 'wrap',
           }
         },
-
         {
           selector: 'node.step',
           style: {
@@ -78,7 +95,6 @@ export default {
             'padding': 0,
             'background-opacity': 0,
             'border-width': 0,
-
             'label': '',
             'text-opacity': 0,
           }
@@ -101,7 +117,7 @@ export default {
             'background-color': '#369c4e',
           }
         },
-          {
+        {
           selector: '.invalid_step',
           style: {
             'background-color': '#d40820',
@@ -113,8 +129,13 @@ export default {
             'background-color': '#e88b00',
           }
         },
+        {
+          selector: '.not_checked_step',
+          style: {
+            'background-color': '#454549',
+          }
+        },
 
-        // Edges
         {
           selector: 'edge',
           style: {
@@ -135,33 +156,46 @@ export default {
       }
     });
 
-    /*
-    Event listeners
-     */
+    // Tooltip listeners
+    const validationSelector = 'node.valid_step, node.invalid_step, node.missing_step, node.not_checked_step';
 
-    // Clicking a node
+    this.cy.on('mouseover', validationSelector, (evt) => {
+      const node = evt.target;
+      const msg = node.data('validationTooltip');
+      if (msg) {
+        this.hoverData = msg;
+        this.updateTooltipPos(evt);
+      }
+    });
+
+    this.cy.on('mousemove', validationSelector, (evt) => {
+      if (this.hoverData) this.updateTooltipPos(evt);
+    });
+
+    this.cy.on('mouseout', validationSelector, () => {
+      this.hoverData = null;
+    });
+
+    // Selection listeners
     this.cy.on('tap', 'node', (evt) => {
       const node = evt.target;
-
       this.cy.elements().removeClass('selected');
       node.addClass('selected');
-
       this.$emit('nodeClick', { id: node.id(), label: node.data('label') });
     });
 
-    // Clicking the background (deselect)
     this.cy.on('tap', (evt) => {
-      if (evt.target === this.cy) {
-        this.cy.elements().removeClass('selected');
-      }
+      if (evt.target === this.cy) this.cy.elements().removeClass('selected');
     });
 
     this.rerun_layout_and_fit();
   },
 
-  // Javascript methods that will be hooked into python in cytoscape_component.py
   methods: {
-    // --- Existing methods ---
+    updateTooltipPos(evt) {
+      const pos = evt.renderedPosition;
+      this.hoverPos = { x: pos.x, y: pos.y };
+    },
 
     rerun_layout_and_fit() {
       // Fit to the graph elements with a small padding
@@ -180,9 +214,7 @@ export default {
     },
 
     existsEdge(source, target) {
-      const edge = this.cy.edges(`[source = "${source}"][target = "${target}"]`);
-
-      return edge.length > 0;
+      return this.cy.edges(`[source = "${source}"][target = "${target}"]`).length > 0;
     },
 
     removeEdge(source, target) {
@@ -204,10 +236,9 @@ export default {
       }
     },
 
-    addNode(id, label, type, node_color) { // <-- node_color is used here
+    addNode(id, label, type, node_color) {
       if (this.cy.$id(id).length === 0) {
         let classes = [];
-
         if (type && ['step', 'object'].includes(type.toLowerCase())) {
           classes.push(type.toLowerCase());
         }
@@ -239,35 +270,47 @@ export default {
     selectNode(id) {
       this.cy.elements().removeClass('selected');
       const node = this.cy.$id(id);
-      if (node.length > 0) {
-        node.addClass('selected');
-      }
+      if (node.length > 0) node.addClass('selected');
     },
 
     clearValidationResults() {
       this.cy.elements().removeClass('valid_step');
       this.cy.elements().removeClass('invalid_step');
       this.cy.elements().removeClass('missing_step');
+      
+      // Clear stored tooltips
+      this.cy.nodes().removeData('validationTooltip');
     },
 
-    setNodeAsValid(id) {
+    setNodeAsValid(id, tooltip = 'Valid') {
       const node = this.cy.$id(id);
       if (node.length > 0) {
         node.addClass('valid_step');
+        node.data('validationTooltip', tooltip);
       }
     },
-
-    setNodeAsInvalid(id) {
+    
+    setNodeAsInvalid(id, tooltip = 'Invalid') {
       const node = this.cy.$id(id);
       if (node.length > 0) {
         node.addClass('invalid_step');
+        node.data('validationTooltip', tooltip);
       }
     },
-
-    setNodeAsMissing(id) {
+    
+    setNodeAsMissing(id, tooltip = 'Missing') {
       const node = this.cy.$id(id);
       if (node.length > 0) {
         node.addClass('missing_step');
+        node.data('validationTooltip', tooltip);
+      }
+    },
+
+    setNodeAsNotChecked(id, tooltip = 'Not checked') {
+      const node = this.cy.$id(id);
+      if (node.length > 0) {
+        node.addClass('not_checked_step');
+        node.data('validationTooltip', tooltip);
       }
     },
 
@@ -276,11 +319,7 @@ export default {
       if (node.length > 0) {
         const activities = node.data('activities') || [];
         if (!activities.includes(activity)) {
-
-          const newActivities = [...activities, activity];
-          node.data('activities', newActivities);
-
-          // Force a re-render of the label and its color
+          node.data('activities', [...activities, activity]);
           node.data('color', new_node_color);
           node.trigger('data');
           this.rerun_layout_and_fit();
@@ -292,17 +331,10 @@ export default {
       const node = this.cy.$id(id);
       if (node.length > 0) {
         const activities = node.data('activities') || [];
-        const index = activities.indexOf(activity);
-
-        if (index > -1) {
-          const newActivities = activities.filter(a => a !== activity);
-          node.data('activities', newActivities);
-
-          // Force a re-render of the label and its color
-          node.data('color', new_node_color);
-          node.trigger('data');
-          this.rerun_layout_and_fit();
-        }
+        const filtered = activities.filter(a => a !== activity);
+        node.data('activities', filtered);
+        node.trigger('data');
+        this.rerun_layout_and_fit();
       }
     },
 

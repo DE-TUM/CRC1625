@@ -118,14 +118,17 @@ class CytoscapeComponent(Element, component='cytoscape_component.js'):
     def select_node(self, node_id: str) -> None:
         self.run_method('selectNode', node_id)
 
-    def set_node_as_valid(self, node_id: str) -> None:
-        self.run_method('setNodeAsValid', node_id)
+    def set_node_as_valid(self, node_id: str, tooltip: str) -> None:
+        self.run_method('setNodeAsValid', node_id, tooltip)
 
-    def set_node_as_invalid(self, node_id: str) -> None:
-        self.run_method('setNodeAsInvalid', node_id)
+    def set_node_as_invalid(self, node_id: str, tooltip: str) -> None:
+        self.run_method('setNodeAsInvalid', node_id, tooltip)
 
-    def set_node_as_missing(self, node_id: str) -> None:
-        self.run_method('setNodeAsMissing', node_id)
+    def set_node_as_missing(self, node_id: str, tooltip: str) -> None:
+        self.run_method('setNodeAsMissing', node_id, tooltip)
+
+    def set_node_as_not_checked(self, node_id: str, tooltip: str) -> None:
+        self.run_method('setNodeAsNotChecked', node_id, tooltip)
 
     def clear_validation_results(self) -> None:
         self.run_method('clearValidationResults')

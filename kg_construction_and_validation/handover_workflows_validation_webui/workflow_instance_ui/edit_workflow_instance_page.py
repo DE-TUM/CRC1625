@@ -162,21 +162,22 @@ async def run_validation():
         #object_id = validation_result.step_to_validate.step_information.object_id
 
         if validation_result.conforms:
-            ui_elements.graph_component.set_node_as_valid(step_name)
+            ui_elements.graph_component.set_node_as_valid(step_name, "Valid!")
         else:
-            ui_elements.graph_component.set_node_as_invalid(step_name)
+            ui_elements.graph_component.set_node_as_invalid(step_name, validation_result.pyshacl_output)
 
         colored_steps.add(step_name)
 
     for step_with_no_target_node in steps_with_no_target_node:
-        ui_elements.graph_component.set_node_as_missing(step_with_no_target_node.workflow_model_step.step_name)
+        ui_elements.graph_component.set_node_as_missing(step_with_no_target_node.workflow_model_step.step_name,
+                                                        f"ML / Sample with object ID {step_with_no_target_node.object_id} had no matching handover group for this step")
         colored_steps.add(step_with_no_target_node.workflow_model_step.step_name)
 
-    # Technically we can just do this and not check the steps with no target nodes, but
-    # we may want to distinguish them / show different info in the future
+    # Same as above, with less detailed tooltips
     for step_name in get_state().current_workflow_model.workflow_model_steps:
         if step_name not in colored_steps:
-            ui_elements.graph_component.set_node_as_missing(step_name)
+            ui_elements.graph_component.set_node_as_not_checked(step_name,
+                                                                "No data was available to check this step")
 
 @ui.page('/workflows/edit_workflow_instance/{workflow_model_name}/{workflow_model_creator_user_id}/{workflow_instance_name}/{workflow_instance_creator_user_id}')
 async def edit_workflow_instance_page(workflow_model_name: str,
