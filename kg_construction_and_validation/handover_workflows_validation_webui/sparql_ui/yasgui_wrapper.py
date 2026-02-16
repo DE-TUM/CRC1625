@@ -258,7 +258,7 @@ async def main_page():
         ui.label(f"CRC 1625 SPARQL endpoint").classes('text-xl font-medium').style('color: #000000')
         ui.space()
         if True:  # TODO integrate auth
-            ui.label('Welcome, Sir SHACLot (demo user)!').classes('text-xl').style('color: #000000')
+            ui.label('Welcome, Sir SHACLot (demo user)!¡').classes('text-xl').style('color: #000000')
             ui.button('Log out', color='negative', on_click=lambda: ui.navigate.to("/")).props('size=m')
             ui.button('Return to main page', color='info', on_click=lambda: ui.navigate.to("/")).props('size=m')
 

@@ -426,7 +426,7 @@ async def workflows_page(demo: str = ""):
         ui.label('Handover workflows validation prototype UI').classes('text-xl').style('color: #000000')
         ui.space()
         if True:  # TODO integrate auth
-            ui.label('Welcome, Sir SHACLot (demo user)!').classes('text-xl').style('color: #000000')
+            ui.label('Welcome, Sir SHACLot (demo user)').classes('text-xl').style('color: #000000')
             ui.button('Log out', color='negative', on_click=lambda: ui.navigate.to("/")).props('size=m')
             ui.button('Return to main page', color='info', on_click=lambda: ui.navigate.to("/")).props('size=m')
         else:

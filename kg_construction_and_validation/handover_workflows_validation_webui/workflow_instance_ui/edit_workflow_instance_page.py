@@ -1,4 +1,5 @@
 from nicegui import ui, run
+from nicegui.elements.input import Input
 
 from handover_workflows_validation.handover_workflows_validation import read_workflow_model, WorkflowModel, \
     get_workflow_instances_of_model, WorkflowInstance, overwrite_workflow_instance, generate_SHACL_shapes_for_workflow, generate_data_graphs_for_workfow_steps, \
@@ -80,6 +81,11 @@ def handle_node_click(e):
         ui.notify(f"Only workflow steps are selectable", type='warning')
 
 
+def handle_workflow_instance_name_button(new_name):
+    get_state().save_workflow_instance_copy()
+    get_state().current_workflow_instance.workflow_model_name = new_name
+
+
 def handle_return_button():
     if not get_state().changes_are_saved:
         with ui.dialog() as return_dialog:
@@ -106,9 +112,9 @@ def handle_return_button():
         ui.navigate.to('/workflows')
 
 
-def handle_undo_button():
+def handle_undo_button(workflow_instance_name_input: Input):
     if len(get_state().workflow_model_history) == 0:
-        ui.notify("No changes have been performed yet!", type='warning')
+        ui.notify("No changes have been performed yet", type='warning')
     else:
         get_state().undo_workflow_model_change()
 
@@ -133,6 +139,9 @@ def handle_undo_button():
             create_workflow_instance_step_controls()
 
         ui_elements.graph_component.select_node(get_state().selected_node)
+
+        workflow_instance_name_input.value = get_state().current_workflow_instance.workflow_instance_name
+
         ui.notify("The last change has been undone", type='positive')
 
 
@@ -162,7 +171,7 @@ async def run_validation():
         #object_id = validation_result.step_to_validate.step_information.object_id
 
         if validation_result.conforms:
-            ui_elements.graph_component.set_node_as_valid(step_name, "Valid!")
+            ui_elements.graph_component.set_node_as_valid(step_name, "This step is valid")
         else:
             ui_elements.graph_component.set_node_as_invalid(step_name, validation_result.pyshacl_output)
 
@@ -196,7 +205,7 @@ async def edit_workflow_instance_page(workflow_model_name: str,
         ui.label(f"Editing Workflow Instance '{get_state().current_workflow_instance.workflow_instance_name}'").classes('text-xl').style('color: #000000')
         ui.space()
         if True:  # TODO integrate auth
-            ui.label('Welcome, Sir SHACLot (demo user)!').classes('text-xl').style('color: #000000')
+            ui.label('Welcome, Sir SHACLot (demo user)').classes('text-xl').style('color: #000000')
             ui.button('Log out', color='negative', on_click=lambda: ui.navigate.to("/")).props('size=m').style('color: #000000')
         else:
             ui.button('Log in', color='info').props('size=m').style('color: #000000')
@@ -207,15 +216,14 @@ async def edit_workflow_instance_page(workflow_model_name: str,
         ui.space()
         ui.image('/assets/crc_logo_black_letters_wide.png').classes('w-26')
 
-    with ui.grid(columns=4):
-        with ui.column(align_items='stretch'):
-            ui.button('Return to main page', color='info', on_click=lambda: handle_return_button())
-        with ui.column(align_items='stretch'):
-            ui.button('Undo last change', color='negative', on_click=lambda: handle_undo_button())
-        with ui.column(align_items='stretch'):
-            ui.button('Save all changes', color='positive', on_click=lambda: handle_save_button())
-        with ui.column(align_items='stretch'):
-            ui.button('Validate workflow', color='info', on_click=lambda: run_validation())
+    with ui.row().classes('w-full items-center'):
+        workflow_instance_name_input = ui.input(label='Workflow Instance name',
+                                                value=workflow_instance_name,
+                                                on_change=lambda i: handle_workflow_instance_name_button(i.value)).classes('grow')
+        ui.button('Return to main page', color='info', on_click=handle_return_button)
+        ui.button('Undo last change', color='negative', on_click=lambda: handle_undo_button(workflow_instance_name_input))
+        ui.button('Save all changes', color='positive', on_click=handle_save_button)
+        ui.button('Validate workflow', color='info', on_click=run_validation)
 
     graph_data = workflow_model_and_instance_to_nodes_and_edges(get_state().current_workflow_model,
                                                                 get_state().current_workflow_instance)

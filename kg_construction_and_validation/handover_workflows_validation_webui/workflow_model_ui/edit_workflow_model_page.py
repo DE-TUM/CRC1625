@@ -1,4 +1,5 @@
 from nicegui import ui
+from nicegui.elements.input import Input
 
 from handover_workflows_validation.handover_workflows_validation import read_workflow_model, WorkflowModel, \
     overwrite_workflow_model
@@ -16,8 +17,15 @@ def workflow_model_to_nodes_and_edges(workflow_model: WorkflowModel):
     nodes = []
     edges = []
     for step_name, step in workflow_model.workflow_model_steps.items():
-        nodes.append({'data': {'id': step_name, 'label': step_name, 'projects': step.projects, 'activities': step.required_activities,
-                               'identifiers_for_coloring': step.required_activities}, 'classes': [NodeType.node_type_step.value]})
+        nodes.append({
+            'data': {
+                'id': step_name,
+                'label': step_name,
+                'projects': step.projects,
+                'activities': step.required_activities,
+                'identifiers_for_coloring': step.required_activities
+            },
+            'classes': [NodeType.node_type_step.value]})
         for next_step_name in step.next_steps:
             edges.append({'data': {'source': step_name, 'target': next_step_name}})
 
@@ -34,6 +42,11 @@ def handle_node_click(e):
     get_state().selected_node = node_id
     create_workflow_model_step_controls()
     ui.notify(f"Step selected: {node_label}", type='info')
+
+
+def handle_workflow_model_name_button(new_name):
+    get_state().save_workflow_model_copy()
+    get_state().current_workflow_model.workflow_model_name = new_name
 
 
 async def handle_return_button():
@@ -63,9 +76,9 @@ async def handle_return_button():
         ui.navigate.to('/workflows')
 
 
-def handle_undo_button():
+def handle_undo_button(workflow_model_name_input: Input):
     if len(get_state().workflow_model_history) == 0:
-        ui.notify("No changes have been performed yet!", type='warning')
+        ui.notify("No changes have been performed yet", type='warning')
     else:
         get_state().undo_workflow_model_change()
 
@@ -89,6 +102,9 @@ def handle_undo_button():
             create_workflow_model_step_controls()
 
         ui_elements.graph_component.select_node(get_state().selected_node)
+
+        workflow_model_name_input.value = get_state().current_workflow_model.workflow_model_name
+
         ui.notify("The last change has been undone", type='positive')
 
 
@@ -108,10 +124,10 @@ async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
         get_state().current_workflow_model = await read_workflow_model(workflow_model_name, user_id)
 
     with ui.header().classes('items-center p-2 h-14'):
-        ui.label(f"Editing Workflow Model '{workflow_model_name}'").classes('text-xl').style('color: #000000')
+        ui.label("Workflow Model Editor").classes('text-xl').style('color: #000000')
         ui.space()
         if True:  # TODO integrate auth
-            ui.label('Welcome, Sir SHACLot (demo user)!').classes('text-xl').style('color: #000000')
+            ui.label('Welcome, Sir SHACLot (demo user)').classes('text-xl').style('color: #000000')
             ui.button('Log out', color='negative', on_click=lambda: ui.navigate.to("/")).props('size=m').style('color: #000000')
         else:
             ui.button('Log in', color='info').props('size=m')
@@ -122,13 +138,13 @@ async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
         ui.space()
         ui.image('/assets/crc_logo_black_letters_wide.png').classes('w-26')
 
-    with ui.grid(columns=3):
-        with ui.column(align_items='stretch'):
-            ui.button('Return to main page', color='info', on_click=handle_return_button)
-        with ui.column(align_items='stretch'):
-            ui.button('Undo last change', color='negative', on_click=handle_undo_button)
-        with ui.column(align_items='stretch'):
-            ui.button('Save all changes', color='positive', on_click=handle_save_button)
+    with ui.row().classes('w-full items-center'):
+        workflow_model_name_input = ui.input(label='Workflow Model name',
+                                             value=get_state().current_workflow_model.workflow_model_name,
+                                             on_change=lambda i: handle_workflow_model_name_button(i.value)).classes('grow')
+        ui.button('Return to main page', color='info', on_click=handle_return_button)
+        ui.button('Undo last change', color='negative', on_click=lambda: handle_undo_button(workflow_model_name_input))
+        ui.button('Save all changes', color='positive', on_click=handle_save_button)
 
     graph_data = workflow_model_to_nodes_and_edges(get_state().current_workflow_model)
 
