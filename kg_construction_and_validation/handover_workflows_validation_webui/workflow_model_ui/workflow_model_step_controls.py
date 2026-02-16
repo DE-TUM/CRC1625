@@ -1,8 +1,6 @@
 from nicegui import ui
-from nicegui.elements.select import Select
-
-from handover_workflows_validation.handover_workflows_validation import WorkflowModel
-from handover_workflows_validation_webui.state import ui_elements, get_state
+from handover_workflows_validation_webui.shared_state import shared_state
+from handover_workflows_validation_webui.workflow_model_ui.workflow_model_page_state import WorkflowModelPageState
 
 allowed_activities = ["Photo",
                       "EDX",
@@ -45,93 +43,93 @@ allowed_projects = [
 ]
 
 
-def change_step_name_action(new_name: str):
-    if not get_state().selected_node:
+def change_step_name_action(new_name: str,
+                            workflow_model_page_state: WorkflowModelPageState):
+    if not workflow_model_page_state.selected_node:
         ui.notify("No step selected", type='warning')
         return
 
-    get_state().save_workflow_model_copy()
-    get_state().current_workflow_model.workflow_model_steps[new_name] = get_state().current_workflow_model.workflow_model_steps.pop(get_state().selected_node)
-    for step_name, step in get_state().current_workflow_model.workflow_model_steps.items():
-        if get_state().selected_node in step.next_steps:
-            step.next_steps.remove(get_state().selected_node)
-            step.next_steps.add(new_name)
+    previous_name = workflow_model_page_state.selected_node
+    workflow_model_page_state.selected_node = new_name
 
-    ui_elements.graph_component.rename_node(get_state().selected_node, new_name)
+    workflow_model_page_state.save_workflow_model_copy()
+    shared_state().current_workflow_model.workflow_model_steps[new_name] = shared_state().current_workflow_model.workflow_model_steps.pop(previous_name)
+    shared_state().current_workflow_model.workflow_model_steps[new_name].step_name = new_name
+    for step_name, step in shared_state().current_workflow_model.workflow_model_steps.items():
+        step.next_steps = [new_name if name == previous_name else name for name in step.next_steps]
 
-    previous_name = get_state().selected_node
-    get_state().selected_node = new_name
+    workflow_model_page_state.graph_component.rename_node(previous_name, new_name)
 
     ui.notify(f"Renamed '{previous_name}' to '{new_name}'", type='positive')
 
 
-def change_step_description_action(new_description: str):
-    if not get_state().selected_node:
+def change_step_description_action(new_description: str, workflow_model_page_state: WorkflowModelPageState):
+    if not workflow_model_page_state.selected_node:
         ui.notify("No step selected", type='warning')
         return
 
-    get_state().save_workflow_model_copy()
-    get_state().current_workflow_model.workflow_model_steps[get_state().selected_node].step_description = new_description
+    workflow_model_page_state.save_workflow_model_copy()
+    shared_state().current_workflow_model.workflow_model_steps[workflow_model_page_state.selected_node].step_description = new_description
     ui.notify("Description modified", type='positive')
 
 
 
-def enable_switch_action(workflow_model: WorkflowModel,
-                         switch_value: bool):
-    if not get_state().selected_node:
+def enable_switch_action(switch_value: bool, workflow_model_page_state: WorkflowModelPageState):
+    if not workflow_model_page_state.selected_node:
         ui.notify("No step selected", type='warning')
         return
 
-    get_state().save_workflow_model_copy()
+    workflow_model_page_state.save_workflow_model_copy()
 
-    workflow_model.workflow_model_steps[get_state().selected_node].enabled = switch_value
+    shared_state().current_workflow_model.workflow_model_steps[workflow_model_page_state.selected_node].enabled = switch_value
 
 
-def other_activities_switch_action(workflow_model: WorkflowModel,
-                                   switch_value: bool):
-    if not get_state().selected_node:
+def other_activities_switch_action(switch_value: bool, workflow_model_page_state: WorkflowModelPageState):
+    if not workflow_model_page_state.selected_node:
         ui.notify("No step selected", type='warning')
         return
 
-    get_state().save_workflow_model_copy()
-    workflow_model.workflow_model_steps[get_state().selected_node].allow_other_activities = switch_value
+    workflow_model_page_state.save_workflow_model_copy()
+    shared_state().current_workflow_model.workflow_model_steps[workflow_model_page_state.selected_node].allow_other_activities = switch_value
 
 
-def add_activity_action(activities_select: Select):
-    if not get_state().selected_node:
+def add_activity_action(activities_select_values,
+                       workflow_model_page_state: WorkflowModelPageState):
+    if not workflow_model_page_state.selected_node:
         ui.notify("No step selected", type='warning')
         return
 
-    ui_elements.graph_component.replace_activities(get_state().selected_node, sorted(activities_select.value))
+    workflow_model_page_state.graph_component.replace_activities(workflow_model_page_state.selected_node, sorted(activities_select_values))
 
-    if sorted(get_state().current_workflow_model.workflow_model_steps[get_state().selected_node].required_activities) != sorted(activities_select.value):
-        get_state().save_workflow_model_copy()
+    if sorted(shared_state().current_workflow_model.workflow_model_steps[workflow_model_page_state.selected_node].required_activities) != sorted(activities_select_values):
+        workflow_model_page_state.save_workflow_model_copy()
 
-        get_state().current_workflow_model.workflow_model_steps[
-            get_state().selected_node].required_activities = activities_select.value
+        shared_state().current_workflow_model.workflow_model_steps[
+            workflow_model_page_state.selected_node].required_activities = activities_select_values
     #  else: the selector's callback is a bit wonky and sometimes triggers with no changes
 
-def add_project_action(projects_select: Select):
-    if not get_state().selected_node:
+def add_project_action(projects_select_values,
+                       workflow_model_page_state: WorkflowModelPageState):
+    if not workflow_model_page_state.selected_node:
         ui.notify("No step selected", type='warning')
         return
 
-    ui_elements.graph_component.replace_projects(get_state().selected_node, sorted(projects_select.value))
+    workflow_model_page_state.graph_component.replace_projects(workflow_model_page_state.selected_node, sorted(projects_select_values))
 
-    if sorted(get_state().current_workflow_model.workflow_model_steps[get_state().selected_node].projects) != sorted(projects_select.value):
-        get_state().save_workflow_model_copy()
+    if sorted(shared_state().current_workflow_model.workflow_model_steps[workflow_model_page_state.selected_node].projects) != sorted(projects_select_values):
+        workflow_model_page_state.save_workflow_model_copy()
 
-        get_state().current_workflow_model.workflow_model_steps[
-            get_state().selected_node].projects = projects_select.value
+        shared_state().current_workflow_model.workflow_model_steps[
+            workflow_model_page_state.selected_node].projects = projects_select_values
 
-def create_workflow_model_step_controls():
-    ui_elements.node_controls_column.clear()
+def create_workflow_model_step_controls(workflow_model_page_state: WorkflowModelPageState):
+    workflow_model_page_state.node_controls_column.clear()
 
-    with ui_elements.node_controls_column:
+    with workflow_model_page_state.node_controls_column:
         with ui.card().classes('w-full bg-secondary'):
             # If the model is empty or nothing is selected somehow, so empty controls
-            if get_state().selected_node:
-                ui.label(f"Step options for '{get_state().selected_node}'").classes('text-lg font-semibold')
+            if workflow_model_page_state.selected_node:
+                ui.label(f"Step options for '{workflow_model_page_state.selected_node}'").classes('text-lg font-semibold')
             else:
                 ui.label("Please select or create a new step")
 
@@ -141,22 +139,24 @@ def create_workflow_model_step_controls():
 
                     with ui.row():
                         rename_input = ui.input('New step name')
-                        rename_input.value = get_state().selected_node
+                        rename_input.value = workflow_model_page_state.selected_node
                         ui.button('Rename', color='info', on_click=lambda: change_step_name_action(
-                            rename_input.value
+                            rename_input.value,
+                            workflow_model_page_state
                         ))
 
                 with ui.column(align_items='center'):
                     ui.label('Workflow step description').classes('text-sm font-bold text-gray-600')
                     with ui.row():
                         description_input = ui.input('Description').props('type=textarea')
-                        if get_state().selected_node:
-                            description_input.value = get_state().current_workflow_model.workflow_model_steps[
-                                get_state().selected_node].step_description
+                        if workflow_model_page_state.selected_node:
+                            description_input.value = shared_state().current_workflow_model.workflow_model_steps[
+                                workflow_model_page_state.selected_node].step_description
                         else:
                             description_input.value = "Please select or create a new step"
                         ui.button('Rename', color='info', on_click=lambda: change_step_description_action(
                             description_input.value,
+                            workflow_model_page_state
                         ))
 
             ui.separator().classes('my-2')
@@ -167,11 +167,11 @@ def create_workflow_model_step_controls():
                     projects_select = ui.select(allowed_projects,
                                                   multiple=True,
                                                   label='Select one or more projects',
-                                                  on_change=lambda: add_project_action(projects_select)).classes(
+                                                  on_change=lambda: add_project_action(projects_select.value, workflow_model_page_state)).classes(
                         'w-64').props('use-chips')
-                    if get_state().selected_node:
-                        projects_select.value = get_state().current_workflow_model.workflow_model_steps[
-                            get_state().selected_node].projects
+                    if workflow_model_page_state.selected_node:
+                        projects_select.value = shared_state().current_workflow_model.workflow_model_steps[
+                            workflow_model_page_state.selected_node].projects
                     else:
                         projects_select.value = []
 
@@ -180,21 +180,20 @@ def create_workflow_model_step_controls():
                     activities_select = ui.select(allowed_activities,
                                                   multiple=True,
                                                   label='Select one or more activities',
-                                                  on_change=lambda: add_activity_action(activities_select)).classes(
+                                                  on_change=lambda: add_activity_action(activities_select.value, workflow_model_page_state)).classes(
                         'w-64').props('use-chips')
-                    if get_state().selected_node:
-                        activities_select.value = get_state().current_workflow_model.workflow_model_steps[
-                            get_state().selected_node].required_activities
+                    if workflow_model_page_state.selected_node:
+                        activities_select.value = shared_state().current_workflow_model.workflow_model_steps[
+                            workflow_model_page_state.selected_node].required_activities
                     else:
                         activities_select.value = []
 
                 with ui.column(align_items='center'):
                     ui.label('Allow other activities?').classes('text-sm font-bold text-gray-600')
-                    if get_state().selected_node:
-                        allow_other_activities = get_state().current_workflow_model.workflow_model_steps[
-                            get_state().selected_node].allow_other_activities
+                    if workflow_model_page_state.selected_node:
+                        allow_other_activities = shared_state().current_workflow_model.workflow_model_steps[
+                            workflow_model_page_state.selected_node].allow_other_activities
                     else:
                         allow_other_activities = False
                     switch = ui.switch('Allow other activities', value=allow_other_activities,
-                                       on_change=lambda: other_activities_switch_action(get_state().current_workflow_model,
-                                                                                        switch.value))
+                                       on_change=lambda: other_activities_switch_action(switch.value, workflow_model_page_state))

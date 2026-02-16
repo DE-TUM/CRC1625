@@ -45,7 +45,9 @@ class CytoscapeComponent(Element, component='cytoscape_component.js'):
     def __init__(self,
                  nodes: List[Dict],
                  edges: List[Dict],
-                 on_node_click: Optional[Callable]) -> None:
+                 # Node click callable and page state to pass to it
+                 on_node_click: Optional[Callable],
+                 page_state) -> None:
         super().__init__()
 
         # Load dependencies
@@ -62,7 +64,7 @@ class CytoscapeComponent(Element, component='cytoscape_component.js'):
 
         # Register event listeners
         if on_node_click:
-            self.on('nodeClick', lambda e: on_node_click(e.args))
+            self.on('nodeClick', lambda e: on_node_click(e.args, page_state))
 
         self.run_method('rerun_layout_and_fit')
 
@@ -103,6 +105,10 @@ class CytoscapeComponent(Element, component='cytoscape_component.js'):
         self.run_method('removeEdge', source, target)
 
     def rename_node(self, node_id: str, new_label: str) -> None:
+        """
+        Changes the node's label (avoids performing a full renaming by changing the ID,
+        as that would be more complex in Cytoscape)
+        """
         self.run_method('renameNode', node_id, new_label)
 
     def add_node(self, node_id: str, label: str, node_type: NodeType, coloring_ids: list[str] = None) -> None:
