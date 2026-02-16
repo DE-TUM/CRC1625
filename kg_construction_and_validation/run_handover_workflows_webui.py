@@ -16,7 +16,7 @@ import handover_workflows_validation_webui.sparql_ui.yasgui_wrapper
 
 from nicegui import ui, app
 
-from handover_workflows_validation_webui import state
+from handover_workflows_validation_webui import shared_state
 
 module_dir = os.path.dirname(__file__)
 load_dotenv(os.path.join(module_dir, '.env'))

@@ -227,6 +227,8 @@ export default {
     },
 
     renameNode(id, newLabel) {
+      // We only change the node's label to avoid recreating the whole
+      // cytoscape data structure again
       const node = this.cy.$id(id);
       if (node.length > 0) {
         node.data('label', newLabel);
