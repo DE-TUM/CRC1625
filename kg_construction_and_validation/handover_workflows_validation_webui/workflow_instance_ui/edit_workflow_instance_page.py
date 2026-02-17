@@ -86,14 +86,14 @@ def handle_workflow_instance_name_button(new_name: str, workflow_instance_page_s
 
 
 def handle_return_button(workflow_instance_page_state: WorkflowInstancePageState):
-    if not workflow_instance_page_state.changes_are_saved:
+    if not workflow_instance_page_state.changes_are_saved and not shared_state().demo_mode:
         with ui.dialog() as return_dialog:
             with ui.card(align_items='center'):
                 with ui.row(align_items='center').classes('w-full justify-center'):
                     ui.label('The workflow model has been modified. Save changes and exit?')
 
                     async def save_and_exit_and_close():
-                        await overwrite_workflow_instance(shared_state().current_workflow_instance, shared_state().user_id)
+                        await overwrite_workflow_instance(shared_state().current_workflow_instance, shared_state().current_workflow_model)
                         return_dialog.close()
                         ui.navigate.to('/workflows')
 
@@ -149,7 +149,7 @@ async def handle_save_button(workflow_instance_page_state: WorkflowInstancePageS
     if shared_state().demo_mode:
         ui.notify("You cannot save changes as a demo user", type='negative')
     else:
-        await overwrite_workflow_instance(shared_state().current_workflow_instance, shared_state().user_id)
+        await overwrite_workflow_instance(shared_state().current_workflow_instance, shared_state().current_workflow_model)
         workflow_instance_page_state.changes_are_saved = True
         workflow_instance_page_state.workflow_model_history = []
         ui.notify("The changes have been saved", type='positive')
