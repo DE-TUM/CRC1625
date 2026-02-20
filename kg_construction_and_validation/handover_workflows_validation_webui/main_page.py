@@ -119,19 +119,7 @@ def handle_workflow_instance_table_click(workflow_instance: WorkflowInstance, wo
         right_drawer_label.set_text(
             f"Workflow instance '{shared_state().current_workflow_instance.workflow_instance_name}' options")
 
-    workflows_page_state.right_drawer.show()
     ui.notify(f'Selected Workflow Instance {shared_state().current_workflow_instance.workflow_instance_name}', color='info')
-
-    workflows_page_state.graph_component_column.clear()
-    with workflows_page_state.graph_component_column:
-        graph_data = workflow_model_to_nodes_and_edges(shared_state().current_workflow_model)
-        workflows_page_state.graph_component = CytoscapeComponent(
-            graph_data['nodes'],
-            graph_data['edges'],
-            lambda: None,
-            None
-        )
-        workflows_page_state.graph_component._rerun_layout_and_fit()
 
 
 def populate_workflow_models_table(workflows_page_state: WorkflowsPageState):
@@ -482,7 +470,8 @@ async def workflows_page(demo: str = ""):
         ui.image('/assets/crc_logo_black_letters_wide.png').classes('w-26')
 
     workflows_page_state.right_drawer = ui.right_drawer(fixed=False).classes('bg-secondary')
-    workflows_page_state.right_drawer.hide()
+    # TODO: We can hide it and show it only when clicked, but for now the graph component cannot adapt to the new width when doing so
+    #workflows_page_state.right_drawer.hide()
 
     with ui.left_drawer().classes('bg-secondary'):
         await create_workflows_model_left_drawer(workflows_page_state)
