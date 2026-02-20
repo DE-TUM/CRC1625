@@ -1,3 +1,4 @@
+import os
 from enum import Enum
 from typing import List, Dict, Callable, Optional
 
@@ -5,13 +6,24 @@ from nicegui import ui
 from nicegui.element import Element
 
 
+def load_cytoscape_js_libs():
+    """
+    Injects the js libs needed for cytoscape. This must be called before initializing cytoscape,
+    and preferably at the beginning for complex pages that have been already initialized
+    """
+    ui.add_head_html('''
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.33.1/cytoscape.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dagre/0.8.5/dagre.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>
+    ''')
+
 class NodeType(Enum):
     node_type_object = "object"
     node_type_step = "step"
     node_type_invisible = "invisible"
 
 
-class CytoscapeComponent(Element, component='cytoscape_component.js'):
+class CytoscapeComponent(Element, component=os.path.join(os.path.dirname(__file__), 'cytoscape_component.js')):
     """
     NiceGUI Element implementation for integrating Cytoscape as a custom Vue component
     """
@@ -46,16 +58,9 @@ class CytoscapeComponent(Element, component='cytoscape_component.js'):
                  nodes: List[Dict],
                  edges: List[Dict],
                  # Node click callable and page state to pass to it
-                 on_node_click: Optional[Callable],
-                 page_state) -> None:
+                 on_node_click: Optional[Callable] = None,
+                 page_state = None) -> None:
         super().__init__()
-
-        # Load dependencies
-        ui.add_head_html('''
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.33.1/cytoscape.min.js"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/dagre/0.8.5/dagre.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>
-        ''')
 
         self._colour_nodes(nodes)
 
@@ -66,9 +71,11 @@ class CytoscapeComponent(Element, component='cytoscape_component.js'):
         if on_node_click:
             self.on('nodeClick', lambda e: on_node_click(e.args, page_state))
 
-        self.run_method('rerun_layout_and_fit')
+        self._rerun_layout_and_fit()
 
     # Hooks into the javascript functions declared in the Vue component
+    def _rerun_layout_and_fit(self):
+        self.run_method('rerun_layout_and_fit')
 
     def _colour_nodes(self, nodes):
         node_coloring_ids = set([' '.join([str(node_id) for node_id in node['data']['identifiers_for_coloring']]) for node in nodes])

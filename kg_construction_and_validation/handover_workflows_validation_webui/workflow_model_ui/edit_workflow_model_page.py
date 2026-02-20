@@ -2,7 +2,7 @@ from nicegui import ui
 
 from handover_workflows_validation.handover_workflows_validation import read_workflow_model, WorkflowModel, \
     overwrite_workflow_model
-from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, NodeType
+from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, NodeType, load_cytoscape_js_libs
 from handover_workflows_validation_webui.shared_state import shared_state
 from handover_workflows_validation_webui.workflow_model_ui.workflow_model_controls import create_graph_controls
 from handover_workflows_validation_webui.workflow_model_ui.workflow_model_page_state import WorkflowModelPageState
@@ -121,6 +121,7 @@ async def handle_save_button(workflow_model_page_state: WorkflowModelPageState):
 
 @ui.page('/workflows/edit_workflow_model/{workflow_model_name}/{user_id}')
 async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
+    load_cytoscape_js_libs()
     workflow_model_page_state = WorkflowModelPageState()
 
     if shared_state().current_workflow_model is None:  # The page has been reloaded
@@ -154,6 +155,7 @@ async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
     with ui.grid(columns=1).classes('w-full gap-8'):
         graph_component_column = ui.column()
         with graph_component_column:
+            print(graph_data)
             graph_component = CytoscapeComponent(
                 graph_data['nodes'],
                 graph_data['edges'],

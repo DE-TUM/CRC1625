@@ -13,7 +13,9 @@ from datastores.rdf import rdf_datastore_client
 from handover_workflows_validation.handover_workflows_validation import get_workflow_model_names_and_creator_user_ids, \
     get_workflow_instances_of_model, read_workflow_model, store_workflow_model, WorkflowInstance, is_workflow_instance_valid, WorkflowModel, \
     create_workflow_instance, delete_workflow_instance
+from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, load_cytoscape_js_libs
 from handover_workflows_validation_webui.shared_state import shared_state
+from handover_workflows_validation_webui.workflow_model_ui.edit_workflow_model_page import workflow_model_to_nodes_and_edges
 
 module_dir = os.path.dirname(__file__)
 prefixes: str = open(os.path.join(module_dir, '../handover_workflows_validation/queries/prefixes.sparql')).read()
@@ -25,6 +27,8 @@ class WorkflowsPageState:
     State dataclass containing references to UI elements and contents of pages in this module.
     Initialized by accessing the main page and thus local to the user.
     """
+    graph_component: CytoscapeComponent = None
+    graph_component_column: Column = None
     main_content: Column = None
     right_drawer: RightDrawer = None
     search_input_workflow_models: Input = None
@@ -116,8 +120,18 @@ def handle_workflow_instance_table_click(workflow_instance: WorkflowInstance, wo
             f"Workflow instance '{shared_state().current_workflow_instance.workflow_instance_name}' options")
 
     workflows_page_state.right_drawer.show()
-
     ui.notify(f'Selected Workflow Instance {shared_state().current_workflow_instance.workflow_instance_name}', color='info')
+
+    workflows_page_state.graph_component_column.clear()
+    with workflows_page_state.graph_component_column:
+        graph_data = workflow_model_to_nodes_and_edges(shared_state().current_workflow_model)
+        workflows_page_state.graph_component = CytoscapeComponent(
+            graph_data['nodes'],
+            graph_data['edges'],
+            lambda: None,
+            None
+        )
+        workflows_page_state.graph_component._rerun_layout_and_fit()
 
 
 def populate_workflow_models_table(workflows_page_state: WorkflowsPageState):
@@ -129,7 +143,7 @@ def populate_workflow_models_table(workflows_page_state: WorkflowsPageState):
             row for row in workflows_page_state.workflow_models_set if search_term in row[0].lower()
         ]
     else:
-        workflows_page_state.filtered_workflow_models_list = workflows_page_state.workflow_models_set
+        workflows_page_state.filtered_workflow_models_list = list(workflows_page_state.workflow_models_set)
 
     # Filter them by user ID
     if workflows_page_state.creator_selector_workflow_models.value:
@@ -155,6 +169,13 @@ def populate_workflow_models_table(workflows_page_state: WorkflowsPageState):
 
 async def create_empty_workflow_instance(workflow_instance_name: str,
                                          workflows_page_state: WorkflowsPageState):
+    if shared_state().demo_mode:
+        ui.notify("You cannot create Workflow Instances as a demo user", type='negative')
+        return
+    elif shared_state().user_id != shared_state().current_workflow_model.creator_user_id:
+        ui.notify(f"You are not the owner of this workflow model, but you can create a copy of it", type='negative')
+        return
+
     workflow_instance = WorkflowInstance()
     workflow_instance.workflow_model_name = shared_state().current_workflow_model.workflow_model_name
     workflow_instance.workflow_instance_name = workflow_instance_name
@@ -221,7 +242,6 @@ async def populate_workflow_instances_table(workflows_page_state: WorkflowsPageS
                 if workflows_page_state.search_input_workflow_instances.value not in workflow_instance.workflow_instance_name.lower():
                     continue
 
-            print(workflows_page_state.sample_input_workflow_instances.value)
             if workflows_page_state.sample_input_workflow_instances.value:
                 has_sample = False
                 for step_assignment_samples in workflow_instance.step_assignments.values():
@@ -273,32 +293,47 @@ async def show_workflow_model_instances(workflow_model_name: str,
 
     workflows_page_state.main_content.clear()
     with workflows_page_state.main_content:
-        # Title
         with ui.row():
             if len(workflow_model_name) > 100:
-                ui.label(f"Workflow instances of '{workflow_model_name[0:100]+"..."}'").classes('text-lg font-semibold')
+                ui.label(f"Overview of Workflow Model '{workflow_model_name[0:100]+"..."}'").classes('text-lg font-semibold')
             else:
-                ui.label(f"Workflow instances of '{workflow_model_name}'").classes('text-lg font-semibold')
+                ui.label(f"Overview of Workflow Model '{workflow_model_name}'").classes('text-lg font-semibold')
 
-        # Workflow model edit and copy buttons
+            # Workflow model edit and copy buttons
+            with ui.row():
+                if workflow_model_creator_user_id == shared_state().user_id:
+                    ui.button("Edit Workflow model", color='info').on_click(
+                        lambda: edit_handover_workflow_model_button_click()
+                    )
+                else:
+                    ui.button("Edit Workflow model", color='gray').on_click(
+                        lambda: ui.notify("You are not the owner of this workflow model, but you can create a copy of it", type='negative')
+                    )
+
+                if not shared_state().demo_mode:
+                    ui.button("Create a copy", color='info').on_click(
+                        lambda: copy_handover_workflow_model(workflows_page_state)
+                    )
+                else:
+                    ui.button("Create a copy", color='gray').on_click(
+                        lambda: ui.notify("You cannot create new models as a demo user", type='negative')
+                    )
+
+        # Workflow model overview
+        with ui.grid(columns=1).classes('w-full gap-8'):
+            workflows_page_state.graph_component_column = ui.column()
+            with workflows_page_state.graph_component_column:
+                graph_data = workflow_model_to_nodes_and_edges(shared_state().current_workflow_model)
+                workflows_page_state.graph_component = CytoscapeComponent(
+                    graph_data['nodes'],
+                    graph_data['edges'],
+                    lambda: None,
+                    None
+                )
+
+        # Workflow instances view
         with ui.row():
-            if workflow_model_creator_user_id == shared_state().user_id:
-                ui.button("View Workflow model", color='info').on_click(
-                    lambda: edit_handover_workflow_model_button_click()
-                )
-            else:
-                ui.button("View Workflow model", color='gray').on_click(
-                    lambda: ui.notify(f"You are not the owner of this workflow model, but you can create a copy of it", type='negative')
-                )
-
-            if not shared_state().demo_mode:
-                ui.button("Create a copy", color='info').on_click(
-                    lambda: copy_handover_workflow_model(workflows_page_state)
-                )
-            else:
-                ui.button("Create a copy", color='gray').on_click(
-                    lambda: ui.notify("You cannot create new models as a demo user", type='negative')
-                )
+            ui.label("Workflow instances").classes('text-lg font-semibold')
 
         # Search and filtering
         with ui.row():
@@ -343,7 +378,7 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
     async def create_empty_workflow_model(workflow_model_name: str,
                                           workflows_page_state: WorkflowsPageState):
         if shared_state().demo_mode:
-            ui.notify("You cannot create new models as a demo user", type='warning')
+            ui.notify("You cannot create new models as a demo user", type='negative')
             return
 
         workflow_model = WorkflowModel()
@@ -367,7 +402,14 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
     with ui.column():
         ui.label("Filter by owner:")
         user_details = await get_user_details()
-        creator_selector_dict = {user_id : f"{user_name} ({project.replace('_', ', ')})" for user_id, (user_name, project) in user_details.items()}
+        creator_selector_dict = {
+            user_id: f"{f'{user_name} (You)' if user_id == shared_state().user_id else user_name} ({project.replace('_', ', ')})"
+            for user_id, (user_name, project) in sorted(
+                user_details.items(),
+                # Alphabetical sort based on project and then user name
+                key=lambda item: (item[1][1], item[1][0])
+            )
+        }
         workflows_page_state.creator_selector_workflow_models = ui.select(options=creator_selector_dict,
                                                                           with_input=True,
                                                                           clearable=True,
@@ -409,6 +451,7 @@ async def workflows_page(demo: str = ""):
         - Main content: Workflow instances of the selected workflow model from the left drawer, also allowing to edit or copy the model and to create a new instance. Empty until so
         - Right drawer: Workflow instance edit options
     """
+    load_cytoscape_js_libs()
     if demo == "demo" or shared_state().demo_mode: # First time, or we already knew we were on demo mode
         # Become Sir SHACLot
         shared_state().demo_mode = True
