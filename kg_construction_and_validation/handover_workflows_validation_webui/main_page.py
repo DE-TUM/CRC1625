@@ -521,7 +521,7 @@ async def workflows_page(demo: str = ""):
         ui.space()
         ui.image('/assets/crc_logo_black_letters_wide.png').classes('w-26')
 
-    workflows_page_state.right_drawer = ui.right_drawer(fixed=False).classes('bg-secondary')
+    workflows_page_state.right_drawer = ui.right_drawer().classes('bg-secondary')
     # TODO: We can hide it and show it only when clicked, but for now the graph component cannot adapt to the new width when doing so
     #workflows_page_state.right_drawer.hide()
 
