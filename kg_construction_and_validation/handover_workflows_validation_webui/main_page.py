@@ -42,6 +42,32 @@ class WorkflowsPageState:
     sample_input_workflow_instances: Select = None
 
 
+demo_warning_message = """
+## **Welcome to the CRC 1625 Knowledge Graph demo!**
+This demo contains **real mock data stored in the Virtuoso endpoint**, including two workflow models and three workflow instances:  
+
+* *Demo Workflow* contains a workflow instance with missing data and a workflow instance with mismatching data.
+* *Demo Workflow 2* contains a workflow instance that correctly matches and validates the data of all demo MLs and samples.
+
+You can visualize the demo data diagrams by clicking the *Visualize data* button.
+
+### The following functionalities are <span style="color:green">**enabled**</span>
+
+* Browse Workflow models and instances.
+* Access the workflow model editor. 
+* Access and **Validate** a workflow instance against its model within the workflow instance editor.  
+
+###  The following functionalities are <span style="color:red">**disabled**</span>
+
+* Creation of new workflow models and instances
+* Saving changes inside the editors  
+
+###  General <span style="color:orange">**warnings**</span>
+
+* The Web UI is not finalized and thus is subject to change. 
+* Some aspects of the UX are still not finished. <span style="color:red">**Namely, the graph layout algorithms don't yet render workflow instances correctly**</span>.
+"""
+
 def edit_handover_workflow_instance_button_click():
     ui.navigate.to(
         f'/workflows/edit_workflow_instance/{shared_state().current_workflow_model.workflow_model_name}/{shared_state().current_workflow_model.creator_user_id}/{shared_state().current_workflow_instance.workflow_instance_name}/{shared_state().current_workflow_instance.creator_user_id}')
@@ -444,6 +470,32 @@ async def workflows_page(demo: str = ""):
         # Become Sir SHACLot
         shared_state().demo_mode = True
         shared_state().user_id = -1
+
+        def show_demo_data_diagram():
+            with ui.dialog().classes('w-full h-full') as demo_data_diagram:
+                with ui.card(align_items='center').classes('w-full h-full').style('max-width: 90%; max-height: 90%'):
+                    with ui.row().classes('w-full h-full'):
+                            ui.html(
+                                f'<embed src="/assets/diagrams/demo_data.pdf" type="application/pdf" style="width:100%; height:100%; border:none;">',
+                                sanitize=False
+                            ).classes('w-full h-full')
+
+                    with ui.row():
+                        ui.button('Close', color='positive', on_click=lambda: demo_data_diagram.close())
+
+            demo_data_diagram.open()
+
+        with ui.dialog() as demo_warning_dialog:
+            with ui.card(align_items='center').classes('w-full').style('max-width: 60%'):
+                with ui.row(align_items='center').classes('w-full justify-center'):
+                    ui.markdown(demo_warning_message)
+
+                with ui.row():
+                    ui.button('Visualize data', color='info', on_click=lambda: show_demo_data_diagram())
+                    ui.button('Understood', color='positive', on_click=lambda: demo_warning_dialog.close())
+
+        demo_warning_dialog.open()
+
     else: # TODO until auth is implemented we force everyone to be the sir SHACLot
         shared_state().demo_mode = True
         shared_state().user_id = -1
