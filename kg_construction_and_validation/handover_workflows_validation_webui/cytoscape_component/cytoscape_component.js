@@ -104,7 +104,7 @@ export default {
         {
           selector: '.selected',
           style: {
-            'border-width': 4,
+            'border-width': 2,
             'border-color': '#5898d4',
             'font-weight': 'bold',
           }
@@ -115,35 +115,60 @@ export default {
           selector: '.valid_step',
           style: {
             'background-color': '#369c4e',
+            'background-image': [
+              '/assets/check_circle.svg',
+            ],
+            'background-fit': 'contain',
+            'background-image-opacity': 0.5,
+            'background-image-containment': 'inside'
           }
         },
         {
           selector: '.invalid_step',
           style: {
             'background-color': '#d40820',
+            'background-image': [
+              '/assets/error.svg',
+            ],
+            'background-fit': 'contain',
+            'background-image-opacity': 0.5,
+            'background-image-containment': 'inside'
           }
         },
-        {
+        { // The step had missing handovers
           selector: '.missing_step',
           style: {
             'background-color': '#e88b00',
+            'background-image': [
+              '/assets/error.svg',
+            ],
+            'background-fit': 'contain',
+            'background-image-opacity': 0.5,
+            'background-image-containment': 'inside'
           }
         },
-        {
+        { // Any and all steps after a "missing handovers" step
           selector: '.not_checked_step',
           style: {
             'background-color': '#454549',
+            'background-image': [
+              '/assets/error.svg',
+            ],
+            'background-fit': 'contain',
+            'background-image-opacity': 0.5,
+            'background-image-containment': 'inside'
           }
         },
-
         {
           selector: 'edge',
           style: {
             'width': 2,
-            'line-color': '#ccc',
-            'target-arrow-shape': 'delta',
-            'target-arrow-color': '#999',
-            'curve-style': 'bezier'
+            'line-color': '#37648f',
+            'curve-style': 'round-taxi',
+            'target-arrow-shape': 'triangle',
+            'target-arrow-color': '#37648f',
+            'source-arrow-color': '#37648f',
+            'arrow-scale': 1.2,
           }
         }
       ],

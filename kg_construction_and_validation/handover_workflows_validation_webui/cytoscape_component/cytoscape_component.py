@@ -68,7 +68,7 @@ class CytoscapeComponent(Element, component=os.path.join(os.path.dirname(__file_
         self._props['edges'] = edges
 
         # Register event listeners
-        if on_node_click:
+        if on_node_click is not None:
             self.on('nodeClick', lambda e: on_node_click(e.args, page_state))
 
         self._rerun_layout_and_fit()
