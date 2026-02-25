@@ -396,7 +396,7 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
                                           workflows_page_state: WorkflowsPageState):
         if shared_state().demo_mode:
             ui.notify("You cannot create new models as a demo user", type='negative')
-            #return
+            return
 
         workflow_model = WorkflowModel()
         workflow_model.workflow_model_name = workflow_model_name
