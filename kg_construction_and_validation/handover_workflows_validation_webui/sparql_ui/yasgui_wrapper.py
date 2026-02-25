@@ -8,7 +8,6 @@ from starlette.responses import JSONResponse
 
 from datastores.rdf import rdf_datastore_client
 from handover_workflows_validation_webui.middleware import matinf_or_demo_login_required, log_out
-from handover_workflows_validation_webui.shared_state import shared_state
 
 LOCAL_SPARQL_PROXY_ROUTE = "/api/sparql"
 
@@ -43,7 +42,7 @@ async def sparql_proxy(request: Request):
     try:
         query = parsed_data['query'][0]
 
-        if app.storage.user.get('use_inference', False):
+        if app.storage.tab.get('use_inference', False):
             query = 'DEFINE input:inference "inference_rules"\n' + query
         response = await rdf_datastore_client.launch_query(query, return_full_response=True)
 
@@ -241,7 +240,7 @@ async def main_page():
         ui.label('Querying options').classes('text-xl font-bold')
         with ui.row().classes('items-center gap-2'):
             ui.label('(Optional) Enable inference:')
-            ui.switch().bind_value(app.storage.user, 'use_inference').props('color=info')
+            ui.switch().bind_value(app.storage.tab, 'use_inference').props('color=info')
             with ui.icon('help'):
                 ui.tooltip('Enabling inference allows querying the data using the PMDco ontology')
 
@@ -260,7 +259,7 @@ async def main_page():
     with ui.header(elevated=True).classes('items-center justify-between p-2 h-15'):
         ui.label(f"CRC 1625 SPARQL endpoint").classes('text-xl font-medium').style('color: #000000')
         ui.space()
-        ui.label(f'Welcome, {shared_state().user_name} ({shared_state().user_project})').classes('text-xl').style('color: #000000')
+        ui.label(f'Welcome, {app.storage.tab['user_name']} ({app.storage.tab['user_project']})').classes('text-xl').style('color: #000000')
         ui.button('Log out', color='negative', on_click=lambda: log_out()).props('size=m')
         ui.button('Return to the previous page', color='info', on_click=lambda: ui.navigate.to("/")).props('size=m')
 

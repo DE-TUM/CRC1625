@@ -1,12 +1,12 @@
 from copy import deepcopy
 from dataclasses import dataclass, field
 
+from nicegui import app
 from nicegui.elements.column import Column
 from nicegui.elements.input import Input
 
 from handover_workflows_validation.handover_workflows_validation import WorkflowInstance
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent
-from handover_workflows_validation_webui.shared_state import shared_state
 
 
 @dataclass
@@ -27,13 +27,13 @@ class WorkflowInstancePageState:
     existing_objects: set[int] = field(default_factory=set)
 
     def save_workflow_instance_copy(self):
-        self.workflow_instance_history.append((self.selected_node, deepcopy(shared_state().current_workflow_instance)))
+        self.workflow_instance_history.append((self.selected_node, deepcopy(app.storage.tab['current_workflow_instance'])))
         self.changes_are_saved = False
 
 
     def undo_workflow_instance_change(self):
         if len(self.workflow_instance_history) > 0:
-            self.selected_node, shared_state().current_workflow_instance = self.workflow_instance_history.pop()
+            self.selected_node, app.storage.tab['current_workflow_instance'] = self.workflow_instance_history.pop()
 
         self.calculate_existing_objects()
 
@@ -41,6 +41,6 @@ class WorkflowInstancePageState:
     def calculate_existing_objects(self):
         self.existing_objects = set()
 
-        for assignments in shared_state().current_workflow_instance.step_assignments.values():
+        for assignments in app.storage.tab['current_workflow_instance'].step_assignments.values():
             for assignment in assignments:
                 self.existing_objects.add(assignment)

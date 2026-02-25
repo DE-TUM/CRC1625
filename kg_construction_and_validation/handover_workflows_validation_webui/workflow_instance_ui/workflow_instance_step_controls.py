@@ -1,6 +1,5 @@
-from nicegui import ui
+from nicegui import ui, app
 
-from handover_workflows_validation_webui.shared_state import shared_state
 from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_page_state import WorkflowInstancePageState
 
 
@@ -20,7 +19,7 @@ async def add_edge_action(step_name: str | None,
     workflow_instance_page_state.save_workflow_instance_copy()
 
     workflow_instance_page_state.graph_component.add_edge(step_name, object_id)
-    shared_state().current_workflow_instance.step_assignments[step_name].append(int(object_id))
+    app.storage.tab['current_workflow_instance'].step_assignments[step_name].append(int(object_id))
 
     ui.notify(f"Assigned Materials Library / Sample ID '{object_id}' to step '{step_name}'", type='positive')
 
@@ -41,7 +40,7 @@ async def remove_edge_action(step_name: str,
     workflow_instance_page_state.save_workflow_instance_copy()
 
     workflow_instance_page_state.graph_component.remove_edge(step_name, object_id)
-    shared_state().current_workflow_instance.step_assignments[step_name].remove(int(object_id))
+    app.storage.tab['current_workflow_instance'].step_assignments[step_name].remove(int(object_id))
 
     ui.notify(f"Removed assignment of Materials Library / Sample ID '{object_id}' from step '{step_name}'",
               type='positive')
@@ -59,7 +58,7 @@ def create_workflow_instance_step_controls(workflow_instance_page_state: Workflo
                 with ui.column(align_items='center'):
                     ui.label("Step")
                     source_node_input_add = ui.select(
-                        options=sorted(list(shared_state().current_workflow_model.workflow_model_steps.keys())))
+                        options=sorted(list(app.storage.tab['current_workflow_model'].workflow_model_steps.keys())))
                 with ui.column(align_items='center'):
                     ui.label("Materials Library / Sample ID")
                     target_node_input_add = ui.select(
@@ -75,7 +74,7 @@ def create_workflow_instance_step_controls(workflow_instance_page_state: Workflo
                 with ui.column(align_items='center'):
                     ui.label("Step")
                     source_node_input_remove = ui.select(
-                        options=sorted(list(shared_state().current_workflow_model.workflow_model_steps.keys())))
+                        options=sorted(list(app.storage.tab['current_workflow_model'].workflow_model_steps.keys())))
                 with ui.column(align_items='center'):
                     ui.label("Materials Library / Sample ID")
                     target_node_input_remove = ui.select(

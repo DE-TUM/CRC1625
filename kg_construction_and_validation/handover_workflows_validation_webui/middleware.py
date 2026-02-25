@@ -2,10 +2,9 @@ import os
 from functools import wraps
 from urllib.parse import urlparse
 
-from nicegui import ui
+from nicegui import ui, app
 
 from datastores.rdf import rdf_datastore_client
-from handover_workflows_validation_webui.shared_state import shared_state
 
 module_dir = os.path.dirname(__file__)
 prefixes: str = open(os.path.join(module_dir, '../handover_workflows_validation/queries/prefixes.sparql')).read()
@@ -16,17 +15,17 @@ pages_with_no_demo_access = ["/sparql"]
 def activate_demo_mode():
     # Become Sir SHACLot and "bypass" authentication
     # No data will be editable
-    shared_state().demo_mode = True
-    shared_state().user_id = -1
-    shared_state().user_name = "Sir SHACLot"
-    shared_state().user_project = "Demo user"
+    app.storage.tab['demo_mode'] = True
+    app.storage.tab['user_id'] = -1
+    app.storage.tab['user_name'] = "Sir SHACLot"
+    app.storage.tab['user_project'] = "Demo user"
 
 
 def handle_log_out_confirm():
-    shared_state().demo_mode = False
-    shared_state().user_id = 0
-    shared_state().user_name = ''
-    shared_state().user_project = ''
+    app.storage.tab['demo_mode'] = False
+    app.storage.tab['user_id'] = 0
+    app.storage.tab['user_name'] = ''
+    app.storage.tab['user_project'] = ''
 
     ui.navigate.to("/")
 
@@ -70,7 +69,9 @@ def matinf_or_demo_login_required(func):
     """
     @wraps(func)
     async def wrapper(*args, **kwargs):
-        if shared_state().demo_mode:
+        await ui.context.client.connected()
+
+        if app.storage.tab.get('demo_mode', False):
             return await func(*args, **kwargs)
         else:
             matinf_response = await check_authentication_in_matinf()
@@ -80,9 +81,9 @@ def matinf_or_demo_login_required(func):
 
                 results = (await rdf_datastore_client.launch_query(details_single_user_query.replace("{user_id}", str(user_id))))["results"]["bindings"]
 
-                shared_state().user_id = user_id
-                shared_state().user_name = results[0]["user_name"]["value"]
-                shared_state().user_project = results[0]["project_name"]["value"]
+                app.storage.tab['user_id'] = user_id
+                app.storage.tab['user_name'] = results[0]["user_name"]["value"]
+                app.storage.tab['user_project'] = results[0]["project_name"]["value"]
 
                 return await func(*args, **kwargs)
             else: # Redirect to the login page
@@ -101,6 +102,8 @@ def handle_demo_mode_button_click(sanitized_redirect_to: str):
 
 @ui.page('/login')
 async def login(redirect_to: str = "/"):
+    await ui.context.client.connected()
+
     sanitized_redirect_to = urlparse(redirect_to).path
 
     with ui.card(align_items='center').classes('absolute-center'):

@@ -1,7 +1,6 @@
-from nicegui import ui
+from nicegui import ui, app
 
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import NodeType
-from handover_workflows_validation_webui.shared_state import shared_state
 from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_page_state import WorkflowInstancePageState
 from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_step_controls import \
     create_workflow_instance_step_controls
@@ -51,7 +50,7 @@ def remove_object_action(object_id_to_remove: str,
 
     workflow_instance_page_state.save_workflow_instance_copy()
 
-    for assignment in shared_state().current_workflow_instance.step_assignments.values():
+    for assignment in app.storage.tab['current_workflow_instance'].step_assignments.values():
         if int(object_id_to_remove) in assignment:
             assignment.remove(int(object_id_to_remove))
 

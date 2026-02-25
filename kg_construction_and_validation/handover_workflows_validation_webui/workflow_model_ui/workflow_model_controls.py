@@ -1,8 +1,7 @@
-from nicegui import ui
+from nicegui import ui, app
 
 from handover_workflows_validation.handover_workflows_validation import WorkflowModelStep
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import NodeType
-from handover_workflows_validation_webui.shared_state import shared_state
 from handover_workflows_validation_webui.workflow_model_ui.workflow_model_page_state import WorkflowModelPageState
 
 
@@ -22,7 +21,7 @@ async def add_edge_action(source: str,
     workflow_model_page_state.save_workflow_model_copy()
 
     workflow_model_page_state.graph_component.add_edge(source, target)
-    shared_state().current_workflow_model.workflow_model_steps[source].next_steps.append(target)
+    app.storage.tab['current_workflow_model'].workflow_model_steps[source].next_steps.append(target)
 
     ui.notify(f"Added edge from '{source}' to '{target}'", type='positive')
 
@@ -44,7 +43,7 @@ async def remove_edge_action(source: str,
     workflow_model_page_state.save_workflow_model_copy()
 
     workflow_model_page_state.graph_component.remove_edge(source, target)
-    shared_state().current_workflow_model.workflow_model_steps[source].next_steps.remove(target)
+    app.storage.tab['current_workflow_model'].workflow_model_steps[source].next_steps.remove(target)
 
     ui.notify(f"Removed edge from '{source}' to '{target}'", type='positive')
 
@@ -58,14 +57,14 @@ def add_step_action(new_step_name: str, workflow_model_page_state: WorkflowModel
         ui.notify("Please enter a step name", type='warning')
         return
 
-    if new_step_name in shared_state().current_workflow_model.workflow_model_steps:
+    if new_step_name in app.storage.tab['current_workflow_model'].workflow_model_steps:
         ui.notify(f"Node '{new_step_name}' already exists", type='negative')
         return
 
     workflow_model_page_state.save_workflow_model_copy()
 
     new_step = WorkflowModelStep(next_steps=list())
-    shared_state().current_workflow_model.workflow_model_steps[new_step_name] = new_step
+    app.storage.tab['current_workflow_model'].workflow_model_steps[new_step_name] = new_step
     workflow_model_page_state.graph_component.add_node(new_step_name,
                                                        new_step_name,
                                                        NodeType.node_type_step,
@@ -85,7 +84,7 @@ def set_initial_step_action(initial_step_node: str, workflow_model_page_state: W
 
     workflow_model_page_state.save_workflow_model_copy()
 
-    shared_state().current_workflow_model.workflow_model_options.initial_step_name = initial_step_node
+    app.storage.tab['current_workflow_model'].workflow_model_options.initial_step_name = initial_step_node
 
     ui.notify(f"Set '{initial_step_node}' as the initial step", type='positive')
 
@@ -101,8 +100,8 @@ def remove_step_action(node_to_remove: str, workflow_model_page_state: WorkflowM
 
     workflow_model_page_state.save_workflow_model_copy()
 
-    del shared_state().current_workflow_model.workflow_model_steps[node_to_remove]
-    for (step_name, workflow_step) in shared_state().current_workflow_model.workflow_model_steps.items():
+    del app.storage.tab['current_workflow_model'].workflow_model_steps[node_to_remove]
+    for (step_name, workflow_step) in app.storage.tab['current_workflow_model'].workflow_model_steps.items():
         if node_to_remove in workflow_step.next_steps:
             workflow_step.next_steps.remove(node_to_remove)
 
@@ -121,13 +120,13 @@ def create_graph_controls(workflow_model_page_state: WorkflowModelPageState):
 
         ui.label('Set initial workflow step').classes('text-sm font-bold text-gray-600')
         with ui.row().classes('w-full items-center'):
-            if shared_state().current_workflow_model.workflow_model_options.initial_step_name:
+            if app.storage.tab['current_workflow_model'].workflow_model_options.initial_step_name:
                 initial_step_select = ui.select(
-                    options=sorted(list(shared_state().current_workflow_model.workflow_model_steps.keys())),
-                    value=shared_state().current_workflow_model.workflow_model_options.initial_step_name)
+                    options=sorted(list(app.storage.tab['current_workflow_model'].workflow_model_steps.keys())),
+                    value=app.storage.tab['current_workflow_model'].workflow_model_options.initial_step_name)
             else:
                 initial_step_select = ui.select(
-                    options=sorted(list(shared_state().current_workflow_model.workflow_model_steps.keys())))
+                    options=sorted(list(app.storage.tab['current_workflow_model'].workflow_model_steps.keys())))
             ui.button('Set initial step', color='info', on_click=lambda: set_initial_step_action(
                 initial_step_select.value,
                 workflow_model_page_state
@@ -148,7 +147,7 @@ def create_graph_controls(workflow_model_page_state: WorkflowModelPageState):
         ui.label('Remove workflow step').classes('text-sm font-bold text-gray-600')
         with ui.row().classes('w-full items-center'):
             remove_step_select = ui.select(
-                options=sorted(list(shared_state().current_workflow_model.workflow_model_steps.keys())))
+                options=sorted(list(app.storage.tab['current_workflow_model'].workflow_model_steps.keys())))
             ui.button('Remove step', color='negative', on_click=lambda: remove_step_action(
                 remove_step_select.value,
                 workflow_model_page_state
@@ -161,11 +160,11 @@ def create_graph_controls(workflow_model_page_state: WorkflowModelPageState):
             with ui.column(align_items='center'):
                 ui.label("Source step")
                 source_node_input_add = ui.select(
-                    options=sorted(list(shared_state().current_workflow_model.workflow_model_steps.keys())))
+                    options=sorted(list(app.storage.tab['current_workflow_model'].workflow_model_steps.keys())))
             with ui.column(align_items='center'):
                 ui.label("Target step")
                 target_node_input_add = ui.select(
-                    options=sorted(list(shared_state().current_workflow_model.workflow_model_steps.keys())))
+                    options=sorted(list(app.storage.tab['current_workflow_model'].workflow_model_steps.keys())))
 
             with ui.column():
                 ui.button('Connect', color='info', on_click=lambda:
@@ -177,11 +176,11 @@ def create_graph_controls(workflow_model_page_state: WorkflowModelPageState):
             with ui.column(align_items='center'):
                 ui.label("Source step")
                 source_node_input_remove = ui.select(
-                    options=sorted(list(shared_state().current_workflow_model.workflow_model_steps.keys())))
+                    options=sorted(list(app.storage.tab['current_workflow_model'].workflow_model_steps.keys())))
             with ui.column(align_items='center'):
                 ui.label("Target step")
                 target_node_input_remove = ui.select(
-                    options=sorted(list(shared_state().current_workflow_model.workflow_model_steps.keys())))
+                    options=sorted(list(app.storage.tab['current_workflow_model'].workflow_model_steps.keys())))
 
             with ui.column():
                 ui.button('Disconnect', color='negative', on_click=lambda:

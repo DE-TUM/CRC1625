@@ -3,7 +3,7 @@ import os
 from copy import copy
 from dataclasses import dataclass, field
 
-from nicegui import ui
+from nicegui import ui, app
 from nicegui.elements.button import Button
 from nicegui.elements.column import Column
 from nicegui.elements.drawer import RightDrawer
@@ -16,7 +16,6 @@ from handover_workflows_validation.handover_workflows_validation import get_work
     create_workflow_instance, delete_workflow_instance
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent
 from handover_workflows_validation_webui.middleware import matinf_or_demo_login_required, activate_demo_mode, log_out
-from handover_workflows_validation_webui.shared_state import shared_state
 from handover_workflows_validation_webui.workflow_model_ui.edit_workflow_model_page import workflow_model_to_nodes_and_edges
 
 module_dir = os.path.dirname(__file__)
@@ -71,22 +70,22 @@ You can visualize the demo data diagrams by clicking the *Visualize data* button
 
 def edit_handover_workflow_instance_button_click():
     ui.navigate.to(
-        f'/workflows/edit_workflow_instance/{shared_state().current_workflow_model.workflow_model_name}/{shared_state().current_workflow_model.creator_user_id}/{shared_state().current_workflow_instance.workflow_instance_name}/{shared_state().current_workflow_instance.creator_user_id}')
+        f'/workflows/edit_workflow_instance/{app.storage.tab['current_workflow_model'].workflow_model_name}/{app.storage.tab['current_workflow_model'].creator_user_id}/{app.storage.tab['current_workflow_instance'].workflow_instance_name}/{app.storage.tab['current_workflow_instance'].creator_user_id}')
 
 
 async def handle_workflow_instance_deletion(workflows_page_state: WorkflowsPageState):
-    await delete_workflow_instance(shared_state().current_workflow_instance)
-    ui.notify(f'Workflow Instance {shared_state().current_workflow_instance.workflow_instance_name} deleted', color='positive')
+    await delete_workflow_instance(app.storage.tab['current_workflow_instance'])
+    ui.notify(f'Workflow Instance {app.storage.tab['current_workflow_instance'].workflow_instance_name} deleted', color='positive')
     # Force the suer to select the workflow model again
     workflows_page_state.main_content.clear()
     workflows_page_state.right_drawer.clear()
 
 
 async def delete_workflow_instance_button_click(workflows_page_state: WorkflowsPageState):
-    if shared_state().demo_mode:
-        ui.notify("You cannot delete workflow isntances as a demo user", type='negative')
+    if app.storage.tab['demo_mode']:
+        ui.notify("You cannot delete workflow instances as a demo user", type='negative')
         return
-    elif shared_state().user_id != shared_state().current_workflow_instance.creator_user_id:
+    elif app.storage.tab['user_id'] != app.storage.tab['current_workflow_instance'].creator_user_id:
         ui.notify(f"You are not the owner of this workflow instance, so you cannot delete it", type='negative')
         return
 
@@ -101,13 +100,13 @@ async def delete_workflow_instance_button_click(workflows_page_state: WorkflowsP
 
 
 def edit_handover_workflow_model_button_click():
-    ui.navigate.to(f'/workflows/edit_workflow_model/{shared_state().current_workflow_model.workflow_model_name}/{shared_state().current_workflow_model.creator_user_id}')
+    ui.navigate.to(f'/workflows/edit_workflow_model/{app.storage.tab['current_workflow_model'].workflow_model_name}/{app.storage.tab['current_workflow_model'].creator_user_id}')
 
 
 async def copy_handover_workflow_model(workflows_page_state: WorkflowsPageState):
-    copy_of_current_workflow_model = copy(shared_state().current_workflow_model)
+    copy_of_current_workflow_model = copy(app.storage.tab['current_workflow_model'])
     copy_of_current_workflow_model.workflow_model_name = "Copy of " +copy_of_current_workflow_model.workflow_model_name
-    copy_of_current_workflow_model.creator_user_id = shared_state().user_id
+    copy_of_current_workflow_model.creator_user_id = app.storage.tab['user_id']
 
     await store_workflow_model(copy_of_current_workflow_model)
 
@@ -131,7 +130,7 @@ def handle_workflow_instance_table_click(workflow_instance: WorkflowInstance, wo
     """
     workflows_page_state.right_drawer.clear()
 
-    shared_state().current_workflow_instance = workflow_instance
+    app.storage.tab['current_workflow_instance'] = workflow_instance
 
     with workflows_page_state.right_drawer:
         right_drawer_label = ui.label('Workflow instance options').classes('text-xl font-bold')
@@ -145,9 +144,9 @@ def handle_workflow_instance_table_click(workflow_instance: WorkflowInstance, wo
             )
 
         right_drawer_label.set_text(
-            f"Workflow instance '{shared_state().current_workflow_instance.workflow_instance_name}' options")
+            f"Workflow instance '{app.storage.tab['current_workflow_instance'].workflow_instance_name}' options")
 
-    ui.notify(f'Selected Workflow Instance {shared_state().current_workflow_instance.workflow_instance_name}', color='info')
+    ui.notify(f'Selected Workflow Instance {app.storage.tab['current_workflow_instance'].workflow_instance_name}', color='info')
 
 
 def populate_workflow_models_table(workflows_page_state: WorkflowsPageState):
@@ -185,26 +184,26 @@ def populate_workflow_models_table(workflows_page_state: WorkflowsPageState):
 
 async def create_empty_workflow_instance(workflow_instance_name: str,
                                          workflows_page_state: WorkflowsPageState):
-    if shared_state().demo_mode:
+    if app.storage.tab['demo_mode']:
         ui.notify("You cannot create Workflow Instances as a demo user", type='negative')
         return
-    elif shared_state().user_id != shared_state().current_workflow_model.creator_user_id:
+    elif app.storage.tab['user_id'] != app.storage.tab['current_workflow_model'].creator_user_id:
         ui.notify(f"You are not the owner of this workflow model, but you can create a copy of it", type='negative')
         return
 
     workflow_instance = WorkflowInstance()
-    workflow_instance.workflow_model_name = shared_state().current_workflow_model.workflow_model_name
+    workflow_instance.workflow_model_name = app.storage.tab['current_workflow_model'].workflow_model_name
     workflow_instance.workflow_instance_name = workflow_instance_name
 
     # We must add step assignments, even if they don't hold references to any objects
-    for step_name in shared_state().current_workflow_model.workflow_model_steps:
+    for step_name in app.storage.tab['current_workflow_model'].workflow_model_steps:
         workflow_instance.step_assignments[step_name] = []
 
-    await create_workflow_instance(workflow_instance, shared_state().current_workflow_model)
+    await create_workflow_instance(workflow_instance, app.storage.tab['current_workflow_model'])
 
     # Show them again
-    await show_workflow_model_instances(shared_state().current_workflow_model.workflow_model_name,
-                                        shared_state().current_workflow_model.creator_user_id,
+    await show_workflow_model_instances(app.storage.tab['current_workflow_model'].workflow_model_name,
+                                        app.storage.tab['current_workflow_model'].creator_user_id,
                                         workflows_page_state)
 
 
@@ -240,7 +239,7 @@ async def populate_workflow_instances_table(workflows_page_state: WorkflowsPageS
         # First pass over workflow instances to populate the sample ID filter
         search_input_workflow_instances_options: list[str] = []
         sample_input_workflow_instances_options: set[int] = set()
-        for workflow_instance in shared_state().workflow_instances_of_current_workflow_model.values():
+        for workflow_instance in app.storage.tab['workflow_instances_of_current_workflow_model'].values():
             search_input_workflow_instances_options.append(workflow_instance.workflow_instance_name)
             for step_assignment_samples in workflow_instance.step_assignments.values():
                 sample_input_workflow_instances_options.update(step_assignment_samples)
@@ -253,7 +252,7 @@ async def populate_workflow_instances_table(workflows_page_state: WorkflowsPageS
 
         # Second pass over the workflow instances to show thet able and run validation jobs
         validation_jobs = []
-        for workflow_instance in shared_state().workflow_instances_of_current_workflow_model.values():
+        for workflow_instance in app.storage.tab['workflow_instances_of_current_workflow_model'].values():
             # Filter by name
             if workflows_page_state.search_input_workflow_instances.value:
                 if workflows_page_state.search_input_workflow_instances.value not in workflow_instance.workflow_instance_name.lower():
@@ -287,10 +286,10 @@ async def populate_workflow_instances_table(workflows_page_state: WorkflowsPageS
                     with validation_icon_column:
                         ui.spinner()
 
-                    validation_jobs.append(validate_workflow(validation_icon_column, shared_state().current_workflow_model, workflow_instance))
+                    validation_jobs.append(validate_workflow(validation_icon_column, app.storage.tab['current_workflow_model'], workflow_instance))
 
         ui.button("Add a new workflow instance", color='info',
-                  on_click=lambda: create_empty_workflow_instance(f"New workflow instance of {shared_state().current_workflow_model.workflow_model_name}",
+                  on_click=lambda: create_empty_workflow_instance(f"New workflow instance of {app.storage.tab['current_workflow_model'].workflow_model_name}",
                                                                   workflows_page_state))
 
         # Run validation and update the spinners
@@ -304,9 +303,9 @@ async def show_workflow_model_instances(workflow_model_name: str,
     Workflow instances of the selected workflow model from the left drawer, also allowing to edit or copy the model and to create a new instance. Empty until so
     """
     # Load the selected workflow model and its instances
-    shared_state().current_workflow_model = await read_workflow_model(workflow_model_name, workflow_model_creator_user_id)
-    shared_state().workflow_instances_of_current_workflow_model = await get_workflow_instances_of_model(shared_state().current_workflow_model)
-    workflows_page_state.filtered_workflow_instances_of_current_workflow_model = shared_state().workflow_instances_of_current_workflow_model
+    app.storage.tab['current_workflow_model'] = await read_workflow_model(workflow_model_name, workflow_model_creator_user_id)
+    app.storage.tab['workflow_instances_of_current_workflow_model'] = await get_workflow_instances_of_model(app.storage.tab['current_workflow_model'])
+    workflows_page_state.filtered_workflow_instances_of_current_workflow_model = app.storage.tab['workflow_instances_of_current_workflow_model']
 
     workflows_page_state.main_content.clear()
     with workflows_page_state.main_content:
@@ -318,7 +317,7 @@ async def show_workflow_model_instances(workflow_model_name: str,
 
             # Workflow model edit and copy buttons
             with ui.row():
-                if workflow_model_creator_user_id == shared_state().user_id:
+                if workflow_model_creator_user_id == app.storage.tab['user_id']:
                     ui.button("Edit Workflow model", color='info').on_click(
                         lambda: edit_handover_workflow_model_button_click()
                     )
@@ -327,7 +326,7 @@ async def show_workflow_model_instances(workflow_model_name: str,
                         lambda: ui.notify("You are not the owner of this workflow model, but you can create a copy of it", type='negative')
                     )
 
-                if not shared_state().demo_mode:
+                if not app.storage.tab['demo_mode']:
                     ui.button("Create a copy", color='info').on_click(
                         lambda: copy_handover_workflow_model(workflows_page_state)
                     )
@@ -340,7 +339,7 @@ async def show_workflow_model_instances(workflow_model_name: str,
         with ui.grid(columns=1).classes('w-full gap-8'):
             workflows_page_state.graph_component_column = ui.column()
             with workflows_page_state.graph_component_column:
-                graph_data = workflow_model_to_nodes_and_edges(shared_state().current_workflow_model)
+                graph_data = workflow_model_to_nodes_and_edges(app.storage.tab['current_workflow_model'])
                 workflows_page_state.graph_component = CytoscapeComponent(
                     graph_data['nodes'],
                     graph_data['edges'],
@@ -394,20 +393,20 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
 
     async def create_empty_workflow_model(workflow_model_name: str,
                                           workflows_page_state: WorkflowsPageState):
-        if shared_state().demo_mode:
+        if app.storage.tab['demo_mode']:
             ui.notify("You cannot create new workflow models as a demo user", type='negative')
             return
 
         workflow_model = WorkflowModel()
         workflow_model.workflow_model_name = workflow_model_name
-        workflow_model.creator_user_id = shared_state().user_id
+        workflow_model.creator_user_id = app.storage.tab['user_id']
 
         await store_workflow_model(workflow_model)
 
         workflows_page_state.workflow_models_set.add(
             (
                 workflow_model_name,
-                str(shared_state().user_id),
+                str(app.storage.tab['user_id']),
             )
         )
 
@@ -422,7 +421,7 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
         ui.label("Filter by owner:")
         user_details = await get_user_details()
         creator_selector_dict = {
-            user_id: f"{f'{user_name} (You)' if user_id == shared_state().user_id else user_name} ({project.replace('_', ', ')})"
+            user_id: f"{f'{user_name} (You)' if user_id == app.storage.tab['user_id'] else user_name} ({project.replace('_', ', ')})"
             for user_id, (user_name, project) in sorted(
                 user_details.items(),
                 # Alphabetical sort based on project and then user name
@@ -432,7 +431,7 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
         workflows_page_state.creator_selector_workflow_models = ui.select(options=creator_selector_dict,
                                                                           with_input=True,
                                                                           clearable=True,
-                                                                          value=shared_state().user_id)
+                                                                          value=app.storage.tab['user_id'])
 
     workflows_page_state.creator_selector_workflow_models.on_value_change(lambda: populate_workflow_models_table(workflows_page_state))
     workflows_page_state.search_input_workflow_models.on_value_change(lambda: populate_workflow_models_table(workflows_page_state))
@@ -472,7 +471,9 @@ async def workflows_page():
         - Main content: Workflow instances of the selected workflow model from the left drawer, also allowing to edit or copy the model and to create a new instance. Empty until so
         - Right drawer: Workflow instance edit options
     """
-    if shared_state().demo_mode:
+    await ui.context.client.connected()
+
+    if app.storage.tab['demo_mode']:
         def show_demo_data_diagram():
             with ui.dialog().classes('w-full h-full') as demo_data_diagram:
                 with ui.card(align_items='center').classes('w-full h-full').style('max-width: 90%; max-height: 90%'):
@@ -504,7 +505,7 @@ async def workflows_page():
     with ui.header().classes('items-center p-2 h-14'):
         ui.label('Handover workflows validation prototype UI').classes('text-xl').style('color: #000000')
         ui.space()
-        ui.label(f'Welcome, {shared_state().user_name} ({shared_state().user_project})').classes('text-xl').style('color: #000000')
+        ui.label(f'Welcome, {app.storage.tab['user_name']} ({app.storage.tab['user_project']})').classes('text-xl').style('color: #000000')
         ui.button('Log out', color='negative', on_click=lambda: log_out()).props('size=m')
         ui.button('Return to the previous page', color='info', on_click=lambda: ui.navigate.to("/")).props('size=m')
 
@@ -533,11 +534,13 @@ async def landing_page():
     """
     Landing page where the user selects whether to access the workflows dashboard or the SPARQL editor
     """
+    await ui.context.client.connected()
+
     with ui.header().classes('items-center p-2 h-14'):
         ui.label('Handover workflows validation prototype UI').classes('text-xl').style('color: #000000')
         ui.space()
-        if shared_state().user_id:
-            ui.label(f'Welcome, {shared_state().user_name} ({shared_state().user_project})').classes('text-xl').style('color: #000000')
+        if app.storage.tab.get('user_id', 0): # Not logged in yet
+            ui.label(f'Welcome, {app.storage.tab['user_name']} ({app.storage.tab['user_project']})').classes('text-xl').style('color: #000000')
             ui.button('Log out',
                       color='negative',
                       on_click=lambda: log_out()).props('size=m')

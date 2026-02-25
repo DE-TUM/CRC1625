@@ -17,7 +17,6 @@ import handover_workflows_validation_webui.middleware
 
 from nicegui import ui, app
 
-from handover_workflows_validation_webui import shared_state
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import load_cytoscape_js_libs
 
 module_dir = os.path.dirname(__file__)
