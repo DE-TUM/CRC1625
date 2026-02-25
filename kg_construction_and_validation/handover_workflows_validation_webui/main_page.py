@@ -333,7 +333,7 @@ async def show_workflow_model_instances(workflow_model_name: str,
                     )
                 else:
                     ui.button("Create a copy", color='gray').on_click(
-                        lambda: ui.notify("You cannot create new models as a demo user", type='negative')
+                        lambda: ui.notify("You cannot copy workflow models as a demo user", type='negative')
                     )
 
         # Workflow model overview
@@ -395,7 +395,7 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
     async def create_empty_workflow_model(workflow_model_name: str,
                                           workflows_page_state: WorkflowsPageState):
         if shared_state().demo_mode:
-            ui.notify("You cannot create new models as a demo user", type='negative')
+            ui.notify("You cannot create new workflow models as a demo user", type='negative')
             return
 
         workflow_model = WorkflowModel()

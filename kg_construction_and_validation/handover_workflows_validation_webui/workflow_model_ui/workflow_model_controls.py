@@ -78,6 +78,22 @@ def add_step_action(new_step_name: str, workflow_model_page_state: WorkflowModel
         create_graph_controls(workflow_model_page_state)
 
 
+def set_initial_step_action(initial_step_node: str, workflow_model_page_state: WorkflowModelPageState):
+    if not initial_step_node:
+        ui.notify("Please indicate the initial step", type='warning')
+        return
+
+    workflow_model_page_state.save_workflow_model_copy()
+
+    shared_state().current_workflow_model.workflow_model_options.initial_step_name = initial_step_node
+
+    ui.notify(f"Set '{initial_step_node}' as the initial step", type='positive')
+
+    workflow_model_page_state.graph_controls_column.clear()
+    with workflow_model_page_state.graph_controls_column:
+        create_graph_controls(workflow_model_page_state)
+
+
 def remove_step_action(node_to_remove: str, workflow_model_page_state: WorkflowModelPageState):
     if not node_to_remove:
         ui.notify("Please indicate the step to remove", type='warning')
@@ -102,6 +118,22 @@ def remove_step_action(node_to_remove: str, workflow_model_page_state: WorkflowM
 def create_graph_controls(workflow_model_page_state: WorkflowModelPageState):
     with ui.card().classes('w-full bg-secondary'):
         ui.label('Workflow Model options').classes('text-lg font-semibold')
+
+        ui.label('Set initial workflow step').classes('text-sm font-bold text-gray-600')
+        with ui.row().classes('w-full items-center'):
+            if shared_state().current_workflow_model.workflow_model_options.initial_step_name:
+                initial_step_select = ui.select(
+                    options=sorted(list(shared_state().current_workflow_model.workflow_model_steps.keys())),
+                    value=shared_state().current_workflow_model.workflow_model_options.initial_step_name)
+            else:
+                initial_step_select = ui.select(
+                    options=sorted(list(shared_state().current_workflow_model.workflow_model_steps.keys())))
+            ui.button('Set initial step', color='info', on_click=lambda: set_initial_step_action(
+                initial_step_select.value,
+                workflow_model_page_state
+            ))
+
+        ui.separator().classes('my-2')
 
         ui.label('Add workflow step').classes('text-sm font-bold text-gray-600')
         with ui.row().classes('w-full items-center'):

@@ -50,6 +50,10 @@ def handle_workflow_model_name_button(new_name: str, workflow_model_page_state: 
     shared_state().current_workflow_model.workflow_model_name = new_name
 
 
+def can_current_workflow_model_be_saved():
+    return len(shared_state().current_workflow_model.workflow_model_steps) == 0 or shared_state().current_workflow_model.workflow_model_options.initial_step_name
+
+
 async def handle_return_button(workflow_model_page_state: WorkflowModelPageState):
     if not workflow_model_page_state.changes_are_saved and not shared_state().demo_mode:
         with ui.dialog() as return_dialog:
@@ -58,10 +62,13 @@ async def handle_return_button(workflow_model_page_state: WorkflowModelPageState
                     ui.label('The workflow model has been modified. Save changes and exit?')
 
                     async def save_and_exit_and_close():
-                        await overwrite_workflow_model(shared_state().current_workflow_model)
-
                         return_dialog.close()
-                        ui.navigate.to('/workflows')
+
+                        if can_current_workflow_model_be_saved():
+                            await overwrite_workflow_model(shared_state().current_workflow_model)
+                            ui.navigate.to('/workflows')
+                        else:
+                            ui.notify("You must select an initial step first", type='negative')
 
                     async def navigate_without_saving():
                         return_dialog.close()
@@ -114,11 +121,13 @@ async def handle_save_button(workflow_model_page_state: WorkflowModelPageState):
     if shared_state().demo_mode:
         ui.notify("You cannot save changes as a demo user", type='negative')
     else:
-        await overwrite_workflow_model(shared_state().current_workflow_model)
-        workflow_model_page_state.changes_are_saved = True
-        workflow_model_page_state.workflow_model_history = []
-        ui.notify("The changes have been saved", type='positive')
-
+        if can_current_workflow_model_be_saved():
+            await overwrite_workflow_model(shared_state().current_workflow_model)
+            workflow_model_page_state.changes_are_saved = True
+            workflow_model_page_state.workflow_model_history = []
+            ui.notify("The changes have been saved", type='positive')
+        else:
+            ui.notify("You must select an initial step first", type='negative')
 
 @ui.page('/workflows/edit_workflow_model/{workflow_model_name}/{user_id}')
 @matinf_or_demo_login_required
@@ -153,7 +162,6 @@ async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
     with ui.grid(columns=1).classes('w-full gap-8'):
         graph_component_column = ui.column()
         with graph_component_column:
-            print(graph_data)
             graph_component = CytoscapeComponent(
                 graph_data['nodes'],
                 graph_data['edges'],
