@@ -72,7 +72,7 @@ def matinf_login_required(func):
             matinf_response = await check_authentication_in_matinf()
 
             if matinf_response.get('success') and matinf_response.get('content') and matinf_response['content'].get('isUserAuthentificated'):
-                user_id = matinf_response.get("id")
+                user_id = matinf_response["content"]["id"]
 
                 result = await rdf_datastore_client.launch_query(details_single_user_query.replace("{user_id}", str(user_id)))
                 results = result["results"]["bindings"]
