@@ -100,8 +100,9 @@ async def delete_workflow_instance_button_click(workflows_page_state: WorkflowsP
 
     workflow_instance_deletion_dialog.open()
 
+
 def edit_handover_workflow_model_button_click():
-    ui.navigate.to(f'/workflows/edit_workflow_model/{shared_state().current_workflow_model.workflow_model_name}/{shared_state().user_id}')
+    ui.navigate.to(f'/workflows/edit_workflow_model/{shared_state().current_workflow_model.workflow_model_name}/{shared_state().current_workflow_model.creator_user_id}')
 
 
 async def copy_handover_workflow_model(workflows_page_state: WorkflowsPageState):
