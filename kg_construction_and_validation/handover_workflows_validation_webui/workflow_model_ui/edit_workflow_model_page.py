@@ -3,6 +3,7 @@ from nicegui import ui
 from handover_workflows_validation.handover_workflows_validation import read_workflow_model, WorkflowModel, \
     overwrite_workflow_model
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, NodeType, load_cytoscape_js_libs
+from handover_workflows_validation_webui.middleware import matinf_login_required, log_out
 from handover_workflows_validation_webui.shared_state import shared_state
 from handover_workflows_validation_webui.workflow_model_ui.workflow_model_controls import create_graph_controls
 from handover_workflows_validation_webui.workflow_model_ui.workflow_model_page_state import WorkflowModelPageState
@@ -120,6 +121,7 @@ async def handle_save_button(workflow_model_page_state: WorkflowModelPageState):
 
 
 @ui.page('/workflows/edit_workflow_model/{workflow_model_name}/{user_id}')
+@matinf_login_required
 async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
     load_cytoscape_js_libs()
     workflow_model_page_state = WorkflowModelPageState()
@@ -130,12 +132,9 @@ async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
     with ui.header().classes('items-center p-2 h-14'):
         ui.label("Workflow Model Editor").classes('text-xl').style('color: #000000')
         ui.space()
-        if True:  # TODO integrate auth
-            ui.label('Welcome, Sir SHACLot (demo user)').classes('text-xl').style('color: #000000')
-            ui.button('Log out', color='negative', on_click=lambda: ui.navigate.to("/")).props('size=m').style('color: #000000')
-        else:
-            ui.button('Log in', color='info').props('size=m')
-            ui.button('Log in (as demo user)', color='info').props('size=m')
+        ui.label(f'Welcome, {shared_state().user_name} ({shared_state().user_project})').classes('text-xl').style('color: #000000')
+        ui.button('Log out', color='negative', on_click=lambda: log_out()).props('size=m')
+        ui.button('Return to the previous page', color='info', on_click=lambda: ui.navigate.to("/")).props('size=m')
 
     with ui.footer().classes('items-center p-2 h-11'):
         ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-m').style('color: #000000')

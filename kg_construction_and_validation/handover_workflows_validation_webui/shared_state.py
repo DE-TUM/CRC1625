@@ -18,7 +18,9 @@ class SharedState:
             'current_workflow_model': None,
             'workflow_instances_of_current_workflow_model': {},
             'current_workflow_instance': None,
-            'user_id': 0,
+            'user_id': None,
+            'user_name': None,
+            'user_project': None,
             'demo_mode': False
         }
 

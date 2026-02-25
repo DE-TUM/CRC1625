@@ -4,6 +4,7 @@ from copy import copy
 from dataclasses import dataclass, field
 
 from nicegui import ui
+from nicegui.elements.button import Button
 from nicegui.elements.column import Column
 from nicegui.elements.drawer import RightDrawer
 from nicegui.elements.input import Input
@@ -14,12 +15,13 @@ from handover_workflows_validation.handover_workflows_validation import get_work
     get_workflow_instances_of_model, read_workflow_model, store_workflow_model, WorkflowInstance, is_workflow_instance_valid, WorkflowModel, \
     create_workflow_instance, delete_workflow_instance
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, load_cytoscape_js_libs
+from handover_workflows_validation_webui.middleware import matinf_login_required, activate_demo_mode, log_out
 from handover_workflows_validation_webui.shared_state import shared_state
 from handover_workflows_validation_webui.workflow_model_ui.edit_workflow_model_page import workflow_model_to_nodes_and_edges
 
 module_dir = os.path.dirname(__file__)
 prefixes: str = open(os.path.join(module_dir, '../handover_workflows_validation/queries/prefixes.sparql')).read()
-user_details_query = prefixes + open(os.path.join(module_dir, 'queries/user_details.sparql'), 'r').read()
+details_all_users_query = prefixes + open(os.path.join(module_dir, 'queries/details_all_users.sparql'), 'r').read()
 
 @dataclass
 class WorkflowsPageState:
@@ -378,7 +380,7 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
     async def get_user_details() -> dict[int, tuple[str, str]]:
         user_details: dict[int, tuple[str, str]] = dict()
 
-        result = await rdf_datastore_client.launch_query(user_details_query)
+        result = await rdf_datastore_client.launch_query(details_all_users_query)
         results = result["results"]["bindings"]
         for result in results:
             user_id = int(result["user_id"]["value"])
@@ -458,7 +460,8 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
 
 
 @ui.page('/workflows')
-async def workflows_page(demo: str = ""):
+@matinf_login_required
+async def workflows_page():
     """
     Main workflows page
         - Left drawer: Workflow models table, allowing the user to search/filter workflow models, to select one of them or to create a new one
@@ -466,11 +469,7 @@ async def workflows_page(demo: str = ""):
         - Right drawer: Workflow instance edit options
     """
     load_cytoscape_js_libs()
-    if demo == "demo" or shared_state().demo_mode: # First time, or we already knew we were on demo mode
-        # Become Sir SHACLot
-        shared_state().demo_mode = True
-        shared_state().user_id = -1
-
+    if shared_state().demo_mode:
         def show_demo_data_diagram():
             with ui.dialog().classes('w-full h-full') as demo_data_diagram:
                 with ui.card(align_items='center').classes('w-full h-full').style('max-width: 90%; max-height: 90%'):
@@ -496,25 +495,15 @@ async def workflows_page(demo: str = ""):
 
         demo_warning_dialog.open()
 
-    else: # TODO until auth is implemented we force everyone to be the sir SHACLot
-        shared_state().demo_mode = True
-        shared_state().user_id = -1
-        #get_state().demo_mode = False
-        #get_state().user_id = 0
-
     workflows_page_state = WorkflowsPageState()
     workflows_page_state.main_content = ui.column().classes('w-full')
 
     with ui.header().classes('items-center p-2 h-14'):
         ui.label('Handover workflows validation prototype UI').classes('text-xl').style('color: #000000')
         ui.space()
-        if True:  # TODO integrate auth
-            ui.label('Welcome, Sir SHACLot (demo user)').classes('text-xl').style('color: #000000')
-            ui.button('Log out', color='negative', on_click=lambda: ui.navigate.to("/")).props('size=m')
-            ui.button('Return to main page', color='info', on_click=lambda: ui.navigate.to("/")).props('size=m')
-        else:
-            ui.button('Log in', color='info').props('size=m').style('color: #000000')
-            ui.button('Log in (as demo user)', color='info').props('size=m').style('color: #000000')
+        ui.label(f'Welcome, {shared_state().user_name} ({shared_state().user_project})').classes('text-xl').style('color: #000000')
+        ui.button('Log out', color='negative', on_click=lambda: log_out()).props('size=m')
+        ui.button('Return to the previous page', color='info', on_click=lambda: ui.navigate.to("/")).props('size=m')
 
     with ui.footer().classes('items-center p-2 h-11'):
         ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-m').style('color: #000000')
@@ -529,6 +518,13 @@ async def workflows_page(demo: str = ""):
         await create_workflows_model_left_drawer(workflows_page_state)
 
 
+def handle_demo_mode_button_click(demo_user_login_button: Button):
+    activate_demo_mode()
+
+    demo_user_login_button.set_text("Demo mode enabled!")
+    demo_user_login_button.disable()
+
+
 @ui.page('/')
 async def landing_page():
     """
@@ -537,11 +533,7 @@ async def landing_page():
     with ui.header().classes('items-center p-2 h-14'):
         ui.label('Handover workflows validation prototype UI').classes('text-xl').style('color: #000000')
         ui.space()
-        if False: # TODO integrate auth
-            ui.button('Log out', color='negative', on_click=lambda: ui.navigate.to("/")).props('size=m')
-        else:
-            ui.button('Log in', color='info').props('size=m')
-            ui.button('Log in (as demo user)', color='info', on_click=lambda: ui.navigate.to("/workflows?demo=demo")).props('size=m')
+        demo_user_login_button = ui.button('Log in as demo user', color='positive', on_click=lambda: handle_demo_mode_button_click(demo_user_login_button)).props('size=m')
 
     with ui.footer().classes('items-center p-2 h-11'):
         ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-m').style('color: #000000')

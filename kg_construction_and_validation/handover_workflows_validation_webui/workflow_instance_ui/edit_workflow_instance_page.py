@@ -4,6 +4,7 @@ from handover_workflows_validation.handover_workflows_validation import read_wor
     get_workflow_instances_of_model, WorkflowInstance, overwrite_workflow_instance, generate_SHACL_shapes_for_workflow, generate_data_graphs_for_workfow_steps, \
     validate_SHACL_rules
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, NodeType, load_cytoscape_js_libs
+from handover_workflows_validation_webui.middleware import matinf_login_required, log_out
 from handover_workflows_validation_webui.shared_state import shared_state
 from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_controls import create_graph_controls
 from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_page_state import WorkflowInstancePageState
@@ -189,6 +190,7 @@ async def run_validation(workflow_instance_page_state: WorkflowInstancePageState
 
 
 @ui.page('/workflows/edit_workflow_instance/{workflow_model_name}/{workflow_model_creator_user_id}/{workflow_instance_name}/{workflow_instance_creator_user_id}')
+@matinf_login_required
 async def edit_workflow_instance_page(workflow_model_name: str,
                                       workflow_model_creator_user_id: int,
                                       workflow_instance_name: str,
@@ -207,12 +209,9 @@ async def edit_workflow_instance_page(workflow_model_name: str,
     with ui.header().classes('items-center p-2 h-14'):
         ui.label("Workflow Instance Editor").classes('text-xl').style('color: #000000')
         ui.space()
-        if True:  # TODO integrate auth
-            ui.label('Welcome, Sir SHACLot (demo user)').classes('text-xl').style('color: #000000')
-            ui.button('Log out', color='negative', on_click=lambda: ui.navigate.to("/")).props('size=m').style('color: #000000')
-        else:
-            ui.button('Log in', color='info').props('size=m').style('color: #000000')
-            ui.button('Log in (as demo user)', color='info').props('size=m').style('color: #000000')
+        ui.label(f'Welcome, {shared_state().user_name} ({shared_state().user_project})').classes('text-xl').style('color: #000000')
+        ui.button('Log out', color='negative', on_click=lambda: log_out()).props('size=m')
+        ui.button('Return to the previous page', color='info', on_click=lambda: ui.navigate.to("/")).props('size=m')
 
     with ui.footer().classes('items-center p-2 h-11'):
         ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-m').style('color: #000000')

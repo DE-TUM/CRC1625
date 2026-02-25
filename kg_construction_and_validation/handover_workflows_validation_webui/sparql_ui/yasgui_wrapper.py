@@ -7,6 +7,8 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from datastores.rdf import rdf_datastore_client
+from handover_workflows_validation_webui.middleware import matinf_login_required, log_out
+from handover_workflows_validation_webui.shared_state import shared_state
 
 LOCAL_SPARQL_PROXY_ROUTE = "/api/sparql"
 
@@ -178,6 +180,7 @@ def load_example_queries() -> list[tuple[str, list[tuple[str, str]]]]:
 
 
 @ui.page('/sparql')
+@matinf_login_required
 async def main_page():
     def set_query(query_text: str):
         ui.run_javascript(f'''
@@ -257,10 +260,9 @@ async def main_page():
     with ui.header(elevated=True).classes('items-center justify-between p-2 h-15'):
         ui.label(f"CRC 1625 SPARQL endpoint").classes('text-xl font-medium').style('color: #000000')
         ui.space()
-        if True:  # TODO integrate auth
-            ui.label('Welcome, Sir SHACLot (demo user)!¡').classes('text-xl').style('color: #000000')
-            ui.button('Log out', color='negative', on_click=lambda: ui.navigate.to("/")).props('size=m')
-            ui.button('Return to main page', color='info', on_click=lambda: ui.navigate.to("/")).props('size=m')
+        ui.label(f'Welcome, {shared_state().user_name} ({shared_state().user_project})').classes('text-xl').style('color: #000000')
+        ui.button('Log out', color='negative', on_click=lambda: log_out()).props('size=m')
+        ui.button('Return to the previous page', color='info', on_click=lambda: ui.navigate.to("/")).props('size=m')
 
     with ui.footer().classes('items-center justify-between p-2 h-15'):
         ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-xl font-medium').style('color: #000000')
