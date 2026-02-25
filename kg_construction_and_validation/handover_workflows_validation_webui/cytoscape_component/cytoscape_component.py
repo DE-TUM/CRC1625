@@ -8,14 +8,15 @@ from nicegui.element import Element
 
 def load_cytoscape_js_libs():
     """
-    Injects the js libs needed for cytoscape. This must be called before initializing cytoscape,
-    and preferably at the beginning for complex pages that have been already initialized
+    Injects the js libs needed for cytoscape on all pages
+    TODO: This is not really ideal, as there can be pages that don't use Cytoscape (e.g the SPARQL endpoint),
+          but this solves the headache of timing conflicts with complex pages or wrt middleware, redirects, etc.
     """
     ui.add_head_html('''
         <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.33.1/cytoscape.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/dagre/0.8.5/dagre.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>
-    ''')
+    ''', shared=True)
 
 class NodeType(Enum):
     node_type_object = "object"

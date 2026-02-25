@@ -14,7 +14,7 @@ from datastores.rdf import rdf_datastore_client
 from handover_workflows_validation.handover_workflows_validation import get_workflow_model_names_and_creator_user_ids, \
     get_workflow_instances_of_model, read_workflow_model, store_workflow_model, WorkflowInstance, is_workflow_instance_valid, WorkflowModel, \
     create_workflow_instance, delete_workflow_instance
-from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, load_cytoscape_js_libs
+from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent
 from handover_workflows_validation_webui.middleware import matinf_or_demo_login_required, activate_demo_mode, log_out
 from handover_workflows_validation_webui.shared_state import shared_state
 from handover_workflows_validation_webui.workflow_model_ui.edit_workflow_model_page import workflow_model_to_nodes_and_edges
@@ -469,7 +469,6 @@ async def workflows_page():
         - Main content: Workflow instances of the selected workflow model from the left drawer, also allowing to edit or copy the model and to create a new instance. Empty until so
         - Right drawer: Workflow instance edit options
     """
-    load_cytoscape_js_libs()
     if shared_state().demo_mode:
         def show_demo_data_diagram():
             with ui.dialog().classes('w-full h-full') as demo_data_diagram:

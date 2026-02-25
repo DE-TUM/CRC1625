@@ -18,6 +18,7 @@ import handover_workflows_validation_webui.middleware
 from nicegui import ui, app
 
 from handover_workflows_validation_webui import shared_state
+from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import load_cytoscape_js_libs
 
 module_dir = os.path.dirname(__file__)
 load_dotenv(os.path.join(module_dir, '.env'))
@@ -57,8 +58,6 @@ async def setup_debug_files(clear_main_graph: bool = False,
 
     # Load Sir SHACLot alongside his demo MLs/Samples and handover workflows
     await rdf_datastore_client.upload_file(os.path.join(module_dir, "handover_workflows_validation/validation_test/validation_test_triples_webui.ttl"))
-
-
 
     # Load Sir SHACLot's demo handover workflow models and instances
     test_file_path = os.path.join(module_dir, 'handover_workflows_validation/validation_test/workflow_config_files/')
@@ -117,6 +116,8 @@ if __name__ in {"__main__", "__mp_main__"}:
                negative='#d40820',
                info='#5898d4',
                warning='#e88b00')
+
+    load_cytoscape_js_libs()
 
     ui.run(host="0.0.0.0",
            port=int(os.environ.get("WEBUI_PORT")),
