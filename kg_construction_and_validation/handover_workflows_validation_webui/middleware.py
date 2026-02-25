@@ -74,12 +74,11 @@ def matinf_login_required(func):
             if matinf_response.get('success') and matinf_response.get('content') and matinf_response['content'].get('isUserAuthentificated'):
                 user_id = matinf_response["content"]["id"]
 
-                result = await rdf_datastore_client.launch_query(details_single_user_query.replace("{user_id}", str(user_id)))
-                results = result["results"]["bindings"]
+                results = (await rdf_datastore_client.launch_query(details_single_user_query.replace("{user_id}", str(user_id))))["results"]["bindings"]
 
                 shared_state().user_id = user_id
                 shared_state().user_name = results[0]["user_name"]["value"]
-                shared_state().user_project = result[0]["project_name"]["value"]
+                shared_state().user_project = results[0]["project_name"]["value"]
 
                 return await func(*args, **kwargs)
             else: # Redirect to the login page
