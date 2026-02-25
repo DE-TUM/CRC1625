@@ -37,7 +37,6 @@ class WorkflowsPageState:
     creator_selector_workflow_models: Select = None
     workflow_models_table_container: Column = None
     workflow_models_set: set[tuple[str, str]] = field(default_factory=set)
-    filtered_workflow_models_list: list[tuple[str, str]] = field(default_factory=list)
     filtered_workflow_instances_of_current_workflow_model: list[WorkflowInstance] = field(default_factory=list)
     workflow_instances_container: Column = None
     search_input_workflow_instances: Input = None
@@ -152,30 +151,30 @@ def handle_workflow_instance_table_click(workflow_instance: WorkflowInstance, wo
 
 
 def populate_workflow_models_table(workflows_page_state: WorkflowsPageState):
-    search_term = workflows_page_state.search_input_workflow_models.value.lower()
+    search_term = "" if workflows_page_state.search_input_workflow_models.value is None else workflows_page_state.search_input_workflow_models.value.lower()
+
+    filtered_workflow_models_list = list(workflows_page_state.workflow_models_set)
 
     # Filter them by name
     if search_term:
-        workflows_page_state.filtered_workflow_models_list = [
-            row for row in workflows_page_state.workflow_models_set if search_term in row[0].lower()
+        filtered_workflow_models_list = [
+            row for row in filtered_workflow_models_list if search_term in row[0].lower()
         ]
-    else:
-        workflows_page_state.filtered_workflow_models_list = list(workflows_page_state.workflow_models_set)
 
     # Filter them by user ID
     if workflows_page_state.creator_selector_workflow_models.value:
-        workflows_page_state.filtered_workflow_models_list = [
-            row for row in workflows_page_state.filtered_workflow_models_list if str(workflows_page_state.creator_selector_workflow_models.value) == row[1]
+        filtered_workflow_models_list = [
+            row for row in filtered_workflow_models_list if str(workflows_page_state.creator_selector_workflow_models.value) == row[1]
         ]
 
     # Sort them by name
-    list(workflows_page_state.filtered_workflow_models_list).sort(key=lambda x: x[0].lower())
+    list(filtered_workflow_models_list).sort(key=lambda x: x[0].lower())
 
     # Show them
     workflows_page_state.workflow_models_table_container.clear()
 
     with workflows_page_state.workflow_models_table_container:
-        for row in workflows_page_state.filtered_workflow_models_list:
+        for row in filtered_workflow_models_list:
             with ui.button(on_click=lambda r=row: show_workflow_model_instances(r[0], int(r[1]), workflows_page_state)).props('no-caps unelevated').classes(
                     'w-full'):
                 with ui.row().classes('w-full py-1 items-center'):
@@ -202,6 +201,7 @@ async def create_empty_workflow_instance(workflow_instance_name: str,
         workflow_instance.step_assignments[step_name] = []
 
     await create_workflow_instance(workflow_instance, shared_state().current_workflow_model)
+
     # Show them again
     await show_workflow_model_instances(shared_state().current_workflow_model.workflow_model_name,
                                         shared_state().current_workflow_model.creator_user_id,
@@ -211,7 +211,7 @@ async def create_empty_workflow_instance(workflow_instance_name: str,
 async def populate_workflow_instances_table(workflows_page_state: WorkflowsPageState):
     workflows_page_state.workflow_instances_container.clear()
 
-    with (workflows_page_state.workflow_instances_container):
+    with workflows_page_state.workflow_instances_container:
         # Workflow instances list
         with ui.row().classes('w-full border-b-2 border-gray-400 py-1 font-bold'):
             ui.label('Workflow Instance name').classes('w-1/3 text-left')
@@ -396,7 +396,7 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
                                           workflows_page_state: WorkflowsPageState):
         if shared_state().demo_mode:
             ui.notify("You cannot create new models as a demo user", type='negative')
-            return
+            #return
 
         workflow_model = WorkflowModel()
         workflow_model.workflow_model_name = workflow_model_name
@@ -407,9 +407,11 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
         workflows_page_state.workflow_models_set.add(
             (
                 workflow_model_name,
-                shared_state().user_id,
+                str(shared_state().user_id),
             )
         )
+
+        # Apply the filters again and show it
         populate_workflow_models_table(workflows_page_state)
 
     with ui.column():
@@ -454,10 +456,11 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
 
     workflows_page_state.workflow_models_table_container = ui.column().classes('w-full')
     workflows_page_state.workflow_models_set = await create_workflow_models_set()
-    workflows_page_state.filtered_workflow_models_list = list(workflows_page_state.workflow_models_set)
     populate_workflow_models_table(workflows_page_state)
 
-    ui.button("Add a new workflow model", color='info', on_click=lambda: create_empty_workflow_model("New workflow model", workflows_page_state))
+    ui.button("Add a new workflow model",
+              color='info',
+              on_click=lambda: create_empty_workflow_model("New workflow model", workflows_page_state))
 
 
 @ui.page('/workflows')
@@ -533,7 +536,18 @@ async def landing_page():
     with ui.header().classes('items-center p-2 h-14'):
         ui.label('Handover workflows validation prototype UI').classes('text-xl').style('color: #000000')
         ui.space()
-        demo_user_login_button = ui.button('Log in as demo user', color='positive', on_click=lambda: handle_demo_mode_button_click(demo_user_login_button)).props('size=m')
+        if shared_state().user_id:
+            ui.label(f'Welcome, {shared_state().user_name} ({shared_state().user_project})').classes('text-xl').style('color: #000000')
+            ui.button('Log out',
+                      color='negative',
+                      on_click=lambda: log_out()).props('size=m')
+        else:
+            demo_user_login_button = ui.button('Log in',
+                                               color='positive',
+                                               on_click=lambda: ui.navigate.to('/login?redirect_to=/')).props('size=m')
+            demo_user_login_button = ui.button('Log in as demo user',
+                                               color='positive',
+                                               on_click=lambda: handle_demo_mode_button_click(demo_user_login_button)).props('size=m')
 
     with ui.footer().classes('items-center p-2 h-11'):
         ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-m').style('color: #000000')
