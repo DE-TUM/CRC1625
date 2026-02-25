@@ -81,6 +81,7 @@ def matinf_or_demo_login_required(func):
 
                 results = (await rdf_datastore_client.launch_query(details_single_user_query.replace("{user_id}", str(user_id))))["results"]["bindings"]
 
+                app.storage.tab['demo_mode'] = False
                 app.storage.tab['user_id'] = user_id
                 app.storage.tab['user_name'] = results[0]["user_name"]["value"]
                 app.storage.tab['user_project'] = results[0]["project_name"]["value"]
