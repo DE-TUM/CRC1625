@@ -1,5 +1,6 @@
 import os
 from functools import wraps
+from urllib.parse import urlparse
 
 from nicegui import ui
 
@@ -10,6 +11,7 @@ module_dir = os.path.dirname(__file__)
 prefixes: str = open(os.path.join(module_dir, '../handover_workflows_validation/queries/prefixes.sparql')).read()
 details_single_user_query = prefixes + open(os.path.join(module_dir, 'queries/details_single_user.sparql'), 'r').read()
 
+pages_with_no_demo_access = ["/sparql"]
 
 def activate_demo_mode():
     # Become Sir SHACLot and "bypass" authentication
@@ -60,9 +62,11 @@ async def check_authentication_in_matinf():
     return await ui.run_javascript(js_code)
 
 
-def matinf_login_required(func):
+def matinf_or_demo_login_required(func):
     """
     Active page guard that forces the user to be logged in MatInf before continuing
+
+    Allows the user to access as the demo user as an alternative
     """
     @wraps(func)
     async def wrapper(*args, **kwargs):
@@ -87,13 +91,18 @@ def matinf_login_required(func):
     return wrapper
 
 
-def handle_demo_mode_button_click(redirect_to: str):
-    activate_demo_mode()
-    ui.navigate.to(redirect_to)
+def handle_demo_mode_button_click(sanitized_redirect_to: str):
+    if sanitized_redirect_to not in pages_with_no_demo_access:
+        activate_demo_mode()
+        ui.navigate.to(sanitized_redirect_to)
+    else:
+        ui.notify('You are not allowed to access this page as a demo user', type='negative')
 
 
 @ui.page('/login')
 async def login(redirect_to: str = "/"):
+    sanitized_redirect_to = urlparse(redirect_to).path
+
     with ui.card(align_items='center').classes('absolute-center'):
         with ui.column():
             ui.markdown(f"""
@@ -108,7 +117,7 @@ async def login(redirect_to: str = "/"):
                       on_click=lambda: ui.navigate.to('https://crc1625.mdi.ruhr-uni-bochum.de/identity/account/login', new_tab=True))
             ui.button("Return to the previous page",
                       color='info',
-                      on_click=lambda: ui.navigate.to(redirect_to))
+                      on_click=lambda: ui.navigate.to(sanitized_redirect_to))
             ui.button('Log in as demo user',
                       color='positive',
-                      on_click=lambda: handle_demo_mode_button_click(redirect_to)).props('size=m')
+                      on_click=lambda: handle_demo_mode_button_click(sanitized_redirect_to)).props('size=m')

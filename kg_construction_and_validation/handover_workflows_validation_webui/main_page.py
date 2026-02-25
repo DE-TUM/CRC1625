@@ -15,7 +15,7 @@ from handover_workflows_validation.handover_workflows_validation import get_work
     get_workflow_instances_of_model, read_workflow_model, store_workflow_model, WorkflowInstance, is_workflow_instance_valid, WorkflowModel, \
     create_workflow_instance, delete_workflow_instance
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, load_cytoscape_js_libs
-from handover_workflows_validation_webui.middleware import matinf_login_required, activate_demo_mode, log_out
+from handover_workflows_validation_webui.middleware import matinf_or_demo_login_required, activate_demo_mode, log_out
 from handover_workflows_validation_webui.shared_state import shared_state
 from handover_workflows_validation_webui.workflow_model_ui.edit_workflow_model_page import workflow_model_to_nodes_and_edges
 
@@ -460,7 +460,7 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
 
 
 @ui.page('/workflows')
-@matinf_login_required
+@matinf_or_demo_login_required
 async def workflows_page():
     """
     Main workflows page

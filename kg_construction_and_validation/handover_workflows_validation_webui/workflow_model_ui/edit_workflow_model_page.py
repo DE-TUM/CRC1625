@@ -3,7 +3,7 @@ from nicegui import ui
 from handover_workflows_validation.handover_workflows_validation import read_workflow_model, WorkflowModel, \
     overwrite_workflow_model
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, NodeType, load_cytoscape_js_libs
-from handover_workflows_validation_webui.middleware import matinf_login_required, log_out
+from handover_workflows_validation_webui.middleware import matinf_or_demo_login_required, log_out
 from handover_workflows_validation_webui.shared_state import shared_state
 from handover_workflows_validation_webui.workflow_model_ui.workflow_model_controls import create_graph_controls
 from handover_workflows_validation_webui.workflow_model_ui.workflow_model_page_state import WorkflowModelPageState
@@ -121,7 +121,7 @@ async def handle_save_button(workflow_model_page_state: WorkflowModelPageState):
 
 
 @ui.page('/workflows/edit_workflow_model/{workflow_model_name}/{user_id}')
-@matinf_login_required
+@matinf_or_demo_login_required
 async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
     load_cytoscape_js_libs()
     workflow_model_page_state = WorkflowModelPageState()

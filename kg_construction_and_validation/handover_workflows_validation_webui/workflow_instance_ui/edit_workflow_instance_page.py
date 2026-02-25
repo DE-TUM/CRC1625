@@ -4,7 +4,7 @@ from handover_workflows_validation.handover_workflows_validation import read_wor
     get_workflow_instances_of_model, WorkflowInstance, overwrite_workflow_instance, generate_SHACL_shapes_for_workflow, generate_data_graphs_for_workfow_steps, \
     validate_SHACL_rules
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, NodeType, load_cytoscape_js_libs
-from handover_workflows_validation_webui.middleware import matinf_login_required, log_out
+from handover_workflows_validation_webui.middleware import matinf_or_demo_login_required, log_out
 from handover_workflows_validation_webui.shared_state import shared_state
 from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_controls import create_graph_controls
 from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_page_state import WorkflowInstancePageState
@@ -190,7 +190,7 @@ async def run_validation(workflow_instance_page_state: WorkflowInstancePageState
 
 
 @ui.page('/workflows/edit_workflow_instance/{workflow_model_name}/{workflow_model_creator_user_id}/{workflow_instance_name}/{workflow_instance_creator_user_id}')
-@matinf_login_required
+@matinf_or_demo_login_required
 async def edit_workflow_instance_page(workflow_model_name: str,
                                       workflow_model_creator_user_id: int,
                                       workflow_instance_name: str,
