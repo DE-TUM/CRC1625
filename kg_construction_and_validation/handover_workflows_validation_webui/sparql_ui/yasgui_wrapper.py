@@ -7,7 +7,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from datastores.rdf import rdf_datastore_client
-from handover_workflows_validation_webui.middleware import matinf_login_required, log_out
+from handover_workflows_validation_webui.middleware import matinf_or_demo_login_required, log_out
 from handover_workflows_validation_webui.shared_state import shared_state
 
 LOCAL_SPARQL_PROXY_ROUTE = "/api/sparql"
@@ -180,7 +180,7 @@ def load_example_queries() -> list[tuple[str, list[tuple[str, str]]]]:
 
 
 @ui.page('/sparql')
-@matinf_login_required
+@matinf_or_demo_login_required
 async def main_page():
     def set_query(query_text: str):
         ui.run_javascript(f'''
