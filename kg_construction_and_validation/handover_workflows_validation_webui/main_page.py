@@ -522,11 +522,9 @@ async def workflows_page():
         await create_workflows_model_left_drawer(workflows_page_state)
 
 
-def handle_demo_mode_button_click(demo_user_login_button: Button):
+def handle_demo_mode_button_click():
     activate_demo_mode()
-
-    demo_user_login_button.set_text("Demo mode enabled!")
-    demo_user_login_button.disable()
+    ui.navigate.to('/workflows')
 
 
 @ui.page('/')
@@ -545,12 +543,12 @@ async def landing_page():
                       color='negative',
                       on_click=lambda: log_out()).props('size=m')
         else:
-            demo_user_login_button = ui.button('Log in',
-                                               color='positive',
-                                               on_click=lambda: ui.navigate.to('/login?redirect_to=/')).props('size=m')
-            demo_user_login_button = ui.button('Log in as demo user',
-                                               color='positive',
-                                               on_click=lambda: handle_demo_mode_button_click(demo_user_login_button)).props('size=m')
+            ui.button('Log in',
+                      color='positive',
+                      on_click=lambda: ui.navigate.to('/login?redirect_to=/')).props('size=m')
+            ui.button('Log in as demo user',
+                      color='positive',
+                      on_click=lambda: handle_demo_mode_button_click()).props('size=m')
 
     with ui.footer().classes('items-center p-2 h-11'):
         ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-m').style('color: #000000')
