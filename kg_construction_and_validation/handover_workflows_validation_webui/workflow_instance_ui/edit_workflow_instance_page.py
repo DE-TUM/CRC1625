@@ -148,6 +148,8 @@ def handle_undo_button(workflow_instance_page_state: WorkflowInstancePageState):
 async def handle_save_button(workflow_instance_page_state: WorkflowInstancePageState):
     if app.storage.tab['demo_mode']:
         ui.notify("You cannot save changes as a demo user", type='negative')
+    if app.storage.tab['current_workflow_instance'].creator_user_id != app.storage.tab['user_id']:
+        ui.notify("You are not the owner of this workflow instance, so you cannot edit it.", type='negative')
     else:
         await overwrite_workflow_instance(app.storage.tab['current_workflow_instance'], app.storage.tab['current_workflow_model'])
         workflow_instance_page_state.changes_are_saved = True

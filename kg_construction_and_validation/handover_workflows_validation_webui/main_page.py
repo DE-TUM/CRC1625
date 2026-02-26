@@ -55,17 +55,18 @@ You can visualize the demo data diagrams by clicking the *Visualize data* button
 
 * Browse Workflow models and instances.
 * Access the workflow model editor. 
-* Access and **Validate** a workflow instance against its model within the workflow instance editor.  
+* Access and **validate** a workflow instance against its model within the workflow instance editor.  
 
 ###  The following functionalities are <span style="color:red">**disabled**</span>
 
 * Creation of new workflow models and instances
 * Saving changes inside the editors  
 
-###  General <span style="color:orange">**warnings**</span>
+###  The following functionalities are still a <span style="color:orange">**Work In Progress**</span>:
 
-* The Web UI is not finalized and thus is subject to change. 
-* Some aspects of the UX are still not finished. <span style="color:red">**Namely, the graph layout algorithms don't yet render workflow instances correctly**</span>.
+* The Web UI style is not finalized and thus is subject to change. 
+* The graph layout algorithms don't yet render workflow instances correctly as a hierarchical view.
+* The workflow model and instance settings are handled via forms and controls. Interaction via the graph view itself (Cytoscape) is planned but not yet implemented.
 """
 
 def edit_handover_workflow_instance_button_click():
@@ -188,7 +189,7 @@ async def create_empty_workflow_instance(workflow_instance_name: str,
         ui.notify("You cannot create Workflow Instances as a demo user", type='negative')
         return
     elif app.storage.tab['user_id'] != app.storage.tab['current_workflow_model'].creator_user_id:
-        ui.notify(f"You are not the owner of this workflow model, but you can create a copy of it", type='negative')
+        ui.notify(f"You are not the owner of this workflow model, so you cannot add workflow instances to it. You can create a copy of it", type='negative')
         return
 
     workflow_instance = WorkflowInstance()
@@ -288,9 +289,15 @@ async def populate_workflow_instances_table(workflows_page_state: WorkflowsPageS
 
                     validation_jobs.append(validate_workflow(validation_icon_column, app.storage.tab['current_workflow_model'], workflow_instance))
 
-        ui.button("Add a new workflow instance", color='info',
-                  on_click=lambda: create_empty_workflow_instance(f"New workflow instance of {app.storage.tab['current_workflow_model'].workflow_model_name}",
-                                                                  workflows_page_state))
+        if not app.storage.tab['demo_mode']:
+            ui.button("Create a new workflow instance", color='info',
+                      on_click=lambda: create_empty_workflow_instance(
+                          f"New workflow instance of {app.storage.tab['current_workflow_model'].workflow_model_name}",
+                          workflows_page_state))
+        else:
+            ui.button("Add a new workflow instance", color='gray',
+                      on_click=lambda: ui.notify("You cannot create new workflow instances as a demo user", type='negative'))
+
 
         # Run validation and update the spinners
         await asyncio.gather(*validation_jobs)
@@ -323,7 +330,7 @@ async def show_workflow_model_instances(workflow_model_name: str,
                     )
                 else:
                     ui.button("Edit Workflow model", color='gray').on_click(
-                        lambda: ui.notify("You are not the owner of this workflow model, but you can create a copy of it", type='negative')
+                        lambda: ui.notify("You are not the owner of this workflow model, so you cannot edit it. You can create a copy of it", type='negative')
                     )
 
                 if not app.storage.tab['demo_mode']:
@@ -457,9 +464,16 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
     workflows_page_state.workflow_models_set = await create_workflow_models_set()
     populate_workflow_models_table(workflows_page_state)
 
-    ui.button("Add a new workflow model",
-              color='info',
-              on_click=lambda: create_empty_workflow_model("New workflow model", workflows_page_state))
+    if not app.storage.tab['demo_mode']:
+        ui.button("Add a new workflow model",
+                  color='info',
+                  on_click=lambda: create_empty_workflow_model("New workflow model", workflows_page_state))
+    else:
+        ui.button("Create a new workflow model",
+                  color='gray',
+                  on_click=lambda: ui.notify("You cannot create new workflow models as a demo user", type='negative'))
+
+
 
 
 @ui.page('/workflows')
