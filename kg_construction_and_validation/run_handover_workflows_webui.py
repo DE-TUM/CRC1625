@@ -2,7 +2,9 @@ import argparse
 import asyncio
 import os
 
+import starlette
 from dotenv import load_dotenv
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from datastores.rdf import rdf_datastore_client
 from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore
@@ -108,6 +110,18 @@ if __name__ in {"__main__", "__mp_main__"}:
         access_log = True
 
     app.add_static_files("/assets", ASSETS_FOLDER)
+
+
+    class SecurityHeaderMiddleware(BaseHTTPMiddleware):
+        async def dispatch(self, request, call_next):
+            response = await call_next(request)
+            # Prevent other domains from iframing us
+            response.headers['Content-Security-Policy'] = "frame-ancestors 'self'"
+            response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+            return response
+
+
+    app.add_middleware(SecurityHeaderMiddleware)
 
     app.colors(primary='#dbdbdb',
                secondary='#f0f0f0',

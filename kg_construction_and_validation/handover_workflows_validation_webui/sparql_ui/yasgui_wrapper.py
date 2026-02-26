@@ -2,6 +2,7 @@ import os
 import urllib.parse
 from pathlib import Path
 
+from fastapi import HTTPException
 from nicegui import app, ui
 from starlette.requests import Request
 from starlette.responses import JSONResponse
@@ -55,9 +56,19 @@ async def sparql_proxy(request: Request):
         return JSONResponse({"error": f"An unexpected error occurred: {e}"}, status_code=500)
 
 
-# New route for the iframe content
 @ui.page('/yasgui_frame', title='YASGUI Embed')
-async def yasgui_frame_page():
+async def yasgui_frame_page(request: Request):
+    # Prevent direct access to this page. We only allow it to be iframed from within /sparql
+    referer = request.headers.get('referer')
+    host = request.headers.get('host')
+    fetch_dest = request.headers.get('sec-fetch-dest')
+
+    is_internal = referer and host in referer
+    is_iframe = fetch_dest == 'iframe'
+
+    if not (is_internal or is_iframe):
+        raise HTTPException(status_code=403, detail="Direct access to YASGUI is forbidden.")
+
     content = f"""
         <link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
         <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
