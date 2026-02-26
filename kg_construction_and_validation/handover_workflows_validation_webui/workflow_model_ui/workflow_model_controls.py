@@ -82,6 +82,11 @@ def set_initial_step_action(initial_step_node: str, workflow_model_page_state: W
         ui.notify("Please indicate the initial step", type='warning')
         return
 
+    for workflow_model_step in app.storage.tab['current_workflow_model'].workflow_model_steps.values():
+        if initial_step_node in workflow_model_step.next_steps:
+            ui.notify("The initial step node should not be preceded by any steps", type='negative')
+            return
+
     workflow_model_page_state.save_workflow_model_copy()
 
     app.storage.tab['current_workflow_model'].workflow_model_options.initial_step_name = initial_step_node

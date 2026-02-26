@@ -50,7 +50,19 @@ def handle_workflow_model_name_button(new_name: str, workflow_model_page_state: 
 
 
 def can_current_workflow_model_be_saved():
-    return len(app.storage.tab['current_workflow_model'].workflow_model_steps) == 0 or app.storage.tab['current_workflow_model'].workflow_model_options.initial_step_name
+    has_steps = len(app.storage.tab['current_workflow_model'].workflow_model_steps) == 0
+    has_initial_step = app.storage.tab['current_workflow_model'].workflow_model_options.initial_step_name
+
+    has_two_or_more_steps = len(app.storage.tab['current_workflow_model'].workflow_model_steps) >= 2
+
+    pointed_at_steps = {dest for step in app.storage.tab['current_workflow_model'].workflow_model_steps.values() for dest in step.next_steps}
+    has_unconnected_steps = any(
+        len(step.next_steps) == 0 and name not in pointed_at_steps # Doesn't point at any step and is not pointed at either
+        for name, step in app.storage.tab['current_workflow_model'].workflow_model_steps.items()
+    )
+
+    return ((has_steps or has_initial_step) and
+            (has_two_or_more_steps and not has_unconnected_steps) or (not has_two_or_more_steps))
 
 
 async def handle_return_button(workflow_model_page_state: WorkflowModelPageState):
@@ -67,7 +79,7 @@ async def handle_return_button(workflow_model_page_state: WorkflowModelPageState
                             await overwrite_workflow_model(app.storage.tab['current_workflow_model'])
                             ui.navigate.to('/workflows')
                         else:
-                            ui.notify("You must select an initial step first", type='negative')
+                            ui.notify("You must select an initial step first and have no unconnected steps if there are multiple of them", type='negative')
 
                     async def navigate_without_saving():
                         return_dialog.close()
@@ -126,7 +138,7 @@ async def handle_save_button(workflow_model_page_state: WorkflowModelPageState):
             workflow_model_page_state.workflow_model_history = []
             ui.notify("The changes have been saved", type='positive')
         else:
-            ui.notify("You must select an initial step first", type='negative')
+            ui.notify("You must select an initial step first and have no unconnected steps if there are multiple of them", type='negative')
 
 @ui.page('/workflows/edit_workflow_model/{workflow_model_name}/{user_id}')
 @matinf_or_demo_login_required
