@@ -42,7 +42,7 @@ async def sparql_proxy(request: Request):
     try:
         query = parsed_data['query'][0]
 
-        if app.storage.tab.get('use_inference', False):
+        if request.headers.get('X-Use-Inference', 'false').lower() == 'true':
             query = 'DEFINE input:inference "inference_rules"\n' + query
         response = await rdf_datastore_client.launch_query(query, return_full_response=True)
 
@@ -57,7 +57,7 @@ async def sparql_proxy(request: Request):
 
 # New route for the iframe content
 @ui.page('/yasgui_frame', title='YASGUI Embed')
-def yasgui_frame_page():
+async def yasgui_frame_page():
     content = f"""
         <link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
         <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
@@ -76,6 +76,8 @@ def yasgui_frame_page():
         <div id="yasgui"></div>
 
         <script>
+            let useInference = false;
+
             function initializeYasqe(yasgui) {{
                 const yasqe = yasgui.getTab().yasqe;
 
@@ -112,7 +114,10 @@ def yasgui_frame_page():
             function initializeYasgui() {{
                 const yasgui = new Yasgui(document.getElementById("yasgui"), {{
                     requestConfig: {{
-                        endpoint: "{LOCAL_SPARQL_PROXY_ROUTE}"
+                        endpoint: "{LOCAL_SPARQL_PROXY_ROUTE}",
+                        headers: () => ({{
+                            'X-Use-Inference': useInference.toString()
+                        }})
                     }},
                     copyEndpointOnNewTab: true,
                     showEndpointInput: false,
@@ -130,10 +135,13 @@ def yasgui_frame_page():
             
             // Listener for the example queries selector
             window.addEventListener('message', (event) => {{
-                console.log(event);
                 if (event.data.type === 'set_query') {{
                     yasgui.getTab().setQuery(event.data.query);
                     initializeYasqe(yasgui);
+                }}
+                
+                if (event.data.type === 'change_on_inference_toggle') {{
+                    useInference = event.data.value;
                 }}
             }});
         </script>
@@ -181,6 +189,8 @@ def load_example_queries() -> list[tuple[str, list[tuple[str, str]]]]:
 @ui.page('/sparql')
 @matinf_or_demo_login_required
 async def main_page():
+    await ui.context.client.connected()
+
     def set_query(query_text: str):
         ui.run_javascript(f'''
             const iframe = document.querySelector('iframe');
@@ -240,7 +250,18 @@ async def main_page():
         ui.label('Querying options').classes('text-xl font-bold')
         with ui.row().classes('items-center gap-2'):
             ui.label('(Optional) Enable inference:')
-            ui.switch().bind_value(app.storage.tab, 'use_inference').props('color=info')
+
+            def update_inference(e):
+                ui.run_javascript(f'''
+                    const iframe = document.querySelector('iframe');
+                    if (iframe && iframe.contentWindow) {{
+                        iframe.contentWindow.postMessage({{
+                            type: 'change_on_inference_toggle',
+                            value: {str(e.value).lower()}
+                        }}, '*');
+                    }}
+                ''')
+            ui.switch().on_value_change(update_inference).props('color=info')
             with ui.icon('help'):
                 ui.tooltip('Enabling inference allows querying the data using the PMDco ontology')
 
