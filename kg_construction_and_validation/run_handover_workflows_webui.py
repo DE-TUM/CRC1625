@@ -73,21 +73,21 @@ if __name__ in {"__main__", "__mp_main__"}:
     parser.add_argument(
         "--debug",
         action="store_true",
-        default=False,
+        default=os.getenv("WEBUI_DEBUG", "false").lower() == "true",
         help="Debugging mode: Upload demo files"
     )
 
     parser.add_argument(
         "--clear_main_graph",
         action="store_true",
-        default=False,
+        default=os.getenv("WEBUI_CLEAR_MAIN_GRAPH", "false").lower() == "true",
         help="Debugging mode: clear the main graph before starting the WebUI"
     )
 
     parser.add_argument(
         "--clear_workflows_graph",
         action="store_true",
-        default=False,
+        default=os.getenv("WEBUI_CLEAR_WORKFLOWS_GRAPH", "false").lower() == "true",
         help="Debugging mode: clear the workflows graph before starting the WebUI"
     )
 
