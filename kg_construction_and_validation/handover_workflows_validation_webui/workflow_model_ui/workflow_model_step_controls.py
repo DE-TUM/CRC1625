@@ -54,6 +54,10 @@ def change_step_name_action(new_name: str,
         ui.notify("No step selected", type='warning')
         return
 
+    if not new_name in app.storage.tab['current_workflow_model'].workflow_model_steps:
+        ui.notify("There is already another step with this name", type='negative')
+        return
+
     previous_name = workflow_model_page_state.selected_node
     workflow_model_page_state.selected_node = new_name
 
