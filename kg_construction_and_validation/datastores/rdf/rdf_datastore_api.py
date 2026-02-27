@@ -1,5 +1,6 @@
 import logging
 import os
+import secrets
 import sys
 import uuid
 from enum import Enum
@@ -7,7 +8,8 @@ from typing import List, Tuple, Dict
 from dotenv import load_dotenv
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Body
+from fastapi import FastAPI, HTTPException, Body, Depends, status
+from fastapi.security import HTTPBasicCredentials, HTTPBasic
 from pydantic import BaseModel
 
 from datastores.rdf.qlever_datastore import QleverRDFDatastore
@@ -26,16 +28,16 @@ load_dotenv(os.path.join(module_dir, '../../.env'))
 
 RDF_DATASTORE_API_HOST = os.environ.get("RDF_DATASTORE_API_HOST")
 RDF_DATASTORE_API_PORT = os.environ.get("RDF_DATASTORE_API_PORT")
+SPARQL_ENDPOINT_SECRET = os.environ.get("SPARQL_ENDPOINT_SECRET")
 
 class DatastoreType(Enum):
     VIRTUOSO = "virtuoso"
     QLEVER = "qlever"
 
-
 rdf_store: RDFDatastore = VirtuosoRDFDatastore()
 rdf_store_type: DatastoreType = DatastoreType.VIRTUOSO
 app = FastAPI()
-
+security = HTTPBasic()
 
 class QueryRequest(BaseModel):
     query: str
@@ -74,7 +76,17 @@ def is_in_docker_deployment():
 def get_random_file_name(file_extension: str):
     return f"{uuid.uuid4()}.{file_extension}"
 
-@app.post("/launch_query")
+
+def verify_secret(credentials: HTTPBasicCredentials = Depends(security)):
+    if not secrets.compare_digest(credentials.password, SPARQL_ENDPOINT_SECRET or ""):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return True
+
+@app.post("/launch_query", dependencies=[Depends(verify_secret)])
 async def rpc_launch_query(payload: QueryRequest):
     """
     Executes a SPARQL query and returns the JSON response from the endpoint
@@ -87,7 +99,7 @@ async def rpc_launch_query(payload: QueryRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/launch_updates")
+@app.post("/launch_updates", dependencies=[Depends(verify_secret)])
 async def rpc_launch_updates(payload: UpdatesRequest):
     """
     Launches a set of update queries with an exclusive lock. Note that this is not a transaction, i.e. there is no rollback
@@ -115,7 +127,7 @@ async def rpc_launch_updates(payload: UpdatesRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/upload_file")
+@app.post("/upload_file", dependencies=[Depends(verify_secret)])
 async def rpc_upload_file(payload: FileUploadRequest):
     """
     Uploads a local RDF file to the SPARQL endpoint.
@@ -141,7 +153,7 @@ async def rpc_upload_file(payload: FileUploadRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/bulk_file_load")
+@app.post("/bulk_file_load", dependencies=[Depends(verify_secret)])
 async def rpc_bulk_file_load(payload: BulkFileUploadRequest):
     """
     Uploads a collection of local RDF files to the SPARQL endpoint.
@@ -168,7 +180,7 @@ async def rpc_bulk_file_load(payload: BulkFileUploadRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/dump_triples")
+@app.post("/dump_triples", dependencies=[Depends(verify_secret)])
 async def rpc_dump_triples(payload: DumpRequest):
     """
     Output all triples to the designated file, in turtle (.ttl) format
@@ -181,7 +193,7 @@ async def rpc_dump_triples(payload: DumpRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/clear_triples")
+@app.post("/clear_triples", dependencies=[Depends(verify_secret)])
 async def rpc_clear_triples(graph_iri: str = Body(embed=True)):
     """
     Clears all triples from the graph
@@ -194,7 +206,7 @@ async def rpc_clear_triples(graph_iri: str = Body(embed=True)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/run_isql")
+@app.post("/run_isql", dependencies=[Depends(verify_secret)])
 async def rpc_run_isql(isql: str = Body(embed=True)):
     """
     Run an ISQL command on the endpoint.
@@ -206,7 +218,7 @@ async def rpc_run_isql(isql: str = Body(embed=True)):
     else:
         raise HTTPException(status_code=500, detail="ISQL commands are only possible when running Virtuoso.")
 
-@app.get("/start_datastore")
+@app.get("/start_datastore", dependencies=[Depends(verify_secret)])
 async def rpc_start_datastore() -> Dict[str, str]:
     """
     Starts the underlying RDF datastore
@@ -221,7 +233,7 @@ async def rpc_start_datastore() -> Dict[str, str]:
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/stop_datastore")
+@app.get("/stop_datastore", dependencies=[Depends(verify_secret)])
 async def rpc_stop_datastore() -> Dict[str, str]:
     """
     Stops the underlying RDF datastore. Does not affect the remote API endpoint itself
@@ -236,7 +248,7 @@ async def rpc_stop_datastore() -> Dict[str, str]:
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/restart_datastore")
+@app.get("/restart_datastore", dependencies=[Depends(verify_secret)])
 async def rpc_restart_datastore() -> Dict[str, str]:
     """
     Restarts the underlying RDF datastore. Does not affect the remote API endpoint itself
@@ -251,7 +263,7 @@ async def rpc_restart_datastore() -> Dict[str, str]:
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/get_datastore_type")
+@app.get("/get_datastore_type", dependencies=[Depends(verify_secret)])
 async def rpc_get_datastore_type() -> Dict[str, str]:
     """
     Returns the name of the underlying RDF datastore

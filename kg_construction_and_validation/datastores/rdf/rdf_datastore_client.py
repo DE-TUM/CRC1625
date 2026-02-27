@@ -14,7 +14,7 @@ load_dotenv(os.path.join(module_dir, '../../.env'))
 RDF_DATASTORE_API_HOST = os.environ.get("RDF_DATASTORE_API_HOST")
 RDF_DATASTORE_API_PORT = os.environ.get("RDF_DATASTORE_API_PORT")
 RDF_DATASTORE_API_ENDPOINT = os.environ.get("RDF_DATASTORE_API_ENDPOINT")
-
+SPARQL_ENDPOINT_SECRET = os.environ.get("SPARQL_ENDPOINT_SECRET")
 
 """
 RDF datastore client functions that interact with a (possibly remote) RDF datastore API
@@ -25,7 +25,7 @@ async def _post(endpoint: str, payload: dict, return_full_response: bool = False
     url = f"{RDF_DATASTORE_API_ENDPOINT}/{endpoint}"
     try:
         async with httpx.AsyncClient(timeout=None) as client:
-            response = await client.post(url, json=payload)
+            response = await client.post(url, json=payload, auth=("", SPARQL_ENDPOINT_SECRET))
             response.raise_for_status()
             if return_full_response:
                 return response.json()
@@ -43,7 +43,7 @@ async def _get(endpoint: str, return_full_response: bool = False):
     url = f"{RDF_DATASTORE_API_ENDPOINT}/{endpoint}"
     try:
         async with httpx.AsyncClient(timeout=None) as client:
-            response = await client.get(url)
+            response = await client.get(url, auth=("", SPARQL_ENDPOINT_SECRET))
             response.raise_for_status()
             if return_full_response:
                 return response.json()
