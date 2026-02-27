@@ -67,6 +67,7 @@ activity_name_to_iri = {
     "Annealing": str(crc_prefix.AnnealingProcess),
     "APT": str(crc_prefix.APTProcess),
     "Bandgap": str(crc_prefix.BandgapProcess),
+    "EDX": str(crc_prefix.EDXMicroscopyProcess),
     "FIM": str(crc_prefix.FIMProcess),
     "LEIS": str(crc_prefix.LEISProcess),
     "Photo": str(crc_prefix.PhotoProcess),
@@ -80,7 +81,6 @@ activity_name_to_iri = {
     "Thickness": str(crc_prefix.ThicknessProcess),
     "XPS": str(crc_prefix.XPSProcess),
     "XRD": str(crc_prefix.XRDProcess),
-    "EDX": str(crc_prefix.EDXMicroscopyProcess),
     "Others": str(pmdco_prefix.AnalysingProcess),
 }
 

@@ -178,6 +178,8 @@ export default {
         padding: 10,
         rankDir: 'LR',
         //animate: true
+        rankSep: 100,
+        nodeSep: 125
       }
     });
 
@@ -224,7 +226,7 @@ export default {
 
     rerun_layout_and_fit() {
       // Fit to the graph elements with a small padding
-      this.cy.layout({ name: 'dagre', fit: true, padding: 10, rankDir: 'LR', animate: true }).run();
+      this.cy.layout({ name: 'dagre', fit: true, padding: 10, rankDir: 'LR', animate: true, rankSep: 100, nodeSep: 125 }).run();
       this.cy.resize();
       this.cy.fit(this.cy.elements(), 10);
     },
