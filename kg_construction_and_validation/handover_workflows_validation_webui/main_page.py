@@ -193,6 +193,7 @@ async def create_empty_workflow_instance(workflow_instance_name: str,
         return
 
     workflow_instance = WorkflowInstance()
+    workflow_instance.creator_user_id = app.storage.tab['user_id']
     workflow_instance.workflow_model_name = app.storage.tab['current_workflow_model'].workflow_model_name
     workflow_instance.workflow_instance_name = workflow_instance_name
 
@@ -206,6 +207,8 @@ async def create_empty_workflow_instance(workflow_instance_name: str,
     await show_workflow_model_instances(app.storage.tab['current_workflow_model'].workflow_model_name,
                                         app.storage.tab['current_workflow_model'].creator_user_id,
                                         workflows_page_state)
+
+    ui.notify(f'Workflow Instance {workflow_instance_name} created', color='positive')
 
 
 async def populate_workflow_instances_table(workflows_page_state: WorkflowsPageState):
@@ -419,6 +422,8 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
 
         # Apply the filters again and show it
         populate_workflow_models_table(workflows_page_state)
+
+        ui.notify(f'Workflow Model {workflow_model_name} created', color='positive')
 
     with ui.column():
         ui.label("Filter by workflow model name:")
