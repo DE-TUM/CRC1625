@@ -40,7 +40,11 @@ allowed_projects = [
     "C01",
     "C02",
     "C03",
-    "C04"
+    "C04",
+
+    "INF",
+    "S",
+    "Z"
 ]
 
 
