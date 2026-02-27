@@ -1,4 +1,6 @@
 from nicegui import ui, app
+
+from handover_workflows_validation_webui.workflow_model_ui.workflow_model_controls import create_graph_controls
 from handover_workflows_validation_webui.workflow_model_ui.workflow_model_page_state import WorkflowModelPageState
 
 allowed_activities = ["Photo",
@@ -57,7 +59,15 @@ def change_step_name_action(new_name: str,
     for step_name, step in app.storage.tab['current_workflow_model'].workflow_model_steps.items():
         step.next_steps = [new_name if name == previous_name else name for name in step.next_steps]
 
+    if previous_name == app.storage.tab['current_workflow_model'].workflow_model_options.initial_step_name:
+        app.storage.tab['current_workflow_model'].workflow_model_options.initial_step_name = new_name
+
     workflow_model_page_state.graph_component.rename_node(previous_name, new_name)
+
+    # Reflect the changes in the left tab
+    workflow_model_page_state.graph_controls_column.clear()
+    with workflow_model_page_state.graph_controls_column:
+        create_graph_controls(workflow_model_page_state)
 
     ui.notify(f"Renamed '{previous_name}' to '{new_name}'", type='positive')
 

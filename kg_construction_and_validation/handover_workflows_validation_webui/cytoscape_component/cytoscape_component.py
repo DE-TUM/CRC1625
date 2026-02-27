@@ -129,7 +129,7 @@ class CytoscapeComponent(Element, component=os.path.join(os.path.dirname(__file_
         self.name_to_id[new_label] = node_id
 
     def add_node(self, label: str, node_type: NodeType, coloring_ids: list[str] = None) -> None:
-        if label not in self.name_to_id[label]:
+        if label not in self.name_to_id:
             self.name_to_id[label] = label # Its ID is the label
 
             node_color = self.colors[0]
