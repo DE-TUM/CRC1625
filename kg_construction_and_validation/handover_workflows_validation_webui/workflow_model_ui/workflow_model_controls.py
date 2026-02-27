@@ -66,7 +66,6 @@ def add_step_action(new_step_name: str, workflow_model_page_state: WorkflowModel
     new_step = WorkflowModelStep(next_steps=list())
     app.storage.tab['current_workflow_model'].workflow_model_steps[new_step_name] = new_step
     workflow_model_page_state.graph_component.add_node(new_step_name,
-                                                       new_step_name,
                                                        NodeType.node_type_step,
                                                        coloring_ids=[''])
 

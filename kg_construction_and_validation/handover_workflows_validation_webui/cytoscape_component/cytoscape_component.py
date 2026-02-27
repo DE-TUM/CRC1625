@@ -54,6 +54,9 @@ class CytoscapeComponent(Element, component=os.path.join(os.path.dirname(__file_
 
     color_i = 0
     id_to_color = dict()
+    # Label to ID correspondences, to keep
+    # track of original IDs after renamings
+    name_to_id = dict()
 
     def __init__(self,
                  nodes: List[Dict],
@@ -62,6 +65,8 @@ class CytoscapeComponent(Element, component=os.path.join(os.path.dirname(__file_
                  on_node_click: Optional[Callable] = None,
                  page_state = None) -> None:
         super().__init__()
+
+        self.name_to_id = {node['data']['label']: node['data']['id'] for node in nodes}
 
         self._colour_nodes(nodes)
 
@@ -112,53 +117,80 @@ class CytoscapeComponent(Element, component=os.path.join(os.path.dirname(__file_
     def remove_edge(self, source: str, target: str) -> None:
         self.run_method('removeEdge', source, target)
 
-    def rename_node(self, node_id: str, new_label: str) -> None:
+    def rename_node(self, current_label: str, new_label: str) -> None:
         """
         Changes the node's label (avoids performing a full renaming by changing the ID,
         as that would be more complex in Cytoscape)
         """
+        node_id = self.name_to_id.get(current_label)
         self.run_method('renameNode', node_id, new_label)
 
-    def add_node(self, node_id: str, label: str, node_type: NodeType, coloring_ids: list[str] = None) -> None:
-        node_color = self.colors[0]
-        if coloring_ids is not None:
-            node_color = self._get_node_color(coloring_ids)
+        del self.name_to_id[current_label]
+        self.name_to_id[new_label] = node_id
 
-        self.run_method('addNode', node_id, label, node_type.value, node_color)
+    def add_node(self, label: str, node_type: NodeType, coloring_ids: list[str] = None) -> None:
+        if label not in self.name_to_id[label]:
+            self.name_to_id[label] = label # Its ID is the label
 
-    def remove_node(self, node_id: str) -> None:
+            node_color = self.colors[0]
+            if coloring_ids is not None:
+                node_color = self._get_node_color(coloring_ids)
+
+            self.run_method('addNode', label, label, node_type.value, node_color)
+
+    def remove_node(self, node_label: str) -> None:
+        node_id = self.name_to_id.get(node_label)
+
         self.run_method('removeNode', node_id)
 
-    def select_node(self, node_id: str) -> None:
+    def select_node(self, node_label: str) -> None:
+        node_id = self.name_to_id.get(node_label)
+
         self.run_method('selectNode', node_id)
 
-    def set_node_as_valid(self, node_id: str, tooltip: str) -> None:
+    def set_node_as_valid(self, node_label: str, tooltip: str) -> None:
+        node_id = self.name_to_id.get(node_label)
+
         self.run_method('setNodeAsValid', node_id, tooltip)
 
-    def set_node_as_invalid(self, node_id: str, tooltip: str) -> None:
+    def set_node_as_invalid(self, node_label: str, tooltip: str) -> None:
+        node_id = self.name_to_id.get(node_label)
+
         self.run_method('setNodeAsInvalid', node_id, tooltip)
 
-    def set_node_as_missing(self, node_id: str, tooltip: str) -> None:
+    def set_node_as_missing(self, node_label: str, tooltip: str) -> None:
+        node_id = self.name_to_id.get(node_label)
+
         self.run_method('setNodeAsMissing', node_id, tooltip)
 
-    def set_node_as_not_checked(self, node_id: str, tooltip: str) -> None:
+    def set_node_as_not_checked(self, node_label: str, tooltip: str) -> None:
+        node_id = self.name_to_id.get(node_label)
+
         self.run_method('setNodeAsNotChecked', node_id, tooltip)
 
     def clear_validation_results(self) -> None:
         self.run_method('clearValidationResults')
 
-    def add_activity(self, node_id: str, new_activities: list[str], added_activity: str) -> None:
+    def add_activity(self, node_label: str, new_activities: list[str], added_activity: str) -> None:
+        node_id = self.name_to_id.get(node_label)
+
         self.run_method('addActivity', node_id, added_activity, self._get_node_color(new_activities))
 
-    def remove_activity(self, node_id: str, new_activities: list[str], removed_activity: str) -> None:
+    def remove_activity(self, node_label: str, new_activities: list[str], removed_activity: str) -> None:
+        node_id = self.name_to_id.get(node_label)
+
         self.run_method('removeActivity', node_id, removed_activity, self._get_node_color(new_activities))
 
-    def replace_activities(self, node_id: str, activities: [str]) -> None:
+    def replace_activities(self, node_label: str, activities: list[str]) -> None:
+        node_id = self.name_to_id.get(node_label)
+
         new_node_color = self.colors[0]
         if activities is not None:
             new_node_color = self._get_node_color(activities)
 
         self.run_method('replaceActivities', node_id, activities, new_node_color)
 
-    def replace_projects(self, node_id: str, projects: [str]) -> None:
+    def replace_projects(self, node_label: str, projects: list[str]) -> None:
+        node_id = self.name_to_id.get(node_label)
+
         self.run_method('replaceProjects', node_id, projects)

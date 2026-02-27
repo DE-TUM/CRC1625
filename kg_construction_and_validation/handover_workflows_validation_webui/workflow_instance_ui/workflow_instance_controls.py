@@ -23,9 +23,8 @@ def add_object_action(new_object_id: str | None,
     workflow_instance_page_state.save_workflow_instance_copy()
 
     workflow_instance_page_state.graph_component.add_node(new_object_id,
-                                                       new_object_id,
-                                                       NodeType.node_type_object,
-                                                       coloring_ids=['object'])
+                                                          NodeType.node_type_object,
+                                                          coloring_ids=['object'])
     workflow_instance_page_state.existing_objects.add(int(new_object_id))
 
     ui.notify(f"Added Materials Library / Sample ID '{new_object_id}'", type='positive')

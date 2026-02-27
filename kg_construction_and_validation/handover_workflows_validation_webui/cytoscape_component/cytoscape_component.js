@@ -255,12 +255,10 @@ export default {
       // We only change the node's label to avoid recreating the whole
       // cytoscape data structure again
       const node = this.cy.$id(id);
-      if (node.length > 0) {
-        node.data('label', newLabel);
+      node.data('label', newLabel);
 
-        // Force a re-render of the label
-        node.trigger('data');
-      }
+      // Force a re-render of the label
+      node.trigger('data');
     },
 
     addNode(id, label, type, node_color) {
