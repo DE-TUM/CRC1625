@@ -64,19 +64,21 @@
     crc:relatesToHandoverWorkflowStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_7f125bd5-6f1b-562d-ad8b-2574dae79c86_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> .
 
 <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_3_of_workflow_instance_b5b3ebd3-d827-50ad-bc0b-089f95ef0a42> a crc:HandoverWorkflowInstanceAssignment ;
-    crc:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/-11> ;
+    crc:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/-11>,
+        <https://crc1625.mdi.ruhr-uni-bochum.de/object/-12> ;
     crc:relatesToHandoverWorkflowStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_79d1eede-f7f6-50f4-a63d-e1d14ec66de2_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> .
 
 <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_4_of_workflow_instance_b5b3ebd3-d827-50ad-bc0b-089f95ef0a42> a crc:HandoverWorkflowInstanceAssignment ;
-    crc:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/-11> ;
+    crc:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/-11>,
+        <https://crc1625.mdi.ruhr-uni-bochum.de/object/-12> ;
     crc:relatesToHandoverWorkflowStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_6a7651e6-800b-5e76-ae96-4d792c89b689_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> .
 
 <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_5_of_workflow_instance_b5b3ebd3-d827-50ad-bc0b-089f95ef0a42> a crc:HandoverWorkflowInstanceAssignment ;
-    crc:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/-12> ;
+    crc:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/-11> ;
     crc:relatesToHandoverWorkflowStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_555322f2-479d-501a-94f8-4a0afdd53281_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> .
 
 <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_6_of_workflow_instance_b5b3ebd3-d827-50ad-bc0b-089f95ef0a42> a crc:HandoverWorkflowInstanceAssignment ;
-    crc:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/-13> ; # Has SECCM, but the step requires EDX
+    crc:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/-12> ; # Has SECCM, but the step requires EDX
     crc:relatesToHandoverWorkflowStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_80ad2e81-b4a4-5f45-9419-cf1a415dad04_for_workflow_model_d9351e79-2760-5fff-83ca-6dd896c308ef> .
 
 
@@ -104,14 +106,16 @@
     crc:relatesToHandoverWorkflowStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_7f125bd5-6f1b-562d-ad8b-2574dae79c86_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> .
 
 <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_3_of_workflow_instance_8ff62678-c1c6-5638-b28d-070012915cfd> a crc:HandoverWorkflowInstanceAssignment ;
-    crc:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/-11> ;
+    crc:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/-11>,
+        <https://crc1625.mdi.ruhr-uni-bochum.de/object/-12> ;
     crc:relatesToHandoverWorkflowStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_79d1eede-f7f6-50f4-a63d-e1d14ec66de2_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> .
 
 <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_4_of_workflow_instance_8ff62678-c1c6-5638-b28d-070012915cfd> a crc:HandoverWorkflowInstanceAssignment ;
-    crc:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/-11> ;
+    crc:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/-11>,
+        <https://crc1625.mdi.ruhr-uni-bochum.de/object/-12> ;
     crc:relatesToHandoverWorkflowStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_6a7651e6-800b-5e76-ae96-4d792c89b689_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> .
 
 <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_5_of_workflow_instance_8ff62678-c1c6-5638-b28d-070012915cfd> a crc:HandoverWorkflowInstanceAssignment ;
-    crc:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/-12>,
-        <https://crc1625.mdi.ruhr-uni-bochum.de/object/-13> ;
+    crc:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/-11>,
+        <https://crc1625.mdi.ruhr-uni-bochum.de/object/-12> ;
     crc:relatesToHandoverWorkflowStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_555322f2-479d-501a-94f8-4a0afdd53281_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> .
