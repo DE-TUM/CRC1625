@@ -479,6 +479,19 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
                   on_click=lambda: ui.notify("You cannot create new workflow models as a demo user", type='negative'))
 
 
+def show_materialization_card():
+    async def check_materialization_status():
+        if not await rdf_datastore_client.is_materialization_active():
+            ui.navigate.reload()
+
+    with ui.card(align_items='center').classes('absolute-center'):
+        with ui.row().classes('items-center'):
+            ui.markdown(f"""**The Knowledge Graph is currently being refreshed. This page will automatically reload when finished. This process should only take a couple minutes.**
+            """)
+            ui.timer(1.0, check_materialization_status)
+
+        with ui.row().classes('items-center'):
+            ui.spinner(size='lg')
 
 
 @ui.page('/workflows')
@@ -492,53 +505,56 @@ async def workflows_page():
     """
     await ui.context.client.connected()
 
-    if app.storage.tab['demo_mode']:
-        def show_demo_data_diagram():
-            with ui.dialog().classes('w-full h-full') as demo_data_diagram:
-                with ui.card(align_items='center').classes('w-full h-full').style('max-width: 90%; max-height: 90%'):
-                    with ui.row().classes('w-full h-full'):
-                            ui.html(
-                                f'<embed src="/assets/diagrams/demo_data.pdf" type="application/pdf" style="width:100%; height:100%; border:none;">',
-                                sanitize=False
-                            ).classes('w-full h-full')
+    if await rdf_datastore_client.is_materialization_active():
+        show_materialization_card()
+    else:
+        if app.storage.tab['demo_mode']:
+            def show_demo_data_diagram():
+                with ui.dialog().classes('w-full h-full') as demo_data_diagram:
+                    with ui.card(align_items='center').classes('w-full h-full').style('max-width: 90%; max-height: 90%'):
+                        with ui.row().classes('w-full h-full'):
+                                ui.html(
+                                    f'<embed src="/assets/diagrams/demo_data.pdf" type="application/pdf" style="width:100%; height:100%; border:none;">',
+                                    sanitize=False
+                                ).classes('w-full h-full')
+
+                        with ui.row():
+                            ui.button('Close', color='positive', on_click=lambda: demo_data_diagram.close())
+
+                demo_data_diagram.open()
+
+            with ui.dialog() as demo_warning_dialog:
+                with ui.card(align_items='center').classes('w-full').style('max-width: 60%'):
+                    with ui.row(align_items='center').classes('w-full justify-center'):
+                        ui.markdown(demo_warning_message)
 
                     with ui.row():
-                        ui.button('Close', color='positive', on_click=lambda: demo_data_diagram.close())
+                        ui.button('Visualize data', color='info', on_click=lambda: show_demo_data_diagram())
+                        ui.button('Understood', color='positive', on_click=lambda: demo_warning_dialog.close())
 
-            demo_data_diagram.open()
+            demo_warning_dialog.open()
 
-        with ui.dialog() as demo_warning_dialog:
-            with ui.card(align_items='center').classes('w-full').style('max-width: 60%'):
-                with ui.row(align_items='center').classes('w-full justify-center'):
-                    ui.markdown(demo_warning_message)
+        workflows_page_state = WorkflowsPageState()
+        workflows_page_state.main_content = ui.column().classes('w-full')
 
-                with ui.row():
-                    ui.button('Visualize data', color='info', on_click=lambda: show_demo_data_diagram())
-                    ui.button('Understood', color='positive', on_click=lambda: demo_warning_dialog.close())
+        with ui.header().classes('items-center p-2 h-14'):
+            ui.label('Handover workflows validation prototype UI').classes('text-xl').style('color: #000000')
+            ui.space()
+            ui.label(f'Welcome, {app.storage.tab['user_name']} ({app.storage.tab['user_project']})').classes('text-xl').style('color: #000000')
+            ui.button('Log out', color='negative', on_click=lambda: log_out()).props('size=m')
+            ui.button('Return to the previous page', color='info', on_click=lambda: ui.navigate.to("/")).props('size=m')
 
-        demo_warning_dialog.open()
+        with ui.footer().classes('items-center p-2 h-11'):
+            ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-m').style('color: #000000')
+            ui.space()
+            ui.image('/assets/crc_logo_black_letters_wide.png').classes('w-26')
 
-    workflows_page_state = WorkflowsPageState()
-    workflows_page_state.main_content = ui.column().classes('w-full')
+        workflows_page_state.right_drawer = ui.right_drawer().classes('bg-secondary')
+        # TODO: We can hide it and show it only when clicked, but for now the graph component cannot adapt to the new width when doing so
+        #workflows_page_state.right_drawer.hide()
 
-    with ui.header().classes('items-center p-2 h-14'):
-        ui.label('Handover workflows validation prototype UI').classes('text-xl').style('color: #000000')
-        ui.space()
-        ui.label(f'Welcome, {app.storage.tab['user_name']} ({app.storage.tab['user_project']})').classes('text-xl').style('color: #000000')
-        ui.button('Log out', color='negative', on_click=lambda: log_out()).props('size=m')
-        ui.button('Return to the previous page', color='info', on_click=lambda: ui.navigate.to("/")).props('size=m')
-
-    with ui.footer().classes('items-center p-2 h-11'):
-        ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-m').style('color: #000000')
-        ui.space()
-        ui.image('/assets/crc_logo_black_letters_wide.png').classes('w-26')
-
-    workflows_page_state.right_drawer = ui.right_drawer().classes('bg-secondary')
-    # TODO: We can hide it and show it only when clicked, but for now the graph component cannot adapt to the new width when doing so
-    #workflows_page_state.right_drawer.hide()
-
-    with ui.left_drawer().classes('bg-secondary'):
-        await create_workflows_model_left_drawer(workflows_page_state)
+        with ui.left_drawer().classes('bg-secondary'):
+            await create_workflows_model_left_drawer(workflows_page_state)
 
 
 def handle_demo_mode_button_click():

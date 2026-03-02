@@ -119,7 +119,7 @@ async def login(redirect_to: str = "/"):
             ui.button("Open MatInf's login page",
                       color='info',
                       on_click=lambda: ui.navigate.to('https://crc1625.mdi.ruhr-uni-bochum.de/identity/account/login', new_tab=True))
-            ui.button("Return to the previous page",
+            ui.button("Reload the page",
                       color='info',
                       on_click=lambda: ui.navigate.to(sanitized_redirect_to))
             ui.button('Log in as demo user',

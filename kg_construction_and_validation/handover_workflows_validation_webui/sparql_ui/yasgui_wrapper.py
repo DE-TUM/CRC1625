@@ -33,12 +33,18 @@ async def sparql_proxy(request: Request):
     """
     Proxies a request from YASGUI to the internal CRC 1625 SPARQL endpoint
     """
+    if await rdf_datastore_client.is_materialization_active():
+        return JSONResponse(
+            content="The Knowledge Graph is currently being refreshed. Please wait a couple minutes and launch the query again.",
+            status_code=503
+        )
+
     if request.method == 'POST':
         data = await request.body()
 
         parsed_data = urllib.parse.parse_qs(data.decode('utf-8'))
     else:
-        return JSONResponse({"error": f"No requests other than POST are allowed"}, status_code=400)
+        return JSONResponse(f"No requests other than POST are allowed", status_code=400)
 
     try:
         query = parsed_data['query'][0]
@@ -53,7 +59,7 @@ async def sparql_proxy(request: Request):
         )
 
     except Exception as e:  # TODO: I know, but we are not exposing anything critical
-        return JSONResponse({"error": f"An unexpected error occurred: {e}"}, status_code=500)
+        return JSONResponse(f"An unexpected error occurred: {e}", status_code=500)
 
 
 @ui.page('/yasgui_frame', title='YASGUI Embed')

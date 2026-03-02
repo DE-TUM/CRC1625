@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 import secrets
@@ -36,6 +37,7 @@ class DatastoreType(Enum):
 
 rdf_store: RDFDatastore = VirtuosoRDFDatastore()
 rdf_store_type: DatastoreType = DatastoreType.VIRTUOSO
+is_materializing: bool = False
 app = FastAPI()
 security = HTTPBasic()
 
@@ -270,6 +272,42 @@ async def rpc_get_datastore_type() -> Dict[str, str]:
     """
     return {"status": "success", "data": rdf_store_type.value}
 
+async def reset_materialization_flag(delay: int):
+    global is_materializing
+
+    await asyncio.sleep(delay)
+    is_materializing = False
+
+@app.get("/signal_start_materialization", dependencies=[Depends(verify_secret)])
+async def rpc_signal_start_materialization() -> Dict[str, str]:
+    """
+    Signals the API that KG materialization is in progress.
+    This will be signaled for up to ten minutes or until the stop materialization RPC is called.
+    """
+    global is_materializing
+    is_materializing = True
+
+    asyncio.create_task(reset_materialization_flag(600))
+
+    return {"status": "success"}
+
+@app.get("/signal_stop_materialization", dependencies=[Depends(verify_secret)])
+async def rpc_signal_stop_materialization() -> Dict[str, str]:
+    """
+    Signals the API that KG materialization is finished.
+    """
+    global is_materializing
+    is_materializing = False
+
+    return {"status": "success"}
+
+@app.get("/is_materialization_active", dependencies=[Depends(verify_secret)])
+async def rpc_is_materialization_active() -> Dict[str, str | bool]:
+    """
+    Used to check whether the KG is being refreshed and thus
+    yield no or incomplete results to queries until finished
+    """
+    return {"status": "success", "data": is_materializing}
 
 def run(rdf_store_to_serve: DatastoreType,
         debug: bool = False):

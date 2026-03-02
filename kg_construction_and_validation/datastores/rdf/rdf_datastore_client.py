@@ -202,6 +202,26 @@ async def get_datastore_type():
     """
     return (await _get("get_datastore_type")).json()['data']
 
+async def signal_start_materialization():
+    """
+    Signals the API that KG materialization is in progress.
+    This will be signaled for up to ten minutes or until the stop materialization RPC is called.
+    """
+    return (await _get("signal_start_materialization")).json()['status']
+
+async def signal_stop_materialization():
+    """
+    Signals the API that KG materialization is finished.
+    """
+    return (await _get("signal_stop_materialization")).json()['status']
+
+async def is_materialization_active():
+    """
+    Used to check whether the KG is being refreshed and thus
+    yield no or incomplete results to queries until finished
+    """
+    return (await _get("is_materialization_active")).json()['data']
+
 def run_sync(coroutine : Coroutine):
     """
     Runs any of the above methods synchronously. You can also simply use asyncio.run() directly.

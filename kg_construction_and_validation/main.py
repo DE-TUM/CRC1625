@@ -67,6 +67,8 @@ def serve_KG(skip_ontologies_upload: bool = True,
                                                                                                          use_rmlstreamer=use_rmlstreamer)
 
     logging.info("Materialization of the KG finished!")
+    # Signal the API that now it's going to be busy clearing and uploading triples and running postprocessing
+    rdf_datastore_client.run_sync(rdf_datastore_client.signal_start_materialization())
     rdf_datastore_client.run_sync(rdf_datastore_client.clear_triples())
 
     file_upload_start = time.perf_counter()
@@ -95,6 +97,8 @@ def serve_KG(skip_ontologies_upload: bool = True,
 
     # Load Sir SHACLot alongside his demo MLs/Samples and handover workflows
     rdf_datastore_client.run_sync(rdf_datastore_client.upload_file(os.path.join(module_dir, "handover_workflows_validation/validation_test/validation_test_triples_webui.ttl")))
+
+    rdf_datastore_client.run_sync(rdf_datastore_client.signal_stop_materialization())
 
     return performance_log_mappings, resource_usage_mappings, performance_log_postprocessing, resource_usage_postprocessing, file_upload_end
 
