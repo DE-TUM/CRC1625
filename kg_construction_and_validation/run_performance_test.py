@@ -295,7 +295,8 @@ def stop_datastores(args, sql_db: MSSQLDB):
     logging.info("Restarting datastore...")
     asyncio.run(rdf_datastore_client.restart_datastore())
 
-    sql_db.stop_DB()
+    if not sql_db.is_remote:
+        sql_db.stop_DB()
 
 
 def get_log_file(log_file):
@@ -438,10 +439,6 @@ if __name__ == "__main__":
                                       n_triples,
                                       query_benchmark_results,
                                       args.log_file)
-
-            if not sql_db.database_backup_exists(backup_identifier):
-                logging.info("Backing up the SQL DB...")
-                sql_db.dump_database(backup_identifier)
 
             if not args.evaluate_only_sql_queries:
                 stop_datastores(args, sql_db)
