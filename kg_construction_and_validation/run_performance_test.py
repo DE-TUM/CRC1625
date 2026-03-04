@@ -319,6 +319,14 @@ def is_run_completed(completed_runs,
     return False
 
 
+def is_prod_run_completed(completed_runs):
+    for completed_run in completed_runs:
+        if "is_prod" in completed_run["config"]:
+            return True
+
+    return False
+
+
 def save_run(completed_runs,
              num_main_samples,
              run_config: dict,
@@ -394,6 +402,50 @@ if __name__ == "__main__":
     backup_identifier = None
 
     try:
+        if is_prod_run_completed(completed_runs):
+            logging.info("Production Run already completed, skipping...")
+        else: # Do a perf test on the production instance
+            logging.info("Running performance test on the production DB...")
+
+            mappings_performance_log, resource_usage_mappings, performance_log_postprocessing, resource_usage_postprocessing, file_upload_time = (
+                serve_KG(skip_ontologies_upload=False,
+                         db_option='p',
+                         skip_db_setup=False,
+                         skip_materialization=False,
+                         delete_materialized_triples_files=False))
+
+            n_triples = get_value_from_query(count_triples_query, "n_triples", int)
+
+            postprocessing_time = sum([time for time in performance_log_postprocessing.values()])
+
+            logging.info(f"File upload time: {timedelta(seconds=file_upload_time)}")
+            logging.info(f"Postprocessing time: {timedelta(seconds=postprocessing_time)}")
+            logging.info(f"Triples generated: {n_triples}")
+            logging.info(f"Benchmarking query times...")
+
+            sql_db_prod = MSSQLDB()
+            sql_db_prod.select_and_start_db('p')
+            query_benchmark_results = run_querying_benchmark(sql_db_prod)
+
+            completed_runs = save_run(completed_runs,
+                                      get_value_from_query(n_samples_query, "n_samples", int),
+                                      {"is_prod": True},
+                                      mappings_performance_log,
+                                      resource_usage_mappings,
+                                      performance_log_postprocessing,
+                                      resource_usage_postprocessing,
+                                      file_upload_time,
+                                      n_triples,
+                                      query_benchmark_results,
+                                      args.log_file)
+
+            if not sql_db.database_backup_exists(backup_identifier):
+                logging.info("Backing up the SQL DB...")
+                sql_db.dump_database(backup_identifier)
+
+            if not args.evaluate_only_sql_queries:
+                stop_datastores(args, sql_db)
+
         for i, run_config in enumerate(runs_config):
             for num_main_samples in run_config["num_main_samples"]:
                 if is_run_completed(completed_runs,
@@ -455,9 +507,7 @@ if __name__ == "__main__":
 
                     logging.info(f"File upload time: {timedelta(seconds=file_upload_time)}")
                     logging.info(f"Postprocessing time: {timedelta(seconds=postprocessing_time)}")
-
                     logging.info(f"Triples generated: {n_triples}")
-
                     logging.info(f"Benchmarking query times...")
 
                 
