@@ -52,19 +52,24 @@ class MSSQLDB():
         """
         Executes a query. Does not return its result
         """
-        conn = pymssql.connect(
-            server=MSSQL_HOST,
-            port=MSSQL_PORT,
-            user=MSSQL_USER,
-            password=MSSQL_PASSWORD,
-            database=MSSQL_CRC1625_DATABASE_NAME,
-        )
-        cursor = conn.cursor()
-        cursor.execute(query)
+        if self.is_remote:
+            headers = {'VroApi': MSSQL_PROD_API_KEY}
+            data = {'sql': query}
+            requests.post(MSSQL_PROD_TENANT_URL + "execute", headers=headers, data=data)
+        else:
+            conn = pymssql.connect(
+                server=MSSQL_HOST,
+                port=MSSQL_PORT,
+                user=MSSQL_USER,
+                password=MSSQL_PASSWORD,
+                database=MSSQL_CRC1625_DATABASE_NAME,
+            )
+            cursor = conn.cursor()
+            cursor.execute(query)
 
-        conn.commit()
-        cursor.close()
-        conn.close()
+            conn.commit()
+            cursor.close()
+            conn.close()
 
     def query_to_csv(self,
                      query: str,
