@@ -4,6 +4,9 @@
 
 </div>
 
+> [!TIP]
+> **You can now access the web interface as a CRC1625 (or demo) user at [kg.crc1625.mdi.ruhr-uni-bochum.de](https://kg.crc1625.mdi.ruhr-uni-bochum.de/)**
+
 Welcome to the repository for the ontology and KG implementation for the [CRC 1625](https://www.ruhr-uni-bochum.de/crc1625/index.html.en)'s [MatInf](https://www.matinf.pro/) Research Data Management System.
 
 This project is structured into six different main folders, each containing their respective **documentation**:
