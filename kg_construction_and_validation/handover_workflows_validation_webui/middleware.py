@@ -47,7 +47,7 @@ def log_out():
     log_out_dialog.open()
 
 
-async def check_authentication_in_matinf():
+async def fetch_matinf_authentication():
     js_code = '''
         try {
             const response = await fetch('https://crc1625.mdi.ruhr-uni-bochum.de/ajax/getstate', { 
@@ -59,6 +59,24 @@ async def check_authentication_in_matinf():
         }
     '''
     return await ui.run_javascript(js_code)
+
+
+def is_matinf_authentication_response_valid(matinf_response) -> bool:
+    return matinf_response.get('success') and matinf_response.get('content') and matinf_response['content'].get('isUserAuthentificated')
+
+
+async def store_user_info_from_matinf(matinf_response):
+    """
+    Given a *successful* MatInf login response, retrieve user info and store it for the web session
+    """
+    user_id = matinf_response["content"]["id"]
+
+    results = (await rdf_datastore_client.launch_query(details_single_user_query.replace("{user_id}", str(user_id))))["results"]["bindings"]
+
+    app.storage.tab['demo_mode'] = False
+    app.storage.tab['user_id'] = user_id
+    app.storage.tab['user_name'] = results[0]["user_name"]["value"]
+    app.storage.tab['user_project'] = results[0]["project_name"]["value"]
 
 
 def matinf_or_demo_login_required(func):
@@ -74,17 +92,10 @@ def matinf_or_demo_login_required(func):
         if app.storage.tab.get('demo_mode', False):
             return await func(*args, **kwargs)
         else:
-            matinf_response = await check_authentication_in_matinf()
+            matinf_response = await fetch_matinf_authentication()
 
-            if matinf_response.get('success') and matinf_response.get('content') and matinf_response['content'].get('isUserAuthentificated'):
-                user_id = matinf_response["content"]["id"]
-
-                results = (await rdf_datastore_client.launch_query(details_single_user_query.replace("{user_id}", str(user_id))))["results"]["bindings"]
-
-                app.storage.tab['demo_mode'] = False
-                app.storage.tab['user_id'] = user_id
-                app.storage.tab['user_name'] = results[0]["user_name"]["value"]
-                app.storage.tab['user_project'] = results[0]["project_name"]["value"]
+            if is_matinf_authentication_response_valid(matinf_response):
+                await store_user_info_from_matinf(matinf_response)
 
                 return await func(*args, **kwargs)
             else: # Redirect to the login page
@@ -107,21 +118,33 @@ async def login(redirect_to: str = "/"):
 
     sanitized_redirect_to = urlparse(redirect_to).path
 
-    with ui.card(align_items='center').classes('absolute-center'):
-        with ui.column():
-            ui.markdown(f"""
-            **You need to be authenticated in MatInf to continue. Please log in to MatInf and return to the previous page.**
+    async def check_authentication():
+        matinf_response = await fetch_matinf_authentication()
+        if is_matinf_authentication_response_valid(matinf_response):
+            await store_user_info_from_matinf(matinf_response)
 
-            Alternatively, you can log in as the demo user.
+            auth_timer.deactivate()
+            ui.navigate.to(sanitized_redirect_to)
+
+    auth_timer = ui.timer(2.0, check_authentication)
+
+    with ui.card(align_items='center').classes('absolute-center'):
+        with ui.column().classes('items-center'):
+            ui.markdown(f"""
+            **You need to be authenticated in MatInf to continue.**
+
+            You can navigate to the [RDMS](https://crc1625.mdi.ruhr-uni-bochum.de/identity/account/login) directly or click the button below.
+            
+            Alternatively, you can access as a (limited) demo user.
+            
+            This page will automatically refresh itself once logged in.
             """)
+            ui.spinner(size='lg')
 
         with ui.row().classes('items-center'):
             ui.button("Open MatInf's login page",
                       color='info',
                       on_click=lambda: ui.navigate.to('https://crc1625.mdi.ruhr-uni-bochum.de/identity/account/login', new_tab=True))
-            ui.button("Reload the page",
-                      color='info',
-                      on_click=lambda: ui.navigate.to(sanitized_redirect_to))
             ui.button('Log in as demo user',
                       color='positive',
                       on_click=lambda: handle_demo_mode_button_click(sanitized_redirect_to)).props('size=m')
