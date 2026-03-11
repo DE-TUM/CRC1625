@@ -19,6 +19,7 @@ allowed_activities = ["Photo",
                       "FIM",
                       "PSM",
                       "Report",
+                      "Synthesis or treatment",
                       "Others"]
 allowed_activities.sort()
 

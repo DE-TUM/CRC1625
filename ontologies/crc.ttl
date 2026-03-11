@@ -611,7 +611,9 @@ crc:Publication rdf:type owl:Class ;
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/ReportProcess
 crc:ReportProcess rdf:type owl:Class ;
                   rdfs:subClassOf crc:CharacterizationActivity ,
-                                  crc:UnidentifiableProcess .
+                                  crc:UnidentifiableProcess ,
+                                  pmdco:AnalysingProcess ;
+                  rdfs:comment "A process where a non-synthesis related report has been uploaded. We treat it as a characterization. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/RequestForSynthesis
@@ -685,11 +687,20 @@ crc:SurfaceComposition rdf:type owl:Class ;
                        rdfs:subClassOf pmdco:ChemicalComposition .
 
 
-###  https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisReport
-crc:SynthesisReport rdf:type owl:Class ;
+###  https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentReport
+crc:SynthesisOrTreatmentReport rdf:type owl:Class ;
                     rdfs:subClassOf pmdco:Document ;
-                    rdfs:comment "A synthesis Report for a Sample"@en ;
-                    rdfs:label "Synthesis Report"@en .
+                    rdfs:comment "A synthesis or treatment (e.g. annealing) report for a ML or Sample"@en ;
+                    rdfs:label "Synthesis or treatment Report"@en .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentProcess
+crc:SynthesisOrTreatmentProcess rdf:type owl:Class ;
+               rdfs:subClassOf crc:CharacterizationActivity ,
+                               crc:UnidentifiableProcess ,
+                               pmdco:AnalysingProcess ;
+               rdfs:comment "A process where a synthesis or treatment has been performed, resulting in a report. We treat it as a characterization. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/TEMProcess

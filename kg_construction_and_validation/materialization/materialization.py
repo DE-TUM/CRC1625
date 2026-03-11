@@ -124,7 +124,8 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                     "50, 59, 60, 86, 87",
                                     "47",
                                     "147",
-                                    "18, 96, 98, 107, 139"
+                                    "18",
+                                    "96, 98, 107, 139"
                                 ]
                             },
 
@@ -146,6 +147,7 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                     "SECCM",
                                     "FIM",
                                     "PSM",
+                                    "Synthesis or treatment",
                                     "Report"
                                 ],
                                 "{measurement_class_name}": [
@@ -164,6 +166,7 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                     "SECCMProcess",
                                     "FIMProcess",
                                     "PSMProcess",
+                                    "SynthesisOrTreatmentProcess",
                                     "ReportProcess"
                                 ]
                             }, False),
@@ -186,7 +189,8 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                     "50, 59, 60, 86, 87",
                                     "47",
                                     "147",
-                                    "18, 96, 98, 107, 139"
+                                    "18",
+                                    "96, 98, 107, 139"
                                 ]
                             },
 
@@ -208,6 +212,7 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                     "SECCM",
                                     "FIM",
                                     "PSM",
+                                    "Synthesis or treatment",
                                     "Report"
                                 ],
                                 "{measurement_class_name}": [
@@ -226,6 +231,7 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                     "SECCMProcess",
                                     "FIMProcess",
                                     "PSMProcess",
+                                    "SynthesisOrTreatmentProcess",
                                     "ReportProcess"
                                 ]
                             }, False),
@@ -248,7 +254,8 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                     "50, 59, 60, 86, 87",
                                     "47",
                                     "147",
-                                    "18, 96, 98, 107, 139"
+                                    "18",
+                                    "96, 98, 107, 139"
                                 ]
                             },
 
@@ -270,6 +277,7 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                     "SECCM",
                                     "FIM",
                                     "PSM",
+                                    "Synthesis or treatment",
                                     "Report"
                                 ],
                                 "{measurement_class_name}": [
@@ -288,6 +296,7 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                     "SECCMProcess",
                                     "FIMProcess",
                                     "PSMProcess",
+                                    "SynthesisOrTreatmentProcess",
                                     "ReportProcess"
                                 ]
                             }, False),
@@ -311,7 +320,8 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                     "50, 59, 60, 86, 87",
                                     "47",
                                     "147",
-                                    "18, 96, 98, 107, 139"
+                                    "18",
+                                    "96, 98, 107, 139"
                                 ]
                             },
 
@@ -333,6 +343,7 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                     "SECCM",
                                     "FIM",
                                     "PSM",
+                                    "Synthesis or treatment",
                                     "Report"
                                 ],
                                 "{measurement_class_name}": [
@@ -351,6 +362,7 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                                     "SECCMProcess",
                                     "FIMProcess",
                                     "PSMProcess",
+                                    "SynthesisOrTreatmentProcess",
                                     "ReportProcess"
                                 ]
                             }, False),

@@ -18,6 +18,7 @@ and instances.
 
 import asyncio
 import os
+import urllib
 import uuid
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, field
@@ -71,7 +72,8 @@ activity_name_to_iri = {
     "LEIS": str(crc_prefix.LEISProcess),
     "Photo": str(crc_prefix.PhotoProcess),
     "PSM": str(crc_prefix.PSMProcess),
-    "Report": str(crc_prefix.Reportrocess),
+    "Report": str(crc_prefix.ReportProcess),
+    "Synthesis or treatment": str(crc_prefix.SynthesisOrTreatmentProcess),
     "Resistance": str(crc_prefix.ResistanceProcess),
     "SDC": str(crc_prefix.SDCProcess),
     "SECCM": str(crc_prefix.SECCMProcess),
@@ -411,7 +413,7 @@ async def store_workflow_model(workflow_model: WorkflowModel,
 
         # Required activities
         for required_activity in step.required_activities:
-            activity_iri = crc_prefix[f"{required_activity}_activity_for_workflow_step_{name_to_uid[step_name]}"]
+            activity_iri = crc_prefix[f"{urllib.parse.quote(required_activity)}_activity_for_workflow_step_{name_to_uid[step_name]}"]
 
             # Requirement
             g.add((step_iri, crc_prefix.requiresActivity, activity_iri))
