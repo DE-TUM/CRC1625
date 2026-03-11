@@ -1,5 +1,7 @@
+import inspect
 import os
 from functools import wraps
+from typing import Callable, Union, Awaitable
 from urllib.parse import urlparse
 
 from nicegui import ui, app
@@ -13,16 +15,22 @@ details_single_user_query = prefixes + open(os.path.join(module_dir, 'queries/de
 pages_with_no_demo_access = ["/sparql"]
 
 
-def show_materialization_card():
+def show_materialization_card(action_after_materialization_finished: Union[Callable[[], None], Callable[[], Awaitable[None]]]):
     async def check_materialization_status():
         if not await rdf_datastore_client.is_materialization_active():
-            ui.navigate.reload()
+            timer.cancel()
+            if inspect.iscoroutinefunction(action_after_materialization_finished):
+                await action_after_materialization_finished()
+            else:
+                action_after_materialization_finished()
+
+
 
     with ui.card(align_items='center').classes('absolute-center'):
         with ui.row().classes('items-center'):
             ui.markdown(f"""**The Knowledge Graph is currently being refreshed. This page will automatically reload when finished. This process should only take a couple minutes.**
             """)
-            ui.timer(1.0, check_materialization_status)
+            timer = ui.timer(1.0, check_materialization_status)
 
         with ui.row().classes('items-center'):
             ui.spinner(size='lg')
@@ -89,7 +97,8 @@ async def store_user_info_from_matinf(matinf_response):
     results = (await rdf_datastore_client.launch_query(details_single_user_query.replace("{user_id}", str(user_id))))["results"]["bindings"]
 
     if len(results) == 0:
-        show_materialization_card()
+        # Show materialization card and reenter the function
+        show_materialization_card(lambda: store_user_info_from_matinf(matinf_response))
     else:
         app.storage.tab['demo_mode'] = False
         app.storage.tab['user_id'] = user_id

@@ -491,7 +491,7 @@ async def workflows_page():
     await ui.context.client.connected()
 
     if await rdf_datastore_client.is_materialization_active():
-        show_materialization_card()
+        show_materialization_card(lambda: ui.navigate.reload())
     else:
         if app.storage.tab['demo_mode']:
             def show_demo_data_diagram():
