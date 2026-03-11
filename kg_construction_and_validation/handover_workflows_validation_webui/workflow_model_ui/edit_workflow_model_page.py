@@ -46,6 +46,8 @@ def handle_node_click(e,
 
 def handle_workflow_model_name_button(new_name: str, workflow_model_page_state: WorkflowModelPageState):
     workflow_model_page_state.save_workflow_model_copy()
+    if not workflow_model_page_state.original_workflow_model_name: # Cache the old name in case we need to save (i.e. replace) the workflow model
+        workflow_model_page_state.original_workflow_model_name = app.storage.tab['current_workflow_model'].workflow_model_name
     app.storage.tab['current_workflow_model'].workflow_model_name = new_name
 
 
@@ -76,7 +78,7 @@ async def handle_return_button(workflow_model_page_state: WorkflowModelPageState
                         return_dialog.close()
 
                         if can_current_workflow_model_be_saved():
-                            await overwrite_workflow_model(app.storage.tab['current_workflow_model'])
+                            await overwrite_workflow_model(app.storage.tab['current_workflow_model'], original_name=workflow_model_page_state.original_workflow_model_name)
                             ui.navigate.to('/workflows')
                         else:
                             ui.notify("You must select an initial step first and have no unconnected steps if there are multiple of them", type='negative')
@@ -129,11 +131,11 @@ def handle_undo_button(workflow_model_page_state: WorkflowModelPageState):
 
 
 async def handle_save_button(workflow_model_page_state: WorkflowModelPageState):
-    if app.storage.tab['demo_mode']:
+    if False: #app.storage.tab['demo_mode']:
         ui.notify("You cannot save changes as a demo user", type='negative')
     else:
         if can_current_workflow_model_be_saved():
-            await overwrite_workflow_model(app.storage.tab['current_workflow_model'])
+            await overwrite_workflow_model(app.storage.tab['current_workflow_model'], original_name=workflow_model_page_state.original_workflow_model_name)
             workflow_model_page_state.changes_are_saved = True
             workflow_model_page_state.workflow_model_history = []
             ui.notify("The changes have been saved", type='positive')

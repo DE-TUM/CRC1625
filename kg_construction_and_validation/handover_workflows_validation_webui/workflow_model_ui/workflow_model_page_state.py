@@ -21,6 +21,7 @@ class WorkflowModelPageState:
     graph_controls_column: Column = None
     selected_node: str = None
     workflow_model_name_input: Input = None
+    original_workflow_model_name: str = None
     changes_are_saved: bool = True
     workflow_model_history: list[tuple[str, WorkflowModel]] = field(default_factory=list)
 
