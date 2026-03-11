@@ -46,7 +46,7 @@ def handle_node_click(e,
 
 def handle_workflow_model_name_button(new_name: str, workflow_model_page_state: WorkflowModelPageState):
     workflow_model_page_state.save_workflow_model_copy()
-    if not workflow_model_page_state.original_workflow_model_name: # Cache the old name in case we need to save (i.e. replace) the workflow model
+    if workflow_model_page_state.original_workflow_model_name is None: # Cache the old name in case we need to save (i.e. replace) the workflow model
         workflow_model_page_state.original_workflow_model_name = app.storage.tab['current_workflow_model'].workflow_model_name
     app.storage.tab['current_workflow_model'].workflow_model_name = new_name
 
@@ -131,7 +131,7 @@ def handle_undo_button(workflow_model_page_state: WorkflowModelPageState):
 
 
 async def handle_save_button(workflow_model_page_state: WorkflowModelPageState):
-    if False: #app.storage.tab['demo_mode']:
+    if app.storage.tab['demo_mode']:
         ui.notify("You cannot save changes as a demo user", type='negative')
     else:
         if can_current_workflow_model_be_saved():

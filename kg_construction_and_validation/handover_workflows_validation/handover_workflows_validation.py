@@ -516,7 +516,8 @@ async def delete_workflow_model(workflow_model: WorkflowModel,
         return None
 
 
-async def overwrite_workflow_model(workflow_model: WorkflowModel, original_name: str = None):
+async def overwrite_workflow_model(workflow_model: WorkflowModel,
+                                   original_name: str = None):
     """
     Given an (updated) workflow model, deletes the existing, corresponding workflow model, and stores it again
 
@@ -657,13 +658,21 @@ async def delete_workflow_instance(workflow_instance: WorkflowInstance,
         await rdf_datastore_client.launch_updates(updates, workflow_instance_iri)
 
 
-async def overwrite_workflow_instance(workflow_instance: WorkflowInstance, workflow_model: WorkflowModel):
+async def overwrite_workflow_instance(workflow_instance: WorkflowInstance,
+                                      workflow_model: WorkflowModel,
+                                      original_name: str=None):
     """
     Given an (updated) workflow instance and the workflow model it refers to, deletes the existing, corresponding workflow instance, and stores it again
     """
     actions = []
-    actions.append((await delete_workflow_instance(workflow_instance, return_query=True), UpdateType.query))
-    actions.append((await create_workflow_instance(workflow_instance, workflow_model, return_file=True), UpdateType.file_upload))
+    if original_name is not None:
+        workflow_instance_copy = deepcopy(workflow_instance)
+        workflow_instance_copy.workflow_instance_name = original_name
+        actions = [(await (delete_workflow_instance(workflow_instance_copy, return_query=True)), UpdateType.query),
+                   (await (create_workflow_instance(workflow_instance, workflow_model, return_file=True)), UpdateType.file_upload)]
+    else:
+        actions.append((await delete_workflow_instance(workflow_instance, return_query=True), UpdateType.query))
+        actions.append((await create_workflow_instance(workflow_instance, workflow_model, return_file=True), UpdateType.file_upload))
 
     await rdf_datastore_client.launch_updates(actions, graph_iri=WORKFLOWS_GRAPH_IRI, delete_files_after_upload=True)
 
@@ -716,7 +725,8 @@ async def get_first_handover_group(object_id: int,
     return first_handover_group
 
 
-def generate_group_shape(workflow_model_step: WorkflowModelStep, target_node: str) -> str:
+def generate_group_shape(workflow_model_step: WorkflowModelStep,
+                         target_node: str) -> str:
     """
     Returns a SHACL shape string for validating the workflow model step, assigned to the target node
     """

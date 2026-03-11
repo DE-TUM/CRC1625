@@ -21,6 +21,7 @@ class WorkflowInstancePageState:
     graph_controls_column: Column = None
     selected_node: str = None
     workflow_instance_name_input: Input = None
+    original_workflow_instance_name: str = None
     changes_are_saved: bool = True
     workflow_instance_page_state: bool = True
     workflow_instance_history: list[tuple[str, WorkflowInstance]] = field(default_factory=list)

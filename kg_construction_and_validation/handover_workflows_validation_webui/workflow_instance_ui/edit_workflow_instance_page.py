@@ -82,6 +82,8 @@ def handle_node_click(e, workflow_instance_page_state: WorkflowInstancePageState
 
 def handle_workflow_instance_name_button(new_name: str, workflow_instance_page_state: WorkflowInstancePageState):
     workflow_instance_page_state.save_workflow_instance_copy()
+    if workflow_instance_page_state.original_workflow_instance_name is None: # Cache the old name in case we need to save (i.e. replace) the workflow instance
+        workflow_instance_page_state.original_workflow_instance_name = app.storage.tab['current_workflow_instance'].workflow_instance_name
     app.storage.tab['current_workflow_instance'].workflow_instance_name = new_name
 
 
@@ -93,7 +95,9 @@ def handle_return_button(workflow_instance_page_state: WorkflowInstancePageState
                     ui.label('The workflow model has been modified. Save changes and exit?')
 
                     async def save_and_exit_and_close():
-                        await overwrite_workflow_instance(app.storage.tab['current_workflow_instance'], app.storage.tab['current_workflow_model'])
+                        await overwrite_workflow_instance(app.storage.tab['current_workflow_instance'],
+                                                          app.storage.tab['current_workflow_model'],
+                                                          original_name=workflow_instance_page_state.original_workflow_instance_name)
                         return_dialog.close()
                         ui.navigate.to('/workflows')
 
@@ -151,7 +155,9 @@ async def handle_save_button(workflow_instance_page_state: WorkflowInstancePageS
     if app.storage.tab['current_workflow_instance'].creator_user_id != app.storage.tab['user_id']:
         ui.notify("You are not the owner of this workflow instance, so you cannot edit it.", type='negative')
     else:
-        await overwrite_workflow_instance(app.storage.tab['current_workflow_instance'], app.storage.tab['current_workflow_model'])
+        await overwrite_workflow_instance(app.storage.tab['current_workflow_instance'],
+                                          app.storage.tab['current_workflow_model'],
+                                          original_name=workflow_instance_page_state.original_workflow_instance_name)
         workflow_instance_page_state.changes_are_saved = True
         workflow_instance_page_state.workflow_model_history = []
         ui.notify("The changes have been saved", type='positive')
