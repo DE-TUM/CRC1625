@@ -1,8 +1,44 @@
+from enum import Enum
+
 from nicegui import ui, app
 
 from handover_workflows_validation.handover_workflows_validation import WorkflowModelStep
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import NodeType
 from handover_workflows_validation_webui.workflow_model_ui.workflow_model_page_state import WorkflowModelPageState
+
+
+
+
+def current_workflow_model_contains_cycles():
+    """
+    Checks if the current workflow model contains cycles by
+    doing a DFS traversal
+    """
+    class visit_status(Enum):
+        unvisited = 0
+        visited_in_current_path = 1
+        already_evaluated = 2
+
+    status: dict[str, visit_status] = {
+        step: visit_status.unvisited for step in app.storage.tab['current_workflow_model'].workflow_model_steps.keys()
+    }
+
+    def visit_step(step_name: str) -> bool:
+        if status[step_name] == visit_status.visited_in_current_path:
+            return True
+        if status[step_name] == visit_status.already_evaluated:
+            return False
+
+        status[step_name] = visit_status.visited_in_current_path
+
+        for next_step_name in app.storage.tab['current_workflow_model'].workflow_model_steps[step_name].next_steps:
+            if visit_step(next_step_name):
+                return True
+
+        status[step_name] = visit_status.already_evaluated
+        return False
+
+    return visit_step(app.storage.tab['current_workflow_model'].workflow_model_options.initial_step_name)
 
 
 async def add_edge_action(source: str,
@@ -14,14 +50,20 @@ async def add_edge_action(source: str,
     elif source == target:
         ui.notify("It is not possible to connect the steps to itself", type='negative')
         return
-    elif await workflow_model_page_state.graph_component.exists_edge(source, target):
+    elif target in app.storage.tab['current_workflow_model'].workflow_model_steps[source].next_steps:
         ui.notify("The two steps are already connected", type='negative')
         return
 
     workflow_model_page_state.save_workflow_model_copy()
 
-    workflow_model_page_state.graph_component.add_edge(source, target)
     app.storage.tab['current_workflow_model'].workflow_model_steps[source].next_steps.append(target)
+    if current_workflow_model_contains_cycles():
+        ui.notify("Creating cycles between steps is not allowed", type='negative')
+        workflow_model_page_state.undo_workflow_model_change()
+        return
+
+    workflow_model_page_state.graph_component.add_edge(source, target)
+
 
     ui.notify(f"Added edge from '{source}' to '{target}'", type='positive')
 
