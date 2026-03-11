@@ -15,7 +15,7 @@ from handover_workflows_validation.handover_workflows_validation import get_work
     get_workflow_instances_of_model, read_workflow_model, store_workflow_model, WorkflowInstance, is_workflow_instance_valid, WorkflowModel, \
     create_workflow_instance, delete_workflow_instance
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent
-from handover_workflows_validation_webui.middleware import matinf_or_demo_login_required, activate_demo_mode, log_out
+from handover_workflows_validation_webui.middleware import matinf_or_demo_login_required, activate_demo_mode, log_out, show_materialization_card
 from handover_workflows_validation_webui.workflow_model_ui.edit_workflow_model_page import workflow_model_to_nodes_and_edges
 
 module_dir = os.path.dirname(__file__)
@@ -477,21 +477,6 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
         ui.button("Create a new workflow model",
                   color='gray',
                   on_click=lambda: ui.notify("You cannot create new workflow models as a demo user", type='negative'))
-
-
-def show_materialization_card():
-    async def check_materialization_status():
-        if not await rdf_datastore_client.is_materialization_active():
-            ui.navigate.reload()
-
-    with ui.card(align_items='center').classes('absolute-center'):
-        with ui.row().classes('items-center'):
-            ui.markdown(f"""**The Knowledge Graph is currently being refreshed. This page will automatically reload when finished. This process should only take a couple minutes.**
-            """)
-            ui.timer(1.0, check_materialization_status)
-
-        with ui.row().classes('items-center'):
-            ui.spinner(size='lg')
 
 
 @ui.page('/workflows')
