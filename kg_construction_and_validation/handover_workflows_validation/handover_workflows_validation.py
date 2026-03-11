@@ -64,7 +64,6 @@ ont_graph.parse(os.path.join(module_dir, "../../ontologies/pmd_core.ttl"), forma
 ont_graph.parse(os.path.join(module_dir, "../../ontologies/oce.owl"), format="xml")
 
 activity_name_to_iri = {
-    "Annealing": str(crc_prefix.AnnealingProcess),
     "APT": str(crc_prefix.APTProcess),
     "Bandgap": str(crc_prefix.BandgapProcess),
     "EDX": str(crc_prefix.EDXMicroscopyProcess),
