@@ -17,6 +17,7 @@ and instances.
 """
 
 import asyncio
+import json
 import os
 import urllib
 import uuid
@@ -68,25 +69,13 @@ ont_graph.parse(os.path.join(module_dir, "../../ontologies/crc.ttl"), format="tu
 ont_graph.parse(os.path.join(module_dir, "../../ontologies/pmd_core.ttl"), format="turtle")
 ont_graph.parse(os.path.join(module_dir, "../../ontologies/oce.owl"), format="xml")
 
+
+# We use the same measurement type ID -> activity correspondences declared for the materialization
+measurement_type_ids_to_activities: list[dict[str, list[str] | str]] = json.load(open(os.path.join(module_dir, "../materialization/mappings/measurement_type_ids_to_activities.json")))
+
 activity_name_to_iri = {
-    "APT": str(crc_prefix.APTProcess),
-    "Bandgap": str(crc_prefix.BandgapProcess),
-    "EDX": str(crc_prefix.EDXMicroscopyProcess),
-    "FIM": str(crc_prefix.FIMProcess),
-    "LEIS": str(crc_prefix.LEISProcess),
-    "Photo": str(crc_prefix.PhotoProcess),
-    "PSM": str(crc_prefix.PSMProcess),
-    "Report": str(crc_prefix.ReportProcess),
-    "Synthesis or treatment": str(crc_prefix.SynthesisOrTreatmentProcess),
-    "Resistance": str(crc_prefix.ResistanceProcess),
-    "SDC": str(crc_prefix.SDCProcess),
-    "SECCM": str(crc_prefix.SECCMProcess),
-    "SEM": str(crc_prefix.SEMProcess),
-    "TEM": str(crc_prefix.TEMProcess),
-    "Thickness": str(crc_prefix.ThicknessProcess),
-    "XPS": str(crc_prefix.XPSProcess),
-    "XRD": str(crc_prefix.XRDProcess),
-    "Others": str(pmdco_prefix.AnalysingProcess),
+    m["measurement_name"]: str(crc_prefix[m["measurement_class_name"]])
+    for m in measurement_type_ids_to_activities
 }
 
 iri_to_activity_name = {v: k for k, v in activity_name_to_iri.items()}

@@ -1,26 +1,16 @@
+import json
+import os
+
 from nicegui import ui, app
 
 from handover_workflows_validation_webui.workflow_model_ui.workflow_model_controls import create_graph_controls
 from handover_workflows_validation_webui.workflow_model_ui.workflow_model_page_state import WorkflowModelPageState
 
-allowed_activities = ["Photo",
-                      "EDX",
-                      "XRD",
-                      "XPS",
-                      "LEIS",
-                      "Thickness",
-                      "SEM",
-                      "Resistance",
-                      "Bandgap",
-                      "APT",
-                      "TEM",
-                      "SDC",
-                      "SECCM",
-                      "FIM",
-                      "PSM",
-                      "Report",
-                      "Synthesis or treatment",
-                      "Others"]
+module_dir = os.path.dirname(__file__)
+# We use the same measurement type ID -> activity correspondences declared for the materialization
+measurement_type_ids_to_activities: list[dict[str, list[str] | str]] = json.load(open(os.path.join(module_dir, "../../materialization/mappings/measurement_type_ids_to_activities.json")))
+
+allowed_activities = [m["measurement_name"] for m in measurement_type_ids_to_activities]
 allowed_activities.sort()
 
 allowed_projects = [
