@@ -111,7 +111,7 @@ async def copy_handover_workflow_model(workflows_page_state: WorkflowsPageState)
 
     await store_workflow_model(copy_of_current_workflow_model)
 
-    ui.notify(f'Workflow model copied as {copy_of_current_workflow_model.workflow_model_name}', color='positive')
+    ui.notify(f'Workflow copied as {copy_of_current_workflow_model.workflow_model_name}', color='positive')
 
     # Add it to the left sidebar's table
     workflows_page_state.workflow_models_set.add(
@@ -189,7 +189,7 @@ async def create_empty_workflow_instance(workflow_instance_name: str,
         ui.notify("You cannot create Workflow Instances as a demo user", type='negative')
         return
     elif app.storage.tab['user_id'] != app.storage.tab['current_workflow_model'].creator_user_id:
-        ui.notify(f"You are not the owner of this workflow model, so you cannot add workflow instances to it. You can create a copy of it", type='negative')
+        ui.notify(f"You are not the owner of this workflow, so you cannot add workflow instances to it. You can create a copy of it", type='negative')
         return
 
     workflow_instance = WorkflowInstance()
@@ -321,19 +321,19 @@ async def show_workflow_model_instances(workflow_model_name: str,
     with workflows_page_state.main_content:
         with ui.row():
             if len(workflow_model_name) > 100:
-                ui.label(f"Overview of Workflow Model '{workflow_model_name[0:100]+"..."}'").classes('text-lg font-semibold')
+                ui.label(f"Overview of '{workflow_model_name[0:100]+"..."}'").classes('text-lg font-semibold')
             else:
-                ui.label(f"Overview of Workflow Model '{workflow_model_name}'").classes('text-lg font-semibold')
+                ui.label(f"Overview of '{workflow_model_name}'").classes('text-lg font-semibold')
 
             # Workflow model edit and copy buttons
             with ui.row():
                 if workflow_model_creator_user_id == app.storage.tab['user_id']:
-                    ui.button("Edit Workflow model", color='info').on_click(
+                    ui.button("Edit Workflow", color='info').on_click(
                         lambda: edit_handover_workflow_model_button_click()
                     )
                 else:
-                    ui.button("Edit Workflow model", color='gray').on_click(
-                        lambda: ui.notify("You are not the owner of this workflow model, so you cannot edit it. You can create a copy of it", type='negative')
+                    ui.button("Edit Workflow", color='gray').on_click(
+                        lambda: ui.notify("You are not the owner of this workflow, so you cannot edit it. You can create a copy of it", type='negative')
                     )
 
                 if not app.storage.tab['demo_mode']:
@@ -342,7 +342,7 @@ async def show_workflow_model_instances(workflow_model_name: str,
                     )
                 else:
                     ui.button("Create a copy", color='gray').on_click(
-                        lambda: ui.notify("You cannot copy workflow models as a demo user", type='negative')
+                        lambda: ui.notify("You cannot copy workflows as a demo user", type='negative')
                     )
 
         # Workflow model overview
@@ -384,7 +384,7 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
     """
     Workflow models table, allowing the user to search/filter workflow models, to select one of them or to create a new one
     """
-    ui.label('Workflow models list').classes('text-xl font-bold')
+    ui.label('Workflows list').classes('text-xl font-bold')
 
     # Search and filtering
     async def get_user_details() -> dict[int, tuple[str, str]]:
@@ -404,7 +404,7 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
     async def create_empty_workflow_model(workflow_model_name: str,
                                           workflows_page_state: WorkflowsPageState):
         if app.storage.tab['demo_mode']:
-            ui.notify("You cannot create new workflow models as a demo user", type='negative')
+            ui.notify("You cannot create new workflows as a demo user", type='negative')
             return
 
         workflow_model = WorkflowModel()
@@ -423,10 +423,10 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
         # Apply the filters again and show it
         populate_workflow_models_table(workflows_page_state)
 
-        ui.notify(f'Workflow Model {workflow_model_name} created', color='positive')
+        ui.notify(f'Workflow {workflow_model_name} created', color='positive')
 
     with ui.column():
-        ui.label("Filter by workflow model name:")
+        ui.label("Filter by workflow name:")
         workflows_page_state.search_input_workflow_models = ui.input(placeholder='Name...').props('clearable').classes('w-full')
 
     with ui.column():
@@ -463,20 +463,20 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
         return workflow_models_set
 
     with ui.row().classes('w-full border-b-2 border-gray-400 py-2 font-bold'):
-        ui.label("Workflow models").classes('align-center')
+        ui.label("Workflows").classes('align-center')
 
     workflows_page_state.workflow_models_table_container = ui.column().classes('w-full')
     workflows_page_state.workflow_models_set = await create_workflow_models_set()
     populate_workflow_models_table(workflows_page_state)
 
     if not app.storage.tab['demo_mode']:
-        ui.button("Add a new workflow model",
+        ui.button("Add a new workflow",
                   color='info',
-                  on_click=lambda: create_empty_workflow_model("New workflow model", workflows_page_state))
+                  on_click=lambda: create_empty_workflow_model("New workflow", workflows_page_state))
     else:
-        ui.button("Create a new workflow model",
+        ui.button("Create a new workflow",
                   color='gray',
-                  on_click=lambda: ui.notify("You cannot create new workflow models as a demo user", type='negative'))
+                  on_click=lambda: ui.notify("You cannot create new workflows as a demo user", type='negative'))
 
 
 @ui.page('/workflows')

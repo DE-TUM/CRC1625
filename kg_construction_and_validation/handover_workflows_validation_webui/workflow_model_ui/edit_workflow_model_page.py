@@ -72,7 +72,7 @@ async def handle_return_button(workflow_model_page_state: WorkflowModelPageState
         with ui.dialog() as return_dialog:
             with ui.card(align_items='center'):
                 with ui.row(align_items='center').classes('w-full justify-center'):
-                    ui.label('The workflow model has been modified. Save changes and exit?')
+                    ui.label('The workflow has been modified. Save changes and exit?')
 
                     async def save_and_exit_and_close():
                         return_dialog.close()
@@ -153,7 +153,7 @@ async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
         app.storage.tab['current_workflow_model'] = await read_workflow_model(workflow_model_name, user_id)
 
     with ui.header().classes('items-center p-2 h-14'):
-        ui.label("Workflow Model Editor").classes('text-xl').style('color: #000000')
+        ui.label("Workflow Editor").classes('text-xl').style('color: #000000')
         ui.space()
         ui.label(f'Welcome, {app.storage.tab['user_name']} ({app.storage.tab['user_project']})').classes('text-xl').style('color: #000000')
         ui.button('Log out', color='negative', on_click=lambda: log_out()).props('size=m')
@@ -165,7 +165,7 @@ async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
         ui.image('/assets/crc_logo_black_letters_wide.png').classes('w-26')
 
     with ui.row().classes('w-full items-center'):
-        workflow_model_page_state.workflow_model_name_input = ui.input(label='Workflow Model name',
+        workflow_model_page_state.workflow_model_name_input = ui.input(label='Workflow name',
                                                                        value=app.storage.tab['current_workflow_model'].workflow_model_name,
                                                                        on_change=lambda i: handle_workflow_model_name_button(i.value, workflow_model_page_state)).classes('grow')
         ui.button('Return to main page', color='info', on_click=lambda: handle_return_button(workflow_model_page_state))
