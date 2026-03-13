@@ -1,0 +1,87 @@
+[
+  {
+    "measurement_ids": ["12"],
+    "measurement_name": "Photo",
+    "measurement_class_name": "PhotoProcess"
+  },
+  {
+    "measurement_ids": ["13", "15", "19", "53", "78", "79"],
+    "measurement_name": "EDX",
+    "measurement_class_name": "EDXMicroscopyProcess"
+  },
+  {
+    "measurement_ids": ["17", "31", "44", "55", "56", "97"],
+    "measurement_name": "XRD",
+    "measurement_class_name": "XRDProcess"
+  },
+  {
+    "measurement_ids": ["30"],
+    "measurement_name": "XPS",
+    "measurement_class_name": "XPSProcess"
+  },
+  {
+    "measurement_ids": ["48"],
+    "measurement_name": "LEIS",
+    "measurement_class_name": "LEISProcess"
+  },
+  {
+    "measurement_ids": ["27", "38", "39", "40"],
+    "measurement_name": "Thickness",
+    "measurement_class_name": "ThicknessProcess"
+  },
+  {
+    "measurement_ids": ["24"],
+    "measurement_name": "SEM",
+    "measurement_class_name": "SEMProcess"
+  },
+  {
+    "measurement_ids": ["14", "16", "33"],
+    "measurement_name": "Resistance",
+    "measurement_class_name": "ResistanceProcess"
+  },
+  {
+    "measurement_ids": ["41", "80", "81", "82"],
+    "measurement_name": "Bandgap",
+    "measurement_class_name": "BandgapProcess"
+  },
+  {
+    "measurement_ids": ["20"],
+    "measurement_name": "APT",
+    "measurement_class_name": "APTProcess"
+  },
+  {
+    "measurement_ids": ["26"],
+    "measurement_name": "TEM",
+    "measurement_class_name": "TEMProcess"
+  },
+  {
+    "measurement_ids": ["57", "58", "85"],
+    "measurement_name": "SDC",
+    "measurement_class_name": "SDCProcess"
+  },
+  {
+    "measurement_ids": ["50", "59", "60", "86", "87"],
+    "measurement_name": "SECCM",
+    "measurement_class_name": "SECCMProcess"
+  },
+  {
+    "measurement_ids": ["47"],
+    "measurement_name": "FIM",
+    "measurement_class_name": "FIMProcess"
+  },
+  {
+    "measurement_ids": ["147"],
+    "measurement_name": "PSM",
+    "measurement_class_name": "PSMProcess"
+  },
+  {
+    "measurement_ids": ["18"],
+    "measurement_name": "Synthesis or treatment",
+    "measurement_class_name": "SynthesisOrTreatmentProcess"
+  },
+  {
+    "measurement_ids": ["96", "98", "107", "139"],
+    "measurement_name": "Report",
+    "measurement_class_name": "ReportProcess"
+  }
+]

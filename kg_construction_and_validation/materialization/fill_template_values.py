@@ -29,24 +29,24 @@ csv_source = """
 """
 
 def get_sql_query(file_name,
-                  custom_sql_template: dict[str, list[str]] | None,
+                  measurement_type_ids_to_activities: list[dict[str, list[str] | str]],
                   replacement_i: int | None,
                   replace_with_view=True) -> str | tuple[str, str]:
     """
     Retrieves the corresponding SQL query file for a YARRRML mapping file path, and returns it as a string.
 
-    It optionally accepts a custom_sql_template parameter, composed of replacement keys and corresponding lists of possible replacement values.
-    If so, replacement_i must dictate the index of the list to pick the replacement value from.
-    These two parameters are currently used to generate SQL queries discriminating against different type IDs in the RDMS
+    If replacement_i is indicated, it will format and replace all '{measurement_ids}' templates with the
+    measurement IDs from the corresponding index in measurement_type_ids_to_activities
     """
     with open(file_name.replace("_templated", "").replace(".yml", ".sql"), 'r') as f:
         lines = f.readlines()
 
         query = lines[0] + ''.join('          ' + line if line.strip() else line for line in lines[1:])
 
-        if custom_sql_template is not None:
-            for key, val in custom_sql_template.items():
-                query = query.replace(key, val[replacement_i])
+        if replacement_i is not None:
+            # We only look for these for now
+            formatted_measurement_ids = ", ".join(measurement_type_ids_to_activities[replacement_i]["measurement_ids"])
+            query = query.replace("{measurement_ids}", formatted_measurement_ids)
 
         if replace_with_view:
             # Transform it into a view beforehand, to avoid launching a very complex query multiple times needlessly
@@ -58,7 +58,7 @@ def get_sql_query(file_name,
 def create_untemplated_yarrrml_file(content: str,
                                     sources: str,
                                     new_output_file_name: str,
-                                    custom_yml_template: dict[str, list[str]] | None,
+                                    measurement_type_ids_to_activities: list[dict[str, list[str] | str]],
                                     replacement_i: int | None,
                                     add_prefixes: bool = True):
     """
@@ -67,8 +67,8 @@ def create_untemplated_yarrrml_file(content: str,
     :param content: Templated YARRRML file as a string
     :param sources: Sources to add to the YARRRML file, as a valid YARRRML-syntax string
     :param new_output_file_name: Destination file
-    :param custom_yml_template: Dict of custom replacements to apply
-    :param replacement_i: Identifier of the replacement inside the dict, cannot be None if custom_yml_template is set
+    :param replacement_i If indicated, it will format and replace all '{measurement_name}' and '{measurement_class_name}' templates with the
+                         contents from the corresponding index in measurement_type_ids_to_activities
     :param add_prefixes: Whether to add a prefixes entry or not
     """
     placeholders = {
@@ -76,9 +76,10 @@ def create_untemplated_yarrrml_file(content: str,
         '{sources}': sources,
     }
     # For as many replacements as there are, replace contents with corresponding position *in the yml mapping*
-    if custom_yml_template is not None:
-        for key in custom_yml_template.keys():
-            placeholders[key] = custom_yml_template[key][replacement_i]
+    if replacement_i is not None:
+        for key, value in measurement_type_ids_to_activities[replacement_i].items():
+            if key == "measurement_name" or key == "measurement_class_name": # We only look for these for now
+                placeholders['{'+key+'}'] = value
 
     content = content
     for key, val in placeholders.items():
@@ -90,8 +91,8 @@ def create_untemplated_yarrrml_file(content: str,
 
 def fill_template_values(templated_yml: str,
                          output_file_name: str,
-                         custom_sql_template: dict[str, list[str]] | None,
-                         custom_yml_template: dict[str, list[str]] | None,
+                         measurement_type_ids_to_activities: list[dict[str, list[str] | str]],
+                         break_down_into_measurement_types: bool = False,
                          convert_to_csv: bool = False,
                          add_prefixes: bool = True) -> list[str] | list[tuple[str, str, str]]:
     """
@@ -101,11 +102,8 @@ def fill_template_values(templated_yml: str,
 
     Optional parameters:
     :param output_file_name: Where to store the final YARRRML file. If the file has a custom yml template (see below), it will be expanded to _replacement_{i}.yml
-    :param custom_yml_template: Dict composed of replacement keys and corresponding lists of possible replacement values.
-                               All replacement value lists must have the same size. It will iterate through each possible
-                               index in the replacement lists, replacing the key with the corresponding value each time
-                               (e.g. iteration 0 will replace every key with element 0 of its replacement values list, etc.).
-                               This is currently used to generate SQL queries discriminating against different type IDs in the RDMS.
+    :param measurement_type_ids_to_activities: Correspondences of measurement IDs to activity classes. Read from `measurement_type_ids_to_activities.json`
+    :param break_down_into_measurement_types: Whether to break down measurement IDs into activity classes. If True, the mapping should be templated accordingly. You can find examples of this in the activity mappings.
     :param custom_sql_template: used to replace values in the SQL query, following the same strategy as custom_yml_template (See get_sql_query documentation)
     :param convert_to_csv: Signals that the source will be a CSV file instead of the SQL query directly. This is mandatory if we want to use RMLStreamer for this mapping
     :param add_prefixes: Whether we should add prefixes to the final YARRRML file(s) or not. Used to prevent warnings when coalescing multiple .yml files into an RML file
@@ -122,18 +120,11 @@ def fill_template_values(templated_yml: str,
     else:
         output_file_names: list[str] = []
 
-    if custom_yml_template is not None:
-        number_of_replacements = None
-
-        for key in custom_yml_template.keys():
-            if number_of_replacements is not None and len(custom_yml_template[key]) != number_of_replacements:
-                raise ValueError(f"Number of replacements mismatch in template {key}")
-            number_of_replacements = len(custom_yml_template[key])
-
+    if break_down_into_measurement_types:
         csv_files_to_create = []
-        for replacement_i in range(number_of_replacements):
+        for replacement_i in range(len(measurement_type_ids_to_activities)):
             query = get_sql_query(templated_yml,
-                                  custom_sql_template,
+                                  measurement_type_ids_to_activities,
                                   replacement_i,
                                   replace_with_view=False)
             if convert_to_csv:
@@ -161,7 +152,7 @@ def fill_template_values(templated_yml: str,
                 create_untemplated_yarrrml_file(content_copy,
                                                 sources,
                                                 new_output_file_name,
-                                                custom_yml_template,
+                                                measurement_type_ids_to_activities,
                                                 replacement_i,
                                                 add_prefixes=add_prefixes)
                 add_prefixes = False
@@ -177,7 +168,7 @@ def fill_template_values(templated_yml: str,
                 create_untemplated_yarrrml_file(content_copy,
                                                 sources, 
                                                 new_output_file_name, 
-                                                custom_yml_template,
+                                                measurement_type_ids_to_activities,
                                                 replacement_i,
                                                 add_prefixes=add_prefixes)
                 add_prefixes = False
@@ -189,7 +180,7 @@ def fill_template_values(templated_yml: str,
         content_copy = content.replace("{i}", source_identifier).replace("sql_source", source_identifier)
 
         query = get_sql_query(templated_yml,
-                              custom_sql_template,
+                              measurement_type_ids_to_activities,
                               None,
                               replace_with_view=False)
 

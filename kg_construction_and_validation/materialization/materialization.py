@@ -8,16 +8,24 @@ How to add a new mapping:
     - Create a {mapping_name}_templated.yml file containing templated YARRRML mappings, and a {mapping_name}.sql
       file containing the SQL query from which the mappings file will fill values from. The files may not be templated,
       in which case the replacement step will simply output the same, unmodified files. The files may be saved in any
-      folder within materialization/mappings. Right now, they are ordered according to a set of categories roughly 
+      folder within `materialization/mappings`. Right now, they are ordered according to a set of categories roughly
       matching RDMS types. Both files should be in the *same* folder.
 
-    - Add the path to {mapping_name}_templated.yml to templated_file_names list in this file. Be mindful of also
+    - Add the path to {mapping_name}_templated.yml to `templated_file_names` list in this file. Be mindful of also
       employing os.path.join(module_dir, {file_path}) for the route!
       The .sql file path doesn't need to be indicated.
+
+      Mappings (and thus their queries) can optionally be broken down into the different measurement type categories.
+      This is indicated as a flag in `templated_file_names`. An example of this can be found in the mappings for
+      activities at `materialization/mappings/handovers/activities/*`.
+
+      `materialization/mappings/measurement_type_ids_to_activities.json` can be modified to reflect any measurement
+      type ID changes, add new categories, etc.
 
 How to run:
     - Call the run_mappings function
 """
+import json
 import logging
 import math
 import multiprocessing
@@ -65,21 +73,14 @@ ontology_files = [
     }
 ]
 
+measurement_type_ids_to_activities: list[dict[str, list[str] | str]] = json.load(open(os.path.join(module_dir, "mappings/measurement_type_ids_to_activities.json")))
 
 
-
-# List of mappings to execute
-# Each entry consists of either of the two:
-#   - A simple mapping, indicated as a tuple of (path_to_untemplated_file, use_rmlstreamer)
-#   - A "typed" mapping, indicated as a tuple of (path_to_untemplated_file, SQL_query_replacements, YARRML_file_replacements, use_rmlstreamer)
-#   
-# In the second case, SQL_query_replacements and YARRML_file_replacements correspond to a dict of str_to_replace -> replacements 
-# in the SQL query and YARRRML files, respectively. All entries in both dictionaries should have the same number of values.
-# This is currently used to avoid declaring individual mappings for every single measurement type in the RDMS
+# List of (mapping_path, break_down_into_measurement_type_ids, use_rmlstreamer)
 #
-# The use_rmlstreamer flag is recommended for mappings for which we expect very large results. Right now, they are used for
-# composition-related mappings
-templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], dict[str, str], bool]]= [
+# If break_down_into_measurement_type_ids == True, measurement_type_ids_to_activities.json will be used to fill
+# templated strings in the queries and mappings, dividing them across the different measurement type categories
+templated_file_names : list[tuple[str, bool]] = [
                             (os.path.join(module_dir, "mappings/users/user_ids_templated.yml"), False),
                             (os.path.join(module_dir, "mappings/users/user_given_names_templated.yml"), False),
                             (os.path.join(module_dir, "mappings/users/user_names_templated.yml"), False),
@@ -104,268 +105,11 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
                             (os.path.join(module_dir, "mappings/handovers/handover_chains_templated.yml"), False),
                             (os.path.join(module_dir, "mappings/handovers/initial_work_handover_to_first_handover_templated.yml"), False),
 
-                            (os.path.join(module_dir, "mappings/handovers/activities/activities_templated.yml"),
-
-                            # SQL templates
-                            {
-                                "{measurement_ids}": [
-                                    "12",
-                                    "13, 15, 19, 53, 78, 79",
-                                    "17, 31, 44, 55, 56, 97",
-                                    "30",
-                                    "48",
-                                    "27, 38, 39, 40",
-                                    "24",
-                                    "14, 16, 33",
-                                    "41, 80, 81, 82",
-                                    "20",
-                                    "26",
-                                    "57, 58, 85",
-                                    "50, 59, 60, 86, 87",
-                                    "47",
-                                    "147",
-                                    "18",
-                                    "96, 98, 107, 139"
-                                ]
-                            },
-
-                            # Additional YARRRML templates
-                            {
-                                "{measurement_name}": [
-                                    "Photo",
-                                    "EDX",
-                                    "XRD",
-                                    "XPS",
-                                    "LEIS",
-                                    "Thickness",
-                                    "SEM",
-                                    "Resistance",
-                                    "Bandgap",
-                                    "APT",
-                                    "TEM",
-                                    "SDC",
-                                    "SECCM",
-                                    "FIM",
-                                    "PSM",
-                                    "Synthesis or treatment",
-                                    "Report"
-                                ],
-                                "{measurement_class_name}": [
-                                    "PhotoProcess",
-                                    "EDXMicroscopyProcess",
-                                    "XRDProcess",
-                                    "XPSProcess",
-                                    "LEISProcess",
-                                    "ThicknessProcess",
-                                    "SEMProcess",
-                                    "ResistanceProcess",
-                                    "BandgapProcess",
-                                    "APTProcess",
-                                    "TEMProcess",
-                                    "SDCProcess",
-                                    "SECCMProcess",
-                                    "FIMProcess",
-                                    "PSMProcess",
-                                    "SynthesisOrTreatmentProcess",
-                                    "ReportProcess"
-                                ]
-                            }, False),
-                            (os.path.join(module_dir, "mappings/handovers/activities/activities_prior_to_first_handover_templated.yml"),
-                            # SQL templates
-                            {
-                                "{measurement_ids}": [
-                                    "12",
-                                    "13, 15, 19, 53, 78, 79",
-                                    "17, 31, 44, 55, 56, 97",
-                                    "30",
-                                    "48",
-                                    "27, 38, 39, 40",
-                                    "24",
-                                    "14, 16, 33",
-                                    "41, 80, 81, 82",
-                                    "20",
-                                    "26",
-                                    "57, 58, 85",
-                                    "50, 59, 60, 86, 87",
-                                    "47",
-                                    "147",
-                                    "18",
-                                    "96, 98, 107, 139"
-                                ]
-                            },
-
-                            # Additional YARRRML templates
-                            {
-                                "{measurement_name}": [
-                                    "Photo",
-                                    "EDX",
-                                    "XRD",
-                                    "XPS",
-                                    "LEIS",
-                                    "Thickness",
-                                    "SEM",
-                                    "Resistance",
-                                    "Bandgap",
-                                    "APT",
-                                    "TEM",
-                                    "SDC",
-                                    "SECCM",
-                                    "FIM",
-                                    "PSM",
-                                    "Synthesis or treatment",
-                                    "Report"
-                                ],
-                                "{measurement_class_name}": [
-                                    "PhotoProcess",
-                                    "EDXMicroscopyProcess",
-                                    "XRDProcess",
-                                    "XPSProcess",
-                                    "LEISProcess",
-                                    "ThicknessProcess",
-                                    "SEMProcess",
-                                    "ResistanceProcess",
-                                    "BandgapProcess",
-                                    "APTProcess",
-                                    "TEMProcess",
-                                    "SDCProcess",
-                                    "SECCMProcess",
-                                    "FIMProcess",
-                                    "PSMProcess",
-                                    "SynthesisOrTreatmentProcess",
-                                    "ReportProcess"
-                                ]
-                            }, False),
-                            (os.path.join(module_dir, "mappings/handovers/activities/activities_with_no_handovers_templated.yml"),
-                            # SQL templates
-                            {
-                                "{measurement_ids}": [
-                                    "12",
-                                    "13, 15, 19, 53, 78, 79",
-                                    "17, 31, 44, 55, 56, 97",
-                                    "30",
-                                    "48",
-                                    "27, 38, 39, 40",
-                                    "24",
-                                    "14, 16, 33",
-                                    "41, 80, 81, 82",
-                                    "20",
-                                    "26",
-                                    "57, 58, 85",
-                                    "50, 59, 60, 86, 87",
-                                    "47",
-                                    "147",
-                                    "18",
-                                    "96, 98, 107, 139"
-                                ]
-                            },
-
-                            # Additional YARRRML templates
-                            {
-                                "{measurement_name}": [
-                                    "Photo",
-                                    "EDX",
-                                    "XRD",
-                                    "XPS",
-                                    "LEIS",
-                                    "Thickness",
-                                    "SEM",
-                                    "Resistance",
-                                    "Bandgap",
-                                    "APT",
-                                    "TEM",
-                                    "SDC",
-                                    "SECCM",
-                                    "FIM",
-                                    "PSM",
-                                    "Synthesis or treatment",
-                                    "Report"
-                                ],
-                                "{measurement_class_name}": [
-                                    "PhotoProcess",
-                                    "EDXMicroscopyProcess",
-                                    "XRDProcess",
-                                    "XPSProcess",
-                                    "LEISProcess",
-                                    "ThicknessProcess",
-                                    "SEMProcess",
-                                    "ResistanceProcess",
-                                    "BandgapProcess",
-                                    "APTProcess",
-                                    "TEMProcess",
-                                    "SDCProcess",
-                                    "SECCMProcess",
-                                    "FIMProcess",
-                                    "PSMProcess",
-                                    "SynthesisOrTreatmentProcess",
-                                    "ReportProcess"
-                                ]
-                            }, False),
-
-                            (os.path.join(module_dir, "mappings/handovers/activities/measurements_with_explicit_links_to_handovers_templated.yml"),
-                            # SQL templates
-                            {
-                                "{measurement_ids}": [
-                                    "12",
-                                    "13, 15, 19, 53, 78, 79",
-                                    "17, 31, 44, 55, 56, 97",
-                                    "30",
-                                    "48",
-                                    "27, 38, 39, 40",
-                                    "24",
-                                    "14, 16, 33",
-                                    "41, 80, 81, 82",
-                                    "20",
-                                    "26",
-                                    "57, 58, 85",
-                                    "50, 59, 60, 86, 87",
-                                    "47",
-                                    "147",
-                                    "18",
-                                    "96, 98, 107, 139"
-                                ]
-                            },
-
-                            # Additional YARRRML templates
-                            {
-                                "{measurement_name}": [
-                                    "Photo",
-                                    "EDX",
-                                    "XRD",
-                                    "XPS",
-                                    "LEIS",
-                                    "Thickness",
-                                    "SEM",
-                                    "Resistance",
-                                    "Bandgap",
-                                    "APT",
-                                    "TEM",
-                                    "SDC",
-                                    "SECCM",
-                                    "FIM",
-                                    "PSM",
-                                    "Synthesis or treatment",
-                                    "Report"
-                                ],
-                                "{measurement_class_name}": [
-                                    "PhotoProcess",
-                                    "EDXMicroscopyProcess",
-                                    "XRDProcess",
-                                    "XPSProcess",
-                                    "LEISProcess",
-                                    "ThicknessProcess",
-                                    "SEMProcess",
-                                    "ResistanceProcess",
-                                    "BandgapProcess",
-                                    "APTProcess",
-                                    "TEMProcess",
-                                    "SDCProcess",
-                                    "SECCMProcess",
-                                    "FIMProcess",
-                                    "PSMProcess",
-                                    "SynthesisOrTreatmentProcess",
-                                    "ReportProcess"
-                                ]
-                            }, False),
+                            # Activities mappings are broken down into the measurement categories
+                            (os.path.join(module_dir, "mappings/handovers/activities/activities_templated.yml"), True),
+                            (os.path.join(module_dir, "mappings/handovers/activities/activities_prior_to_first_handover_templated.yml"), True),
+                            (os.path.join(module_dir, "mappings/handovers/activities/activities_with_no_handovers_templated.yml"), True),
+                            (os.path.join(module_dir, "mappings/handovers/activities/measurements_with_explicit_links_to_handovers_templated.yml"), True),
 
                             (os.path.join(module_dir, "mappings/handovers/activities/activities_for_other_types_templated.yml"), False),
                             (os.path.join(module_dir, "mappings/handovers/activities/activities_for_other_types_prior_to_first_handover_templated.yml"), False),
@@ -375,8 +119,8 @@ templated_file_names : list[tuple[str, bool]] | list[tuple[str, dict[str, str], 
 
                             (os.path.join(module_dir, "mappings/generic_relations/object_to_object_templated.yml"), False),
 
-                            (os.path.join(module_dir, "mappings/compositions/compositions_metadata_templated.yml"), True),
-                            (os.path.join(module_dir, "mappings/compositions/properties_of_compositions_templated.yml"), True)
+                            (os.path.join(module_dir, "mappings/compositions/compositions_metadata_templated.yml"), False),
+                            (os.path.join(module_dir, "mappings/compositions/properties_of_compositions_templated.yml"), False)
                        ]
 
 # RML file all the YARRRML mappings must coalesce to
@@ -423,18 +167,13 @@ def prepare_YARRRML_files() -> list[tuple[str, str, str]]:
     untemplated_yarrrml_file_names_and_jobs = []
 
     for i, mapping in enumerate(templated_file_names):
-        if len(mapping) == 2:
-            templated_yarrrml_file, use_rmlstreamer = mapping
-            custom_sql_template = None
-            custom_yml_template = None
-        else:
-            (templated_yarrrml_file, custom_sql_template, custom_yml_template, use_rmlstreamer) = mapping
+        (templated_yarrrml_file, break_down_into_measurement_types) = mapping
 
         untemplated_base_yarrrml_file = templated_yarrrml_file.replace("_templated", "")
         untemplated_yarrrml_file_names_and_jobs += fill_template_values(templated_yml=templated_yarrrml_file,
                                                                         output_file_name=untemplated_base_yarrrml_file,
-                                                                        custom_sql_template=custom_sql_template,
-                                                                        custom_yml_template=custom_yml_template,
+                                                                        measurement_type_ids_to_activities=measurement_type_ids_to_activities,
+                                                                        break_down_into_measurement_types=break_down_into_measurement_types,
                                                                         convert_to_csv=True,
                                                                         # We only add prefixes to the first mapping
                                                                         add_prefixes= i == 0)
