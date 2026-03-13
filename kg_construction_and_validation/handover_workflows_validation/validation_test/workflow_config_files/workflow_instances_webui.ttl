@@ -118,4 +118,4 @@
 <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/step_assignment_5_of_workflow_instance_8ff62678-c1c6-5638-b28d-070012915cfd> a crc:HandoverWorkflowInstanceAssignment ;
     crc:assignedObject <https://crc1625.mdi.ruhr-uni-bochum.de/object/-11>,
         <https://crc1625.mdi.ruhr-uni-bochum.de/object/-12> ;
-    crc:relatesToHandoverWorkflowStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_555322f2-479d-501a-94f8-4a0afdd53281_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> .
+    crc:relatesToHandoverWorkflowStep <https://crc1625.mdi.ruhr-uni-bochum.de/workflow/workflow_step_ac9663d1-c008-5477-ac20-75abe10d3d4d_for_workflow_model_f8e54c3a-99be-57e5-a9b9-9fcfcd90612e> .
