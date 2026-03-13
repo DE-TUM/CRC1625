@@ -4,7 +4,7 @@ SELECT ?first_handover_group WHERE {
 		?MLOrSample a/rdfs:subClassOf* crc:MaterialsLibrary.
 
 		?workflow_instance crc:input ?MLOrSample.
-		?MLOrSample crc:internalID {object_id}.
+		?MLOrSample crc:externalID {object_id}.
 
 		?workflow_instance crc:substep ?first_handover_group.
 	}

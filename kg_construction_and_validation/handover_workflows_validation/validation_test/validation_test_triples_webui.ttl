@@ -11,14 +11,17 @@
 # MLs and Samples
 <https://crc1625.mdi.ruhr-uni-bochum.de/object/-10> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/object/-10> <https://crc1625.mdi.ruhr-uni-bochum.de/internalID> -10 .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/-10> <https://crc1625.mdi.ruhr-uni-bochum.de/externalID> -10 .
 <https://crc1625.mdi.ruhr-uni-bochum.de/object/-10> <https://crc1625.mdi.ruhr-uni-bochum.de/objectName> "Demo ML of Sir SHACLot" .
 
 <https://crc1625.mdi.ruhr-uni-bochum.de/object/-11> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/Sample> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/object/-11> <https://crc1625.mdi.ruhr-uni-bochum.de/internalID> -11 .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/-11> <https://crc1625.mdi.ruhr-uni-bochum.de/externalID> -11 .
 <https://crc1625.mdi.ruhr-uni-bochum.de/object/-11> <https://crc1625.mdi.ruhr-uni-bochum.de/objectName> "Sample of Sir SHACLot's Demo ML (Piece 1 of 2)" .
 
 <https://crc1625.mdi.ruhr-uni-bochum.de/object/-12> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://crc1625.mdi.ruhr-uni-bochum.de/Sample> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/object/-12> <https://crc1625.mdi.ruhr-uni-bochum.de/internalID> -12 .
+<https://crc1625.mdi.ruhr-uni-bochum.de/object/-12> <https://crc1625.mdi.ruhr-uni-bochum.de/externalID> -12 .
 <https://crc1625.mdi.ruhr-uni-bochum.de/object/-12> <https://crc1625.mdi.ruhr-uni-bochum.de/objectName> "Sample of Sir SHACLot's Demo ML (Piece 2 of 2)" .
 
 

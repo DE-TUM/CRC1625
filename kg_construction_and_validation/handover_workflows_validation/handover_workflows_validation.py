@@ -207,7 +207,9 @@ class WorkflowInstance:
     workflow_model_name: str = ""
 
     """
-    Dict of Step name -> List of sample IDs
+    Dict of Step name -> List of sample IDs (i.e. external IDs)
+    Throughout the code, sample IDs will be referred as object IDs to simplify terminology. If we were to switch to check
+    actual object IDs (i.e. internal IDs) instead, we just nee to change the predicates in the SPARQL queries accordingly
     
     The step names must refer to the step names contained in the workflow model it is specifying
     """

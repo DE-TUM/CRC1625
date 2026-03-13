@@ -1,6 +1,6 @@
 SELECT ?s ?p ?o FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph> WHERE {
     {
-        ?MLOrSample crc:internalID {object_id}.
+        ?MLOrSample crc:externalID {object_id}.
 
         ?workflow_instance crc:input ?MLOrSample.
 
@@ -12,7 +12,7 @@ SELECT ?s ?p ?o FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph> WHERE {
     UNION
 
     {
-        ?MLOrSample crc:internalID {object_id}.
+        ?MLOrSample crc:externalID {object_id}.
 
         ?workflow_instance crc:input ?MLOrSample.
 
@@ -24,7 +24,7 @@ SELECT ?s ?p ?o FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph> WHERE {
     UNION
 
     {
-        ?MLOrSample crc:internalID {object_id}.
+        ?MLOrSample crc:externalID {object_id}.
 
         ?workflow_instance crc:input ?MLOrSample.
 

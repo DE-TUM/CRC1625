@@ -20,7 +20,7 @@ def add_object_action(new_object_id: str | None,
                   type='negative')
         return
 
-    workflow_instance_page_state.graph_component.add_node(new_object_id,
+    workflow_instance_page_state.graph_component.add_node(f'ML / Sample {new_object_id}',
                                                           NodeType.node_type_object,
                                                           coloring_ids=['object'])
     workflow_instance_page_state.existing_objects.add(int(new_object_id))
