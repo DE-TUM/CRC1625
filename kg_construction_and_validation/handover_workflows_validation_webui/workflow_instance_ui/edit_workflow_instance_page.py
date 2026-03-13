@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from nicegui import ui, app
 
 from handover_workflows_validation.handover_workflows_validation import read_workflow_model, WorkflowModel, \
@@ -81,9 +83,6 @@ def handle_node_click(e, workflow_instance_page_state: WorkflowInstancePageState
 
 
 def handle_workflow_instance_name_button(new_name: str, workflow_instance_page_state: WorkflowInstancePageState):
-    workflow_instance_page_state.save_workflow_instance_copy()
-    if workflow_instance_page_state.original_workflow_instance_name is None: # Cache the old name in case we need to save (i.e. replace) the workflow instance
-        workflow_instance_page_state.original_workflow_instance_name = app.storage.tab['current_workflow_instance'].workflow_instance_name
     app.storage.tab['current_workflow_instance'].workflow_instance_name = new_name
 
 
@@ -116,37 +115,37 @@ def handle_return_button(workflow_instance_page_state: WorkflowInstancePageState
 
 
 def handle_undo_button(workflow_instance_page_state: WorkflowInstancePageState):
-    if len(workflow_instance_page_state.workflow_instance_history) == 0:
-        ui.notify("No changes have been performed yet", type='warning')
-    else:
-        workflow_instance_page_state.undo_workflow_instance_change()
+    workflow_instance_page_state.undo_workflow_instance_changes()
 
-        # Reload Cytoscape
-        graph_data = workflow_model_and_instance_to_nodes_and_edges(app.storage.tab['current_workflow_model'],
-                                                                    app.storage.tab['current_workflow_instance'])
-        workflow_instance_page_state.graph_component_column.clear()
-        with workflow_instance_page_state.graph_component_column:
-            workflow_instance_page_state.graph_component = CytoscapeComponent(
-                graph_data['nodes'],
-                graph_data['edges'],
-                handle_node_click,
-                workflow_instance_page_state
-            )
+    # Unselect the node to prevent stale references
+    workflow_instance_page_state.selected_node = ""
 
-        # Reload the UI
-        workflow_instance_page_state.graph_controls_column.clear()
-        with workflow_instance_page_state.graph_controls_column:
-            create_graph_controls(workflow_instance_page_state)
+    # Reload Cytoscape
+    graph_data = workflow_model_and_instance_to_nodes_and_edges(app.storage.tab['current_workflow_model'],
+                                                                app.storage.tab['current_workflow_instance'])
+    workflow_instance_page_state.graph_component_column.clear()
+    with workflow_instance_page_state.graph_component_column:
+        workflow_instance_page_state.graph_component = CytoscapeComponent(
+            graph_data['nodes'],
+            graph_data['edges'],
+            handle_node_click,
+            workflow_instance_page_state
+        )
 
-        workflow_instance_page_state.node_controls_column.clear()
-        with workflow_instance_page_state.node_controls_column:
-            create_workflow_instance_step_controls(workflow_instance_page_state)
+    # Reload the UI
+    workflow_instance_page_state.graph_controls_column.clear()
+    with workflow_instance_page_state.graph_controls_column:
+        create_graph_controls(workflow_instance_page_state)
 
-        workflow_instance_page_state.graph_component.select_node(workflow_instance_page_state.selected_node)
+    workflow_instance_page_state.node_controls_column.clear()
+    with workflow_instance_page_state.node_controls_column:
+        create_workflow_instance_step_controls(workflow_instance_page_state)
 
-        workflow_instance_page_state.workflow_instance_name_input.value = app.storage.tab['current_workflow_instance'].workflow_instance_name
+    workflow_instance_page_state.graph_component.select_node(workflow_instance_page_state.selected_node)
 
-        ui.notify("The last change has been undone", type='positive')
+    workflow_instance_page_state.workflow_instance_name_input.value = app.storage.tab['current_workflow_instance'].workflow_instance_name
+
+    ui.notify("All changes have been undone", type='positive')
 
 
 async def handle_save_button(workflow_instance_page_state: WorkflowInstancePageState):
@@ -157,9 +156,9 @@ async def handle_save_button(workflow_instance_page_state: WorkflowInstancePageS
     else:
         await overwrite_workflow_instance(app.storage.tab['current_workflow_instance'],
                                           app.storage.tab['current_workflow_model'],
-                                          original_name=workflow_instance_page_state.original_workflow_instance_name)
+                                          original_name=workflow_instance_page_state.original_workflow_instance.workflow_instance_name)
         workflow_instance_page_state.changes_are_saved = True
-        workflow_instance_page_state.workflow_model_history = []
+        workflow_instance_page_state.original_workflow_instance = app.storage.tab['current_workflow_instance']
         ui.notify("The changes have been saved", type='positive')
 
 
@@ -212,6 +211,8 @@ async def edit_workflow_instance_page(workflow_model_name: str,
     app.storage.tab['workflow_instances_of_current_workflow_model'] = await get_workflow_instances_of_model(app.storage.tab['current_workflow_model'])
     app.storage.tab['current_workflow_instance'] = app.storage.tab['workflow_instances_of_current_workflow_model'][(workflow_instance_name, workflow_instance_creator_user_id)]
 
+    workflow_instance_page_state.original_workflow_instance = deepcopy(app.storage.tab['current_workflow_instance'])
+
     workflow_instance_page_state.calculate_existing_objects()
 
     with ui.header().classes('items-center p-2 h-14'):
@@ -231,7 +232,7 @@ async def edit_workflow_instance_page(workflow_model_name: str,
                                                                              value=app.storage.tab['current_workflow_instance'].workflow_instance_name,
                                                                              on_change=lambda i: handle_workflow_instance_name_button(i.value, workflow_instance_page_state)).classes('grow')
         ui.button('Return to main page', color='info', on_click=lambda: handle_return_button(workflow_instance_page_state))
-        ui.button('Undo last change', color='negative', on_click=lambda: handle_undo_button(workflow_instance_page_state))
+        ui.button('Undo all changes', color='negative', on_click=lambda: handle_undo_button(workflow_instance_page_state))
         ui.button('Save all changes', color='positive', on_click=lambda: handle_save_button(workflow_instance_page_state))
         ui.button('Validate workflow', color='info', on_click=lambda: run_validation(workflow_instance_page_state))
 

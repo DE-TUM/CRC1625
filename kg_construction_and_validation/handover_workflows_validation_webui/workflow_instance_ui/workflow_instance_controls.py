@@ -20,8 +20,6 @@ def add_object_action(new_object_id: str | None,
                   type='negative')
         return
 
-    workflow_instance_page_state.save_workflow_instance_copy()
-
     workflow_instance_page_state.graph_component.add_node(new_object_id,
                                                           NodeType.node_type_object,
                                                           coloring_ids=['object'])
@@ -46,8 +44,6 @@ def remove_object_action(object_id_to_remove: str,
     if not object_id_to_remove:
         ui.notify("Please indicate a Materials Library / Sample ID to remove", type='warning')
         return
-
-    workflow_instance_page_state.save_workflow_instance_copy()
 
     for assignment in app.storage.tab['current_workflow_instance'].step_assignments.values():
         if int(object_id_to_remove) in assignment:

@@ -54,12 +54,10 @@ async def add_edge_action(source: str,
         ui.notify("The two steps are already connected", type='negative')
         return
 
-    workflow_model_page_state.save_workflow_model_copy()
-
     app.storage.tab['current_workflow_model'].workflow_model_steps[source].next_steps.append(target)
     if current_workflow_model_contains_cycles():
         ui.notify("Creating cycles between steps is not allowed", type='negative')
-        workflow_model_page_state.undo_workflow_model_change()
+        app.storage.tab['current_workflow_model'].workflow_model_steps[source].next_steps.remove(target)
         return
 
     workflow_model_page_state.graph_component.add_edge(source, target)
@@ -82,8 +80,6 @@ async def remove_edge_action(source: str,
         ui.notify("The two steps are not connected", type='negative')
         return
 
-    workflow_model_page_state.save_workflow_model_copy()
-
     workflow_model_page_state.graph_component.remove_edge(source, target)
     app.storage.tab['current_workflow_model'].workflow_model_steps[source].next_steps.remove(target)
 
@@ -102,8 +98,6 @@ def add_step_action(new_step_name: str, workflow_model_page_state: WorkflowModel
     if new_step_name in app.storage.tab['current_workflow_model'].workflow_model_steps:
         ui.notify(f"Node '{new_step_name}' already exists", type='negative')
         return
-
-    workflow_model_page_state.save_workflow_model_copy()
 
     new_step = WorkflowModelStep(next_steps=list())
     app.storage.tab['current_workflow_model'].workflow_model_steps[new_step_name] = new_step
@@ -128,8 +122,6 @@ def set_initial_step_action(initial_step_node: str, workflow_model_page_state: W
             ui.notify("The initial step node should not be preceded by any steps", type='negative')
             return
 
-    workflow_model_page_state.save_workflow_model_copy()
-
     app.storage.tab['current_workflow_model'].workflow_model_options.initial_step_name = initial_step_node
 
     ui.notify(f"Set '{initial_step_node}' as the initial step", type='positive')
@@ -144,8 +136,11 @@ def remove_step_action(node_to_remove: str, workflow_model_page_state: WorkflowM
         ui.notify("Please indicate the step to remove", type='warning')
         return
 
-    workflow_model_page_state.save_workflow_model_copy()
+    # If it was a renaming, remove its reference
+    if node_to_remove in workflow_model_page_state.step_renamings:
+        del workflow_model_page_state.step_renamings[node_to_remove]
 
+    # Remove entries from next steps
     del app.storage.tab['current_workflow_model'].workflow_model_steps[node_to_remove]
     for (step_name, workflow_step) in app.storage.tab['current_workflow_model'].workflow_model_steps.items():
         if node_to_remove in workflow_step.next_steps:

@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from nicegui import ui, app
 
 from handover_workflows_validation.handover_workflows_validation import read_workflow_model, WorkflowModel, \
@@ -44,10 +46,7 @@ def handle_node_click(e,
     create_workflow_model_step_controls(workflow_model_page_state)
 
 
-def handle_workflow_model_name_button(new_name: str, workflow_model_page_state: WorkflowModelPageState):
-    workflow_model_page_state.save_workflow_model_copy()
-    if workflow_model_page_state.original_workflow_model_name is None: # Cache the old name in case we need to save (i.e. replace) the workflow model
-        workflow_model_page_state.original_workflow_model_name = app.storage.tab['current_workflow_model'].workflow_model_name
+def handle_workflow_model_name_button(new_name: str):
     app.storage.tab['current_workflow_model'].workflow_model_name = new_name
 
 
@@ -78,7 +77,9 @@ async def handle_return_button(workflow_model_page_state: WorkflowModelPageState
                         return_dialog.close()
 
                         if can_current_workflow_model_be_saved():
-                            await overwrite_workflow_model(app.storage.tab['current_workflow_model'], original_name=workflow_model_page_state.original_workflow_model_name)
+                            await overwrite_workflow_model(app.storage.tab['current_workflow_model'],
+                                                           workflow_model_page_state.original_workflow_model,
+                                                           workflow_model_page_state.step_renamings)
                             ui.navigate.to('/workflows')
                         else:
                             ui.notify("You must select an initial step first and have no unconnected steps if there are multiple of them", type='negative')
@@ -98,36 +99,37 @@ async def handle_return_button(workflow_model_page_state: WorkflowModelPageState
 
 
 def handle_undo_button(workflow_model_page_state: WorkflowModelPageState):
-    if len(workflow_model_page_state.workflow_model_history) == 0:
-        ui.notify("No changes have been performed yet", type='warning')
-    else:
-        workflow_model_page_state.undo_workflow_model_change()
+    workflow_model_page_state.undo_workflow_model_changes()
+    workflow_model_page_state.step_renamings = dict()
 
-        # Reload Cytoscape
-        graph_data = workflow_model_to_nodes_and_edges(app.storage.tab['current_workflow_model'])
-        workflow_model_page_state.graph_component_column.clear()
-        with workflow_model_page_state.graph_component_column:
-            workflow_model_page_state.graph_component = CytoscapeComponent(
-                graph_data['nodes'],
-                graph_data['edges'],
-                handle_node_click,
-                workflow_model_page_state
-            )
+    # Unselect the node to prevent stale references
+    workflow_model_page_state.selected_node = ""
 
-        # Reload the UI
-        workflow_model_page_state.graph_controls_column.clear()
-        with workflow_model_page_state.graph_controls_column:
-            create_graph_controls(workflow_model_page_state)
+    # Reload Cytoscape
+    graph_data = workflow_model_to_nodes_and_edges(app.storage.tab['current_workflow_model'])
+    workflow_model_page_state.graph_component_column.clear()
+    with workflow_model_page_state.graph_component_column:
+        workflow_model_page_state.graph_component = CytoscapeComponent(
+            graph_data['nodes'],
+            graph_data['edges'],
+            handle_node_click,
+            workflow_model_page_state
+        )
 
-        workflow_model_page_state.node_controls_column.clear()
-        with workflow_model_page_state.node_controls_column:
-            create_workflow_model_step_controls(workflow_model_page_state)
+    # Reload the UI
+    workflow_model_page_state.graph_controls_column.clear()
+    with workflow_model_page_state.graph_controls_column:
+        create_graph_controls(workflow_model_page_state)
 
-        workflow_model_page_state.graph_component.select_node(workflow_model_page_state.selected_node)
+    workflow_model_page_state.node_controls_column.clear()
+    with workflow_model_page_state.node_controls_column:
+        create_workflow_model_step_controls(workflow_model_page_state)
 
-        workflow_model_page_state.workflow_model_name_input.value = app.storage.tab['current_workflow_model'].workflow_model_name
+    workflow_model_page_state.graph_component.select_node(workflow_model_page_state.selected_node)
 
-        ui.notify("The last change has been undone", type='positive')
+    workflow_model_page_state.workflow_model_name_input.value = app.storage.tab['current_workflow_model'].workflow_model_name
+
+    ui.notify("All changes have been undone", type='positive')
 
 
 async def handle_save_button(workflow_model_page_state: WorkflowModelPageState):
@@ -135,9 +137,12 @@ async def handle_save_button(workflow_model_page_state: WorkflowModelPageState):
         ui.notify("You cannot save changes as a demo user", type='negative')
     else:
         if can_current_workflow_model_be_saved():
-            await overwrite_workflow_model(app.storage.tab['current_workflow_model'], original_name=workflow_model_page_state.original_workflow_model_name)
+            await overwrite_workflow_model(app.storage.tab['current_workflow_model'],
+                                           workflow_model_page_state.original_workflow_model,
+                                           workflow_model_page_state.step_renamings)
             workflow_model_page_state.changes_are_saved = True
-            workflow_model_page_state.workflow_model_history = []
+            workflow_model_page_state.step_renamings = dict()
+            workflow_model_page_state.original_workflow_model = app.storage.tab['current_workflow_model']
             ui.notify("The changes have been saved", type='positive')
         else:
             ui.notify("You must select an initial step first and have no unconnected steps if there are multiple of them", type='negative')
@@ -151,6 +156,7 @@ async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
 
     if app.storage.tab.get('current_workflow_model', None):  # The page has been reloaded
         app.storage.tab['current_workflow_model'] = await read_workflow_model(workflow_model_name, user_id)
+    workflow_model_page_state.original_workflow_model = deepcopy(app.storage.tab['current_workflow_model'])
 
     with ui.header().classes('items-center p-2 h-14'):
         ui.label("Workflow Editor").classes('text-xl').style('color: #000000')
@@ -169,7 +175,7 @@ async def edit_workflow_model_page(workflow_model_name: str, user_id: int):
                                                                        value=app.storage.tab['current_workflow_model'].workflow_model_name,
                                                                        on_change=lambda i: handle_workflow_model_name_button(i.value, workflow_model_page_state)).classes('grow')
         ui.button('Return to main page', color='info', on_click=lambda: handle_return_button(workflow_model_page_state))
-        ui.button('Undo last change', color='negative', on_click=lambda: handle_undo_button(workflow_model_page_state))
+        ui.button('Undo all changes', color='negative', on_click=lambda: handle_undo_button(workflow_model_page_state))
         ui.button('Save all changes', color='positive', on_click=lambda: handle_save_button(workflow_model_page_state))
 
     graph_data = workflow_model_to_nodes_and_edges(app.storage.tab['current_workflow_model'])

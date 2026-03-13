@@ -61,7 +61,14 @@ def change_step_name_action(new_name: str,
     previous_name = workflow_model_page_state.selected_node
     workflow_model_page_state.selected_node = new_name
 
-    workflow_model_page_state.save_workflow_model_copy()
+    if previous_name in workflow_model_page_state.step_renamings:
+        # previous_name was also a new name, we need to preserve the original one
+        workflow_model_page_state.step_renamings[new_name] = workflow_model_page_state.step_renamings[previous_name]
+        del workflow_model_page_state.step_renamings[previous_name]
+    else:
+        workflow_model_page_state.step_renamings[new_name] = previous_name
+
+    # Redirect all next steps
     app.storage.tab['current_workflow_model'].workflow_model_steps[new_name] = app.storage.tab['current_workflow_model'].workflow_model_steps.pop(previous_name)
     app.storage.tab['current_workflow_model'].workflow_model_steps[new_name].step_name = new_name
     for step_name, step in app.storage.tab['current_workflow_model'].workflow_model_steps.items():
@@ -85,7 +92,6 @@ def change_step_description_action(new_description: str, workflow_model_page_sta
         ui.notify("No step selected", type='warning')
         return
 
-    workflow_model_page_state.save_workflow_model_copy()
     app.storage.tab['current_workflow_model'].workflow_model_steps[workflow_model_page_state.selected_node].step_description = new_description
     ui.notify("Description modified", type='positive')
 
@@ -96,8 +102,6 @@ def enable_switch_action(switch_value: bool, workflow_model_page_state: Workflow
         ui.notify("No step selected", type='warning')
         return
 
-    workflow_model_page_state.save_workflow_model_copy()
-
     app.storage.tab['current_workflow_model'].workflow_model_steps[workflow_model_page_state.selected_node].enabled = switch_value
 
 
@@ -106,7 +110,6 @@ def other_activities_switch_action(switch_value: bool, workflow_model_page_state
         ui.notify("No step selected", type='warning')
         return
 
-    workflow_model_page_state.save_workflow_model_copy()
     app.storage.tab['current_workflow_model'].workflow_model_steps[workflow_model_page_state.selected_node].allow_other_activities = switch_value
 
 
@@ -119,8 +122,6 @@ def add_activity_action(activities_select_values,
     workflow_model_page_state.graph_component.replace_activities(workflow_model_page_state.selected_node, sorted(activities_select_values))
 
     if sorted(app.storage.tab['current_workflow_model'].workflow_model_steps[workflow_model_page_state.selected_node].required_activities) != sorted(activities_select_values):
-        workflow_model_page_state.save_workflow_model_copy()
-
         app.storage.tab['current_workflow_model'].workflow_model_steps[
             workflow_model_page_state.selected_node].required_activities = activities_select_values
     #  else: the selector's callback is a bit wonky and sometimes triggers with no changes
@@ -134,8 +135,6 @@ def add_project_action(projects_select_values,
     workflow_model_page_state.graph_component.replace_projects(workflow_model_page_state.selected_node, sorted(projects_select_values))
 
     if sorted(app.storage.tab['current_workflow_model'].workflow_model_steps[workflow_model_page_state.selected_node].projects) != sorted(projects_select_values):
-        workflow_model_page_state.save_workflow_model_copy()
-
         app.storage.tab['current_workflow_model'].workflow_model_steps[
             workflow_model_page_state.selected_node].projects = projects_select_values
 

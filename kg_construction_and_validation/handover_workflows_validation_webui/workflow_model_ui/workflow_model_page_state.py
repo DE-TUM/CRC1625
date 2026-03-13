@@ -21,15 +21,10 @@ class WorkflowModelPageState:
     graph_controls_column: Column = None
     selected_node: str = None
     workflow_model_name_input: Input = None
-    original_workflow_model_name: str = None
+    step_renamings: dict[str, str] = field(default_factory=dict)
     changes_are_saved: bool = True
-    workflow_model_history: list[tuple[str, WorkflowModel]] = field(default_factory=list)
+    original_workflow_model: WorkflowModel = None
 
-    def save_workflow_model_copy(self):
-        self.workflow_model_history.append((self.selected_node, deepcopy(app.storage.tab['current_workflow_model'])))
-        self.changes_are_saved = False
-
-
-    def undo_workflow_model_change(self):
-        if len(self.workflow_model_history) > 0:
-            self.selected_node, app.storage.tab['current_workflow_model'] = self.workflow_model_history.pop()
+    def undo_workflow_model_changes(self):
+        if self.original_workflow_model is not None:
+            app.storage.tab['current_workflow_model'] = self.original_workflow_model

@@ -45,6 +45,7 @@ delete_handover_workflow_model_query = prefixes + open(os.path.join(module_dir, 
 delete_handover_workflow_instance_query = prefixes + open(os.path.join(module_dir, 'queries/delete_handover_workflow_instance.sparql'), 'r').read()
 redirect_workflow_instances_query = prefixes + open(os.path.join(module_dir, 'queries/redirect_workflow_instances.sparql'), 'r').read()
 redirect_workflow_instance_steps_query = prefixes + open(os.path.join(module_dir, 'queries/redirect_workflow_instance_steps.sparql'), 'r').read()
+delete_workflow_instance_steps_query = prefixes + open(os.path.join(module_dir, 'queries/delete_workflow_instance_steps.sparql'), 'r').read()
 clean_handover_workflow_instance_steps_query = prefixes + open(os.path.join(module_dir, 'queries/clean_handover_workflow_instance_steps.sparql'), 'r').read()
 workflow_model_details_query = prefixes + open(os.path.join(module_dir, 'queries/workflow_model_details.sparql'), 'r').read()
 workflow_instance_details_query = prefixes + open(os.path.join(module_dir, 'queries/workflow_instance_details.sparql'), 'r').read()
@@ -466,12 +467,17 @@ async def redirect_workflow_instances(old_workflow_model: WorkflowModel,
         return None
 
 
-async def redirect_workflow_instance_steps(old_workflow_model: WorkflowModel,
-                                           new_workflow_model: WorkflowModel,
+async def redirect_workflow_instance_steps(new_workflow_model: WorkflowModel,
+                                           old_workflow_model: WorkflowModel,
+                                           step_renamings: dict[str, str] | None = None,
                                            return_queries: bool = False) -> list[str] | None:
     """
-    Redirects all workflow instance steps of the old workflow model to the new one
+    Adapts all workflow instance steps of the old workflow model to the new one, renaming or removing them accordingly
     """
+    # Switch the renamed steps dict around
+    if step_renamings is not None:
+        step_renamings = {v : k for k, v in step_renamings.items()}
+
     queries = []
 
     old_workflow_model_id = uuid_for_name(old_workflow_model.workflow_model_name, old_workflow_model.creator_user_id)
@@ -480,17 +486,31 @@ async def redirect_workflow_instance_steps(old_workflow_model: WorkflowModel,
     new_workflow_model_id = uuid_for_name(new_workflow_model.workflow_model_name, new_workflow_model.creator_user_id)
     new_workflow_model_iri = crc_workflow_prefix["workflow_model_" + new_workflow_model_id]
 
-    for step_name in old_workflow_model.workflow_model_steps:
-        old_workflow_model_step_iri = crc_workflow_prefix[f"workflow_step_{uuid_for_name(step_name, old_workflow_model.creator_user_id)}_for_workflow_model_{old_workflow_model_id}"]
-        new_workflow_model_step_iri = crc_workflow_prefix[f"workflow_step_{uuid_for_name(step_name, new_workflow_model.creator_user_id)}_for_workflow_model_{new_workflow_model_id}"]
+    for old_step_name in old_workflow_model.workflow_model_steps:
+        old_workflow_model_step_iri = crc_workflow_prefix[f"workflow_step_{uuid_for_name(old_step_name, old_workflow_model.creator_user_id)}_for_workflow_model_{old_workflow_model_id}"]
+        if step_renamings is not None and old_step_name in step_renamings: # It has been renamed
+            new_workflow_model_step_iri = crc_workflow_prefix[f"workflow_step_{uuid_for_name(step_renamings[old_step_name], new_workflow_model.creator_user_id)}_for_workflow_model_{new_workflow_model_id}"]
 
-        queries.append((redirect_workflow_instance_steps_query
-             .replace("{old_workflow_model_step_iri}", old_workflow_model_step_iri)
-             .replace("{new_workflow_model_step_iri}", new_workflow_model_step_iri)))
+            queries.append((redirect_workflow_instance_steps_query
+                            .replace("{old_workflow_model_step_iri}", old_workflow_model_step_iri)
+                            .replace("{new_workflow_model_step_iri}", new_workflow_model_step_iri)))
 
-    queries.append((redirect_workflow_instances_query
-             .replace("{old_workflow_model_iri}", old_workflow_model_iri)
-             .replace("{new_workflow_model_iri}", new_workflow_model_iri)))
+        elif old_step_name not in new_workflow_model.workflow_model_steps: # It has been deleted
+            queries.append((delete_workflow_instance_steps_query
+                            .replace("{workflow_model_step_iri}", old_workflow_model_step_iri)))
+
+        elif old_workflow_model_id != new_workflow_model_id: # We only need to change the workflow model's base name
+            new_workflow_model_step_iri = crc_workflow_prefix[f"workflow_step_{uuid_for_name(old_step_name, new_workflow_model.creator_user_id)}_for_workflow_model_{new_workflow_model_id}"]
+
+            queries.append((redirect_workflow_instance_steps_query
+                            .replace("{old_workflow_model_step_iri}", old_workflow_model_step_iri)
+                            .replace("{new_workflow_model_step_iri}", new_workflow_model_step_iri)))
+
+    if old_workflow_model_id != new_workflow_model_id: # Redirect the instance as a whole
+        queries.append((redirect_workflow_instances_query
+                 .replace("{old_workflow_model_iri}", old_workflow_model_iri)
+                 .replace("{new_workflow_model_iri}", new_workflow_model_iri)))
+
     if return_queries:
         return queries
     else:
@@ -503,6 +523,8 @@ async def delete_workflow_model(workflow_model: WorkflowModel,
                                 return_query: bool = False) -> str | None:
     """
     Deletes the workflow model of a given user from the rdf_datastore_client
+
+    Note that workflow instanced will not be redirected unless redirect_workflow_instance_steps is called
     """
     workflow_model_id = uuid_for_name(workflow_model.workflow_model_name, workflow_model.creator_user_id)
     workflow_model_iri = crc_workflow_prefix["workflow_model_" + workflow_model_id]
@@ -517,21 +539,21 @@ async def delete_workflow_model(workflow_model: WorkflowModel,
 
 
 async def overwrite_workflow_model(workflow_model: WorkflowModel,
-                                   original_name: str = None):
+                                   original_workflow_model: WorkflowModel,
+                                   step_renamings: dict[str, str] | None = None):
     """
-    Given an (updated) workflow model, deletes the existing, corresponding workflow model, and stores it again
+    Given an (updated) workflow model and its original version, deletes the existing, corresponding workflow model, and stores it again
 
-    If the workflow model has been renamed, `original_name` *must* be provided. Workflow instances will be redirected accordingly.
+    If the workflow model itself has been renamed or one of its steps deleted, the original workflow model will be
+    used to redirect or remove its workflow instance assignments accordingly. If any steps have been renamed,
+    a dictionary of renamed_step_name -> original_step_name must also be provided
     """
-    if original_name is not None:
-        workflow_model_copy = deepcopy(workflow_model)
-        workflow_model_copy.workflow_model_name = original_name
-        actions = [(await (delete_workflow_model(workflow_model_copy, return_query=True)), UpdateType.query),
-                   (await (store_workflow_model(workflow_model, return_file=True)), UpdateType.file_upload)]
-        actions += [(query, UpdateType.query) for query in (await redirect_workflow_instance_steps(workflow_model_copy, workflow_model, return_queries=True))]
-    else:
-        actions = [(await (delete_workflow_model(workflow_model, return_query=True)), UpdateType.query),
-                    (await (store_workflow_model(workflow_model, return_file=True)), UpdateType.file_upload)]
+    actions = [(await (delete_workflow_model(original_workflow_model, return_query=True)), UpdateType.query),
+               (await (store_workflow_model(workflow_model, return_file=True)), UpdateType.file_upload)]
+    actions += [(query, UpdateType.query) for query in (await redirect_workflow_instance_steps(workflow_model,
+                                                                                               original_workflow_model,
+                                                                                               step_renamings,
+                                                                                               return_queries=True))]
 
     await rdf_datastore_client.launch_updates(actions, graph_iri=WORKFLOWS_GRAPH_IRI, delete_files_after_upload=True)
 

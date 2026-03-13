@@ -21,22 +21,14 @@ class WorkflowInstancePageState:
     graph_controls_column: Column = None
     selected_node: str = None
     workflow_instance_name_input: Input = None
-    original_workflow_instance_name: str = None
     changes_are_saved: bool = True
-    workflow_instance_page_state: bool = True
-    workflow_instance_history: list[tuple[str, WorkflowInstance]] = field(default_factory=list)
+    original_workflow_instance: WorkflowInstance = None
     existing_objects: set[int] = field(default_factory=set)
 
-    def save_workflow_instance_copy(self):
-        self.workflow_instance_history.append((self.selected_node, deepcopy(app.storage.tab['current_workflow_instance'])))
-        self.changes_are_saved = False
 
-
-    def undo_workflow_instance_change(self):
-        if len(self.workflow_instance_history) > 0:
-            self.selected_node, app.storage.tab['current_workflow_instance'] = self.workflow_instance_history.pop()
-
-        self.calculate_existing_objects()
+    def undo_workflow_instance_changes(self):
+        if self.original_workflow_instance is not None:
+            app.storage.tab['current_workflow_instance'] = self.original_workflow_instance
 
 
     def calculate_existing_objects(self):

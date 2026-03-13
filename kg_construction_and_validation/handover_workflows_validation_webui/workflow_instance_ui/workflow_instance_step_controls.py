@@ -16,8 +16,6 @@ async def add_edge_action(step_name: str | None,
         ui.notify("The Materials Library / Sample is already assigned to the step", type='negative')
         return
 
-    workflow_instance_page_state.save_workflow_instance_copy()
-
     workflow_instance_page_state.graph_component.add_edge(step_name, object_id)
     app.storage.tab['current_workflow_instance'].step_assignments[step_name].append(int(object_id))
 
@@ -36,8 +34,6 @@ async def remove_edge_action(step_name: str,
     elif not await workflow_instance_page_state.graph_component.exists_edge(step_name, object_id):
         ui.notify("The Materials Library / Sample is not assigned to the step", type='negative')
         return
-
-    workflow_instance_page_state.save_workflow_instance_copy()
 
     workflow_instance_page_state.graph_component.remove_edge(step_name, object_id)
     app.storage.tab['current_workflow_instance'].step_assignments[step_name].remove(int(object_id))
