@@ -24,4 +24,4 @@ This project is structured into six different main folders, each containing thei
 </div>
 
 ## Licensing
-All code and any other supplemental materials is licensed under the GNU Affero General Public License v3.0
+All code and documentation is licensed under the GNU Affero General Public License v3.0. The ontology is licensed under the CC BY-SA 4.0.
