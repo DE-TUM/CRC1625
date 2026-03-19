@@ -587,3 +587,15 @@ async def landing_page():
             ui.image('assets/sparql_endpoint_header.png').props('fit=scale-down').classes('h-90')
             with ui.column().classes('p-4 w-full bg-secondary'):
                 ui.label('Access the SPARQL querying interface').classes('text-h6')
+
+        with ui.card().tight().classes('w-128 h-100 cursor-pointer hover:shadow-lg') \
+                .on('click', lambda: ui.navigate.to('/assets/ontology_widoco/index-en.html')):
+            ui.image('assets/crc_logo_black_letters.png').props('fit=scale-down').classes('h-90')
+            with ui.column().classes('p-4 w-full bg-secondary'):
+                ui.label('Access the CRC 1625 ontology documentation').classes('text-h6')
+
+        with ui.card().tight().classes('w-128 h-100 cursor-pointer hover:shadow-lg') \
+                .on('click', lambda: ui.navigate.to('https://github.com/DE-TUM/CRC1625')):
+            ui.image('assets/git_logo.svg').props('fit=scale-down').classes('h-90')
+            with ui.column().classes('p-4 w-full bg-secondary'):
+                ui.label('Access the code repository').classes('text-h6')

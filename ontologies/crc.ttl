@@ -14,11 +14,20 @@
 @base <https://crc1625.mdi.ruhr-uni-bochum.de/> .
 
 <https://crc1625.mdi.ruhr-uni-bochum.de> rdf:type owl:Ontology ;
-                                          owl:imports <https://w3id.org/pmd/co/2.0.8> ;
+                                          owl:imports <https://w3id.org/pmd/co/2.0.8>, <https://purl.bioontology.org/ontology/OCE> ;
+                                          <http://purl.org/vocommons/voaf#extends> <https://w3id.org/pmd/co/2.0.8> ;
                                           <http://purl.org/dc/elements/1.1/creator> <https://orcid.org/0009-0006-0232-8677> ;
                                           <http://purl.org/dc/terms/license> <http://creativecommons.org/licenses/by-sa/4.0/> ;
                                           <http://purl.org/dc/terms/title> "CRC 1625 Ontology"@en ;
-                                          rdfs:comment "Ontology for the MatInf database of the CRC 1625. Our aim is to represent all experimental data, provenance metadata and workflows present in the MatInf instances, while additionally being compatible with existing Materials Science ontologies."@en .
+                                          <http://purl.org/dc/terms/description> """Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625.
+                                          This ontology models the experimental (meta-)data, provenance and handover workflows present in MatInf instances, while additionally being compatible with existing Materials Science ontologies.
+                                          This additionally includes the modelling of handover workflow models, and other (meta-)data that is exclusively used by the MatInf semantic layer.
+                                          Note that some classes are not present in the ontology document. Namely, specific measurement types are dynamically generated, as they change between MatInf instances. Processes and activities for them, however, are included here.""" ;
+                                          <http://purl.org/dc/terms/abstract> "Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625." ;
+                                          <http://schema.org/codeRepository> "https://github.com/DE-TUM/CRC1625"^^xsd:anyURI ;
+                                          <http://purl.org/dc/terms/date> "2026-03-19"^^xsd:date ;
+                                          owl:versionInfo "1.0.0" .
+
 
 #################################################################
 #    Annotation properties
@@ -79,7 +88,7 @@ This is used to associate Handover Groups to specific projects, and invididual H
 crc:characteristic rdf:type owl:ObjectProperty ;
                    owl:equivalentProperty pmdco:characteristic ;
                    rdfs:subPropertyOf owl:topObjectProperty ;
-                   rdfs:comment """The object property characteristic indicates a relationship between a Materials Library, Sample or Measurement Area and anything that further describes it in the RDMS. 
+                   rdfs:comment """The object property characteristic indicates a relationship between a Materials Library, Sample or Measurement Area and anything that further describes it in the RDMS.
 
 This can be the result of applying an actual characterization technique on a sample (e.g., the results of TEM, EDX...), or associating it with miscellaneous file uploads (photos, documents...). A Measurement Area can also contain characteristics, such as individual EDX composition results.
 
@@ -135,7 +144,7 @@ crc:hasAssignment rdf:type owl:ObjectProperty ;
 crc:input rdf:type owl:ObjectProperty ;
           owl:equivalentProperty pmdco:input ;
           rdfs:subPropertyOf owl:topObjectProperty ;
-          rdfs:comment """The object property input is used to point at the anything that influenced or was used by a step in a handover workflow. 
+          rdfs:comment """The object property input is used to point at the anything that influenced or was used by a step in a handover workflow.
 
 This is employed by the characterization activities (the leaf/most basic step of a handover workflow) to point at the actual results (e.g. a photo or EDX results file) they refer to.""" .
 
@@ -325,7 +334,7 @@ crc:tolerance rdf:type owl:DatatypeProperty ;
 crc:value rdf:type owl:DatatypeProperty ;
           owl:equivalentProperty pmdco:value ;
           rdfs:subPropertyOf owl:topDataProperty ;
-          rdfs:comment """The raw value the entity referred by the characteristic object property refers to. 
+          rdfs:comment """The raw value the entity referred by the characteristic object property refers to.
 
 While the entity pointed by at by the crc:characteristic property may contain metadata such as creators and dates, its raw values (e.g. file paths or composition values) can be accessed by this property.""" .
 
@@ -462,7 +471,7 @@ crc:HandoverGroup rdf:type owl:Class ;
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflow
 crc:HandoverWorkflow rdf:type owl:Class ;
                      rdfs:subClassOf pmdco:Process ;
-                     rdfs:comment """A process composed of a series of processing steps as part of the work of the CRC, which involve the act of physically moving a sample to be studied to another person and/or project. 
+                     rdfs:comment """A process composed of a series of processing steps as part of the work of the CRC, which involve the act of physically moving a sample to be studied to another person and/or project.
 Its subclasses narrow its application."""@en ;
                      rdfs:label "Handover workflow" .
 
@@ -489,7 +498,7 @@ crc:HandoverWorkflowInstanceAssignment rdf:type owl:Class ;
 crc:HandoverWorkflowModel rdf:type owl:Class ;
                           rdfs:subClassOf crc:HandoverWorkflow ,
                                           crc:ProcessModel ;
-                          rdfs:comment """The beginning of a series of processes that need to be performed. 
+                          rdfs:comment """The beginning of a series of processes that need to be performed.
 
 
 An instance of this entity will contain a two-layer hierarchy of consecutive HandoverWorkflowModelStep instances that correspond to hypothetical handover groups of a given sample. Each step will contain zero or more Activity Model instances that dictate the desired measurements that the sample should contain, among other metadata, and that are taken at the time of any of the handovers within its corresponding handover group.
@@ -501,7 +510,7 @@ Note that a Handover workflow Model instance dictates the processing steps, but 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelInstance
 crc:HandoverWorkflowModelInstance rdf:type owl:Class ;
                                   rdfs:subClassOf crc:HandoverWorkflowModel ;
-                                  rdfs:comment """The beginning of a series of HandoverWorkflowModelStep instances. Each HandoverWorkflowModelStep instance indicates an assignment of one or more samples to a step in the same entity of type WorkflowModel. 
+                                  rdfs:comment """The beginning of a series of HandoverWorkflowModelStep instances. Each HandoverWorkflowModelStep instance indicates an assignment of one or more samples to a step in the same entity of type WorkflowModel.
 
 
 An entity of this class will thus completely characterize a WorkflowModel by being able to apply it to existing objects in the RDMS during validation.""" ;
@@ -579,7 +588,9 @@ crc:PSMProcess rdf:type owl:Class ;
 crc:PhotoProcess rdf:type owl:Class ;
                  rdfs:subClassOf crc:CharacterizationActivity ,
                                  crc:UnidentifiableProcess ,
-                                 pmdco:AnalysingProcess .
+                                 pmdco:AnalysingProcess ;
+                 rdfs:comment "A process where photos have been taken. Used by Activity instances and Activity Models to denote the type of measurements they refer to." ;
+                 rdfs:label "Photo Process" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance
@@ -613,7 +624,7 @@ crc:ReportProcess rdf:type owl:Class ;
                   rdfs:subClassOf crc:CharacterizationActivity ,
                                   crc:UnidentifiableProcess ,
                                   pmdco:AnalysingProcess ;
-                  rdfs:comment "A process where a non-synthesis related report has been uploaded. We treat it as a characterization. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+                  rdfs:comment "A process where a non-synthesis related report has been uploaded (i.e., anything from presentations to .pdf documents). We treat it as a characterization. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/RequestForSynthesis
@@ -699,7 +710,7 @@ crc:SynthesisOrTreatmentProcess rdf:type owl:Class ;
                rdfs:subClassOf crc:CharacterizationActivity ,
                                crc:UnidentifiableProcess ,
                                pmdco:AnalysingProcess ;
-               rdfs:comment "A process where a synthesis or treatment has been performed, resulting in a report. We treat it as a characterization. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+               rdfs:comment "A process where a synthesis or treatment has been performed, resulting in a synthesis report. We treat it as a characterization. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
 
 
 
