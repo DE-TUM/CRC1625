@@ -24,4 +24,6 @@ This project is structured into six different main folders, each containing thei
 </div>
 
 ## Licensing
-All code and documentation is licensed under the GNU Affero General Public License v3.0. The CRC 1625 ontology (`crc.ttl`) is licensed under the CC BY-SA 4.0.
+All code and documentation is licensed under the GNU Affero General Public License v3.0. 
+
+The CRC 1625 ontology (`crc.ttl`) is licensed under the CC BY-SA 4.0.
