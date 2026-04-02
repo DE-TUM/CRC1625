@@ -55,10 +55,27 @@ Before running `Qlever` for the first time, it is necessary to execute `qlever -
 The following CLI applications are offered, offering documentation with the `-h / --help` parameter:
 - `run_rdf_datastore_API.py`: A lightweight HTTP API that communicates with an RDF datastore (e.g. Virtuoso) and serves requests to the rest of this system's modules. This module, alongside the underlying RDF datastore, can be located in a different system than the rest of the below modules and the SQL store. Their endpoints are controlled in the `.env` file.
 - `main.py`: Executes the complete YARRRML mappings pipeline over a specified database backup. Note that the production database is not offered, but all DB backups used for testing are available.
-- `run_mappings_output_test.py`: Performs a correctness test of the YARRRML mappings
+- `run_handover_workflows_webui.py`: Runs the web-based tools (SPARQL endpoint, handover workflows validation UI...).
+- `run_mappings_output_test.py`: Performs a correctness test of the YARRRML mappings.
 - `run_handover_workflows_validation_test.py`: Performs an experimental workflows validation correctness test.
 - `run_performance_test.py`: Performs a time and resource consumption for the KG creation pipeline. This script is based on a configuration file (`performance_test/runs_configuration.json`) that is already offered (and was used for the tests). If no file is provided, it will create one based on statistics of the objects in a production MatInf database dump.
+
 
 The following Python modules and APIs are also available:
 - `create_synthetic_records.py`: Creates a synthetic MatInf database that follows specified counts and probabilities of containing different objects.
 - `workflows_validation/validation.py`: Manages the in-memory and RDF-backed representations of workflow models and their instances, and performs validation on the MatInf data using them.
+
+
+### Running the applications manually
+Although we recommend using the `deployment` provided at the root of this project, it is also possible to run the individual parts 
+of the pipeline for e.g. development/debugging purposes
+All tools have a CLI interface that can be consulted with the `-h` / `--help`
+- Executing the mappings: 
+  1. Set up `virtuoso` (see the root project documentation)
+  2. Execute `run_rdf_datastore_API.py` as a background process
+  3. Execute `main.py`
+- Executing the web UI:
+  1. Set up `virtuoso` (see the root project documentation)
+  2. Execute `run_rdf_datastore_API.py` as a background process
+  3. (Optional) Execute `main.py` to populate the KG.
+  4. Execute `run_handover_workflows_webui.py`. The `--debug` flag can be used to skip authentication middleware.
