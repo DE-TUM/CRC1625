@@ -574,8 +574,16 @@ async def landing_page():
         ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-m').style('color: #000000')
         ui.space()
         ui.image('/assets/crc_logo_black_letters_wide.png').classes('w-26')
-
+    
+    #HERE IS THE MLEM CARD
     with ui.row().classes('w-full justify-center gap-8 p-8'):
+        with ui.card().tight().classes('w-128 h-100 cursor-pointer hover:shadow-lg') \
+                .on('click', lambda: ui.navigate.to('/workflows')):
+            ui.image('assets/workflows_validation_header.png').props('fit=scale-down').classes('h-90')
+            with ui.column().classes('p-4 w-full bg-secondary'):
+                ui.label('Mlem').classes('text-h6')
+
+        
         with ui.card().tight().classes('w-128 h-100 cursor-pointer hover:shadow-lg') \
                 .on('click', lambda: ui.navigate.to('/workflows')):
             ui.image('assets/workflows_validation_header.png').props('fit=scale-down').classes('h-90')
