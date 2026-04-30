@@ -9,11 +9,12 @@ from nicegui import ui, app
 from datastores.rdf import rdf_datastore_client
 
 module_dir = os.path.dirname(__file__)
-prefixes: str = open(os.path.join(module_dir, '../handover_workflows_validation/queries/prefixes.sparql')).read()
+prefixes: str = open(os.path.join(module_dir, '../workflows_validation/queries/prefixes.sparql')).read()
 details_single_user_query = prefixes + open(os.path.join(module_dir, 'queries/details_single_user.sparql'), 'r').read()
 
 pages_with_no_demo_access = ["/sparql"]
 
+DEBUGGING_MODE = False
 
 def show_materialization_card(action_after_materialization_finished: Union[Callable[[], None], Callable[[], Awaitable[None]]]):
     async def check_materialization_status():
@@ -24,8 +25,6 @@ def show_materialization_card(action_after_materialization_finished: Union[Calla
             else:
                 action_after_materialization_finished()
 
-
-
     with ui.card(align_items='center').classes('absolute-center'):
         with ui.row().classes('items-center'):
             ui.markdown(f"""**The Knowledge Graph is currently being refreshed. This page will automatically reload when finished. This process should only take a couple minutes.**
@@ -34,6 +33,7 @@ def show_materialization_card(action_after_materialization_finished: Union[Calla
 
         with ui.row().classes('items-center'):
             ui.spinner(size='lg')
+
 
 def activate_demo_mode():
     # Become Sir SHACLot and "bypass" authentication
@@ -112,12 +112,18 @@ def matinf_or_demo_login_required(func):
 
     Allows the user to access as the demo user as an alternative
     """
+
     @wraps(func)
     async def wrapper(*args, **kwargs):
         await ui.context.client.connected()
-
-        if app.storage.tab.get('demo_mode', False):
+        if app.storage.tab.get('demo_mode', False) and ui.context.client.page.path not in pages_with_no_demo_access:
             return await func(*args, **kwargs)
+        elif DEBUGGING_MODE:
+                app.storage.tab['demo_mode'] = False # We act as a normal, editor user
+                app.storage.tab['user_id'] = -1
+                app.storage.tab['user_name'] = "Sir DEBUGalot"
+                app.storage.tab['user_project'] = "A06"
+                return await func(*args, **kwargs)
         else:
             matinf_response = await fetch_matinf_authentication()
 
@@ -125,7 +131,7 @@ def matinf_or_demo_login_required(func):
                 await store_user_info_from_matinf(matinf_response)
 
                 return await func(*args, **kwargs)
-            else: # Redirect to the login page
+            else:  # Redirect to the login page
                 ui.navigate.to(f'/login?redirect_to={ui.context.client.page.path}')
 
     return wrapper

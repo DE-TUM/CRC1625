@@ -5,6 +5,8 @@ from typing import List, Tuple, Coroutine
 from dotenv import load_dotenv
 
 import httpx
+from rdflib import Dataset
+from rdflib.plugins.stores.sparqlstore import SPARQLStore
 
 from datastores.rdf.rdf_datastore import UpdateType, MAIN_GRAPH_IRI, WORKFLOWS_GRAPH_IRI
 
@@ -221,6 +223,20 @@ async def is_materialization_active():
     yield no or incomplete results to queries until finished
     """
     return (await _get("is_materialization_active")).json()['data']
+
+async def get_validation_data_graph() -> Dataset:
+    """
+    Returns the data graph object to be fed to pySHACL. Internally, it is a
+    SPARQL endpoint redirected to a specific endpoint prepared for pySHACL's
+    queries.
+    """
+    store = SPARQLStore(
+        query_endpoint=f"{RDF_DATASTORE_API_ENDPOINT}/launch_query_validation",
+        method="POST"
+    )
+
+    return Dataset(store, default_union=True)
+
 
 def run_sync(coroutine : Coroutine):
     """

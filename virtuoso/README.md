@@ -26,9 +26,11 @@ docker run -d \
   - [Make virtuoso correctly treat untyped and typed xsd:string literals as the same during comparisons](https://github.com/openlink/virtuoso-opensource/issues/728#issuecomment-1937376203)
   - Add `/data` under `DirsAllowed` in the `virtuoso.ini` file
   - Increase `MaxVectorSize` in the `virtuoso.ini` file to, e.g., 4000000
-  - Set up proper SPARQL UPDATE and INSET user permissions using conductor. An easy (but more unsafe) way to do this is to execute the following via ISQL:
+  - Set up proper SPARQL UPDATE and INSERT user permissions using conductor. An easy (but more unsafe) way to do this is to execute the following via ISQL:
 
 ```
+DB.DBA.RDF_DEFAULT_USER_PERMS_SET ('nobody', 7);
+
 -- Set default permissions
 UPDATE DB.DBA.SYS_USERS 
    SET U_DEF_PERMS = '110100005R' 

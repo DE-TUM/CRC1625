@@ -1,0 +1,58 @@
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix pmdco:      <https://w3id.org/pmd/co/> .
+@prefix crc:           <https://crc1625.mdi.ruhr-uni-bochum.de/> .
+@prefix project:    <https://crc1625.mdi.ruhr-uni-bochum.de/project/> .
+
+crc:handover_group_shape
+    a sh:NodeShape ;
+    sh:targetNode <{{ target_node }}> ;
+
+    sh:property [
+        sh:path crc:assignedTo ;
+        {% if projects is iterable and projects is not string -%}
+        sh:in ({% for project in projects %}<{{ project }}>{% if not loop.last %}, {% endif %}{% endfor %}) ;
+        {%- else -%}
+        sh:in (<{{ projects }}>) ;
+        {%- endif %}
+        sh:message "The handover group is within an incorrect project"
+    ] ;
+
+    {% if not other_activities_allowed and projects is iterable and projects is not string%}
+    sh:property [
+        sh:path (crc:substep [ sh:zeroOrMorePath crc:nextStep ] crc:substep) ;
+
+        sh:qualifiedValueShape [
+            sh:class crc:CharacterizationActivityInstance ;
+        ] ;
+
+        sh:qualifiedMinCount {{ projects|length }} ;
+        sh:qualifiedMaxCount {{ projects|length }} ;
+        sh:message "There is a different number of activities done in the handover group. We expected {{ projects|length }}"
+    ] ;
+    {% endif %}
+
+
+    {% if allowed_activities is iterable and allowed_activities is not string -%}
+    {% for activity_template_str in allowed_activities %}
+    sh:property [
+        sh:path (crc:substep [ sh:zeroOrMorePath crc:nextStep ] crc:substep) ;
+        sh:qualifiedValueShape [
+            sh:class <{{ activity_template_str.split('|')[1] }}> ;
+        ] ;
+
+        sh:qualifiedMinCount 1 ;
+        sh:message "Could not find {{ activity_template_str.split('|')[0] }} measurements in the handover group"
+    ] {{ "." if loop.last else ";" }}
+    {% endfor %}
+    {%- else -%}
+    sh:property [
+        sh:path (crc:substep [ sh:zeroOrMorePath crc:nextStep ] crc:substep) ;
+        sh:qualifiedValueShape [
+            sh:class <{{ allowed_activities.split('|')[1] }}> ;
+        ] ;
+
+        sh:qualifiedMinCount 1 ;
+        sh:message "Could not find {{ allowed_activities.split('|')[0] }} measurements in the handover group"
+    ] .
+    {% endif %}

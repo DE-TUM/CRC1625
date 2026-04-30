@@ -1,0 +1,6 @@
+SELECT DISTINCT ?workflow_step_assignment_iri ?p ?o WHERE {
+    GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
+        <{workflow_instance_iri}> crc:hasAssignment ?workflow_step_assignment_iri.
+        ?workflow_step_assignment_iri ?p ?o.
+    }
+}

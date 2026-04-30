@@ -1,0 +1,15 @@
+DELETE {
+    GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
+        ?workflow_instance crc:workflowModelInstanceOf <{old_workflow_model_iri}>.
+    }
+}
+INSERT {
+    GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
+        ?workflow_instance crc:workflowModelInstanceOf <{new_workflow_model_iri}>.
+    }
+}
+WHERE {
+  GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
+        ?workflow_instance crc:workflowModelInstanceOf <{old_workflow_model_iri}>.
+  }
+}

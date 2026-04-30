@@ -2,13 +2,12 @@ import argparse
 import asyncio
 import os
 
-import starlette
 from dotenv import load_dotenv
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from datastores.rdf import rdf_datastore_client
-from datastores.rdf.virtuoso_datastore import VirtuosoRDFDatastore
-from handover_workflows_validation import handover_workflows_validation
+from datastores.rdf.rdf_datastore import WORKFLOWS_GRAPH_IRI
+from handover_workflows_validation_webui import demo_data_loader, middleware
 
 # Required for serving their pages
 import handover_workflows_validation_webui.workflow_instance_ui.edit_workflow_instance_page
@@ -55,26 +54,26 @@ async def setup_debug_files(clear_main_graph: bool = False,
         await rdf_datastore_client.bulk_file_load([f["file"] for f in ontology_files], delete_files_after_upload=False)
 
     if clear_workflows_graph:
-        await rdf_datastore_client.clear_triples(handover_workflows_validation.WORKFLOWS_GRAPH_IRI)
+        await rdf_datastore_client.clear_triples(WORKFLOWS_GRAPH_IRI)
 
     # Load Sir SHACLot alongside his demo MLs/Samples and handover workflows
-    await rdf_datastore_client.upload_file(os.path.join(module_dir, "handover_workflows_validation/validation_test/validation_test_triples_webui.ttl"))
-
-    # Load Sir SHACLot's demo handover workflow models and instances
-    test_file_path = os.path.join(module_dir, 'handover_workflows_validation/validation_test/workflow_config_files/')
-
-    await rdf_datastore_client.upload_file(test_file_path + "workflow_models_webui.ttl", graph_iri=handover_workflows_validation.WORKFLOWS_GRAPH_IRI)
-    await rdf_datastore_client.upload_file(test_file_path + "workflow_instances_webui.ttl", graph_iri=handover_workflows_validation.WORKFLOWS_GRAPH_IRI)
-
+    await demo_data_loader.load_demo_data()
 
 if __name__ in {"__main__", "__mp_main__"}:
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "--debug",
+        "--upload_debug_files",
         action="store_true",
-        default=os.getenv("WEBUI_DEBUG", "false").lower() == "true",
+        default=os.getenv("WEBUI_UPLOAD_DEBUG_FILES", "false").lower() == "true",
         help="Debugging mode: Upload demo files"
+    )
+
+    parser.add_argument(
+        "--bypass_auth",
+        action="store_true",
+        default=os.getenv("WEBUI_BYPASS_AUTH", "false").lower() == "true",
+        help="Debugging mode: Bypass authentication"
     )
 
     parser.add_argument(
@@ -103,11 +102,14 @@ if __name__ in {"__main__", "__mp_main__"}:
 
     uvicorn_logging_level = 'warning'
     access_log = False
-    if args.debug:
+    if args.upload_debug_files:
         asyncio.run(setup_debug_files(clear_main_graph=args.clear_main_graph,
                                       clear_workflows_graph=args.clear_workflows_graph))
         uvicorn_logging_level = 'debug'
         access_log = True
+
+    if args.bypass_auth:
+        middleware.DEBUGGING_MODE = True # Bypass authentication as a non-demo user (i.e., access everything with edit permissions)
 
     app.add_static_files("/assets", ASSETS_FOLDER)
 

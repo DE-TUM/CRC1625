@@ -12,6 +12,7 @@ import datastores.sql.sql_db as sql_db
 import materialization.materialization as materialization
 import postprocessing.postprocessing as postprocessing
 from datastores.rdf import rdf_datastore_client, rdf_datastore
+from handover_workflows_validation_webui.demo_data_loader import load_demo_data
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -96,8 +97,7 @@ def serve_KG(skip_ontologies_upload: bool = True,
         db.stop_DB()
 
     # Load Sir SHACLot alongside his demo MLs/Samples and handover workflows
-    rdf_datastore_client.run_sync(rdf_datastore_client.upload_file(os.path.join(module_dir, "handover_workflows_validation/validation_test/validation_test_triples_webui.ttl")))
-
+    rdf_datastore_client.run_sync(load_demo_data())
     rdf_datastore_client.run_sync(rdf_datastore_client.signal_stop_materialization())
 
     return performance_log_mappings, resource_usage_mappings, performance_log_postprocessing, resource_usage_postprocessing, file_upload_end

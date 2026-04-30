@@ -1,9 +1,0 @@
-  sh:property [
-    sh:path (crc:substep [ sh:zeroOrMorePath crc:nextStep ] crc:substep) ;
-    sh:qualifiedValueShape [
-      sh:class {activity_class} ;
-    ] ;
-
-    sh:qualifiedMinCount 1 ;
-    sh:message "Could not find {measurement_name} measurements in the handover group"
-  ] ;

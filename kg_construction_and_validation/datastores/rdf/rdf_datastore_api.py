@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import re
 import secrets
 import sys
 import uuid
@@ -9,7 +10,7 @@ from typing import List, Tuple, Dict
 from dotenv import load_dotenv
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Body, Depends, status
+from fastapi import FastAPI, HTTPException, Body, Depends, status, Request, Response
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 from pydantic import BaseModel
 
@@ -30,6 +31,12 @@ load_dotenv(os.path.join(module_dir, '../../.env'))
 RDF_DATASTORE_API_HOST = os.environ.get("RDF_DATASTORE_API_HOST")
 RDF_DATASTORE_API_PORT = os.environ.get("RDF_DATASTORE_API_PORT")
 SPARQL_ENDPOINT_SECRET = os.environ.get("SPARQL_ENDPOINT_SECRET")
+
+# Matches:
+# 1. Everything before the first {
+# 2. Everything inside the first { ... } pair
+# 3. Everything after the last }
+CURLY_BRACES_REGEX = re.compile(r'^([^{]*\{)(.*)\}(.*)$', re.DOTALL)
 
 class DatastoreType(Enum):
     VIRTUOSO = "virtuoso"
@@ -97,6 +104,41 @@ async def rpc_launch_query(payload: QueryRequest):
         result = await rdf_store.launch_query(payload.query)
 
         return {"status": result.status_code, "data": result.json()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+def wrap_query_for_virtuoso(query_str : str):
+    """
+    Given a valid SPARQL query, ensures that all the VALUES blocks are inside the WHERE clause.
+    This fixes pySHACL's remote validation queries on Virtuoso, which somehow doesn't appreciate
+    VALUES after a WHERE clause as it thinks they are SQL commands (don't ask how or why...)
+
+    A quick fix is to simply wrap the very first/outermost { } block inside another set of curly braces
+    """
+
+    return CURLY_BRACES_REGEX.sub(r'\1 { \2 } \3 }', query_str.strip())
+
+
+@app.post("/launch_query_validation")
+async def rpc_launch_query_validation(request: Request):
+    """
+    Endpoint that intercepts pySHACL queries and (unfortunately) fixes them for Virtuoso
+    """
+    query_string = ""
+    try:
+        body = await request.body()
+        query_string = body.decode("utf-8")
+
+        httpx_response = await rdf_store.launch_query(
+            wrap_query_for_virtuoso(query_string)
+        )
+
+        return Response(
+            content=httpx_response.text,
+            media_type="application/sparql-results+json"
+        )
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

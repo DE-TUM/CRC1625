@@ -1,26 +1,31 @@
 import asyncio
 import os
-from copy import copy
 from dataclasses import dataclass, field
 
 from nicegui import ui, app
-from nicegui.elements.button import Button
 from nicegui.elements.column import Column
 from nicegui.elements.drawer import RightDrawer
 from nicegui.elements.input import Input
 from nicegui.elements.select import Select
+from rdflib import URIRef
 
 from datastores.rdf import rdf_datastore_client
-from handover_workflows_validation.handover_workflows_validation import get_workflow_model_names_and_creator_user_ids, \
-    get_workflow_instances_of_model, read_workflow_model, store_workflow_model, WorkflowInstance, is_workflow_instance_valid, WorkflowModel, \
-    create_workflow_instance, delete_workflow_instance
+from handover_workflows_validation_webui.common_functions import get_sample_object_id_of_handover_group_iri
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent
 from handover_workflows_validation_webui.middleware import matinf_or_demo_login_required, activate_demo_mode, log_out, show_materialization_card
 from handover_workflows_validation_webui.workflow_model_ui.edit_workflow_model_page import workflow_model_to_nodes_and_edges
+from workflows_validation.CRC_1625_workflows_validator.CRC_1625_workflows_validator import get_creator_user_id, set_creator_user_id, CRC1625WorkflowModelStep, \
+    crc_prefix
+from workflows_validation.workflow_instance import WorkflowInstance, delete_workflow_instance, store_workflow_instance, get_workflow_instances_of_model, \
+    StepAssignment
+from workflows_validation.workflow_model import store_workflow_model, read_workflow_model, WorkflowModel
+from workflows_validation.workflows_validator import is_workflow_instance_valid
 
 module_dir = os.path.dirname(__file__)
-prefixes: str = open(os.path.join(module_dir, '../handover_workflows_validation/queries/prefixes.sparql')).read()
+prefixes: str = open(os.path.join(module_dir, '../workflows_validation/queries/prefixes.sparql')).read()
 details_all_users_query = prefixes + open(os.path.join(module_dir, 'queries/details_all_users.sparql'), 'r').read()
+get_workflow_models_and_creators_query = prefixes + open(os.path.join(module_dir, 'queries/get_workflow_models_and_creators.sparql'), 'r').read()
+
 
 @dataclass
 class WorkflowsPageState:
@@ -35,7 +40,7 @@ class WorkflowsPageState:
     search_input_workflow_models: Input = None
     creator_selector_workflow_models: Select = None
     workflow_models_table_container: Column = None
-    workflow_models_set: set[tuple[str, str]] = field(default_factory=set)
+    workflow_model_details: dict[URIRef, tuple[str, str]] = field(default_factory=dict)
     filtered_workflow_instances_of_current_workflow_model: list[WorkflowInstance] = field(default_factory=list)
     workflow_instances_container: Column = None
     search_input_workflow_instances: Input = None
@@ -69,14 +74,16 @@ You can visualize the demo data diagrams by clicking the *Visualize data* button
 * The workflow model and instance settings are handled via forms and controls. Interaction via the graph view itself (Cytoscape) is planned but not yet implemented.
 """
 
+
 def edit_handover_workflow_instance_button_click():
-    ui.navigate.to(
-        f'/workflows/edit_workflow_instance/{app.storage.tab['current_workflow_model'].workflow_model_name}/{app.storage.tab['current_workflow_model'].creator_user_id}/{app.storage.tab['current_workflow_instance'].workflow_instance_name}/{app.storage.tab['current_workflow_instance'].creator_user_id}')
+    workflow_model_uuid = app.storage.tab['current_workflow_model'].iri.rsplit('/', 1)[-1]
+    workflow_instance_uuid = app.storage.tab['current_workflow_instance'].iri.rsplit('/', 1)[-1]
+    ui.navigate.to(f'/workflows/edit_workflow_instance/{workflow_model_uuid}/{workflow_instance_uuid}')
 
 
 async def handle_workflow_instance_deletion(workflows_page_state: WorkflowsPageState):
     await delete_workflow_instance(app.storage.tab['current_workflow_instance'])
-    ui.notify(f'Workflow Instance {app.storage.tab['current_workflow_instance'].workflow_instance_name} deleted', color='positive')
+    ui.notify(f'Workflow Instance {app.storage.tab['current_workflow_instance'].name} deleted', color='positive')
     # Force the suer to select the workflow model again
     workflows_page_state.main_content.clear()
     workflows_page_state.right_drawer.clear()
@@ -86,7 +93,7 @@ async def delete_workflow_instance_button_click(workflows_page_state: WorkflowsP
     if app.storage.tab['demo_mode']:
         ui.notify("You cannot delete workflow instances as a demo user", type='negative')
         return
-    elif app.storage.tab['user_id'] != app.storage.tab['current_workflow_instance'].creator_user_id:
+    elif app.storage.tab['user_id'] != get_creator_user_id(app.storage.tab['current_workflow_instance']):
         ui.notify(f"You are not the owner of this workflow instance, so you cannot delete it", type='negative')
         return
 
@@ -101,25 +108,22 @@ async def delete_workflow_instance_button_click(workflows_page_state: WorkflowsP
 
 
 def edit_handover_workflow_model_button_click():
-    ui.navigate.to(f'/workflows/edit_workflow_model/{app.storage.tab['current_workflow_model'].workflow_model_name}/{app.storage.tab['current_workflow_model'].creator_user_id}')
+    workflow_model_uuid = app.storage.tab['current_workflow_model'].iri.rsplit('/', 1)[-1]
+    ui.navigate.to(f'/workflows/edit_workflow_model/{workflow_model_uuid}')
 
 
 async def copy_handover_workflow_model(workflows_page_state: WorkflowsPageState):
-    copy_of_current_workflow_model = copy(app.storage.tab['current_workflow_model'])
-    copy_of_current_workflow_model.workflow_model_name = "Copy of " +copy_of_current_workflow_model.workflow_model_name
-    copy_of_current_workflow_model.creator_user_id = app.storage.tab['user_id']
+    copy_of_current_workflow_model = app.storage.tab['current_workflow_model'].create_copy()
+    set_creator_user_id(copy_of_current_workflow_model, app.storage.tab['user_id'])
 
     await store_workflow_model(copy_of_current_workflow_model)
 
-    ui.notify(f'Workflow copied as {copy_of_current_workflow_model.workflow_model_name}', color='positive')
+    print(f"Cloned {app.storage.tab['current_workflow_model'].iri} into {copy_of_current_workflow_model.iri}")
+    ui.notify(f'Workflow copied as {copy_of_current_workflow_model.name}', color='positive')
 
     # Add it to the left sidebar's table
-    workflows_page_state.workflow_models_set.add(
-        (
-            copy_of_current_workflow_model.workflow_model_name,
-            str(copy_of_current_workflow_model.creator_user_id)
-        )
-    )
+    workflows_page_state.workflow_model_details[copy_of_current_workflow_model.iri] = (copy_of_current_workflow_model.name,
+                                                                                       str(get_creator_user_id(copy_of_current_workflow_model)))
 
     # Apply the filters again and show it
     populate_workflow_models_table(workflows_page_state)
@@ -145,42 +149,43 @@ def handle_workflow_instance_table_click(workflow_instance: WorkflowInstance, wo
             )
 
         right_drawer_label.set_text(
-            f"Workflow instance '{app.storage.tab['current_workflow_instance'].workflow_instance_name}' options")
+            f"Workflow instance '{app.storage.tab['current_workflow_instance'].name}' options")
 
-    ui.notify(f'Selected Workflow Instance {app.storage.tab['current_workflow_instance'].workflow_instance_name}', color='info')
+    ui.notify(f'Selected Workflow Instance {app.storage.tab['current_workflow_instance'].name}', color='info')
 
 
 def populate_workflow_models_table(workflows_page_state: WorkflowsPageState):
     search_term = "" if workflows_page_state.search_input_workflow_models.value is None else workflows_page_state.search_input_workflow_models.value.lower()
 
-    filtered_workflow_models_list = list(workflows_page_state.workflow_models_set)
+    filtered_workflow_models_list = list(workflows_page_state.workflow_model_details.items())
 
     # Filter them by name
     if search_term:
         filtered_workflow_models_list = [
-            row for row in filtered_workflow_models_list if search_term in row[0].lower()
+            (uri, (name, user_id)) for (uri, (name, user_id)) in filtered_workflow_models_list if search_term in name.lower()
         ]
 
     # Filter them by user ID
     if workflows_page_state.creator_selector_workflow_models.value:
         filtered_workflow_models_list = [
-            row for row in filtered_workflow_models_list if str(workflows_page_state.creator_selector_workflow_models.value) == row[1]
+            (uri, (name, user_id)) for (uri, (name, user_id)) in filtered_workflow_models_list if
+            str(workflows_page_state.creator_selector_workflow_models.value) == user_id
         ]
 
     # Sort them by name
-    list(filtered_workflow_models_list).sort(key=lambda x: x[0].lower())
+    filtered_workflow_models_list.sort(key=lambda x: x[1][0].lower())
 
     # Show them
     workflows_page_state.workflow_models_table_container.clear()
 
-    with workflows_page_state.workflow_models_table_container:
-        for row in filtered_workflow_models_list:
-            with ui.button(on_click=lambda r=row: show_workflow_model_instances(r[0], int(r[1]), workflows_page_state)).props('no-caps unelevated').classes(
-                    'w-full'):
+    with (workflows_page_state.workflow_models_table_container):
+        for (uri, (name, user_id)) in filtered_workflow_models_list:
+            with ui.button(on_click=lambda f, u=uri: show_workflow_model_instances(u, workflows_page_state)
+                           ).props('no-caps unelevated').classes('w-full'):
                 with ui.row().classes('w-full py-1 items-center'):
-                    ui.label(str(row[0])).classes('w-1/2 text-left').style('color: #000000')
+                    ui.label(str(name)).classes('w-1/2 text-left').style('color: #000000')
                     ui.space()
-                    ui.label(str(row[1])).classes('w-0 flex-grow text-right').style('color: #000000')
+                    ui.label(str(user_id)).classes('w-0 flex-grow text-right').style('color: #000000')
 
 
 async def create_empty_workflow_instance(workflow_instance_name: str,
@@ -188,24 +193,27 @@ async def create_empty_workflow_instance(workflow_instance_name: str,
     if app.storage.tab['demo_mode']:
         ui.notify("You cannot create Workflow Instances as a demo user", type='negative')
         return
-    elif app.storage.tab['user_id'] != app.storage.tab['current_workflow_model'].creator_user_id:
+    elif app.storage.tab['user_id'] != get_creator_user_id(app.storage.tab['current_workflow_model']):
         ui.notify(f"You are not the owner of this workflow, so you cannot add workflow instances to it. You can create a copy of it", type='negative')
         return
 
     workflow_instance = WorkflowInstance()
-    workflow_instance.creator_user_id = app.storage.tab['user_id']
-    workflow_instance.workflow_model_name = app.storage.tab['current_workflow_model'].workflow_model_name
-    workflow_instance.workflow_instance_name = workflow_instance_name
+    workflow_instance.create_new_iri()
+    workflow_instance.name = workflow_instance_name
+    set_creator_user_id(workflow_instance, app.storage.tab['user_id'])
+    workflow_instance.workflow_model_iri = app.storage.tab['current_workflow_model'].iri
 
     # We must add step assignments, even if they don't hold references to any objects
-    for step_name in app.storage.tab['current_workflow_model'].workflow_model_steps:
-        workflow_instance.step_assignments[step_name] = []
+    for step_iri in app.storage.tab['current_workflow_model'].workflow_model_steps.keys():
+        workflow_instance.step_assignments[step_iri] = StepAssignment()
+        workflow_instance.step_assignments[step_iri].create_new_iri()
+        workflow_instance.step_assignments[step_iri].workflow_step_iri = step_iri
+        workflow_instance.step_assignments[step_iri].property_to_follow = crc_prefix.nextStep
 
-    await create_workflow_instance(workflow_instance, app.storage.tab['current_workflow_model'])
+    await store_workflow_instance(workflow_instance)
 
     # Show them again
-    await show_workflow_model_instances(app.storage.tab['current_workflow_model'].workflow_model_name,
-                                        app.storage.tab['current_workflow_model'].creator_user_id,
+    await show_workflow_model_instances(app.storage.tab['current_workflow_model'].iri,
                                         workflows_page_state)
 
     ui.notify(f'Workflow Instance {workflow_instance_name} created', color='positive')
@@ -225,7 +233,9 @@ async def populate_workflow_instances_table(workflows_page_state: WorkflowsPageS
             """
             Runs validation for the workflow model and instance pair, and updates the corresponding icon according to the results
             """
-            validation_status = await is_workflow_instance_valid(workflow_model, workflow_instance)
+            validation_status, _ = await is_workflow_instance_valid(workflow_model,
+                                                                    workflow_instance,
+                                                                    return_individual_results=False)
 
             validation_icon_column.clear()
             with validation_icon_column:
@@ -242,33 +252,33 @@ async def populate_workflow_instances_table(workflows_page_state: WorkflowsPageS
 
         # First pass over workflow instances to populate the sample ID filter
         search_input_workflow_instances_options: list[str] = []
-        sample_input_workflow_instances_options: set[int] = set()
-        for workflow_instance in app.storage.tab['workflow_instances_of_current_workflow_model'].values():
-            search_input_workflow_instances_options.append(workflow_instance.workflow_instance_name)
-            for step_assignment_samples in workflow_instance.step_assignments.values():
-                sample_input_workflow_instances_options.update(step_assignment_samples)
-
-        sample_input_workflow_instances_options_list = list(sample_input_workflow_instances_options)
-        sorted(sample_input_workflow_instances_options_list)
+        handover_group_iri_to_sample_id: dict[URIRef, int] = dict()
+        for workflow_instance in app.storage.tab['workflow_instances_of_current_workflow_model']:
+            search_input_workflow_instances_options.append(workflow_instance.name)
+            for step_assignment in workflow_instance.step_assignments.values():
+                for assigned_entity in step_assignment.assigned_entities:
+                    handover_group_iri_to_sample_id[assigned_entity] = await get_sample_object_id_of_handover_group_iri(assigned_entity)
 
         workflows_page_state.search_input_workflow_instances.set_autocomplete(search_input_workflow_instances_options)
-        workflows_page_state.sample_input_workflow_instances.set_options(sample_input_workflow_instances_options_list)
+        workflows_page_state.sample_input_workflow_instances.set_options(handover_group_iri_to_sample_id)
 
-        # Second pass over the workflow instances to show thet able and run validation jobs
+        # Second pass over the workflow instances to show the able and run validation jobs
         validation_jobs = []
-        for workflow_instance in app.storage.tab['workflow_instances_of_current_workflow_model'].values():
+        for workflow_instance in app.storage.tab['workflow_instances_of_current_workflow_model']:
             # Filter by name
             if workflows_page_state.search_input_workflow_instances.value:
-                if workflows_page_state.search_input_workflow_instances.value not in workflow_instance.workflow_instance_name.lower():
+                if workflows_page_state.search_input_workflow_instances.value not in workflow_instance.name.lower():
                     continue
 
             if workflows_page_state.sample_input_workflow_instances.value:
                 has_sample = False
-                for step_assignment_samples in workflow_instance.step_assignments.values():
+                for step_assignment in workflow_instance.step_assignments.values():
                     for selection_value in workflows_page_state.sample_input_workflow_instances.value:
-                        if selection_value in step_assignment_samples:
+                        if selection_value in step_assignment.assigned_entities:
                             has_sample = True
                             break
+                    if has_sample:
+                        break
 
                 if not has_sample:
                     continue
@@ -276,12 +286,12 @@ async def populate_workflow_instances_table(workflows_page_state: WorkflowsPageS
             with ui.button(on_click=lambda r=workflow_instance: handle_workflow_instance_table_click(r, workflows_page_state)).props(
                     'no-caps unelevated color=secondary').classes('w-full p-1'):
                 with ui.row().classes('w-full py-1 items-center'):
-                    ui.label(workflow_instance.workflow_instance_name).classes('w-1/3 text-left').style('color: #000000')
+                    ui.label(workflow_instance.name).classes('w-1/3 text-left').style('color: #000000')
 
                     associated_objects = set()
-                    for assignments in workflow_instance.step_assignments.values():
-                        for assignment in assignments:
-                            associated_objects.add(str(assignment))
+                    for step_assignment in workflow_instance.step_assignments.values():
+                        for assigned_entity in step_assignment.assigned_entities:
+                            associated_objects.add(str(await get_sample_object_id_of_handover_group_iri(assigned_entity)))
 
                     ui.label(', '.join(sorted(associated_objects))).classes('w-1/3 text-left').style('color: #000000')
 
@@ -295,39 +305,40 @@ async def populate_workflow_instances_table(workflows_page_state: WorkflowsPageS
         if not app.storage.tab['demo_mode']:
             ui.button("Create a new workflow instance", color='info',
                       on_click=lambda: create_empty_workflow_instance(
-                          f"New workflow instance of {app.storage.tab['current_workflow_model'].workflow_model_name}",
+                          f"New workflow instance of {app.storage.tab['current_workflow_model'].name}",
                           workflows_page_state))
         else:
             ui.button("Add a new workflow instance", color='gray',
                       on_click=lambda: ui.notify("You cannot create new workflow instances as a demo user", type='negative'))
 
-
         # Run validation and update the spinners
         await asyncio.gather(*validation_jobs)
 
 
-async def show_workflow_model_instances(workflow_model_name: str,
-                                        workflow_model_creator_user_id: int,
+async def show_workflow_model_instances(workflow_model_iri: URIRef,
                                         workflows_page_state: WorkflowsPageState):
     """
     Workflow instances of the selected workflow model from the left drawer, also allowing to edit or copy the model and to create a new instance. Empty until so
     """
     # Load the selected workflow model and its instances
-    app.storage.tab['current_workflow_model'] = await read_workflow_model(workflow_model_name, workflow_model_creator_user_id)
-    app.storage.tab['workflow_instances_of_current_workflow_model'] = await get_workflow_instances_of_model(app.storage.tab['current_workflow_model'])
+    app.storage.tab['current_workflow_model'] = await read_workflow_model(workflow_model_iri)
+    workflow_instances_of_current_workflow_model = await get_workflow_instances_of_model(app.storage.tab['current_workflow_model'])
+    app.storage.tab['workflow_instances_of_current_workflow_model'] = list(workflow_instances_of_current_workflow_model.values())
     workflows_page_state.filtered_workflow_instances_of_current_workflow_model = app.storage.tab['workflow_instances_of_current_workflow_model']
+
+    workflow_model_name = app.storage.tab['current_workflow_model'].name
 
     workflows_page_state.main_content.clear()
     with workflows_page_state.main_content:
         with ui.row():
             if len(workflow_model_name) > 100:
-                ui.label(f"Overview of '{workflow_model_name[0:100]+"..."}'").classes('text-lg font-semibold')
+                ui.label(f"Overview of '{workflow_model_name[0:100] + "..."}'").classes('text-lg font-semibold')
             else:
                 ui.label(f"Overview of '{workflow_model_name}'").classes('text-lg font-semibold')
 
             # Workflow model edit and copy buttons
             with ui.row():
-                if workflow_model_creator_user_id == app.storage.tab['user_id']:
+                if get_creator_user_id(app.storage.tab['current_workflow_model']) == app.storage.tab['user_id']:
                     ui.button("Edit Workflow", color='info').on_click(
                         lambda: edit_handover_workflow_model_button_click()
                     )
@@ -372,12 +383,27 @@ async def show_workflow_model_instances(workflow_model_name: str,
                 workflows_page_state.sample_input_workflow_instances = ui.select(with_input=True,
                                                                                  multiple=True,
                                                                                  clearable=True,
-                                                                                 options=[]).on_value_change(lambda: populate_workflow_instances_table(workflows_page_state))
+                                                                                 options=[]).on_value_change(
+                    lambda: populate_workflow_instances_table(workflows_page_state))
 
         workflows_page_state.workflow_instances_container = ui.column().classes('w-full')
 
-
     await populate_workflow_instances_table(workflows_page_state)
+
+
+async def get_workflow_model_names_and_creator_user_ids() -> dict[URIRef, tuple[str, str]]:
+    workflow_details: dict[URIRef, tuple[str, str]] = dict()
+
+    result = await rdf_datastore_client.launch_query(get_workflow_models_and_creators_query)
+    results = result["results"]["bindings"]
+    for result in results:
+        workflow_model_iri = URIRef(result["workflow_model"]["value"])
+        workflow_model_name = result["workflow_model_name"]["value"]
+        user_id = result["user_id"]["value"]
+
+        workflow_details[workflow_model_iri] = (workflow_model_name, user_id)
+
+    return workflow_details
 
 
 async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPageState):
@@ -408,17 +434,21 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
             return
 
         workflow_model = WorkflowModel()
-        workflow_model.workflow_model_name = workflow_model_name
-        workflow_model.creator_user_id = app.storage.tab['user_id']
+        workflow_model.create_new_iri()
+        workflow_model.name = workflow_model_name
+        set_creator_user_id(workflow_model, app.storage.tab['user_id'])
+
+        # Add an initial, empty step
+        workflow_model_step = CRC1625WorkflowModelStep()
+        workflow_model_step.create_new_iri()
+        workflow_model_step.name = "Initial step"
+        workflow_model_step.description = "The starting point of the workflow"
+        workflow_model.workflow_model_steps[workflow_model_step.iri] = workflow_model_step
+        workflow_model.initial_step_iri = workflow_model_step.iri
 
         await store_workflow_model(workflow_model)
 
-        workflows_page_state.workflow_models_set.add(
-            (
-                workflow_model_name,
-                str(app.storage.tab['user_id']),
-            )
-        )
+        workflows_page_state.workflow_model_details[workflow_model.iri] = (workflow_model_name, str(app.storage.tab['user_id']))
 
         # Apply the filters again and show it
         populate_workflow_models_table(workflows_page_state)
@@ -448,25 +478,11 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
     workflows_page_state.creator_selector_workflow_models.on_value_change(lambda: populate_workflow_models_table(workflows_page_state))
     workflows_page_state.search_input_workflow_models.on_value_change(lambda: populate_workflow_models_table(workflows_page_state))
 
-    # Workflow models table
-    async def create_workflow_models_set() -> set[tuple[str, str]]:
-        workflow_models_set = set()
-
-        for workflow_model_name, user_id in await get_workflow_model_names_and_creator_user_ids():
-            workflow_models_set.add(
-                (
-                    workflow_model_name,
-                    str(user_id)
-                )
-            )
-
-        return workflow_models_set
-
     with ui.row().classes('w-full border-b-2 border-gray-400 py-2 font-bold'):
         ui.label("Workflows").classes('align-center')
 
     workflows_page_state.workflow_models_table_container = ui.column().classes('w-full')
-    workflows_page_state.workflow_models_set = await create_workflow_models_set()
+    workflows_page_state.workflow_model_details = await get_workflow_model_names_and_creator_user_ids()
     populate_workflow_models_table(workflows_page_state)
 
     if not app.storage.tab['demo_mode']:
@@ -498,10 +514,10 @@ async def workflows_page():
                 with ui.dialog().classes('w-full h-full') as demo_data_diagram:
                     with ui.card(align_items='center').classes('w-full h-full').style('max-width: 90%; max-height: 90%'):
                         with ui.row().classes('w-full h-full'):
-                                ui.html(
-                                    f'<embed src="/assets/diagrams/demo_data.pdf" type="application/pdf" style="width:100%; height:100%; border:none;">',
-                                    sanitize=False
-                                ).classes('w-full h-full')
+                            ui.html(
+                                f'<embed src="/assets/diagrams/demo_data.pdf" type="application/pdf" style="width:100%; height:100%; border:none;">',
+                                sanitize=False
+                            ).classes('w-full h-full')
 
                         with ui.row():
                             ui.button('Close', color='positive', on_click=lambda: demo_data_diagram.close())
@@ -536,7 +552,7 @@ async def workflows_page():
 
         workflows_page_state.right_drawer = ui.right_drawer().classes('bg-secondary')
         # TODO: We can hide it and show it only when clicked, but for now the graph component cannot adapt to the new width when doing so
-        #workflows_page_state.right_drawer.hide()
+        # workflows_page_state.right_drawer.hide()
 
         with ui.left_drawer().classes('bg-secondary'):
             await create_workflows_model_left_drawer(workflows_page_state)
@@ -557,7 +573,7 @@ async def landing_page():
     with ui.header().classes('items-center p-2 h-14'):
         ui.label('Handover workflows validation prototype UI').classes('text-xl').style('color: #000000')
         ui.space()
-        if app.storage.tab.get('user_id', 0): # Not logged in yet
+        if app.storage.tab.get('user_id', 0):  # Not logged in yet
             ui.label(f'Welcome, {app.storage.tab['user_name']} ({app.storage.tab['user_project']})').classes('text-xl').style('color: #000000')
             ui.button('Log out',
                       color='negative',

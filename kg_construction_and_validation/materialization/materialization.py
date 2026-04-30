@@ -333,7 +333,7 @@ def run_mappings(db: MSSQLDB,
     )
     resource_usage_tracker.start()
 
-    performance_log: dict[str: float | dict[str: float]] = dict()
+    performance_log: dict[str, float | dict[str, float]] = dict()
 
     if skip_materialization:
         logging.info("Skipping materialization. Note that the system will assume the materialized files already exist.")
