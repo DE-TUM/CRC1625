@@ -14,20 +14,20 @@
 @base <https://crc1625.mdi.ruhr-uni-bochum.de/> .
 
 <https://crc1625.mdi.ruhr-uni-bochum.de> rdf:type owl:Ontology ;
-                                          owl:imports <https://w3id.org/pmd/co/2.0.8>, <https://purl.bioontology.org/ontology/OCE> ;
-                                          <http://purl.org/vocommons/voaf#extends> <https://w3id.org/pmd/co/2.0.8> ;
+                                          owl:imports <https://purl.bioontology.org/ontology/OCE> ,
+                                                      <https://w3id.org/pmd/co/2.0.8> ;
                                           <http://purl.org/dc/elements/1.1/creator> <https://orcid.org/0009-0006-0232-8677> ;
-                                          <http://purl.org/dc/terms/license> <http://creativecommons.org/licenses/by-sa/4.0/> ;
-                                          <http://purl.org/dc/terms/title> "CRC 1625 Ontology"@en ;
-                                          <http://purl.org/dc/terms/description> """Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625.
-                                          This ontology models the experimental (meta-)data, provenance and handover workflows present in MatInf instances, while additionally being compatible with existing Materials Science ontologies.
+                                          <http://purl.org/dc/terms/abstract> "Ontology for supporting the analysis of Compositionally Complex Solid Solutions (CCSS) in the context of the Collaborative Research Center (CRC) 1625." ;
+                                          <http://purl.org/dc/terms/date> "2026-04-30"^^xsd:date ;
+                                          <http://purl.org/dc/terms/description> """Ontology for supporting the analysis of Compositionally Complex Solid Solutions (CCSS) in the context of the Collaborative Research Center (CRC) 1625.
+                                          This ontology models the experimental (meta-)data, provenance and handover workflows present in MatInf instances and vocabulary employed for the analysis of CCSS, while additionally being compatible with existing Materials Science ontologies.
                                           This additionally includes the modelling of handover workflow models, and other (meta-)data that is exclusively used by the MatInf semantic layer.
                                           Note that some classes are not present in the ontology document. Namely, specific measurement types are dynamically generated, as they change between MatInf instances. Processes and activities for them, however, are included here.""" ;
-                                          <http://purl.org/dc/terms/abstract> "Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625." ;
+                                          <http://purl.org/dc/terms/license> <http://creativecommons.org/licenses/by-sa/4.0/> ;
+                                          <http://purl.org/dc/terms/title> "CCSS Ontology"@en ;
+                                          <http://purl.org/vocommons/voaf#extends> <https://w3id.org/pmd/co/2.0.8> ;
                                           <http://schema.org/codeRepository> "https://github.com/DE-TUM/CRC1625"^^xsd:anyURI ;
-                                          <http://purl.org/dc/terms/date> "2026-03-19"^^xsd:date ;
-                                          owl:versionInfo "1.0.0" .
-
+                                          owl:versionInfo "1.0.1" .
 
 #################################################################
 #    Annotation properties
@@ -77,7 +77,6 @@ crc:assignedObject rdf:type owl:ObjectProperty ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo
 crc:assignedTo rdf:type owl:ObjectProperty ;
-               owl:equivalentProperty prov:wasAssociatedWith ;
                rdfs:comment """The assigned to object property is used to associate a user or project to a step in the handover workflow. Note that association does not imply authorship, for which the creator property exists.
 
 This is used to associate Handover Groups to specific projects, and invididual Handovers to their corresponding receiver users.""" ;
@@ -104,7 +103,6 @@ crc:composedOf rdf:type owl:ObjectProperty ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/creator
 crc:creator rdf:type owl:ObjectProperty ;
-            owl:equivalentProperty prov:wasAttributedTo ;
             rdfs:comment "The creator of the object, characterization, etc. it refers to, as indicated in the RDMS." ;
             rdfs:label "Creator" .
 
@@ -120,8 +118,7 @@ The elements themselves are CheBI entities that can be individually accessed for
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/givenName
 crc:givenName rdf:type owl:ObjectProperty ;
-             owl:equivalentProperty foaf:givenName ;
-             rdfs:comment "The given name of a person" .
+              rdfs:comment "The given name of a person" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/handoverWorkflowModelInstanceOf
@@ -158,8 +155,7 @@ crc:memberOfProject rdf:type owl:ObjectProperty ;
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/name
 crc:name rdf:type owl:ObjectProperty ;
-             owl:equivalentProperty foaf:name ;
-             rdfs:comment "The name of a person" .
+         rdfs:comment "The name of a person" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/nextProcessAcrossGroups
@@ -226,8 +222,7 @@ More specifically, in a handover workflow, this is employed by Handover Groups t
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/surname
 crc:surname rdf:type owl:ObjectProperty ;
-             owl:equivalentProperty foaf:surname ;
-             rdfs:comment "The surname of a person" .
+            rdfs:comment "The surname of a person" .
 
 
 #################################################################
@@ -355,16 +350,6 @@ crc:y_position rdf:type owl:DatatypeProperty ;
 #    Classes
 #################################################################
 
-###  https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity
-crc:CharacterizationActivity rdf:type owl:Class ;
-                          rdfs:subClassOf pmdco:Process ;
-                          rdfs:comment """A process that represents to the act of applying a measurement technique on an object in the CRC. Further specified by its subclasses.
-
-Note: Not to be confused with prov:Activity, which acts as the superclass of Process.
-
-An entity of this class or any of its subclasses indicates the nature of its measurements by also belonging to one of the *Process classes (e.g. FIMProcess)""" ;
-                          rdfs:label "Characterization activity" .
-
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/AFMProcess
 crc:AFMProcess rdf:type owl:Class ;
                rdfs:subClassOf crc:CharacterizationActivity ,
@@ -390,6 +375,7 @@ crc:APTProcess rdf:type owl:Class ;
                their analysis. APT is based on the principle of field evaporation, a process derived historically from field ion microscopy (FIM).""" ;
                rdfs:label "APT Process" .
 
+
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/AnnealingProcess
 crc:AnnealingProcess rdf:type owl:Class ;
                      rdfs:subClassOf crc:CharacterizationActivity ,
@@ -405,6 +391,17 @@ crc:BulkComposition rdf:type owl:Class ;
                     rdfs:subClassOf pmdco:ChemicalObject ;
                     rdfs:comment "The composition of a Materials Library (i.e., the concentration of every atomic element present in it) as a whole"@en ;
                     rdfs:label "Bulk Composition"@en .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity
+crc:CharacterizationActivity rdf:type owl:Class ;
+                             rdfs:subClassOf pmdco:Process ;
+                             rdfs:comment """A process that represents to the act of applying a measurement technique on an object in the CRC. Further specified by its subclasses.
+
+Note: Not to be confused with prov:Activity, which acts as the superclass of Process.
+
+An entity of this class or any of its subclasses indicates the nature of its measurements by also belonging to one of the *Process classes (e.g. FIMProcess)""" ;
+                             rdfs:label "Characterization activity" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance
@@ -436,12 +433,13 @@ crc:ChemicalObject rdf:type owl:Class ;
 crc:ComputationalSample rdf:type owl:Class ;
                         rdfs:subClassOf pmdco:DigitalEntity .
 
+
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/EBSDProcess
 crc:EBSDProcess rdf:type owl:Class ;
-               rdfs:subClassOf crc:CharacterizationActivity ,
-                               crc:UnidentifiableProcess ,
-                               pmdco:AnalysingProcess ;
-               rdfs:comment """A process where EBSD measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.
+                rdfs:subClassOf crc:CharacterizationActivity ,
+                                crc:UnidentifiableProcess ,
+                                pmdco:AnalysingProcess ;
+                rdfs:comment """A process where EBSD measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.
 
                EBSD (Electron Backscatter Diffraction) is a method to measure the local orientations of a crystalline specimen from an electron backscatter diffraction pattern. Electrons are inelastically scattered on crystalline materials.
                The resulting pattern is characteristic of the crystal structure and lattice distances.
@@ -492,6 +490,7 @@ crc:FIMProcess rdf:type owl:Class ;
                FIM (Field Ion Microscopy), is an imaging technique that visualizes the atomic structure of a sharply pointed specimen by ionizing gas atoms near its surface in a strong electric field.
                It provides direct real-space imaging of surface atoms and is often used to study atomic arrangements and tip structures at very high spatial resolution.""" ;
                rdfs:label "FIM Process" .
+
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/Handover
 crc:Handover rdf:type owl:Class ;
@@ -692,6 +691,7 @@ crc:SECCMProcess rdf:type owl:Class ;
                  This allows spatially resolved mapping of surface electrochemical activity, making SECCM especially useful for linking local composition or structure to activity.""" ;
                  rdfs:label "SECCM Process" .
 
+
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess
 crc:SEMProcess rdf:type owl:Class ;
                rdfs:subClassOf crc:CharacterizationActivity ,
@@ -706,6 +706,7 @@ crc:SEMProcess rdf:type owl:Class ;
                """ ;
                rdfs:label "SEM Process" .
 
+
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/STMProcess
 crc:STMProcess rdf:type owl:Class ;
                rdfs:subClassOf crc:CharacterizationActivity ,
@@ -717,6 +718,7 @@ crc:STMProcess rdf:type owl:Class ;
                It provides atomic-scale resolution and reveals the electronic and structural properties of conductive surfaces.
                """ ;
                rdfs:label "STM Process" .
+
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/Sample
 crc:Sample rdf:type owl:Class ;
@@ -748,20 +750,21 @@ crc:SurfaceComposition rdf:type owl:Class ;
                        rdfs:subClassOf pmdco:ChemicalComposition .
 
 
-###  https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentReport
-crc:SynthesisOrTreatmentReport rdf:type owl:Class ;
-                    rdfs:subClassOf pmdco:Document ;
-                    rdfs:comment "A synthesis or treatment (e.g. annealing) report for a ML or Sample"@en ;
-                    rdfs:label "Synthesis or treatment Report"@en .
-
-
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentProcess
 crc:SynthesisOrTreatmentProcess rdf:type owl:Class ;
-               rdfs:subClassOf crc:CharacterizationActivity ,
-                               crc:UnidentifiableProcess ,
-                               pmdco:AnalysingProcess ;
-               rdfs:comment "A process where a synthesis or treatment has been performed, resulting in a synthesis report. We treat it as a characterization. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+                                rdfs:subClassOf crc:CharacterizationActivity ,
+                                                crc:UnidentifiableProcess ,
+                                                pmdco:AnalysingProcess ;
+                                rdfs:comment "A process where a synthesis or treatment has been performed, resulting in a synthesis report. We treat it as a characterization. Used by Activity instances and Activity Models to denote the type of measurements they refer to." ;
+                                rdfs:label "Synthesis or treatment Process" .
 
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentReport
+crc:SynthesisOrTreatmentReport rdf:type owl:Class ;
+                               rdfs:subClassOf pmdco:Document ;
+                               rdfs:comment "A synthesis or treatment (e.g. annealing) report for a ML or Sample"@en ;
+                               rdfs:label "Synthesis or treatment Report"@en .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/TEMProcess
@@ -783,7 +786,8 @@ crc:ThicknessProcess rdf:type owl:Class ;
                                      crc:UnidentifiableProcess ,
                                      pmdco:AnalysingProcess ;
                      rdfs:comment "A process where Thickness measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." ;
-                     rdfs:label: "Thickness Process" .
+                     rdfs:label "Thickness Process" .
+
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess
 crc:UnidentifiableProcess rdf:type owl:Class ;

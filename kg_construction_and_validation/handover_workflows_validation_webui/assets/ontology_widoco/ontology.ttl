@@ -10,17 +10,17 @@
                                           owl:imports <https://purl.bioontology.org/ontology/OCE> ,
                                                       <https://w3id.org/pmd/co/2.0.8> ;
                                           <http://purl.org/dc/elements/1.1/creator> <https://orcid.org/0009-0006-0232-8677> ;
-                                          <http://purl.org/dc/terms/abstract> "Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625." ;
-                                          <http://purl.org/dc/terms/date> "2026-03-19"^^xsd:date ;
-                                          <http://purl.org/dc/terms/description> """Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625.
-                                          This ontology models the experimental (meta-)data, provenance and handover workflows present in MatInf instances, while additionally being compatible with existing Materials Science ontologies.
+                                          <http://purl.org/dc/terms/abstract> "Ontology for supporting the analysis of Compositionally Complex Solid Solutions (CCSS) in the context of the Collaborative Research Center (CRC) 1625." ;
+                                          <http://purl.org/dc/terms/date> "2026-04-30"^^xsd:date ;
+                                          <http://purl.org/dc/terms/description> """Ontology for supporting the analysis of Compositionally Complex Solid Solutions (CCSS) in the context of the Collaborative Research Center (CRC) 1625.
+                                          This ontology models the experimental (meta-)data, provenance and handover workflows present in MatInf instances and vocabulary employed for the analysis of CCSS, while additionally being compatible with existing Materials Science ontologies.
                                           This additionally includes the modelling of handover workflow models, and other (meta-)data that is exclusively used by the MatInf semantic layer.
                                           Note that some classes are not present in the ontology document. Namely, specific measurement types are dynamically generated, as they change between MatInf instances. Processes and activities for them, however, are included here.""" ;
                                           <http://purl.org/dc/terms/license> <http://creativecommons.org/licenses/by-sa/4.0/> ;
-                                          <http://purl.org/dc/terms/title> "CRC 1625 Ontology"@en ;
+                                          <http://purl.org/dc/terms/title> "CCSS Ontology"@en ;
                                           <http://purl.org/vocommons/voaf#extends> <https://w3id.org/pmd/co/2.0.8> ;
                                           <http://schema.org/codeRepository> "https://github.com/DE-TUM/CRC1625"^^xsd:anyURI ;
-                                          owl:versionInfo "1.0.0" .
+                                          owl:versionInfo "1.0.1" .
 
 #################################################################
 #    Annotation properties
@@ -77,14 +77,6 @@ xsd:date rdf:type rdfs:Datatype .
 #################################################################
 #    Object Properties
 #################################################################
-
-###  http://www.w3.org/ns/prov#wasAssociatedWith
-<http://www.w3.org/ns/prov#wasAssociatedWith> owl:equivalentProperty <https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo> .
-
-
-###  http://www.w3.org/ns/prov#wasAttributedTo
-<http://www.w3.org/ns/prov#wasAttributedTo> owl:equivalentProperty <https://crc1625.mdi.ruhr-uni-bochum.de/creator> .
-
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject
 <https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject> rdf:type owl:ObjectProperty ;
@@ -338,12 +330,6 @@ More specifically, in a handover workflow, this is employed by Handover Groups t
                                                     rdfs:label "Resistance" .
 
 
-###  https://crc1625.mdi.ruhr-uni-bochum.de/temporaryDatatypeProperty
-<https://crc1625.mdi.ruhr-uni-bochum.de/temporaryDatatypeProperty> rdf:type owl:DatatypeProperty ;
-                                                                   rdfs:subPropertyOf owl:topDataProperty ;
-                                                                   rdfs:comment "Property used exclusively during the mapping of SQL to RDF, deleted via a post-processing script after executing the Ontop mappings" .
-
-
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/tolerance
 <https://crc1625.mdi.ruhr-uni-bochum.de/tolerance> rdf:type owl:DatatypeProperty ;
                                                    rdfs:subPropertyOf owl:topDataProperty ;
@@ -384,33 +370,45 @@ While the entity pointed by at by the crc:characteristic property may contain me
 #    Classes
 #################################################################
 
+###  https://crc1625.mdi.ruhr-uni-bochum.de/AFMProcess
+<https://crc1625.mdi.ruhr-uni-bochum.de/AFMProcess> rdf:type owl:Class ;
+                                                    rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity> ,
+                                                                    <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> ,
+                                                                    <https://w3id.org/pmd/co/AnalysingProcess> ;
+                                                    rdfs:comment """A process where AFM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.
+               Atomic Force Microscopy (AFM) is a surface characterization technique that maps the topography of a material by scanning a sharp probe across the surface and monitoring the tip–sample interaction forces.
+               It provides nanometer- to atomic-scale height information and can also reveal surface roughness, grain structure, and local mechanical or adhesive contrasts, depending on the measurement mode.
+               """ ;
+                                                    rdfs:label "AFM Process" .
+
+
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/APTProcess
 <https://crc1625.mdi.ruhr-uni-bochum.de/APTProcess> rdf:type owl:Class ;
                                                     rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity> ,
                                                                     <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> ,
                                                                     <https://w3id.org/pmd/co/AnalysingProcess> ;
-                                                    rdfs:comment "A process where APT measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." ;
+                                                    rdfs:comment """A process where APT measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.
+
+               APT (Atom Probe Tomography) is a time-of-flight mass spectrometer that provides three-dimensional (3D) compositional information with sub-nanometer spatial resolution.
+               APT specimens must be sharp and needle-shaped, with typical tip radii below 100 nm to facilitate the field evaporation of surface atoms in the form of ions, thereby enabling
+               their analysis. APT is based on the principle of field evaporation, a process derived historically from field ion microscopy (FIM).""" ;
                                                     rdfs:label "APT Process" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/AnnealingProcess
 <https://crc1625.mdi.ruhr-uni-bochum.de/AnnealingProcess> rdf:type owl:Class ;
                                                           rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity> ,
-                                                                          <https://w3id.org/pmd/co/AnalysingProcess> .
+                                                                          <https://w3id.org/pmd/co/AnalysingProcess> ;
+                                                          rdfs:comment """A process where annealing has been applied to the materials library or sample. Used by Activity instances and Activity Models to denote the type of measurements they refer to.
 
-
-###  https://crc1625.mdi.ruhr-uni-bochum.de/BandgapProcess
-<https://crc1625.mdi.ruhr-uni-bochum.de/BandgapProcess> rdf:type owl:Class ;
-                                                        rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity> ,
-                                                                        <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> ,
-                                                                        <https://w3id.org/pmd/co/AnalysingProcess> ;
-                                                        rdfs:comment "A process where Bandgap measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+                     Annealing consists of a heat treatment applied to a materials library or sample, usually in the context of dealloying. """ ;
+                                                          rdfs:label "Annealing Process" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/BulkComposition
 <https://crc1625.mdi.ruhr-uni-bochum.de/BulkComposition> rdf:type owl:Class ;
                                                          rdfs:subClassOf <https://w3id.org/pmd/co/ChemicalObject> ;
-                                                         rdfs:comment "The composition of a Materials Library as a whole"@en ;
+                                                         rdfs:comment "The composition of a Materials Library (i.e., the concentration of every atomic element present in it) as a whole"@en ;
                                                          rdfs:label "Bulk Composition"@en .
 
 
@@ -455,12 +453,31 @@ An entity of this type indicates the type of its measurements by belonging to a 
                                                              rdfs:subClassOf <https://w3id.org/pmd/co/DigitalEntity> .
 
 
+###  https://crc1625.mdi.ruhr-uni-bochum.de/EBSDProcess
+<https://crc1625.mdi.ruhr-uni-bochum.de/EBSDProcess> rdf:type owl:Class ;
+                                                     rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity> ,
+                                                                     <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> ,
+                                                                     <https://w3id.org/pmd/co/AnalysingProcess> ;
+                                                     rdfs:comment """A process where EBSD measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.
+
+               EBSD (Electron Backscatter Diffraction) is a method to measure the local orientations of a crystalline specimen from an electron backscatter diffraction pattern. Electrons are inelastically scattered on crystalline materials.
+               The resulting pattern is characteristic of the crystal structure and lattice distances.
+               An important feature of the EBSD method is crystal orientation mapping.
+               """ ;
+                                                     rdfs:label "EBSD Process" .
+
+
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess
 <https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess> rdf:type owl:Class ;
                                                               rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity> ,
                                                                               <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> ,
                                                                               <https://w3id.org/pmd/co/MicroscopyProcess> ;
-                                                              rdfs:comment "A process where EDX measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." ;
+                                                              rdfs:comment """A process where EDX measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.
+
+                         During EDX (Energy Dispersive X-Ray Spectroscopy), when the electrons hit the matter of the specimen, several interactions are possible. One is the production of characteristic x-ray, by kicking out an inner shell electron, whose space has to be filled by an outer shell electron.
+                         The decrease in energy is emitted as X-ray quant. The energy of the x-rays is characteristic of the element; thus, this technique can be used to calculate the (bulk) composition of the sample.
+                         Also called EDS (energy dispersive x-ray Spectroscopy)
+                         """ ;
                                                               rdfs:label "EDX Microscopy Process" .
 
 
@@ -469,12 +486,29 @@ An entity of this type indicates the type of its measurements by belonging to a 
                                                             owl:equivalentClass <https://w3id.org/pmd/co/EngineeredMaterial> .
 
 
+###  https://crc1625.mdi.ruhr-uni-bochum.de/FIBProcess
+<https://crc1625.mdi.ruhr-uni-bochum.de/FIBProcess> rdf:type owl:Class ;
+                                                    rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity> ,
+                                                                    <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> ,
+                                                                    <https://w3id.org/pmd/co/AnalysingProcess> ;
+                                                    rdfs:comment """A process where FIB measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.
+
+               FIB (Focused Ion Beam) usually comes as a dual-beam system: SEM equipped with another beam source and optics, often Ga-ions or plasma.
+               FIB enables milling and welding in a several nm to micrometer range and is used to prepare TEM or APT samples.
+               """ ;
+                                                    rdfs:label "FIB Process" .
+
+
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/FIMProcess
 <https://crc1625.mdi.ruhr-uni-bochum.de/FIMProcess> rdf:type owl:Class ;
                                                     rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity> ,
                                                                     <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> ,
                                                                     <https://w3id.org/pmd/co/AnalysingProcess> ;
-                                                    rdfs:comment "A process where FIM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+                                                    rdfs:comment """A process where FIM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.
+
+               FIM (Field Ion Microscopy), is an imaging technique that visualizes the atomic structure of a sharply pointed specimen by ionizing gas atoms near its surface in a strong electric field.
+               It provides direct real-space imaging of surface atoms and is often used to study atomic arrangements and tip structures at very high spatial resolution.""" ;
+                                                    rdfs:label "FIM Process" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/Handover
@@ -562,14 +596,6 @@ An entity of this class will thus completely characterize a WorkflowModel by bei
                                                              rdfs:label "Identifiable process" .
 
 
-###  https://crc1625.mdi.ruhr-uni-bochum.de/LEISProcess
-<https://crc1625.mdi.ruhr-uni-bochum.de/LEISProcess> rdf:type owl:Class ;
-                                                     rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity> ,
-                                                                     <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> ,
-                                                                     <https://w3id.org/pmd/co/AnalysingProcess> ;
-                                                     rdfs:comment "A process where LEIS measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
-
-
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/LiteratureReference
 <https://crc1625.mdi.ruhr-uni-bochum.de/LiteratureReference> rdf:type owl:Class ;
                                                              rdfs:subClassOf <https://w3id.org/pmd/co/Document> .
@@ -598,13 +624,6 @@ An entity of this class will thus completely characterize a WorkflowModel by bei
 <https://crc1625.mdi.ruhr-uni-bochum.de/NoGradientSample> rdf:type owl:Class ;
                                                           rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary> ;
                                                           rdfs:comment "From Satyakam" .
-
-
-###  https://crc1625.mdi.ruhr-uni-bochum.de/PSMProcess
-<https://crc1625.mdi.ruhr-uni-bochum.de/PSMProcess> rdf:type owl:Class ;
-                                                    rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity> ,
-                                                                    <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> ,
-                                                                    <https://w3id.org/pmd/co/AnalysingProcess> .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/PhotoProcess
@@ -672,7 +691,12 @@ Note that other parameters will be modelled in the future."""@en ;
                                                     rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity> ,
                                                                     <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> ,
                                                                     <https://w3id.org/pmd/co/AnalysingProcess> ;
-                                                    rdfs:comment "A process where SDC measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+                                                    rdfs:comment """A process where SDC measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.
+
+               SDC (Scanning Droplet Cell) is an electrochemical technique in which a small electrolyte droplet is brought into localized contact with a sample surface to perform spatially resolved measurements.
+               It is used to map variations in electrochemical behavior across a material, for example, local activity.
+               """ ;
+                                                    rdfs:label "SDC Process" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess
@@ -680,7 +704,11 @@ Note that other parameters will be modelled in the future."""@en ;
                                                       rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity> ,
                                                                       <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> ,
                                                                       <https://w3id.org/pmd/co/AnalysingProcess> ;
-                                                      rdfs:comment "A process where SECCM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+                                                      rdfs:comment """A process where SECCM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.
+
+                 SECCM (Scanning Electrochemical Cell Microscopy), is a localized electrochemical method in which a tiny liquid meniscus at the end of a nanopipette forms a confined electrochemical cell with the sample surface.
+                 This allows spatially resolved mapping of surface electrochemical activity, making SECCM especially useful for linking local composition or structure to activity.""" ;
+                                                      rdfs:label "SECCM Process" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess
@@ -688,7 +716,27 @@ Note that other parameters will be modelled in the future."""@en ;
                                                     rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity> ,
                                                                     <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> ,
                                                                     <https://w3id.org/pmd/co/AnalysingProcess> ;
-                                                    rdfs:comment "A process where SEM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+                                                    rdfs:comment """A process where SEM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.
+
+               In SEM (Scanning Electron Microscopy) an electron beam is rastered across the surface.
+               The interaction with the sample (surface) produces several signals, which can be used for imaging, chemical analysis or analysis of the crystal structure.
+               Secondary electrons and backscattered electrons can be used for image acquisition: the former gives a topography contrast, the latter a z-contrast (z = atomic number).
+               Backscatter diffraction analysis (also see: EBSD) is a technique for crystal structure analysis. X-rays, produced during interaction with the sample, can give information about the chemical composition, usually analyzed using EDX, less commonly but more accurately: WDX.
+               """ ;
+                                                    rdfs:label "SEM Process" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/STMProcess
+<https://crc1625.mdi.ruhr-uni-bochum.de/STMProcess> rdf:type owl:Class ;
+                                                    rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity> ,
+                                                                    <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> ,
+                                                                    <https://w3id.org/pmd/co/AnalysingProcess> ;
+                                                    rdfs:comment """A process where STM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.
+
+               STM (Scanning tunneling microscopy) is a surface-imaging technique that uses a sharp conductive tip to measure tunneling current between the tip and a sample.
+               It provides atomic-scale resolution and reveals the electronic and structural properties of conductive surfaces.
+               """ ;
+                                                    rdfs:label "STM Process" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/Sample
@@ -726,7 +774,8 @@ Note that other parameters will be modelled in the future."""@en ;
                                                                      rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity> ,
                                                                                      <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> ,
                                                                                      <https://w3id.org/pmd/co/AnalysingProcess> ;
-                                                                     rdfs:comment "A process where a synthesis or treatment has been performed, resulting in a synthesis report. We treat it as a characterization. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+                                                                     rdfs:comment "A process where a synthesis or treatment has been performed, resulting in a synthesis report. We treat it as a characterization. Used by Activity instances and Activity Models to denote the type of measurements they refer to." ;
+                                                                     rdfs:label "Synthesis or treatment Process" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentReport
@@ -741,7 +790,12 @@ Note that other parameters will be modelled in the future."""@en ;
                                                     rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity> ,
                                                                     <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> ,
                                                                     <https://w3id.org/pmd/co/AnalysingProcess> ;
-                                                    rdfs:comment "A process where TEM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+                                                    rdfs:comment """A process where TEM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.
+
+               In (S)TEM, standing for (Scanning) Transmission Electron Microscopy, the electron beam of the TEM is focused on a small spot and rastered across the specimen as in SEM.
+               The spot size controls the resolution of the resulting image. Depending on the detector, different types of dark field (DF) or bright field (BF) images can be recorded.
+               """ ;
+                                                    rdfs:label "TEM Process" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/ThicknessProcess
@@ -749,7 +803,8 @@ Note that other parameters will be modelled in the future."""@en ;
                                                           rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity> ,
                                                                           <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> ,
                                                                           <https://w3id.org/pmd/co/AnalysingProcess> ;
-                                                          rdfs:comment "A process where Thickness measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+                                                          rdfs:comment "A process where Thickness measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." ;
+                                                          rdfs:label "Thickness Process" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess
@@ -787,7 +842,11 @@ Note that other parameters will be modelled in the future."""@en ;
                                                     rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity> ,
                                                                     <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> ,
                                                                     <https://w3id.org/pmd/co/AnalysingProcess> ;
-                                                    rdfs:comment "A process where XPS measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+                                                    rdfs:comment """A process where XPS measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.
+
+               XPS (X-ray Photoelectron Spectroscopy) is a method that uses X-rays to eject electrons from a material and analyzes their energies to identify which elements are present and in what chemical states.
+               It probes only the outermost atomic layers, making it highly surface-specific. """ ;
+                                                    rdfs:label "XPS Process" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/XRDProcess
@@ -795,7 +854,12 @@ Note that other parameters will be modelled in the future."""@en ;
                                                     rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity> ,
                                                                     <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> ,
                                                                     <https://w3id.org/pmd/co/AnalysingProcess> ;
-                                                    rdfs:comment "A process where XRD measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to." .
+                                                    rdfs:comment """A process where XRD measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.
+
+               X-ray diffraction (XRD) is a crystallographic technique that measures the diffraction of X-rays by the periodic lattice of a material.
+               It provides information on crystal structure, phase composition, and lattice parameters.
+               """ ;
+                                                    rdfs:label "XRD Process" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/externalID

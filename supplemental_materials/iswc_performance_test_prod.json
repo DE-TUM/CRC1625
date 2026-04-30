@@ -1,0 +1,486 @@
+[
+    {
+        "config": {
+            "is_prod": true,
+            "num_main_samples": 360
+        },
+        "mappings_performance_log": {
+            "query_execution_real_time": 2.9410749749513343,
+            "per_mapping_query_execution_times": [
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/users/user_names.yml",
+                    0.06735223298892379
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/users/user_surnames.yml",
+                    0.07033097103703767
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/samples/substrates.yml",
+                    0.0720204149838537
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/users/user_ids.yml",
+                    0.07666442997287959
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/users/user_given_names.yml",
+                    0.07667074294295162
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/users/projects.yml",
+                    0.07667450397275388
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/samples/sample_elements.yml",
+                    0.09353170299436897
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/samples/samples_workflow_instances_and_initial_work.yml",
+                    0.12324554799124599
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/ideas/ideas.yml",
+                    0.12421749602071941
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/requests_for_synthesis/requests_for_synthesis.yml",
+                    0.1242214780068025
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/samples/computational_sample_types.yml",
+                    0.12422386603429914
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/requests_for_synthesis/bulk_compositions_of_requests_for_synthesis.yml",
+                    0.13822930003516376
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/publications_and_lit_references/publications.yml",
+                    0.13952185597736388
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/publications_and_lit_references/literature_references.yml",
+                    0.14198509696871042
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/samples/physical_sample_types.yml",
+                    0.14453637599945068
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/initial_work_handover_to_first_handover.yml",
+                    0.16215256100986153
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/handover_metadata.yml",
+                    0.16505934798624367
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/handover_chains.yml",
+                    0.17457413696683943
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_1.yml",
+                    0.20268392900470644
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_0.yml",
+                    0.2076231959508732
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_7.yml",
+                    0.2229523389833048
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_3.yml",
+                    0.23205932404380292
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_2.yml",
+                    0.23501422302797437
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_4.yml",
+                    0.23502014100085944
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_8.yml",
+                    0.24685112200677395
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_12.yml",
+                    0.28733046096749604
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_11.yml",
+                    0.28858568996656686
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_13.yml",
+                    0.2918037639465183
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_16.yml",
+                    0.3082216279581189
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_prior_to_first_handover_0.yml",
+                    0.32504065602552146
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_prior_to_first_handover_8.yml",
+                    0.36960033397190273
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_prior_to_first_handover_1.yml",
+                    0.3782853389857337
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_prior_to_first_handover_3.yml",
+                    0.3889898470370099
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_prior_to_first_handover_4.yml",
+                    0.4297435679472983
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_prior_to_first_handover_11.yml",
+                    0.43120585195720196
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_prior_to_first_handover_12.yml",
+                    0.44118254003115
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_prior_to_first_handover_13.yml",
+                    0.4514358500018716
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_prior_to_first_handover_16.yml",
+                    0.45630531397182494
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_with_no_handovers_0.yml",
+                    0.49092085496522486
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_with_no_handovers_3.yml",
+                    0.49963736394420266
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_with_no_handovers_4.yml",
+                    0.5011725219665095
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_with_no_handovers_2.yml",
+                    0.5224193700123578
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_prior_to_first_handover_7.yml",
+                    0.5336531900102273
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_with_no_handovers_6.yml",
+                    0.5363940329989418
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_with_no_handovers_8.yml",
+                    0.541083520045504
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_with_no_handovers_10.yml",
+                    0.558419737033546
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_with_no_handovers_11.yml",
+                    0.5822022289503366
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_with_no_handovers_7.yml",
+                    0.5834986389381811
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_with_no_handovers_13.yml",
+                    0.5917931620497257
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_with_no_handovers_1.yml",
+                    0.6001933730440214
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_with_no_handovers_16.yml",
+                    0.6027411590330303
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_with_no_handovers_12.yml",
+                    0.6162336959969252
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/measurements_with_explicit_links_to_handovers_2.yml",
+                    0.6417668149806559
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/measurements_with_explicit_links_to_handovers_1.yml",
+                    0.6456379999872297
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/measurements_with_explicit_links_to_handovers_0.yml",
+                    0.6622393309371546
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/measurements_with_explicit_links_to_handovers_3.yml",
+                    0.6724880089750513
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/measurements_with_explicit_links_to_handovers_7.yml",
+                    0.7014393500285223
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_prior_to_first_handover_2.yml",
+                    0.7230051369406283
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/measurements_with_explicit_links_to_handovers_13.yml",
+                    0.7347572869621217
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/measurements_with_explicit_links_to_handovers_16.yml",
+                    0.7566986849997193
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_for_other_types.yml",
+                    0.7753930479520932
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_for_other_types_with_no_handovers.yml",
+                    0.7997915160376579
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/handovers/activities/activities_for_other_types_prior_to_first_handover.yml",
+                    0.8492427309975028
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/measurements/measurements.yml",
+                    0.8619755690451711
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/generic_relations/object_to_object.yml",
+                    0.929356575012207
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/compositions/properties_of_compositions.yml",
+                    1.6116409299429506
+                ],
+                [
+                    "/home/sam/CRC1625/kg_construction_and_validation/materialization/mappings/compositions/compositions_metadata.yml",
+                    2.93989053403493
+                ]
+            ],
+            "yarrrml_to_rml_conversion_real_time": 0.4642471900442615,
+            "materialization_real_time": 9.300729623995721
+        },
+        "resource_usage_mappings": [
+            [
+                15.7,
+                {
+                    "used_mem_per_file": {},
+                    "sql_server": 964304896
+                }
+            ],
+            [
+                2.0,
+                {
+                    "used_mem_per_file": {},
+                    "sql_server": 964272128
+                }
+            ],
+            [
+                12.2,
+                {
+                    "used_mem_per_file": {},
+                    "sql_server": 964272128
+                }
+            ],
+            [
+                13.2,
+                {
+                    "used_mem_per_file": {},
+                    "sql_server": 964272128
+                }
+            ],
+            [
+                12.6,
+                {
+                    "used_mem_per_file": {},
+                    "sql_server": 964276224
+                }
+            ],
+            [
+                12.5,
+                {
+                    "used_mem_per_file": {},
+                    "sql_server": 964276224
+                }
+            ],
+            [
+                12.6,
+                {
+                    "used_mem_per_file": {},
+                    "sql_server": 964276224
+                }
+            ],
+            [
+                12.5,
+                {
+                    "used_mem_per_file": {},
+                    "sql_server": 964276224
+                }
+            ],
+            [
+                35.7,
+                {
+                    "used_mem_per_file": {},
+                    "sql_server": 964276224
+                }
+            ],
+            [
+                27.4,
+                {
+                    "used_mem_per_file": {},
+                    "sql_server": 964276224
+                }
+            ],
+            [
+                12.5,
+                {
+                    "used_mem_per_file": {},
+                    "sql_server": 964276224
+                }
+            ],
+            [
+                12.9,
+                {
+                    "used_mem_per_file": {},
+                    "sql_server": 964276224
+                }
+            ],
+            [
+                9.4,
+                {
+                    "used_mem_per_file": {},
+                    "sql_server": 964276224
+                }
+            ]
+        ],
+        "file_upload_time": 6.397828064975329,
+        "postprocessing_performance_log": {
+            "replace_temporary_entity_iris": 3.6418136300053447,
+            "query_cross_project_handovers": 0.06791391607839614,
+            "delete_cross_project_links": 0.021090816939249635,
+            "query_remaining_handover_chains": 0.25688784301746637,
+            "process_remaining_handover_chains": 0.0015811489429324865,
+            "create_and_load_handover_groups": 0.904917174950242,
+            "redirect_workflow_instances": 0.04048257495742291,
+            "create_handover_groups_for_initial_work_handovers": 0.016031965031288564,
+            "add_chebi_elements": 1.938931000069715,
+            "delete_temporary_triples": 1.300572587060742
+        },
+        "resource_usage_postprocessing": [
+            [
+                0.2,
+                9283395584
+            ],
+            [
+                20.1,
+                9284399104
+            ],
+            [
+                12.6,
+                9284579328
+            ],
+            [
+                12.5,
+                9284702208
+            ],
+            [
+                12.6,
+                9290752000
+            ],
+            [
+                13.3,
+                9290829824
+            ],
+            [
+                13.1,
+                9290874880
+            ],
+            [
+                13.4,
+                9290887168
+            ],
+            [
+                10.5,
+                9290936320
+            ],
+            [
+                0.0,
+                9290936320
+            ]
+        ],
+        "n_triples_generated": 993165,
+        "query_benchmark_results": {
+            "samples_per_user": [
+                0.019931055954657495,
+                0.03758614894468337
+            ],
+            "query_user_details": [
+                0.01678787695709616,
+                0.01685224799439311
+            ],
+            "samples_and_authors": [
+                0.016252028988674283,
+                0.016250679967924953
+            ],
+            "samples_not_composed_of_elements": [
+                0.016175684984773397,
+                0.017751373001374304
+            ],
+            "samples_with_substrates": [
+                0.015462745912373066,
+                0.015838252031244338
+            ],
+            "samples_with_specific_elements_exclusive": [
+                0.016403774032369256,
+                0.017234456026926637
+            ],
+            "samples_with_specific_elements": [
+                0.015702044940553606,
+                0.016167412046343088
+            ],
+            "query_based_on_composition_values": [
+                0.016426342073827982,
+                0.05108249397017062
+            ],
+            "composition_count_per_MA": [
+                0.01607253693509847,
+                0.05308702599722892
+            ],
+            "handovers_with_specific_measurement_type": [
+                0.01627899007871747,
+                0.01741426403168589
+            ],
+            "measurement_to_handovers": [
+                0.01757173507940024,
+                0.03289309702813625
+            ],
+            "get_edx_csv_measurements": [
+                0.015607221983373165,
+                0.016707527916878462
+            ],
+            "measurements_and_authors": [
+                0.016005616984330118,
+                0.016431503929197788
+            ]
+        }
+    }
+]

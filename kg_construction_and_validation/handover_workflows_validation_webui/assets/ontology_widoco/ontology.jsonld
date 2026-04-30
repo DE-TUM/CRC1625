@@ -47,37 +47,27 @@
   "@id" : "http://www.w3.org/2001/XMLSchema#date",
   "@type" : [ "http://www.w3.org/2000/01/rdf-schema#Datatype" ]
 }, {
-  "@id" : "http://www.w3.org/ns/prov#wasAssociatedWith",
-  "http://www.w3.org/2002/07/owl#equivalentProperty" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo"
-  } ]
-}, {
-  "@id" : "http://www.w3.org/ns/prov#wasAttributedTo",
-  "http://www.w3.org/2002/07/owl#equivalentProperty" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/creator"
-  } ]
-}, {
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de",
   "@type" : [ "http://www.w3.org/2002/07/owl#Ontology" ],
   "http://purl.org/dc/elements/1.1/creator" : [ {
     "@id" : "https://orcid.org/0009-0006-0232-8677"
   } ],
   "http://purl.org/dc/terms/abstract" : [ {
-    "@value" : "Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625."
+    "@value" : "Ontology for supporting the analysis of Compositionally Complex Solid Solutions (CCSS) in the context of the Collaborative Research Center (CRC) 1625."
   } ],
   "http://purl.org/dc/terms/date" : [ {
     "@type" : "http://www.w3.org/2001/XMLSchema#date",
-    "@value" : "2026-03-19"
+    "@value" : "2026-04-30"
   } ],
   "http://purl.org/dc/terms/description" : [ {
-    "@value" : "Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625.\n                                          This ontology models the experimental (meta-)data, provenance and handover workflows present in MatInf instances, while additionally being compatible with existing Materials Science ontologies.\n                                          This additionally includes the modelling of handover workflow models, and other (meta-)data that is exclusively used by the MatInf semantic layer.\n                                          Note that some classes are not present in the ontology document. Namely, specific measurement types are dynamically generated, as they change between MatInf instances. Processes and activities for them, however, are included here."
+    "@value" : "Ontology for supporting the analysis of Compositionally Complex Solid Solutions (CCSS) in the context of the Collaborative Research Center (CRC) 1625.\n                                          This ontology models the experimental (meta-)data, provenance and handover workflows present in MatInf instances and vocabulary employed for the analysis of CCSS, while additionally being compatible with existing Materials Science ontologies.\n                                          This additionally includes the modelling of handover workflow models, and other (meta-)data that is exclusively used by the MatInf semantic layer.\n                                          Note that some classes are not present in the ontology document. Namely, specific measurement types are dynamically generated, as they change between MatInf instances. Processes and activities for them, however, are included here."
   } ],
   "http://purl.org/dc/terms/license" : [ {
     "@id" : "http://creativecommons.org/licenses/by-sa/4.0/"
   } ],
   "http://purl.org/dc/terms/title" : [ {
     "@language" : "en",
-    "@value" : "CRC 1625 Ontology"
+    "@value" : "CCSS Ontology"
   } ],
   "http://purl.org/vocommons/voaf#extends" : [ {
     "@id" : "https://w3id.org/pmd/co/2.0.8"
@@ -92,13 +82,29 @@
     "@id" : "https://w3id.org/pmd/co/2.0.8"
   } ],
   "http://www.w3.org/2002/07/owl#versionInfo" : [ {
-    "@value" : "1.0.0"
+    "@value" : "1.0.1"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/AFMProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process where AFM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.\n               Atomic Force Microscopy (AFM) is a surface characterization technique that maps the topography of a material by scanning a sharp probe across the surface and monitoring the tip–sample interaction forces.\n               It provides nanometer- to atomic-scale height information and can also reveal surface roughness, grain structure, and local mechanical or adhesive contrasts, depending on the measurement mode.\n               "
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "AFM Process"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
   } ]
 }, {
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/APTProcess",
   "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "A process where APT measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+    "@value" : "A process where APT measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.\n\n               APT (Atom Probe Tomography) is a time-of-flight mass spectrometer that provides three-dimensional (3D) compositional information with sub-nanometer spatial resolution.\n               APT specimens must be sharp and needle-shaped, with typical tip radii below 100 nm to facilitate the field evaporation of surface atoms in the form of ions, thereby enabling\n               their analysis. APT is based on the principle of field evaporation, a process derived historically from field ion microscopy (FIM)."
   } ],
   "http://www.w3.org/2000/01/rdf-schema#label" : [ {
     "@value" : "APT Process"
@@ -113,21 +119,14 @@
 }, {
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/AnnealingProcess",
   "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
-  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
-  }, {
-    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
-  } ]
-}, {
-  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/BandgapProcess",
-  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "A process where Bandgap measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+    "@value" : "A process where annealing has been applied to the materials library or sample. Used by Activity instances and Activity Models to denote the type of measurements they refer to.\n\n                     Annealing consists of a heat treatment applied to a materials library or sample, usually in the context of dealloying. "
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Annealing Process"
   } ],
   "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
     "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
-  }, {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
   }, {
     "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
   } ]
@@ -136,7 +135,7 @@
   "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
     "@language" : "en",
-    "@value" : "The composition of a Materials Library as a whole"
+    "@value" : "The composition of a Materials Library (i.e., the concentration of every atomic element present in it) as a whole"
   } ],
   "http://www.w3.org/2000/01/rdf-schema#label" : [ {
     "@language" : "en",
@@ -198,10 +197,26 @@
     "@id" : "https://w3id.org/pmd/co/DigitalEntity"
   } ]
 }, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/EBSDProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process where EBSD measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.\n\n               EBSD (Electron Backscatter Diffraction) is a method to measure the local orientations of a crystalline specimen from an electron backscatter diffraction pattern. Electrons are inelastically scattered on crystalline materials.\n               The resulting pattern is characteristic of the crystal structure and lattice distances.\n               An important feature of the EBSD method is crystal orientation mapping.\n               "
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "EBSD Process"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
+  } ]
+}, {
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess",
   "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "A process where EDX measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+    "@value" : "A process where EDX measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.\n\n                         During EDX (Energy Dispersive X-Ray Spectroscopy), when the electrons hit the matter of the specimen, several interactions are possible. One is the production of characteristic x-ray, by kicking out an inner shell electron, whose space has to be filled by an outer shell electron.\n                         The decrease in energy is emitted as X-ray quant. The energy of the x-rays is characteristic of the element; thus, this technique can be used to calculate the (bulk) composition of the sample.\n                         Also called EDS (energy dispersive x-ray Spectroscopy)\n                         "
   } ],
   "http://www.w3.org/2000/01/rdf-schema#label" : [ {
     "@value" : "EDX Microscopy Process"
@@ -220,10 +235,29 @@
     "@id" : "https://w3id.org/pmd/co/EngineeredMaterial"
   } ]
 }, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/FIBProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process where FIB measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.\n\n               FIB (Focused Ion Beam) usually comes as a dual-beam system: SEM equipped with another beam source and optics, often Ga-ions or plasma.\n               FIB enables milling and welding in a several nm to micrometer range and is used to prepare TEM or APT samples.\n               "
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "FIB Process"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
+  } ]
+}, {
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/FIMProcess",
   "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "A process where FIM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+    "@value" : "A process where FIM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.\n\n               FIM (Field Ion Microscopy), is an imaging technique that visualizes the atomic structure of a sharply pointed specimen by ionizing gas atoms near its surface in a strong electric field.\n               It provides direct real-space imaging of surface atoms and is often used to study atomic arrangements and tip structures at very high spatial resolution."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "FIM Process"
   } ],
   "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
     "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
@@ -367,19 +401,6 @@
     "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance"
   } ]
 }, {
-  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/LEISProcess",
-  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
-  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "A process where LEIS measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
-  }, {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
-  }, {
-    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
-  } ]
-}, {
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/LiteratureReference",
   "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
   "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
@@ -425,16 +446,6 @@
   } ],
   "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
     "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary"
-  } ]
-}, {
-  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/PSMProcess",
-  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
-  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
-  }, {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
-  }, {
-    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
   } ]
 }, {
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/PhotoProcess",
@@ -542,7 +553,10 @@
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/SDCProcess",
   "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "A process where SDC measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+    "@value" : "A process where SDC measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.\n\n               SDC (Scanning Droplet Cell) is an electrochemical technique in which a small electrolyte droplet is brought into localized contact with a sample surface to perform spatially resolved measurements.\n               It is used to map variations in electrochemical behavior across a material, for example, local activity.\n               "
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "SDC Process"
   } ],
   "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
     "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
@@ -555,7 +569,10 @@
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess",
   "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "A process where SECCM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+    "@value" : "A process where SECCM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.\n\n                 SECCM (Scanning Electrochemical Cell Microscopy), is a localized electrochemical method in which a tiny liquid meniscus at the end of a nanopipette forms a confined electrochemical cell with the sample surface.\n                 This allows spatially resolved mapping of surface electrochemical activity, making SECCM especially useful for linking local composition or structure to activity."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "SECCM Process"
   } ],
   "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
     "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
@@ -568,7 +585,26 @@
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess",
   "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "A process where SEM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+    "@value" : "A process where SEM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.\n\n               In SEM (Scanning Electron Microscopy) an electron beam is rastered across the surface.\n               The interaction with the sample (surface) produces several signals, which can be used for imaging, chemical analysis or analysis of the crystal structure.\n               Secondary electrons and backscattered electrons can be used for image acquisition: the former gives a topography contrast, the latter a z-contrast (z = atomic number).\n               Backscatter diffraction analysis (also see: EBSD) is a technique for crystal structure analysis. X-rays, produced during interaction with the sample, can give information about the chemical composition, usually analyzed using EDX, less commonly but more accurately: WDX.\n               "
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "SEM Process"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/STMProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process where STM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.\n\n               STM (Scanning tunneling microscopy) is a surface-imaging technique that uses a sharp conductive tip to measure tunneling current between the tip and a sample.\n               It provides atomic-scale resolution and reveals the electronic and structural properties of conductive surfaces.\n               "
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "STM Process"
   } ],
   "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
     "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
@@ -630,6 +666,9 @@
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
     "@value" : "A process where a synthesis or treatment has been performed, resulting in a synthesis report. We treat it as a characterization. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
   } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Synthesis or treatment Process"
+  } ],
   "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
     "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
   }, {
@@ -655,7 +694,10 @@
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/TEMProcess",
   "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "A process where TEM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+    "@value" : "A process where TEM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.\n\n               In (S)TEM, standing for (Scanning) Transmission Electron Microscopy, the electron beam of the TEM is focused on a small spot and rastered across the specimen as in SEM.\n               The spot size controls the resolution of the resulting image. Depending on the detector, different types of dark field (DF) or bright field (BF) images can be recorded.\n               "
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "TEM Process"
   } ],
   "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
     "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
@@ -669,6 +711,9 @@
   "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
     "@value" : "A process where Thickness measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Thickness Process"
   } ],
   "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
     "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
@@ -725,7 +770,10 @@
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess",
   "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "A process where XPS measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+    "@value" : "A process where XPS measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.\n\n               XPS (X-ray Photoelectron Spectroscopy) is a method that uses X-rays to eject electrons from a material and analyzes their energies to identify which elements are present and in what chemical states.\n               It probes only the outermost atomic layers, making it highly surface-specific. "
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "XPS Process"
   } ],
   "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
     "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
@@ -738,7 +786,10 @@
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/XRDProcess",
   "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "A process where XRD measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+    "@value" : "A process where XRD measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.\n\n               X-ray diffraction (XRD) is a crystallographic technique that measures the diffraction of X-rays by the periodic lattice of a material.\n               It provides information on crystal structure, phase composition, and lattice parameters.\n               "
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "XRD Process"
   } ],
   "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
     "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
@@ -1186,15 +1237,6 @@
   "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
     "@value" : "The surname of a person"
-  } ]
-}, {
-  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/temporaryDatatypeProperty",
-  "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty" ],
-  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "Property used exclusively during the mapping of SQL to RDF, deleted via a post-processing script after executing the Ontop mappings"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
-    "@id" : "http://www.w3.org/2002/07/owl#topDataProperty"
   } ]
 }, {
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/tolerance",

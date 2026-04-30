@@ -13,11 +13,11 @@
 <script type="module" src="resources/dark-mode-toggle.mjs"></script><div class="darkmode">
 	<dark-mode-toggle class="slider"></dark-mode-toggle>
 </div>
- <title>CRC 1625 Ontology</title>
+ <title>CCSS Ontology</title>
 
 
 <!-- SCHEMA.ORG METADATA -->
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","url":"https://crc1625.mdi.ruhr-uni-bochum.de","image":"http://vowl.visualdataweb.org/webvowl/#iri=https://crc1625.mdi.ruhr-uni-bochum.de","name":"CRC 1625 Ontology", "headline":"Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625.", "dateReleased":"Thu Mar 19 12:08:08 CET 2026", "version":"1.0.0", "license":"http://creativecommons.org/licenses/by-sa/4.0/", "codeRepository":"https://github.com/DE-TUM/CRC1625", "author":[{"@type":"Person","name":"https://orcid.org/0009-0006-0232-8677","url":"https://orcid.org/0009-0006-0232-8677"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","url":"https://crc1625.mdi.ruhr-uni-bochum.de","image":"http://vowl.visualdataweb.org/webvowl/#iri=https://crc1625.mdi.ruhr-uni-bochum.de","name":"CCSS Ontology", "headline":"Ontology for supporting the analysis of Compositionally Complex Solid Solutions (CCSS) in the context of the Collaborative Research Center (CRC) 1625.", "dateReleased":"Thu Apr 30 23:35:32 CEST 2026", "version":"1.0.1", "license":"http://creativecommons.org/licenses/by-sa/4.0/", "codeRepository":"https://github.com/DE-TUM/CRC1625", "author":[{"@type":"Person","name":"https://orcid.org/0009-0006-0232-8677","url":"https://orcid.org/0009-0006-0232-8677"}]}</script>
 
 <script src="resources/jquery.js"></script> 
 <script src="resources/marked.min.js"></script> 
@@ -65,12 +65,12 @@ $(function(){
 <div class="container">
 <div class="head">
 <div style="float:right">language <a href="index-en.html"><b>en</b></a> </div>
-<h1>CRC 1625 Ontology</h1>
+<h1>CCSS Ontology</h1>
 
 
 <dl>
 <dt>Revision:</dt>
-<dd>1.0.0</dd>
+<dd>1.0.1</dd>
 <dt>Authors:</dt>
 <dd><a href="https://orcid.org/0009-0006-0232-8677">https://orcid.org/0009-0006-0232-8677</a></dd>
 
@@ -82,7 +82,7 @@ $(function(){
 
 <dt>Download serialization:</dt><dd><span><a href="ontology.jsonld" target="_blank"><img src="https://img.shields.io/badge/Format-JSON_LD-blue.svg" alt="JSON-LD" /></a> </span><span><a href="ontology.owl" target="_blank"><img src="https://img.shields.io/badge/Format-RDF/XML-blue.svg" alt="RDF/XML" /></a> </span><span><a href="ontology.nt" target="_blank"><img src="https://img.shields.io/badge/Format-N_Triples-blue.svg" alt="N-Triples" /></a> </span><span><a href="ontology.ttl" target="_blank"><img src="https://img.shields.io/badge/Format-TTL-blue.svg" alt="TTL" /></a> </span></dd><dt>License:</dt><dd><a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank"><img src="https://img.shields.io/badge/License-http://creativecommons.org/licenses/by_sa/4.0/-blue.svg" alt="http://creativecommons.org/licenses/by-sa/4.0/" /></a>
 </dd><!-- <dt>Evaluation:</dt><dd><a href="OOPSevaluation/oopsEval.html#" target="_blank"><img src="https://img.shields.io/badge/Evaluate_with-OOPS! (OntOlogy Pitfall Scanner!)-blue.svg" alt="Evaluate with OOPS!" /></a></dd> --><dt>Cite as:</dt>
-<dd>https://orcid.org/0009-0006-0232-8677. CRC 1625 Ontology. Revision: 1.0.0.</dd>
+<dd>https://orcid.org/0009-0006-0232-8677. CCSS Ontology. Revision: 1.0.1.</dd>
 <dt>Vocabulary maintained at:</dt>
 <dd><a href="https://github.com/DE-TUM/CRC1625">https://github.com/DE-TUM/CRC1625</a></dd>
 </dl>
@@ -94,12 +94,19 @@ $(function(){
 <span>Ontology Specification Draft</span>
 </div>
 </div>     <div id="abstract"><h2>Abstract</h2><span class="markdown">
-Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625.</span>
+Ontology for supporting the analysis of Compositionally Complex Solid Solutions (CCSS) in the context of the Collaborative Research Center (CRC) 1625.</span>
 </div>
-<div id="toc"></div>  
+<div id="toc"></div> 
+
+<!--INTRODUCTION SECTION-->
+    <div id="introduction"><h2 id="intro" class="list">Introduction <span class="backlink"> back to <a href="#toc">ToC</a></span></h2>
+<span class="markdown">
+This is a place holder text for the introduction. The introduction should briefly describe the ontology, its motivation, state of the art and goals.</span>
+</div>
+  
 
 <!--OVERVIEW SECTION-->
-    <div id="overview"><h2 id="overv" class="list">CRC 1625 Ontology: Overview <span class="backlink"> back to <a href="#toc">ToC</a></span></h2>
+    <div id="overview"><h2 id="overv" class="list">CCSS Ontology: Overview <span class="backlink"> back to <a href="#toc">ToC</a></span></h2>
 <span class="markdown">
 This ontology has the following classes and properties.</span>
 <h4>Classes</h4>
@@ -107,20 +114,16 @@ This ontology has the following classes and properties.</span>
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     class="hlist">
    <li>
+      <a href="#/AFMProcess"
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/AFMProcess">AFM Process</a>
+   </li>
+   <li>
       <a href="#/AnnealingProcess"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/AnnealingProcess">
-         <span>Annealing Process</span>
-      </a>
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/AnnealingProcess">Annealing Process</a>
    </li>
    <li>
       <a href="#/APTProcess"
          title="https://crc1625.mdi.ruhr-uni-bochum.de/APTProcess">APT Process</a>
-   </li>
-   <li>
-      <a href="#/BandgapProcess"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/BandgapProcess">
-         <span>Bandgap Process</span>
-      </a>
    </li>
    <li>
       <a href="#/BulkComposition"
@@ -151,6 +154,10 @@ This ontology has the following classes and properties.</span>
       </a>
    </li>
    <li>
+      <a href="#/EBSDProcess"
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/EBSDProcess">EBSD Process</a>
+   </li>
+   <li>
       <a href="#/EDXMicroscopyProcess"
          title="https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess">EDX Microscopy Process</a>
    </li>
@@ -161,10 +168,12 @@ This ontology has the following classes and properties.</span>
       </a>
    </li>
    <li>
+      <a href="#/FIBProcess"
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/FIBProcess">FIB Process</a>
+   </li>
+   <li>
       <a href="#/FIMProcess"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/FIMProcess">
-         <span>F I M Process</span>
-      </a>
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/FIMProcess">FIM Process</a>
    </li>
    <li>
       <a href="#/Handover" title="https://crc1625.mdi.ruhr-uni-bochum.de/Handover">
@@ -208,12 +217,6 @@ This ontology has the following classes and properties.</span>
          title="https://crc1625.mdi.ruhr-uni-bochum.de/IdentifiableProcess">Identifiable process</a>
    </li>
    <li>
-      <a href="#/LEISProcess"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/LEISProcess">
-         <span>L E I S Process</span>
-      </a>
-   </li>
-   <li>
       <a href="#/LiteratureReference"
          title="https://crc1625.mdi.ruhr-uni-bochum.de/LiteratureReference">
          <span>Literature Reference</span>
@@ -237,12 +240,6 @@ This ontology has the following classes and properties.</span>
       <a href="#/NoGradientSample"
          title="https://crc1625.mdi.ruhr-uni-bochum.de/NoGradientSample">
          <span>No Gradient Sample</span>
-      </a>
-   </li>
-   <li>
-      <a href="#/PSMProcess"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/PSMProcess">
-         <span>P S M Process</span>
       </a>
    </li>
    <li>
@@ -283,25 +280,23 @@ This ontology has the following classes and properties.</span>
       </a>
    </li>
    <li>
+      <a href="#/Sample" title="https://crc1625.mdi.ruhr-uni-bochum.de/Sample">Sample</a>
+   </li>
+   <li>
       <a href="#/SDCProcess"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/SDCProcess">
-         <span>S D C Process</span>
-      </a>
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/SDCProcess">SDC Process</a>
    </li>
    <li>
       <a href="#/SECCMProcess"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess">
-         <span>S E C C M Process</span>
-      </a>
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess">SECCM Process</a>
    </li>
    <li>
       <a href="#/SEMProcess"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess">
-         <span>S E M Process</span>
-      </a>
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess">SEM Process</a>
    </li>
    <li>
-      <a href="#/Sample" title="https://crc1625.mdi.ruhr-uni-bochum.de/Sample">Sample</a>
+      <a href="#/STMProcess"
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/STMProcess">STM Process</a>
    </li>
    <li>
       <a href="#/StressChip"
@@ -327,9 +322,7 @@ This ontology has the following classes and properties.</span>
    </li>
    <li>
       <a href="#/SynthesisOrTreatmentProcess"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentProcess">
-         <span>Synthesis Or Treatment Process</span>
-      </a>
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentProcess">Synthesis or treatment Process</a>
    </li>
    <li>
       <a href="#/SynthesisOrTreatmentReport"
@@ -337,15 +330,11 @@ This ontology has the following classes and properties.</span>
    </li>
    <li>
       <a href="#/TEMProcess"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/TEMProcess">
-         <span>T E M Process</span>
-      </a>
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/TEMProcess">TEM Process</a>
    </li>
    <li>
       <a href="#/ThicknessProcess"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/ThicknessProcess">
-         <span>Thickness Process</span>
-      </a>
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/ThicknessProcess">Thickness Process</a>
    </li>
    <li>
       <a href="#/UnidentifiableProcess"
@@ -374,15 +363,11 @@ This ontology has the following classes and properties.</span>
    </li>
    <li>
       <a href="#/XPSProcess"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess">
-         <span>X P S Process</span>
-      </a>
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess">XPS Process</a>
    </li>
    <li>
       <a href="#/XRDProcess"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/XRDProcess">
-         <span>X R D Process</span>
-      </a>
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/XRDProcess">XRD Process</a>
    </li>
 </ul><h4>Object Properties</h4><ul xmlns:widoco="https://w3id.org/widoco/vocab#"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -519,12 +504,6 @@ This ontology has the following classes and properties.</span>
          title="https://crc1625.mdi.ruhr-uni-bochum.de/resistance">Resistance</a>
    </li>
    <li>
-      <a href="#/temporaryDatatypeProperty"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/temporaryDatatypeProperty">
-         <span>temporary Datatype Property</span>
-      </a>
-   </li>
-   <li>
       <a href="#/tolerance" title="https://crc1625.mdi.ruhr-uni-bochum.de/tolerance">Tolerance</a>
    </li>
    <li>
@@ -540,76 +519,39 @@ This ontology has the following classes and properties.</span>
       <a href="#/y_position"
          title="https://crc1625.mdi.ruhr-uni-bochum.de/y_position">Y position</a>
    </li>
-</ul><h4>Annotation Properties</h4><ul xmlns:widoco="https://w3id.org/widoco/vocab#"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    class="hlist">
-   <li>
-      <a href="#http://purl.org/dc/terms/abstract" title="http://purl.org/dc/terms/abstract">
-         <span>abstract</span>
-      </a>
-   </li>
-   <li>
-      <a href="#http://schema.org/codeRepository" title="http://schema.org/codeRepository">
-         <span>code Repository</span>
-      </a>
-   </li>
-   <li>
-      <a href="#http://purl.org/dc/terms/date" title="http://purl.org/dc/terms/date">
-         <span>date</span>
-      </a>
-   </li>
-   <li>
-      <a href="#http://purl.org/dc/terms/description" title="http://purl.org/dc/terms/description">
-         <span>description</span>
-      </a>
-   </li>
-   <li>
-      <a href="#http://purl.org/vocommons/voaf#extends" title="http://purl.org/vocommons/voaf#extends">
-         <span>extends</span>
-      </a>
-   </li>
-   <li>
-      <a href="#/objectDescription"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/objectDescription">
-         <span>object Description</span>
-      </a>
-   </li>
-   <li>
-      <a href="#/objectName" title="https://crc1625.mdi.ruhr-uni-bochum.de/objectName">
-         <span>object Name</span>
-      </a>
-   </li>
 </ul>
 </div>
   
 
 <!--DESCRIPTION SECTION-->
-    <div id="description"><h2 id="desc" class="list">CRC 1625 Ontology: Description <span class="backlink"> back to <a href="#toc">ToC</a></span></h2>
+    <div id="description"><h2 id="desc" class="list">CCSS Ontology: Description <span class="backlink"> back to <a href="#toc">ToC</a></span></h2>
 
-<span class="markdown">Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625.
-                                          This ontology models the experimental (meta-)data, provenance and handover workflows present in MatInf instances, while additionally being compatible with existing Materials Science ontologies.
+<span class="markdown">Ontology for supporting the analysis of Compositionally Complex Solid Solutions (CCSS) in the context of the Collaborative Research Center (CRC) 1625.
+                                          This ontology models the experimental (meta-)data, provenance and handover workflows present in MatInf instances and vocabulary employed for the analysis of CCSS, while additionally being compatible with existing Materials Science ontologies.
                                           This additionally includes the modelling of handover workflow models, and other (meta-)data that is exclusively used by the MatInf semantic layer.
                                           Note that some classes are not present in the ontology document. Namely, specific measurement types are dynamically generated, as they change between MatInf instances. Processes and activities for them, however, are included here.</span></div>
    
 
 <!--CROSSREF SECTION-->
-   <div id="crossref"><h2 id="crossreference" class="list">Cross-reference for CRC 1625 Ontology classes, object properties and data properties <span class="backlink"> back to <a href="#toc">ToC</a></span></h2>
-This section provides details for each class and property defined by CRC 1625 Ontology.
+   <div id="crossref"><h2 id="crossreference" class="list">Cross-reference for CCSS Ontology classes, object properties and data properties <span class="backlink"> back to <a href="#toc">ToC</a></span></h2>
+This section provides details for each class and property defined by CCSS Ontology.
 <div xmlns:widoco="https://w3id.org/widoco/vocab#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="classes">
  <h3 id="classes-headline" class="list">Classes</h3>
  <ul class="hlist">
-  <li><a href="#/AnnealingProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/AnnealingProcess"> <span>Annealing Process</span> </a></li>
+  <li><a href="#/AFMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/AFMProcess">AFM Process</a></li>
+  <li><a href="#/AnnealingProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/AnnealingProcess">Annealing Process</a></li>
   <li><a href="#/APTProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/APTProcess">APT Process</a></li>
-  <li><a href="#/BandgapProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/BandgapProcess"> <span>Bandgap Process</span> </a></li>
   <li><a href="#/BulkComposition" title="https://crc1625.mdi.ruhr-uni-bochum.de/BulkComposition">Bulk Composition</a></li>
   <li><a href="#/CharacterizationActivity" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity">Characterization activity</a></li>
   <li><a href="#/CharacterizationActivityInstance" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance">Characterization activity instance</a></li>
   <li><a href="#/CharacterizationActivityModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel">Characterization activity model</a></li>
   <li><a href="#/ChemicalObject" title="https://crc1625.mdi.ruhr-uni-bochum.de/ChemicalObject"> <span>Chemical Object</span> </a></li>
   <li><a href="#/ComputationalSample" title="https://crc1625.mdi.ruhr-uni-bochum.de/ComputationalSample"> <span>Computational Sample</span> </a></li>
+  <li><a href="#/EBSDProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/EBSDProcess">EBSD Process</a></li>
   <li><a href="#/EDXMicroscopyProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess">EDX Microscopy Process</a></li>
   <li><a href="#/EngineeredMaterial" title="https://crc1625.mdi.ruhr-uni-bochum.de/EngineeredMaterial"> <span>Engineered Material</span> </a></li>
-  <li><a href="#/FIMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/FIMProcess"> <span>F I M Process</span> </a></li>
+  <li><a href="#/FIBProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/FIBProcess">FIB Process</a></li>
+  <li><a href="#/FIMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/FIMProcess">FIM Process</a></li>
   <li><a href="#/Handover" title="https://crc1625.mdi.ruhr-uni-bochum.de/Handover"> <span>Handover</span> </a></li>
   <li><a href="#/HandoverGroup" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverGroup">Handover group</a></li>
   <li><a href="#/HandoverWorkflow" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflow">Handover workflow</a></li>
@@ -620,13 +562,11 @@ This section provides details for each class and property defined by CRC 1625 On
   <li><a href="#/HandoverWorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep">Handover workflow model step</a></li>
   <li><a href="#/IdeaOrExperimentPlan" title="https://crc1625.mdi.ruhr-uni-bochum.de/IdeaOrExperimentPlan">Idea or experiment plan</a></li>
   <li><a href="#/IdentifiableProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/IdentifiableProcess">Identifiable process</a></li>
-  <li><a href="#/LEISProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/LEISProcess"> <span>L E I S Process</span> </a></li>
   <li><a href="#/LiteratureReference" title="https://crc1625.mdi.ruhr-uni-bochum.de/LiteratureReference"> <span>Literature Reference</span> </a></li>
   <li><a href="#/MaterialsLibrary" title="https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary">Materials Library</a></li>
   <li><a href="#/Measurement" title="https://crc1625.mdi.ruhr-uni-bochum.de/Measurement"> <span>Measurement</span> </a></li>
   <li><a href="#/MeasurementArea" title="https://crc1625.mdi.ruhr-uni-bochum.de/MeasurementArea">Measurement area</a></li>
   <li><a href="#/NoGradientSample" title="https://crc1625.mdi.ruhr-uni-bochum.de/NoGradientSample"> <span>No Gradient Sample</span> </a></li>
-  <li><a href="#/PSMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/PSMProcess"> <span>P S M Process</span> </a></li>
   <li><a href="#/PhotoProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/PhotoProcess">Photo Process</a></li>
   <li><a href="#/ProcessInstance" title="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance">Process Instance</a></li>
   <li><a href="#/ProcessModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel">Process Model</a></li>
@@ -635,29 +575,48 @@ This section provides details for each class and property defined by CRC 1625 On
   <li><a href="#/ReportProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ReportProcess"> <span>Report Process</span> </a></li>
   <li><a href="#/RequestForSynthesis" title="https://crc1625.mdi.ruhr-uni-bochum.de/RequestForSynthesis">Request for synthesis</a></li>
   <li><a href="#/ResistanceProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ResistanceProcess"> <span>Resistance Process</span> </a></li>
-  <li><a href="#/SDCProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SDCProcess"> <span>S D C Process</span> </a></li>
-  <li><a href="#/SECCMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess"> <span>S E C C M Process</span> </a></li>
-  <li><a href="#/SEMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess"> <span>S E M Process</span> </a></li>
   <li><a href="#/Sample" title="https://crc1625.mdi.ruhr-uni-bochum.de/Sample">Sample</a></li>
+  <li><a href="#/SDCProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SDCProcess">SDC Process</a></li>
+  <li><a href="#/SECCMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess">SECCM Process</a></li>
+  <li><a href="#/SEMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess">SEM Process</a></li>
+  <li><a href="#/STMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/STMProcess">STM Process</a></li>
   <li><a href="#/StressChip" title="https://crc1625.mdi.ruhr-uni-bochum.de/StressChip"> <span>Stress Chip</span> </a></li>
   <li><a href="#/StripeSample" title="https://crc1625.mdi.ruhr-uni-bochum.de/StripeSample"> <span>Stripe Sample</span> </a></li>
   <li><a href="#/Substrate" title="https://crc1625.mdi.ruhr-uni-bochum.de/Substrate">Substrate</a></li>
   <li><a href="#/SurfaceComposition" title="https://crc1625.mdi.ruhr-uni-bochum.de/SurfaceComposition"> <span>Surface Composition</span> </a></li>
-  <li><a href="#/SynthesisOrTreatmentProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentProcess"> <span>Synthesis Or Treatment Process</span> </a></li>
+  <li><a href="#/SynthesisOrTreatmentProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentProcess">Synthesis or treatment Process</a></li>
   <li><a href="#/SynthesisOrTreatmentReport" title="https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentReport">Synthesis or treatment Report</a></li>
-  <li><a href="#/TEMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/TEMProcess"> <span>T E M Process</span> </a></li>
-  <li><a href="#/ThicknessProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ThicknessProcess"> <span>Thickness Process</span> </a></li>
+  <li><a href="#/TEMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/TEMProcess">TEM Process</a></li>
+  <li><a href="#/ThicknessProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ThicknessProcess">Thickness Process</a></li>
   <li><a href="#/UnidentifiableProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess">Unidentifiable process</a></li>
   <li><a href="#/UploadedFile" title="https://crc1625.mdi.ruhr-uni-bochum.de/UploadedFile"> <span>Uploaded File</span> </a></li>
   <li><a href="#/User" title="https://crc1625.mdi.ruhr-uni-bochum.de/User"> <span>User</span> </a></li>
   <li><a href="#/VirtualHandover" title="https://crc1625.mdi.ruhr-uni-bochum.de/VirtualHandover">Virtual handover</a></li>
   <li><a href="#/VolumeComposition" title="https://crc1625.mdi.ruhr-uni-bochum.de/VolumeComposition"> <span>Volume Composition</span> </a></li>
-  <li><a href="#/XPSProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess"> <span>X P S Process</span> </a></li>
-  <li><a href="#/XRDProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XRDProcess"> <span>X R D Process</span> </a></li>
+  <li><a href="#/XPSProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess">XPS Process</a></li>
+  <li><a href="#/XRDProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XRDProcess">XRD Process</a></li>
  </ul>
+ <div class="entity" id="/AFMProcess">
+  <h3>AFM Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
+  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/AFMProcess</p>
+  <div class="comment">
+   <span class="markdown">A process where AFM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to. Atomic Force Microscopy (AFM) is a surface characterization technique that maps the topography of a material by scanning a sharp probe across the surface and monitoring the tip–sample interaction forces. It provides nanometer- to atomic-scale height information and can also reveal surface roughness, grain structure, and local mechanical or adhesive contrasts, depending on the measurement mode. </span>
+  </div>
+  <dl class="description">
+   <dt>
+    has super-classes
+   </dt>
+   <dd>
+    <a href="https://w3id.org/pmd/co/AnalysingProcess" target="_blank" title="https://w3id.org/pmd/co/AnalysingProcess">Analysing Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/CharacterizationActivity" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity">Characterization activity</a> <sup class="type-c" title="class">c</sup>, <a href="#/UnidentifiableProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess">Unidentifiable process</a> <sup class="type-c" title="class">c</sup>
+   </dd>
+  </dl>
+ </div>
  <div class="entity" id="/AnnealingProcess">
   <h3>Annealing Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
   <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/AnnealingProcess</p>
+  <div class="comment">
+   <span class="markdown">A process where annealing has been applied to the materials library or sample. Used by Activity instances and Activity Models to denote the type of measurements they refer to. Annealing consists of a heat treatment applied to a materials library or sample, usually in the context of dealloying. </span>
+  </div>
   <dl class="description">
    <dt>
     has super-classes
@@ -671,22 +630,7 @@ This section provides details for each class and property defined by CRC 1625 On
   <h3>APT Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
   <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/APTProcess</p>
   <div class="comment">
-   <span class="markdown">A process where APT measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</span>
-  </div>
-  <dl class="description">
-   <dt>
-    has super-classes
-   </dt>
-   <dd>
-    <a href="https://w3id.org/pmd/co/AnalysingProcess" target="_blank" title="https://w3id.org/pmd/co/AnalysingProcess">Analysing Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/CharacterizationActivity" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity">Characterization activity</a> <sup class="type-c" title="class">c</sup>, <a href="#/UnidentifiableProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess">Unidentifiable process</a> <sup class="type-c" title="class">c</sup>
-   </dd>
-  </dl>
- </div>
- <div class="entity" id="/BandgapProcess">
-  <h3>Bandgap Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/BandgapProcess</p>
-  <div class="comment">
-   <span class="markdown">A process where Bandgap measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</span>
+   <span class="markdown">A process where APT measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to. APT (Atom Probe Tomography) is a time-of-flight mass spectrometer that provides three-dimensional (3D) compositional information with sub-nanometer spatial resolution. APT specimens must be sharp and needle-shaped, with typical tip radii below 100 nm to facilitate the field evaporation of surface atoms in the form of ions, thereby enabling their analysis. APT is based on the principle of field evaporation, a process derived historically from field ion microscopy (FIM).</span>
   </div>
   <dl class="description">
    <dt>
@@ -701,7 +645,7 @@ This section provides details for each class and property defined by CRC 1625 On
   <h3>Bulk Composition<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
   <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/BulkComposition</p>
   <div class="comment">
-   <span class="markdown">The composition of a Materials Library as a whole</span>
+   <span class="markdown">The composition of a Materials Library (i.e., the concentration of every atomic element present in it) as a whole</span>
   </div>
   <dl class="description">
    <dt>
@@ -729,7 +673,7 @@ This section provides details for each class and property defined by CRC 1625 On
     has sub-classes
    </dt>
    <dd>
-    <a href="#/APTProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/APTProcess">APT Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/AnnealingProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/AnnealingProcess">Annealing Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/BandgapProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/BandgapProcess">Bandgap Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/CharacterizationActivityInstance" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance">Characterization activity instance</a> <sup class="type-c" title="class">c</sup>, <a href="#/CharacterizationActivityModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel">Characterization activity model</a> <sup class="type-c" title="class">c</sup>, <a href="#/EDXMicroscopyProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess">EDX Microscopy Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/FIMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/FIMProcess">F I M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/LEISProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/LEISProcess">L E I S Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/PSMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/PSMProcess">P S M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/PhotoProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/PhotoProcess">Photo Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ReportProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ReportProcess">Report Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ResistanceProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ResistanceProcess">Resistance Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SDCProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SDCProcess">S D C Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SECCMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess">S E C C M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SEMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess">S E M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SynthesisOrTreatmentProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentProcess">Synthesis Or Treatment Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/TEMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/TEMProcess">T E M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ThicknessProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ThicknessProcess">Thickness Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/XPSProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess">X P S Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/XRDProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XRDProcess">X R D Process</a> <sup class="type-c" title="class">c</sup>
+    <a href="#/AFMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/AFMProcess">AFM Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/APTProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/APTProcess">APT Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/AnnealingProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/AnnealingProcess">Annealing Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/CharacterizationActivityInstance" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance">Characterization activity instance</a> <sup class="type-c" title="class">c</sup>, <a href="#/CharacterizationActivityModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel">Characterization activity model</a> <sup class="type-c" title="class">c</sup>, <a href="#/EBSDProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/EBSDProcess">EBSD Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/EDXMicroscopyProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess">EDX Microscopy Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/FIBProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/FIBProcess">FIB Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/FIMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/FIMProcess">FIM Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/PhotoProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/PhotoProcess">Photo Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ReportProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ReportProcess">Report Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ResistanceProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ResistanceProcess">Resistance Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SDCProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SDCProcess">SDC Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SECCMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess">SECCM Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SEMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess">SEM Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/STMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/STMProcess">STM Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SynthesisOrTreatmentProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentProcess">Synthesis or treatment Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/TEMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/TEMProcess">TEM Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ThicknessProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ThicknessProcess">Thickness Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/XPSProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess">XPS Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/XRDProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XRDProcess">XRD Process</a> <sup class="type-c" title="class">c</sup>
    </dd>
   </dl>
  </div>
@@ -793,11 +737,26 @@ This section provides details for each class and property defined by CRC 1625 On
    </dd>
   </dl>
  </div>
+ <div class="entity" id="/EBSDProcess">
+  <h3>EBSD Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
+  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/EBSDProcess</p>
+  <div class="comment">
+   <span class="markdown">A process where EBSD measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to. EBSD (Electron Backscatter Diffraction) is a method to measure the local orientations of a crystalline specimen from an electron backscatter diffraction pattern. Electrons are inelastically scattered on crystalline materials. The resulting pattern is characteristic of the crystal structure and lattice distances. An important feature of the EBSD method is crystal orientation mapping. </span>
+  </div>
+  <dl class="description">
+   <dt>
+    has super-classes
+   </dt>
+   <dd>
+    <a href="https://w3id.org/pmd/co/AnalysingProcess" target="_blank" title="https://w3id.org/pmd/co/AnalysingProcess">Analysing Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/CharacterizationActivity" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity">Characterization activity</a> <sup class="type-c" title="class">c</sup>, <a href="#/UnidentifiableProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess">Unidentifiable process</a> <sup class="type-c" title="class">c</sup>
+   </dd>
+  </dl>
+ </div>
  <div class="entity" id="/EDXMicroscopyProcess">
   <h3>EDX Microscopy Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
   <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess</p>
   <div class="comment">
-   <span class="markdown">A process where EDX measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</span>
+   <span class="markdown">A process where EDX measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to. During EDX (Energy Dispersive X-Ray Spectroscopy), when the electrons hit the matter of the specimen, several interactions are possible. One is the production of characteristic x-ray, by kicking out an inner shell electron, whose space has to be filled by an outer shell electron. The decrease in energy is emitted as X-ray quant. The energy of the x-rays is characteristic of the element; thus, this technique can be used to calculate the (bulk) composition of the sample. Also called EDS (energy dispersive x-ray Spectroscopy) </span>
   </div>
   <dl class="description">
    <dt>
@@ -820,11 +779,26 @@ This section provides details for each class and property defined by CRC 1625 On
    </dd>
   </dl>
  </div>
+ <div class="entity" id="/FIBProcess">
+  <h3>FIB Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
+  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/FIBProcess</p>
+  <div class="comment">
+   <span class="markdown">A process where FIB measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to. FIB (Focused Ion Beam) usually comes as a dual-beam system: SEM equipped with another beam source and optics, often Ga-ions or plasma. FIB enables milling and welding in a several nm to micrometer range and is used to prepare TEM or APT samples. </span>
+  </div>
+  <dl class="description">
+   <dt>
+    has super-classes
+   </dt>
+   <dd>
+    <a href="https://w3id.org/pmd/co/AnalysingProcess" target="_blank" title="https://w3id.org/pmd/co/AnalysingProcess">Analysing Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/CharacterizationActivity" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity">Characterization activity</a> <sup class="type-c" title="class">c</sup>, <a href="#/UnidentifiableProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess">Unidentifiable process</a> <sup class="type-c" title="class">c</sup>
+   </dd>
+  </dl>
+ </div>
  <div class="entity" id="/FIMProcess">
-  <h3>F I M Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
+  <h3>FIM Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
   <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/FIMProcess</p>
   <div class="comment">
-   <span class="markdown">A process where FIM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</span>
+   <span class="markdown">A process where FIM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to. FIM (Field Ion Microscopy), is an imaging technique that visualizes the atomic structure of a sharply pointed specimen by ionizing gas atoms near its surface in a strong electric field. It provides direct real-space imaging of surface atoms and is often used to study atomic arrangements and tip structures at very high spatial resolution.</span>
   </div>
   <dl class="description">
    <dt>
@@ -1051,21 +1025,6 @@ This section provides details for each class and property defined by CRC 1625 On
    </dd>
   </dl>
  </div>
- <div class="entity" id="/LEISProcess">
-  <h3>L E I S Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/LEISProcess</p>
-  <div class="comment">
-   <span class="markdown">A process where LEIS measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</span>
-  </div>
-  <dl class="description">
-   <dt>
-    has super-classes
-   </dt>
-   <dd>
-    <a href="https://w3id.org/pmd/co/AnalysingProcess" target="_blank" title="https://w3id.org/pmd/co/AnalysingProcess">Analysing Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/CharacterizationActivity" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity">Characterization activity</a> <sup class="type-c" title="class">c</sup>, <a href="#/UnidentifiableProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess">Unidentifiable process</a> <sup class="type-c" title="class">c</sup>
-   </dd>
-  </dl>
- </div>
  <div class="entity" id="/LiteratureReference">
   <h3>Literature Reference<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
   <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/LiteratureReference</p>
@@ -1144,18 +1103,6 @@ This section provides details for each class and property defined by CRC 1625 On
    </dt>
    <dd>
     <a href="#/MaterialsLibrary" title="https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary">Materials Library</a> <sup class="type-c" title="class">c</sup>
-   </dd>
-  </dl>
- </div>
- <div class="entity" id="/PSMProcess">
-  <h3>P S M Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/PSMProcess</p>
-  <dl class="description">
-   <dt>
-    has super-classes
-   </dt>
-   <dd>
-    <a href="https://w3id.org/pmd/co/AnalysingProcess" target="_blank" title="https://w3id.org/pmd/co/AnalysingProcess">Analysing Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/CharacterizationActivity" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity">Characterization activity</a> <sup class="type-c" title="class">c</sup>, <a href="#/UnidentifiableProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess">Unidentifiable process</a> <sup class="type-c" title="class">c</sup>
    </dd>
   </dl>
  </div>
@@ -1294,51 +1241,6 @@ This section provides details for each class and property defined by CRC 1625 On
    </dd>
   </dl>
  </div>
- <div class="entity" id="/SDCProcess">
-  <h3>S D C Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/SDCProcess</p>
-  <div class="comment">
-   <span class="markdown">A process where SDC measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</span>
-  </div>
-  <dl class="description">
-   <dt>
-    has super-classes
-   </dt>
-   <dd>
-    <a href="https://w3id.org/pmd/co/AnalysingProcess" target="_blank" title="https://w3id.org/pmd/co/AnalysingProcess">Analysing Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/CharacterizationActivity" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity">Characterization activity</a> <sup class="type-c" title="class">c</sup>, <a href="#/UnidentifiableProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess">Unidentifiable process</a> <sup class="type-c" title="class">c</sup>
-   </dd>
-  </dl>
- </div>
- <div class="entity" id="/SECCMProcess">
-  <h3>S E C C M Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess</p>
-  <div class="comment">
-   <span class="markdown">A process where SECCM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</span>
-  </div>
-  <dl class="description">
-   <dt>
-    has super-classes
-   </dt>
-   <dd>
-    <a href="https://w3id.org/pmd/co/AnalysingProcess" target="_blank" title="https://w3id.org/pmd/co/AnalysingProcess">Analysing Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/CharacterizationActivity" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity">Characterization activity</a> <sup class="type-c" title="class">c</sup>, <a href="#/UnidentifiableProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess">Unidentifiable process</a> <sup class="type-c" title="class">c</sup>
-   </dd>
-  </dl>
- </div>
- <div class="entity" id="/SEMProcess">
-  <h3>S E M Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess</p>
-  <div class="comment">
-   <span class="markdown">A process where SEM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</span>
-  </div>
-  <dl class="description">
-   <dt>
-    has super-classes
-   </dt>
-   <dd>
-    <a href="https://w3id.org/pmd/co/AnalysingProcess" target="_blank" title="https://w3id.org/pmd/co/AnalysingProcess">Analysing Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/CharacterizationActivity" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity">Characterization activity</a> <sup class="type-c" title="class">c</sup>, <a href="#/UnidentifiableProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess">Unidentifiable process</a> <sup class="type-c" title="class">c</sup>
-   </dd>
-  </dl>
- </div>
  <div class="entity" id="/Sample">
   <h3>Sample<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
   <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/Sample</p>
@@ -1363,6 +1265,66 @@ This section provides details for each class and property defined by CRC 1625 On
    </dt>
    <dd>
     <a href="#/StripeSample" title="https://crc1625.mdi.ruhr-uni-bochum.de/StripeSample">Stripe Sample</a> <sup class="type-c" title="class">c</sup>
+   </dd>
+  </dl>
+ </div>
+ <div class="entity" id="/SDCProcess">
+  <h3>SDC Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
+  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/SDCProcess</p>
+  <div class="comment">
+   <span class="markdown">A process where SDC measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to. SDC (Scanning Droplet Cell) is an electrochemical technique in which a small electrolyte droplet is brought into localized contact with a sample surface to perform spatially resolved measurements. It is used to map variations in electrochemical behavior across a material, for example, local activity. </span>
+  </div>
+  <dl class="description">
+   <dt>
+    has super-classes
+   </dt>
+   <dd>
+    <a href="https://w3id.org/pmd/co/AnalysingProcess" target="_blank" title="https://w3id.org/pmd/co/AnalysingProcess">Analysing Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/CharacterizationActivity" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity">Characterization activity</a> <sup class="type-c" title="class">c</sup>, <a href="#/UnidentifiableProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess">Unidentifiable process</a> <sup class="type-c" title="class">c</sup>
+   </dd>
+  </dl>
+ </div>
+ <div class="entity" id="/SECCMProcess">
+  <h3>SECCM Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
+  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess</p>
+  <div class="comment">
+   <span class="markdown">A process where SECCM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to. SECCM (Scanning Electrochemical Cell Microscopy), is a localized electrochemical method in which a tiny liquid meniscus at the end of a nanopipette forms a confined electrochemical cell with the sample surface. This allows spatially resolved mapping of surface electrochemical activity, making SECCM especially useful for linking local composition or structure to activity.</span>
+  </div>
+  <dl class="description">
+   <dt>
+    has super-classes
+   </dt>
+   <dd>
+    <a href="https://w3id.org/pmd/co/AnalysingProcess" target="_blank" title="https://w3id.org/pmd/co/AnalysingProcess">Analysing Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/CharacterizationActivity" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity">Characterization activity</a> <sup class="type-c" title="class">c</sup>, <a href="#/UnidentifiableProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess">Unidentifiable process</a> <sup class="type-c" title="class">c</sup>
+   </dd>
+  </dl>
+ </div>
+ <div class="entity" id="/SEMProcess">
+  <h3>SEM Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
+  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess</p>
+  <div class="comment">
+   <span class="markdown">A process where SEM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to. In SEM (Scanning Electron Microscopy) an electron beam is rastered across the surface. The interaction with the sample (surface) produces several signals, which can be used for imaging, chemical analysis or analysis of the crystal structure. Secondary electrons and backscattered electrons can be used for image acquisition: the former gives a topography contrast, the latter a z-contrast (z = atomic number). Backscatter diffraction analysis (also see: EBSD) is a technique for crystal structure analysis. X-rays, produced during interaction with the sample, can give information about the chemical composition, usually analyzed using EDX, less commonly but more accurately: WDX. </span>
+  </div>
+  <dl class="description">
+   <dt>
+    has super-classes
+   </dt>
+   <dd>
+    <a href="https://w3id.org/pmd/co/AnalysingProcess" target="_blank" title="https://w3id.org/pmd/co/AnalysingProcess">Analysing Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/CharacterizationActivity" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity">Characterization activity</a> <sup class="type-c" title="class">c</sup>, <a href="#/UnidentifiableProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess">Unidentifiable process</a> <sup class="type-c" title="class">c</sup>
+   </dd>
+  </dl>
+ </div>
+ <div class="entity" id="/STMProcess">
+  <h3>STM Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
+  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/STMProcess</p>
+  <div class="comment">
+   <span class="markdown">A process where STM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to. STM (Scanning tunneling microscopy) is a surface-imaging technique that uses a sharp conductive tip to measure tunneling current between the tip and a sample. It provides atomic-scale resolution and reveals the electronic and structural properties of conductive surfaces. </span>
+  </div>
+  <dl class="description">
+   <dt>
+    has super-classes
+   </dt>
+   <dd>
+    <a href="https://w3id.org/pmd/co/AnalysingProcess" target="_blank" title="https://w3id.org/pmd/co/AnalysingProcess">Analysing Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/CharacterizationActivity" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity">Characterization activity</a> <sup class="type-c" title="class">c</sup>, <a href="#/UnidentifiableProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess">Unidentifiable process</a> <sup class="type-c" title="class">c</sup>
    </dd>
   </dl>
  </div>
@@ -1418,7 +1380,7 @@ This section provides details for each class and property defined by CRC 1625 On
   </dl>
  </div>
  <div class="entity" id="/SynthesisOrTreatmentProcess">
-  <h3>Synthesis Or Treatment Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
+  <h3>Synthesis or treatment Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
   <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentProcess</p>
   <div class="comment">
    <span class="markdown">A process where a synthesis or treatment has been performed, resulting in a synthesis report. We treat it as a characterization. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</span>
@@ -1448,10 +1410,10 @@ This section provides details for each class and property defined by CRC 1625 On
   </dl>
  </div>
  <div class="entity" id="/TEMProcess">
-  <h3>T E M Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
+  <h3>TEM Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
   <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/TEMProcess</p>
   <div class="comment">
-   <span class="markdown">A process where TEM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</span>
+   <span class="markdown">A process where TEM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to. In (S)TEM, standing for (Scanning) Transmission Electron Microscopy, the electron beam of the TEM is focused on a small spot and rastered across the specimen as in SEM. The spot size controls the resolution of the resulting image. Depending on the detector, different types of dark field (DF) or bright field (BF) images can be recorded. </span>
   </div>
   <dl class="description">
    <dt>
@@ -1494,7 +1456,7 @@ This section provides details for each class and property defined by CRC 1625 On
     has sub-classes
    </dt>
    <dd>
-    <a href="#/APTProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/APTProcess">APT Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/BandgapProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/BandgapProcess">Bandgap Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/EDXMicroscopyProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess">EDX Microscopy Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/FIMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/FIMProcess">F I M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/HandoverGroup" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverGroup">Handover group</a> <sup class="type-c" title="class">c</sup>, <a href="#/HandoverWorkflowInstanceAssignment" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment">Handover workflow instance assignment</a> <sup class="type-c" title="class">c</sup>, <a href="#/HandoverWorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep">Handover workflow model step</a> <sup class="type-c" title="class">c</sup>, <a href="#/LEISProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/LEISProcess">L E I S Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/PSMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/PSMProcess">P S M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/PhotoProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/PhotoProcess">Photo Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ProcessModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel">Process Model</a> <sup class="type-c" title="class">c</sup>, <a href="#/ReportProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ReportProcess">Report Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ResistanceProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ResistanceProcess">Resistance Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SDCProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SDCProcess">S D C Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SECCMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess">S E C C M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SEMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess">S E M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SynthesisOrTreatmentProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentProcess">Synthesis Or Treatment Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/TEMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/TEMProcess">T E M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ThicknessProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ThicknessProcess">Thickness Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/VirtualHandover" title="https://crc1625.mdi.ruhr-uni-bochum.de/VirtualHandover">Virtual handover</a> <sup class="type-c" title="class">c</sup>, <a href="#/XPSProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess">X P S Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/XRDProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XRDProcess">X R D Process</a> <sup class="type-c" title="class">c</sup>
+    <a href="#/AFMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/AFMProcess">AFM Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/APTProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/APTProcess">APT Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/EBSDProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/EBSDProcess">EBSD Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/EDXMicroscopyProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess">EDX Microscopy Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/FIBProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/FIBProcess">FIB Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/FIMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/FIMProcess">FIM Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/HandoverGroup" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverGroup">Handover group</a> <sup class="type-c" title="class">c</sup>, <a href="#/HandoverWorkflowInstanceAssignment" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment">Handover workflow instance assignment</a> <sup class="type-c" title="class">c</sup>, <a href="#/HandoverWorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep">Handover workflow model step</a> <sup class="type-c" title="class">c</sup>, <a href="#/PhotoProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/PhotoProcess">Photo Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ProcessModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel">Process Model</a> <sup class="type-c" title="class">c</sup>, <a href="#/ReportProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ReportProcess">Report Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ResistanceProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ResistanceProcess">Resistance Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SDCProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SDCProcess">SDC Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SECCMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess">SECCM Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SEMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess">SEM Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/STMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/STMProcess">STM Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SynthesisOrTreatmentProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentProcess">Synthesis or treatment Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/TEMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/TEMProcess">TEM Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ThicknessProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ThicknessProcess">Thickness Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/VirtualHandover" title="https://crc1625.mdi.ruhr-uni-bochum.de/VirtualHandover">Virtual handover</a> <sup class="type-c" title="class">c</sup>, <a href="#/XPSProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess">XPS Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/XRDProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XRDProcess">XRD Process</a> <sup class="type-c" title="class">c</sup>
    </dd>
   </dl>
  </div>
@@ -1550,10 +1512,10 @@ This section provides details for each class and property defined by CRC 1625 On
   </dl>
  </div>
  <div class="entity" id="/XPSProcess">
-  <h3>X P S Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
+  <h3>XPS Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
   <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess</p>
   <div class="comment">
-   <span class="markdown">A process where XPS measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</span>
+   <span class="markdown">A process where XPS measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to. XPS (X-ray Photoelectron Spectroscopy) is a method that uses X-rays to eject electrons from a material and analyzes their energies to identify which elements are present and in what chemical states. It probes only the outermost atomic layers, making it highly surface-specific. </span>
   </div>
   <dl class="description">
    <dt>
@@ -1565,10 +1527,10 @@ This section provides details for each class and property defined by CRC 1625 On
   </dl>
  </div>
  <div class="entity" id="/XRDProcess">
-  <h3>X R D Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
+  <h3>XRD Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
   <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/XRDProcess</p>
   <div class="comment">
-   <span class="markdown">A process where XRD measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</span>
+   <span class="markdown">A process where XRD measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to. X-ray diffraction (XRD) is a crystallographic technique that measures the diffraction of X-rays by the periodic lattice of a material. It provides information on crystal structure, phase composition, and lattice parameters. </span>
   </div>
   <dl class="description">
    <dt>
@@ -2031,7 +1993,6 @@ This section provides details for each class and property defined by CRC 1625 On
   <li><a href="#/internalID" title="https://crc1625.mdi.ruhr-uni-bochum.de/internalID"> <span>Internal ID</span> </a></li>
   <li><a href="#/isHandoverWorkflowStepEnabled" title="https://crc1625.mdi.ruhr-uni-bochum.de/isHandoverWorkflowStepEnabled">Is Handover workflow step enabled</a></li>
   <li><a href="#/resistance" title="https://crc1625.mdi.ruhr-uni-bochum.de/resistance">Resistance</a></li>
-  <li><a href="#/temporaryDatatypeProperty" title="https://crc1625.mdi.ruhr-uni-bochum.de/temporaryDatatypeProperty"> <span>temporary Datatype Property</span> </a></li>
   <li><a href="#/tolerance" title="https://crc1625.mdi.ruhr-uni-bochum.de/tolerance">Tolerance</a></li>
   <li><a href="#/value" title="https://crc1625.mdi.ruhr-uni-bochum.de/value"> <span>value</span> </a></li>
   <li><a href="#/x_position" title="https://crc1625.mdi.ruhr-uni-bochum.de/x_position">X position</a></li>
@@ -2257,23 +2218,6 @@ This section provides details for each class and property defined by CRC 1625 On
    </dl>
   </div>
  </div>
- <div class="entity" id="/temporaryDatatypeProperty">
-  <h3>temporary Datatype Property<sup class="type-dp" title="data property">dp</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#dataproperties">Data Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/temporaryDatatypeProperty</p>
-  <div class="comment">
-   <span class="markdown">Property used exclusively during the mapping of SQL to RDF, deleted via a post-processing script after executing the Ontop mappings</span>
-  </div>
-  <div class="description">
-   <dl>
-    <dt>
-     has super-properties
-    </dt>
-    <dd>
-     <a href="http://www.w3.org/2002/07/owl#topDataProperty" target="_blank" title="http://www.w3.org/2002/07/owl#topDataProperty">top Data Property</a> <sup class="type-dp" title="data property">dp</sup>
-    </dd>
-   </dl>
-  </div>
- </div>
  <div class="entity" id="/tolerance">
   <h3>Tolerance<sup class="type-dp" title="data property">dp</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#dataproperties">Data Property ToC</a> </span></h3>
   <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/tolerance</p>
@@ -2384,107 +2328,6 @@ This section provides details for each class and property defined by CRC 1625 On
    </dl>
   </div>
  </div>
-</div><div xmlns:widoco="https://w3id.org/widoco/vocab#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="annotationproperties">
- <h3 id="annotationproperties" class="list">Annotation Properties</h3>
- <ul class="hlist">
-  <li><a href="#http://purl.org/dc/terms/abstract" title="http://purl.org/dc/terms/abstract"> <span>abstract</span> </a></li>
-  <li><a href="#http://schema.org/codeRepository" title="http://schema.org/codeRepository"> <span>code Repository</span> </a></li>
-  <li><a href="#http://purl.org/dc/terms/date" title="http://purl.org/dc/terms/date"> <span>date</span> </a></li>
-  <li><a href="#http://purl.org/dc/terms/description" title="http://purl.org/dc/terms/description"> <span>description</span> </a></li>
-  <li><a href="#http://purl.org/vocommons/voaf#extends" title="http://purl.org/vocommons/voaf#extends"> <span>extends</span> </a></li>
-  <li><a href="#/objectDescription" title="https://crc1625.mdi.ruhr-uni-bochum.de/objectDescription"> <span>object Description</span> </a></li>
-  <li><a href="#/objectName" title="https://crc1625.mdi.ruhr-uni-bochum.de/objectName"> <span>object Name</span> </a></li>
- </ul>
- <div class="entity" id="http://purl.org/dc/terms/abstract">
-  <h3>abstract<sup class="type-ap" title="annotation property">ap</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#annotationproperties">Annotation Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> http://purl.org/dc/terms/abstract</p>
- </div>
- <div class="entity" id="http://schema.org/codeRepository">
-  <h3>code Repository<sup class="type-ap" title="annotation property">ap</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#annotationproperties">Annotation Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> http://schema.org/codeRepository</p>
- </div>
- <div class="entity" id="http://purl.org/dc/terms/date">
-  <h3>date<sup class="type-ap" title="annotation property">ap</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#annotationproperties">Annotation Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> http://purl.org/dc/terms/date</p>
- </div>
- <div class="entity" id="http://purl.org/dc/terms/description">
-  <h3>description<sup class="type-ap" title="annotation property">ap</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#annotationproperties">Annotation Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> http://purl.org/dc/terms/description</p>
- </div>
- <div class="entity" id="http://purl.org/vocommons/voaf#extends">
-  <h3>extends<sup class="type-ap" title="annotation property">ap</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#annotationproperties">Annotation Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> http://purl.org/vocommons/voaf#extends</p>
- </div>
- <div class="entity" id="/objectDescription">
-  <h3>object Description<sup class="type-ap" title="annotation property">ap</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#annotationproperties">Annotation Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/objectDescription</p>
-  <div class="comment">
-   <span class="markdown">The annotation property object description points to the description of the RDMS object it refers to.</span>
-  </div>
-  <div class="description">
-   <dl>
-    <dt>
-     has super-properties
-    </dt>
-    <dd>
-     <a href="http://www.w3.org/2000/01/rdf-schema#comment" target="_blank" title="http://www.w3.org/2000/01/rdf-schema#comment">comment</a>
-    </dd>
-    <dt>
-     has domain
-    </dt>
-    <dd>
-     <a href="http://www.w3.org/ns/prov#Activity" target="_blank" title="http://www.w3.org/ns/prov#Activity">Activity</a> <sup class="type-c" title="class">c</sup>
-    </dd>
-    <dd>
-     <a href="http://www.w3.org/ns/prov#Agent" target="_blank" title="http://www.w3.org/ns/prov#Agent">Agent</a> <sup class="type-c" title="class">c</sup>
-    </dd>
-    <dd>
-     <a href="http://www.w3.org/ns/prov#Entity" target="_blank" title="http://www.w3.org/ns/prov#Entity">Entity</a> <sup class="type-c" title="class">c</sup>
-    </dd>
-    <dt>
-     has range
-    </dt>
-    <dd>
-     <a href="http://www.w3.org/2000/01/rdf-schema#Literal" target="_blank" title="http://www.w3.org/2000/01/rdf-schema#Literal">Literal</a>
-    </dd>
-   </dl>
-  </div>
- </div>
- <div class="entity" id="/objectName">
-  <h3>object Name<sup class="type-ap" title="annotation property">ap</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#annotationproperties">Annotation Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/objectName</p>
-  <div class="comment">
-   <span class="markdown">The datatype property object description points to the name of the RDMS object it refers to.</span>
-  </div>
-  <div class="description">
-   <dl>
-    <dt>
-     has super-properties
-    </dt>
-    <dd>
-     <a href="http://www.w3.org/2000/01/rdf-schema#label" target="_blank" title="http://www.w3.org/2000/01/rdf-schema#label">label</a>
-    </dd>
-    <dt>
-     has domain
-    </dt>
-    <dd>
-     <a href="http://www.w3.org/ns/prov#Activity" target="_blank" title="http://www.w3.org/ns/prov#Activity">Activity</a> <sup class="type-c" title="class">c</sup>
-    </dd>
-    <dd>
-     <a href="http://www.w3.org/ns/prov#Agent" target="_blank" title="http://www.w3.org/ns/prov#Agent">Agent</a> <sup class="type-c" title="class">c</sup>
-    </dd>
-    <dd>
-     <a href="http://www.w3.org/ns/prov#Entity" target="_blank" title="http://www.w3.org/ns/prov#Entity">Entity</a> <sup class="type-c" title="class">c</sup>
-    </dd>
-    <dt>
-     has range
-    </dt>
-    <dd>
-     <a href="http://www.w3.org/2000/01/rdf-schema#Literal" target="_blank" title="http://www.w3.org/2000/01/rdf-schema#Literal">Literal</a>
-    </dd>
-   </dl>
-  </div>
- </div>
 </div><div id="legend">
 <h2>Legend <span class="backlink"> back to <a href="#toc">ToC</a></span></h2>
 <div   class="entity">
@@ -2500,7 +2343,7 @@ This section provides details for each class and property defined by CRC 1625 On
   <div id="references">
 <h2 id="ref" class="list">References <span class="backlink"> back to <a href="#toc">ToC</a></span></h2>
 <span class="markdown">
-TBD.</span>
+Add your references here. It is recommended to have them as a list.</span>
 
 </div>
 <div id="acknowledgments">

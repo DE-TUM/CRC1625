@@ -81,7 +81,7 @@
 # 
 # https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject
 <https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject> <http://www.w3.org/2000/01/rdf-schema#domain> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject> <http://www.w3.org/2000/01/rdf-schema#domain> <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject> <http://www.w3.org/2000/01/rdf-schema#range> <https://crc1625.mdi.ruhr-uni-bochum.de/Project> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject> <http://www.w3.org/2000/01/rdf-schema#comment> "Indicates that the handover group that the Handover workflow model step is checking is allowed to take place in the given group" .
 <https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject> <http://www.w3.org/2000/01/rdf-schema#label> "Allowed project" .
@@ -89,7 +89,7 @@
 # https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject
 <https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject> <http://www.w3.org/2000/01/rdf-schema#domain> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject> <http://www.w3.org/2000/01/rdf-schema#domain> <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowInstanceAssignment> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject> <http://www.w3.org/2000/01/rdf-schema#range> <https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject> <http://www.w3.org/2000/01/rdf-schema#comment> "Indicates that the Handover workflow assignment is related to the target materials library or sample" .
 <https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject> <http://www.w3.org/2000/01/rdf-schema#label> "Assigned object" .
@@ -126,17 +126,17 @@
 <https://crc1625.mdi.ruhr-uni-bochum.de/givenName> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/givenName> <http://www.w3.org/2000/01/rdf-schema#comment> "The given name of a person" .
 # 
-# https://crc1625.mdi.ruhr-uni-bochum.de/handoverWorkflowModelInstanceOf
-<https://crc1625.mdi.ruhr-uni-bochum.de/handoverWorkflowModelInstanceOf> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/handoverWorkflowModelInstanceOf> <http://www.w3.org/2000/01/rdf-schema#domain> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/handoverWorkflowModelInstanceOf> <http://www.w3.org/2000/01/rdf-schema#range> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/handoverWorkflowModelInstanceOf> <http://www.w3.org/2000/01/rdf-schema#comment> "Indicates that the Handover workflow model instance is an instantiation of the Handover workflow model" .
-<https://crc1625.mdi.ruhr-uni-bochum.de/handoverWorkflowModelInstanceOf> <http://www.w3.org/2000/01/rdf-schema#label> "Handover workflow model instance of" .
+# https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstanceOf
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstanceOf> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstanceOf> <http://www.w3.org/2000/01/rdf-schema#domain> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstanceOf> <http://www.w3.org/2000/01/rdf-schema#range> <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstanceOf> <http://www.w3.org/2000/01/rdf-schema#comment> "Indicates that the Handover workflow model instance is an instantiation of the Handover workflow model" .
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstanceOf> <http://www.w3.org/2000/01/rdf-schema#label> "Handover workflow model instance of" .
 # 
 # https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment
 <https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment> <http://www.w3.org/2000/01/rdf-schema#domain> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelInstance> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment> <http://www.w3.org/2000/01/rdf-schema#range> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment> <http://www.w3.org/2000/01/rdf-schema#domain> <https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstance> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment> <http://www.w3.org/2000/01/rdf-schema#range> <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowInstanceAssignment> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment> <http://www.w3.org/2000/01/rdf-schema#comment> "Indicates that the Handover workflow model instance has an assignment of samples to a Handover workflow model step further described in the target entity" .
 <https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment> <http://www.w3.org/2000/01/rdf-schema#label> "Has assignment" .
 # 
@@ -177,14 +177,14 @@
 # https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep
 <https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep> <http://www.w3.org/2000/01/rdf-schema#domain> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep> <http://www.w3.org/2000/01/rdf-schema#range> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep> <http://www.w3.org/2000/01/rdf-schema#domain> <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowInstanceAssignment> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep> <http://www.w3.org/2000/01/rdf-schema#range> <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep> <http://www.w3.org/2000/01/rdf-schema#comment> "Indicates that the handover Handover workflow assignment is related to the target Handover workflow model step" .
 <https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep> <http://www.w3.org/2000/01/rdf-schema#label> "Relates to Handover Workflow step" .
 # 
 # https://crc1625.mdi.ruhr-uni-bochum.de/requiresActivity
 <https://crc1625.mdi.ruhr-uni-bochum.de/requiresActivity> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/requiresActivity> <http://www.w3.org/2000/01/rdf-schema#domain> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/requiresActivity> <http://www.w3.org/2000/01/rdf-schema#domain> <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/requiresActivity> <http://www.w3.org/2000/01/rdf-schema#range> <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/requiresActivity> <http://www.w3.org/2000/01/rdf-schema#comment> "Indicates that the handover group that the Handover workflow model step is checking must contain a given activity within its handovers. The type of measurement is indicated by the targeted entity's class, by also belonging to one of the *Process classes (e.g. FIMProcess)" .
 <https://crc1625.mdi.ruhr-uni-bochum.de/requiresActivity> <http://www.w3.org/2000/01/rdf-schema#label> "Requires activity" .
@@ -226,14 +226,14 @@
 # 
 # https://crc1625.mdi.ruhr-uni-bochum.de/allowIntermediateHandoverGroups
 <https://crc1625.mdi.ruhr-uni-bochum.de/allowIntermediateHandoverGroups> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/allowIntermediateHandoverGroups> <http://www.w3.org/2000/01/rdf-schema#domain> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/allowIntermediateHandoverGroups> <http://www.w3.org/2000/01/rdf-schema#domain> <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/allowIntermediateHandoverGroups> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/allowIntermediateHandoverGroups> <http://www.w3.org/2000/01/rdf-schema#comment> "Indicates if the validation of the Handover workflow model allows intermediate, non-compliant handover groups on an otherwise valid handover group chain while validating. If true, the validation system will attempt to keep validating the current Handover workflow model step on the next handover group if the current handover group was non-compliant." .
 <https://crc1625.mdi.ruhr-uni-bochum.de/allowIntermediateHandoverGroups> <http://www.w3.org/2000/01/rdf-schema#label> "Allow intermediate handover groups" .
 # 
 # https://crc1625.mdi.ruhr-uni-bochum.de/allowsOtherActivities
 <https://crc1625.mdi.ruhr-uni-bochum.de/allowsOtherActivities> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/allowsOtherActivities> <http://www.w3.org/2000/01/rdf-schema#domain> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/allowsOtherActivities> <http://www.w3.org/2000/01/rdf-schema#domain> <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/allowsOtherActivities> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/allowsOtherActivities> <http://www.w3.org/2000/01/rdf-schema#comment> "Indicates that the handover group that the Handover workflow model step is validating is allowed to have activities other than the ones indicated by requiresActivity. If false, the presence of other activities will cause the validation to fail in this step." .
 <https://crc1625.mdi.ruhr-uni-bochum.de/allowsOtherActivities> <http://www.w3.org/2000/01/rdf-schema#label> "Allows other activities" .
@@ -284,7 +284,7 @@ _:genid7 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/20
 # 
 # https://crc1625.mdi.ruhr-uni-bochum.de/isHandoverWorkflowStepEnabled
 <https://crc1625.mdi.ruhr-uni-bochum.de/isHandoverWorkflowStepEnabled> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/isHandoverWorkflowStepEnabled> <http://www.w3.org/2000/01/rdf-schema#domain> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/isHandoverWorkflowStepEnabled> <http://www.w3.org/2000/01/rdf-schema#domain> <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/isHandoverWorkflowStepEnabled> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
 <https://crc1625.mdi.ruhr-uni-bochum.de/isHandoverWorkflowStepEnabled> <http://www.w3.org/2000/01/rdf-schema#comment> "Indicates if the current Handover workflow model step is to be validated by the system. If false, the system will keep checking the current handover group from the next Handover workflow model step." .
 <https://crc1625.mdi.ruhr-uni-bochum.de/isHandoverWorkflowStepEnabled> <http://www.w3.org/2000/01/rdf-schema#label> "Is Handover workflow step enabled" .
@@ -442,32 +442,32 @@ _:genid7 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/20
 <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance> <http://www.w3.org/2000/01/rdf-schema#comment> "The beginning of a series of processes belonging to the same sample in the RDMS.\n\nAn instance of this entity will contain a three-layer hierarchy of consecutive HandoverGroup instances, each containing a series of consecutive Handover instances, which finally can contain Activity Instance entities with measurements as their outputs."@en .
 <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance> <http://www.w3.org/2000/01/rdf-schema#label> "Handover workflow instance"@en .
 # 
-# https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment> <http://www.w3.org/2000/01/rdf-schema#comment> "A process that indicates an assignment of one or more samples to a step in an entity of type HandoverWorkflowModel. A HandoverWorkflowModelInstance will contain one or more HandoverWorkflowInstanceAssignment instances to completely link a HandoverWorkflowModel to existing objects in the RDMS." .
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment> <http://www.w3.org/2000/01/rdf-schema#label> "Handover workflow instance assignment" .
+# https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowInstanceAssignment
+<https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowInstanceAssignment> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowInstanceAssignment> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowInstanceAssignment> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowInstanceAssignment> <http://www.w3.org/2000/01/rdf-schema#comment> "A process that indicates an assignment of one or more samples to a step in an entity of type WorkflowModel. A workflowModelInstance will contain one or more WorkflowInstanceAssignment instances to completely link a WorkflowModel to existing objects in the RDMS." .
+<https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowInstanceAssignment> <http://www.w3.org/2000/01/rdf-schema#label> "Handover workflow instance assignment" .
 # 
-# https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflow> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel> <http://www.w3.org/2000/01/rdf-schema#comment> "The beginning of a series of processes that need to be performed.\n\n\nAn instance of this entity will contain a two-layer hierarchy of consecutive HandoverWorkflowModelStep instances that correspond to hypothetical handover groups of a given sample. Each step will contain zero or more Activity Model instances that dictate the desired measurements that the sample should contain, among other metadata, and that are taken at the time of any of the handovers within its corresponding handover group.\n\nNote that a Handover workflow Model instance dictates the processing steps, but are not linked to a specific samples - they instead act as templates that can be reused at will and assigned to different groups of samples. An entity of type HandoverWorkflowModelInstance will thus completely characterize a HandoverWorkflowModel by being able to apply it to existing objects in the RDMS during validation."@en .
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel> <http://www.w3.org/2000/01/rdf-schema#label> "Handover workflow model"@en .
+# https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel
+<https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflow> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel> <http://www.w3.org/2000/01/rdf-schema#comment> "The beginning of a series of processes that need to be performed.\n\n\nAn instance of this entity will contain a two-layer hierarchy of consecutive WorkflowModelStep instances that correspond to hypothetical handover groups of a given sample. Each step will contain zero or more Activity Model instances that dictate the desired measurements that the sample should contain, among other metadata, and that are taken at the time of any of the handovers within its corresponding handover group.\n\nNote that a Handover workflow Model instance dictates the processing steps, but are not linked to a specific samples - they instead act as templates that can be reused at will and assigned to different groups of samples. An entity of type workflowModelInstance will thus completely characterize a WorkflowModel by being able to apply it to existing objects in the RDMS during validation."@en .
+<https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel> <http://www.w3.org/2000/01/rdf-schema#label> "Handover workflow model"@en .
 # 
-# https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelInstance
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelInstance> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelInstance> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelInstance> <http://www.w3.org/2000/01/rdf-schema#comment> "The beginning of a series of HandoverWorkflowModelStep instances. Each HandoverWorkflowModelStep instance indicates an assignment of one or more samples to a step in the same entity of type WorkflowModel.\n\n\nAn entity of this class will thus completely characterize a WorkflowModel by being able to apply it to existing objects in the RDMS during validation." .
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelInstance> <http://www.w3.org/2000/01/rdf-schema#label> "Handover workflow model instance" .
+# https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstance
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstance> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstance> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstance> <http://www.w3.org/2000/01/rdf-schema#comment> "The beginning of a series of WorkflowModelStep instances. Each WorkflowModelStep instance indicates an assignment of one or more samples to a step in the same entity of type WorkflowModel.\n\n\nAn entity of this class will thus completely characterize a WorkflowModel by being able to apply it to existing objects in the RDMS during validation." .
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstance> <http://www.w3.org/2000/01/rdf-schema#label> "Handover workflow model instance" .
 # 
-# https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> .
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep> <http://www.w3.org/2000/01/rdf-schema#comment> "A step in a Handover workflow model, with a set of attributes indicating its settings, and references to Activity Models and projects" .
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep> <http://www.w3.org/2000/01/rdf-schema#label> "Handover workflow model step" .
+# https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep
+<https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> .
+<https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep> <http://www.w3.org/2000/01/rdf-schema#comment> "A step in a Handover workflow model, with a set of attributes indicating its settings, and references to Activity Models and projects" .
+<https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep> <http://www.w3.org/2000/01/rdf-schema#label> "Handover workflow model step" .
 # 
 # https://crc1625.mdi.ruhr-uni-bochum.de/IdeaOrExperimentPlan
 <https://crc1625.mdi.ruhr-uni-bochum.de/IdeaOrExperimentPlan> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
