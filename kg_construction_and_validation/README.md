@@ -18,7 +18,7 @@ This folder contains the following implementations:
 The whole Knowledge Graph creation and testing pipeline is designed to work under `Virtuoso` and `[WIP]`.
 
 ### General requirements
-- `Python >= 3.13.7`: The required libraries are provided in `../requirements.txt`, using a `conda` environment with the `conda-forge` channel
+- `Python >= 3.13.7`: The required libraries are declared in `../pyproject.toml`, using  `uv` is recommended.
 - `Docker`: The scripts will set up local containers of the MSSQL DB for MatInf and, optionally, of `Oxigraph`.
 - Materialization and performance test: `.jar` executables of `RMLMapper` and `RMLStreamer` are needed, alongside write permissions on the db dumps directory. The `setup_files_and_permissions.sh` script can be used to retrieve and set them up.
 - An `.env` file containing login and endpoint details, located in this folder. An example file can be found in `example.env`.
