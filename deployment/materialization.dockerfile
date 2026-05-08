@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.13-slim
 
 WORKDIR /app
 
@@ -9,13 +9,18 @@ RUN mkdir ./ontologies
 COPY --exclude=*.bak ./kg_construction_and_validation ./kg_construction_and_validation
 COPY ./ontologies ./ontologies 
 COPY ./deployment/virtuoso_deployment.env ./kg_construction_and_validation/.env
+COPY ./pyproject.toml ./kg_construction_and_validation/pyproject.toml
 
+# Deps
 RUN apt update && apt install -y --no-install-recommends \
+    curl \
+    ca-certificates \
     build-essential \
     openjdk-21-jre-headless \
     nodejs \
     npm
 
+# Docker-cli
 # https://docs.docker.com/engine/install/debian/#install-using-the-repository
 RUN apt install -y --no-install-recommends ca-certificates curl
 RUN install -m 0755 -d /etc/apt/keyrings
@@ -28,17 +33,18 @@ Components: stable\n\
 Signed-By: /etc/apt/keyrings/docker.asc" > /etc/apt/sources.list.d/docker.sources
 # All that for this...
 RUN apt update && apt install -y --no-install-recommends docker-ce-cli
-
 RUN rm -rf /var/lib/apt/lists/*
 
-RUN python3 -m venv /opt/venv
-RUN /opt/venv/bin/pip install --no-cache --upgrade pip setuptools
-RUN /opt/venv/bin/pip install --no-cache-dir -r kg_construction_and_validation/requirements.txt
+# YARRRML-parser
 RUN npm i -g @rmlio/yarrrml-parser
 
-WORKDIR /app/kg_construction_and_validation
+# uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    mv /root/.local/bin/uv /root/.local/bin/uvx /usr/local/bin/
 
-ENV PATH="/opt/venv/bin:$PATH"
+# Setup
+WORKDIR /app/kg_construction_and_validation
+RUN uv sync --no-cache
 ENV PYTHONUNBUFFERED=1
 
-CMD ["sh", "-c", "sleep 120 && python main.py --db_option p"]
+CMD ["sh", "-c", "sleep 120 && uv run main.py --db_option p"]

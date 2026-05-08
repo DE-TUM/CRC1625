@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.13-slim
 
 WORKDIR /app
 
@@ -9,13 +9,16 @@ WORKDIR /app
 RUN mkdir ./kg_construction_and_validation
 COPY --exclude=*.bak ./kg_construction_and_validation ./kg_construction_and_validation
 COPY ./deployment/virtuoso_deployment.env ./kg_construction_and_validation/.env
+COPY ./pyproject.toml ./kg_construction_and_validation/pyproject.toml
 
+# Deps
 RUN apt update && apt install -y --no-install-recommends \
+    curl \
+    ca-certificates \
     build-essential \
-    openjdk-21-jre-headless \
-    nodejs \
     npm
 
+# Docker-cli
 # https://docs.docker.com/engine/install/debian/#install-using-the-repository
 RUN apt install -y --no-install-recommends ca-certificates curl
 RUN install -m 0755 -d /etc/apt/keyrings
@@ -29,13 +32,13 @@ Signed-By: /etc/apt/keyrings/docker.asc" > /etc/apt/sources.list.d/docker.source
 # All that for this...
 RUN apt update && apt install -y --no-install-recommends docker-ce-cli
 
-RUN python3 -m venv /opt/venv
-RUN /opt/venv/bin/pip install --no-cache --upgrade pip setuptools
-RUN /opt/venv/bin/pip install --no-cache-dir -r kg_construction_and_validation/requirements.txt
+# uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    mv /root/.local/bin/uv /root/.local/bin/uvx /usr/local/bin/
 
+# Setup
 WORKDIR /app/kg_construction_and_validation
-
-ENV PATH="/opt/venv/bin:$PATH"
+RUN uv sync --no-cache
 ENV PYTHONUNBUFFERED=1
 
-CMD ["python", "run_rdf_datastore_API.py", "--datastore", "virtuoso"]
+CMD ["uv", "run", "run_rdf_datastore_API.py", "--datastore", "virtuoso"]
