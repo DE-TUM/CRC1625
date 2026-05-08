@@ -102,8 +102,8 @@ workflow_model_step_config_key_to_iri = {v: k for k, v in workflow_model_step_ir
 # they could be modeled as blank nodes or triple terms
 workflow_model_step_template_iri_to_config_key = {
     # **base_workflow_element_iri_to_config_key,
-    str(crc_prefix.key): "key",
-    str(crc_prefix.value): "value",
+    str(crc_prefix.templateKey): "key",
+    str(crc_prefix.templateValue): "value",
 }
 workflow_model_step_template_config_key_to_iri = {v: k for k, v in workflow_model_step_template_iri_to_config_key.items()}
 

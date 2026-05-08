@@ -1,5 +1,5 @@
 SELECT ?key ?value FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> WHERE {
     <{entity_iri}> crc:hasTemplate ?s.
-    ?s crc:key ?key.
-    ?s crc:value ?value.
+    ?s crc:templateKey ?key.
+    ?s crc:templateValue ?value.
 }

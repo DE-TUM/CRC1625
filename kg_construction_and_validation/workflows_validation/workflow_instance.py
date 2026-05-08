@@ -64,7 +64,7 @@ step_assignment_iri_to_config_key = {
     **base_workflow_element_iri_to_config_key,
     # step_templates actually belongs to the workflow instance, but we handle their creation outside the automated config methods
     str(crc_prefix.hasAssignment): "step_assignments",
-    str(crc_prefix.assignedStep): "workflow_step_iri",
+    str(crc_prefix.assignedWorkflowModelStep): "workflow_step_iri",
     str(crc_prefix.assignedEntity): "assigned_entities",
     str(crc_prefix.propertyToFollow): "property_to_follow",
 }
@@ -160,7 +160,7 @@ async def store_workflow_instance(workflow_instance: WorkflowInstance,
 
     for step_assignment in workflow_instance.step_assignments.values():
         # Type
-        g.add((step_assignment.iri, rdf_prefix.type, crc_prefix.WorkflowInstanceAssignment))
+        g.add((step_assignment.iri, rdf_prefix.type, crc_prefix.WorkflowModelStepAssignment))
 
         # Label
         g.add((step_assignment.iri, URIRef(step_assignment_config_key_to_iri["name"]), Literal(step_assignment.name, datatype=XSD.string)))
