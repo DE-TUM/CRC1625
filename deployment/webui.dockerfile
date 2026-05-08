@@ -26,4 +26,4 @@ WORKDIR /app/kg_construction_and_validation
 RUN uv sync --no-cache
 ENV PYTHONUNBUFFERED=1
 
-CMD ["uv", "run", "run_handover_workflows_webui.py"]
+CMD ["uv", "run", "run_handover_workflows_webui.py", "--upload_debug_files"]
