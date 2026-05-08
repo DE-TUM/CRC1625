@@ -10,17 +10,17 @@
                                           owl:imports <https://purl.bioontology.org/ontology/OCE> ,
                                                       <https://w3id.org/pmd/co/2.0.8> ;
                                           <http://purl.org/dc/elements/1.1/creator> <https://orcid.org/0009-0006-0232-8677> ;
-                                          <http://purl.org/dc/terms/abstract> "Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625." ;
+                                          <http://purl.org/dc/terms/abstract> "Ontology for supporting the analysis of Compositionally Complex Solid Solutions (CCSS) in the context of the Collaborative Research Center (CRC) 1625." ;
                                           <http://purl.org/dc/terms/date> "2026-03-19"^^xsd:date ;
-                                          <http://purl.org/dc/terms/description> """Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625.
-                                          This ontology models the experimental (meta-)data, provenance and handover workflows present in MatInf instances, while additionally being compatible with existing Materials Science ontologies.
+                                          <http://purl.org/dc/terms/description> """Ontology for supporting the analysis of Compositionally Complex Solid Solutions (CCSS) in the context of the Collaborative Research Center (CRC) 1625.
+                                          This ontology models the experimental (meta-)data, provenance and handover workflows present in MatInf instances and vocabulary employed for the analysis of CCSS, while additionally being compatible with existing Materials Science ontologies.
                                           This additionally includes the modelling of handover workflow models, and other (meta-)data that is exclusively used by the MatInf semantic layer.
                                           Note that some classes are not present in the ontology document. Namely, specific measurement types are dynamically generated, as they change between MatInf instances. Processes and activities for them, however, are included here.""" ;
                                           <http://purl.org/dc/terms/license> <http://creativecommons.org/licenses/by-sa/4.0/> ;
-                                          <http://purl.org/dc/terms/title> "CRC 1625 Ontology"@en ;
+                                          <http://purl.org/dc/terms/title> "CCSS Ontology"@en ;
                                           <http://purl.org/vocommons/voaf#extends> <https://w3id.org/pmd/co/2.0.8> ;
                                           <http://schema.org/codeRepository> "https://github.com/DE-TUM/CRC1625"^^xsd:anyURI ;
-                                          owl:versionInfo "1.0.0" .
+                                          owl:versionInfo "1.0.2" .
 
 #################################################################
 #    Annotation properties
@@ -86,21 +86,17 @@ xsd:date rdf:type rdfs:Datatype .
 <http://www.w3.org/ns/prov#wasAttributedTo> owl:equivalentProperty <https://crc1625.mdi.ruhr-uni-bochum.de/creator> .
 
 
-###  https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject
-<https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject> rdf:type owl:ObjectProperty ;
-                                                        rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep> ;
-                                                        rdfs:range <https://crc1625.mdi.ruhr-uni-bochum.de/Project> ;
-                                                        rdfs:comment "Indicates that the handover group that the Handover workflow model step is checking is allowed to take place in the given group" ;
-                                                        rdfs:label "Allowed project" .
-
-
-###  https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject
-<https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject> rdf:type owl:ObjectProperty ;
+###  https://crc1625.mdi.ruhr-uni-bochum.de/assignedEntity
+<https://crc1625.mdi.ruhr-uni-bochum.de/assignedEntity> rdf:type owl:ObjectProperty ;
                                                         rdfs:subPropertyOf <https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo> ;
-                                                        rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment> ;
-                                                        rdfs:range <https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary> ;
-                                                        rdfs:comment "Indicates that the Handover workflow assignment is related to the target materials library or sample" ;
-                                                        rdfs:label "Assigned object" .
+                                                        rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepAssignment> ;
+                                                        rdfs:range <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep> ;
+                                                        rdfs:comment """Indicates that the given WorkflowModelStepAssignment is assigning an entity to its specified WorkflowModelStep.
+
+Note that the assigned entities should always point to the starting node of a data workflow. Each consecutive workflow model step assigned to the same entity will validate the successor of the previously validated entity, starting with the original entity itself (i.e., the entity assigned to a step serves as a marker for the starting point of the data workflow, and it appearing multiple times signals to continue validating on its successors).
+
+This removes the need to manually assign every individual target node to workflow model steps, and allows defining workflow model for possibly missing data.""" ;
+                                                        rdfs:label "Assigned entity" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo
@@ -109,6 +105,15 @@ xsd:date rdf:type rdfs:Datatype .
 
 This is used to associate Handover Groups to specific projects, and invididual Handovers to their corresponding receiver users.""" ;
                                                     rdfs:label "Assigned to" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/assignedWorkflowModelStep
+<https://crc1625.mdi.ruhr-uni-bochum.de/assignedWorkflowModelStep> rdf:type owl:ObjectProperty ;
+                                                                   rdfs:subPropertyOf <https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo> ;
+                                                                   rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepAssignment> ;
+                                                                   rdfs:range <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep> ;
+                                                                   rdfs:comment "Indicates that the given WorkflowModelStepAssignment is specifying the target WorkflowModelStep" ;
+                                                                   rdfs:label "Assigned workflow model step" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/characteristic
@@ -149,20 +154,21 @@ The elements themselves are CheBI entities that can be individually accessed for
                                                    rdfs:comment "The given name of a person" .
 
 
-###  https://crc1625.mdi.ruhr-uni-bochum.de/handoverWorkflowModelInstanceOf
-<https://crc1625.mdi.ruhr-uni-bochum.de/handoverWorkflowModelInstanceOf> rdf:type owl:ObjectProperty ;
-                                                                         rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance> ;
-                                                                         rdfs:range <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel> ;
-                                                                         rdfs:comment "Indicates that the Handover workflow model instance is an instantiation of the Handover workflow model" ;
-                                                                         rdfs:label "Handover workflow model instance of" .
-
-
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment
 <https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment> rdf:type owl:ObjectProperty ;
-                                                       rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelInstance> ;
-                                                       rdfs:range <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment> ;
+                                                       rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelInstance> ;
+                                                       rdfs:range <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepAssignment> ;
                                                        rdfs:comment "Indicates that the Handover workflow model instance has an assignment of samples to a Handover workflow model step further described in the target entity" ;
                                                        rdfs:label "Has assignment" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/hasTemplate
+<https://crc1625.mdi.ruhr-uni-bochum.de/hasTemplate> rdf:type owl:ObjectProperty ;
+                                                     rdfs:subPropertyOf <https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo> ;
+                                                     rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep> ;
+                                                     rdfs:range <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepTemplate> ;
+                                                     rdfs:comment "Indicates that the WorkflowModelStep has the target WorkflowModelStepTemplate" ;
+                                                     rdfs:label "Has template" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/input
@@ -186,13 +192,6 @@ This is employed by the characterization activities (the leaf/most basic step of
                                               rdfs:comment "The name of a person" .
 
 
-###  https://crc1625.mdi.ruhr-uni-bochum.de/nextProcessAcrossGroups
-<https://crc1625.mdi.ruhr-uni-bochum.de/nextProcessAcrossGroups> rdf:type owl:ObjectProperty ;
-                                                                 rdfs:subPropertyOf <https://w3id.org/pmd/co/nextProcess> ;
-                                                                 rdfs:comment "Connection between two processes that took place in two different groups each. Only used as an intermediate step during materialization." ;
-                                                                 rdfs:label "next process across groups" .
-
-
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/nextStep
 <https://crc1625.mdi.ruhr-uni-bochum.de/nextStep> rdf:type owl:ObjectProperty ;
                                                   owl:equivalentProperty <https://w3id.org/pmd/co/nextProcess> ;
@@ -209,21 +208,11 @@ This is employed by the characterization activities (the leaf/most basic step of
 This is employed by the characterization activities (the leaf/most basic step of a handover workflow) to point at the actual results (e.g. a photo or EDX results file) they refer to.""" .
 
 
-###  https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep
-<https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep> rdf:type owl:ObjectProperty ;
-                                                                       rdfs:subPropertyOf <https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo> ;
-                                                                       rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment> ;
-                                                                       rdfs:range <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep> ;
-                                                                       rdfs:comment "Indicates that the handover Handover workflow assignment is related to the target Handover workflow model step" ;
-                                                                       rdfs:label "Relates to Handover Workflow step" .
-
-
-###  https://crc1625.mdi.ruhr-uni-bochum.de/requiresActivity
-<https://crc1625.mdi.ruhr-uni-bochum.de/requiresActivity> rdf:type owl:ObjectProperty ;
-                                                          rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep> ;
-                                                          rdfs:range <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel> ;
-                                                          rdfs:comment "Indicates that the handover group that the Handover workflow model step is checking must contain a given activity within its handovers. The type of measurement is indicated by the targeted entity's class, by also belonging to one of the *Process classes (e.g. FIMProcess)" ;
-                                                          rdfs:label "Requires activity" .
+###  https://crc1625.mdi.ruhr-uni-bochum.de/propertyToFollow
+<https://crc1625.mdi.ruhr-uni-bochum.de/propertyToFollow> rdf:type owl:ObjectProperty ;
+                                                          rdfs:subPropertyOf <https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo> ;
+                                                          rdfs:comment "Employed by a WorkflowModelStepAssignment entity to indicate the property that the validation process will use to query for the next target node(s) to assign to the next WorkflowModelStep to be validated, if any." ;
+                                                          rdfs:label "Property to follow" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/resource
@@ -235,7 +224,7 @@ This is employed by the characterization activities (the leaf/most basic step of
 This property does not explicitly indicate that the given file is generated *for* the object it is connected to; instead, it indicates that they are *related* in a generic way.
 To indicate the former, the connection should instead be the other way around via the crc:characteristic property, as is in the majority of cases.
              """ ;
-                                                  rdfs:label "Requires activity" .
+                                                  rdfs:label "Resource" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/substep
@@ -253,6 +242,14 @@ More specifically, in a handover workflow, this is employed by Handover Groups t
                                                  rdfs:comment "The surname of a person" .
 
 
+###  https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstanceOf
+<https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstanceOf> rdf:type owl:ObjectProperty ;
+                                                                 rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelInstance> ;
+                                                                 rdfs:range <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel> ;
+                                                                 rdfs:comment "Indicates that the workflow model instance is specifying the target WorkflowModel" ;
+                                                                 rdfs:label "Workflow model instance of" .
+
+
 #################################################################
 #    Data properties
 #################################################################
@@ -266,20 +263,20 @@ More specifically, in a handover workflow, this is employed by Handover Groups t
                                                       rdfs:label "Accepted date" .
 
 
-###  https://crc1625.mdi.ruhr-uni-bochum.de/allowIntermediateHandoverGroups
-<https://crc1625.mdi.ruhr-uni-bochum.de/allowIntermediateHandoverGroups> rdf:type owl:DatatypeProperty ;
-                                                                         rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel> ;
-                                                                         rdfs:range xsd:boolean ;
-                                                                         rdfs:comment "Indicates if the validation of the Handover workflow model allows intermediate, non-compliant handover groups on an otherwise valid handover group chain while validating. If true, the validation system will attempt to keep validating the current Handover workflow model step on the next handover group if the current handover group was non-compliant." ;
-                                                                         rdfs:label "Allow intermediate handover groups" .
-
-
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/allowsOtherActivities
 <https://crc1625.mdi.ruhr-uni-bochum.de/allowsOtherActivities> rdf:type owl:DatatypeProperty ;
-                                                               rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep> ;
+                                                               rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep> ;
                                                                rdfs:range xsd:boolean ;
                                                                rdfs:comment "Indicates that the handover group that the Handover workflow model step is validating is allowed to have activities other than the ones indicated by requiresActivity. If false, the presence of other activities will cause the validation to fail in this step." ;
                                                                rdfs:label "Allows other activities" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/assignedShape
+<https://crc1625.mdi.ruhr-uni-bochum.de/assignedShape> rdf:type owl:DatatypeProperty ;
+                                                       rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepTemplate> ;
+                                                       rdfs:range xsd:string ;
+                                                       rdfs:comment "Indicates that the WorkflowModelStepTemplate has the target SHACL shape string" ;
+                                                       rdfs:label "Assigned shape" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/creationDate
@@ -317,14 +314,6 @@ More specifically, in a handover workflow, this is employed by Handover Groups t
                                                     rdfs:range xsd:integer .
 
 
-###  https://crc1625.mdi.ruhr-uni-bochum.de/isHandoverWorkflowStepEnabled
-<https://crc1625.mdi.ruhr-uni-bochum.de/isHandoverWorkflowStepEnabled> rdf:type owl:DatatypeProperty ;
-                                                                       rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep> ;
-                                                                       rdfs:range xsd:boolean ;
-                                                                       rdfs:comment "Indicates if the current Handover workflow model step is to be validated by the system. If false, the system will keep checking the current handover group from the next Handover workflow model step." ;
-                                                                       rdfs:label "Is Handover workflow step enabled" .
-
-
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/percentage
 <https://crc1625.mdi.ruhr-uni-bochum.de/percentage> rdf:type owl:DatatypeProperty .
 
@@ -338,10 +327,20 @@ More specifically, in a handover workflow, this is employed by Handover Groups t
                                                     rdfs:label "Resistance" .
 
 
-###  https://crc1625.mdi.ruhr-uni-bochum.de/temporaryDatatypeProperty
-<https://crc1625.mdi.ruhr-uni-bochum.de/temporaryDatatypeProperty> rdf:type owl:DatatypeProperty ;
-                                                                   rdfs:subPropertyOf owl:topDataProperty ;
-                                                                   rdfs:comment "Property used exclusively during the mapping of SQL to RDF, deleted via a post-processing script after executing the Ontop mappings" .
+###  https://crc1625.mdi.ruhr-uni-bochum.de/templateKey
+<https://crc1625.mdi.ruhr-uni-bochum.de/templateKey> rdf:type owl:DatatypeProperty ;
+                                                     rdfs:subPropertyOf owl:topDataProperty ;
+                                                     rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepTemplate> ;
+                                                     rdfs:range xsd:string ;
+                                                     rdfs:comment "The key used for a WorkflowModelStepTemplate" ;
+                                                     rdfs:label "Template key" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/templateValue
+<https://crc1625.mdi.ruhr-uni-bochum.de/templateValue> rdf:type owl:DatatypeProperty ;
+                                                       rdfs:subPropertyOf owl:topDataProperty ;
+                                                       rdfs:comment "The value used for a WorkflowModelStepTemplate" ;
+                                                       rdfs:label "Template value" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/tolerance
@@ -435,16 +434,6 @@ This is an additional abstraction that acts as a subordinate process of a handov
                                                                           rdfs:label "Characterization activity instance" .
 
 
-###  https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel
-<https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel> rdf:type owl:Class ;
-                                                                       rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity> ,
-                                                                                       <https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel> ;
-                                                                       rdfs:comment """A process indicating that a Handover workflow model step desires a set of measurements of the same time.
-
-An entity of this type indicates the type of its measurements by belonging to a unidentifiable process class. This will be used by e.g. the Handover workflows validation system to correctly validate measurements assigned to handovers.""" ;
-                                                                       rdfs:label "Characterization activity model" .
-
-
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/ChemicalObject
 <https://crc1625.mdi.ruhr-uni-bochum.de/ChemicalObject> rdf:type owl:Class ;
                                                         owl:equivalentClass <https://w3id.org/pmd/co/ChemicalObject> .
@@ -507,45 +496,6 @@ Its subclasses narrow its application."""@en ;
 
 An instance of this entity will contain a three-layer hierarchy of consecutive HandoverGroup instances, each containing a series of consecutive Handover instances, which finally can contain Activity Instance entities with measurements as their outputs."""@en ;
                                                                   rdfs:label "Handover workflow instance"@en .
-
-
-###  https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment> rdf:type owl:Class ;
-                                                                            rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel> ,
-                                                                                            <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> ;
-                                                                            rdfs:comment "A process that indicates an assignment of one or more samples to a step in an entity of type HandoverWorkflowModel. A HandoverWorkflowModelInstance will contain one or more HandoverWorkflowInstanceAssignment instances to completely link a HandoverWorkflowModel to existing objects in the RDMS." ;
-                                                                            rdfs:label "Handover workflow instance assignment" .
-
-
-###  https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel> rdf:type owl:Class ;
-                                                               rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflow> ,
-                                                                               <https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel> ;
-                                                               rdfs:comment """The beginning of a series of processes that need to be performed.
-
-
-An instance of this entity will contain a two-layer hierarchy of consecutive HandoverWorkflowModelStep instances that correspond to hypothetical handover groups of a given sample. Each step will contain zero or more Activity Model instances that dictate the desired measurements that the sample should contain, among other metadata, and that are taken at the time of any of the handovers within its corresponding handover group.
-
-Note that a Handover workflow Model instance dictates the processing steps, but are not linked to a specific samples - they instead act as templates that can be reused at will and assigned to different groups of samples. An entity of type HandoverWorkflowModelInstance will thus completely characterize a HandoverWorkflowModel by being able to apply it to existing objects in the RDMS during validation."""@en ;
-                                                               rdfs:label "Handover workflow model"@en .
-
-
-###  https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelInstance
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelInstance> rdf:type owl:Class ;
-                                                                       rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel> ;
-                                                                       rdfs:comment """The beginning of a series of HandoverWorkflowModelStep instances. Each HandoverWorkflowModelStep instance indicates an assignment of one or more samples to a step in the same entity of type WorkflowModel.
-
-
-An entity of this class will thus completely characterize a WorkflowModel by being able to apply it to existing objects in the RDMS during validation.""" ;
-                                                                       rdfs:label "Handover workflow model instance" .
-
-
-###  https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep
-<https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep> rdf:type owl:Class ;
-                                                                   rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel> ,
-                                                                                   <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> ;
-                                                                   rdfs:comment "A step in a Handover workflow model, with a set of attributes indicating its settings, and references to Activity Models and projects" ;
-                                                                   rdfs:label "Handover workflow model step" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/IdeaOrExperimentPlan
@@ -626,7 +576,7 @@ An entity of this class will thus completely characterize a WorkflowModel by bei
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel
 <https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel> rdf:type owl:Class ;
                                                       rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess> ;
-                                                      rdfs:comment "A process that does not refer to a real event in the CRC / RDMS database, and instead refers to an entity within a Handover Workflow Model, such as a Handover workflow model step, an activity required by it or a Handover workflow step assignment."@en ;
+                                                      rdfs:comment "A process that does not refer to a real event in the CRC / RDMS database."@en ;
                                                       rdfs:label "Process Model"@en .
 
 
@@ -780,6 +730,56 @@ Note that other parameters will be modelled in the future."""@en ;
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/VolumeComposition
 <https://crc1625.mdi.ruhr-uni-bochum.de/VolumeComposition> rdf:type owl:Class ;
                                                            rdfs:subClassOf <https://w3id.org/pmd/co/ChemicalComposition> .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel
+<https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel> rdf:type owl:Class ;
+                                                       rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel> ;
+                                                       rdfs:comment """A model of a data workflow.
+
+An instance of this entity will contain as its substep the beginning pf a sequence of WorkflowModelStep entities, each with a SHACL shape to be applied and (optionally) template key-value pairs.
+
+Important: You can find instructions on how to assign workflow model steps to data workflows in the documentation for the assignedEntity property or the Python validation API."""@en ;
+                                                       rdfs:label "Workflow model"@en .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelInstance
+<https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelInstance> rdf:type owl:Class ;
+                                                               rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel> ;
+                                                               rdfs:comment """An assignment of entities to the steps of a specific WorkflowModel
+
+A WorkflowModelInstance is composed of one or more WorkflowModelStepAssignment instances that indicate the entities to which the steps are validated against, alongside instructions on how to fetch the next target node(s) of the data workflow.
+
+Important: You can find instructions on how to assign workflow model steps to data workflows in the documentation for the assignedEntity property or the Python validation API.""" ;
+                                                               rdfs:label "Workflow model instance" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep
+<https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep> rdf:type owl:Class ;
+                                                           rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel> ;
+                                                           rdfs:comment """A WorkflowModelStep entity contains a SHACL shape to be applied to a target node and (optionally) template key-value pairs.
+
+The target nodes will correspond to entities in a data workflow, and are dynamically assigned by the validation process following the WorkflowModelStepAssignment entities related to this step from a WorkflowInstance.
+
+Important: You can find instructions on how to assign workflow model steps to data workflows in the documentation for the assignedEntity property or the Python validation API.""" ;
+                                                           rdfs:label "Workflow model step" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepAssignment
+<https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepAssignment> rdf:type owl:Class ;
+                                                                     rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelInstance> ;
+                                                                     rdfs:comment """A WorkflowModelStepAssignment instance indicates the entities to which a workflow model step is validated against, alongside a reference to the property with which the validation process will fetch the next target node(s) of the data workflow.
+
+Important: You can find instructions on how to assign workflow model steps to data workflows in the documentation for the assignedEntity property or the Python validation API.""" ;
+                                                                     rdfs:label "Workflow model step assignment" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepTemplate
+<https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepTemplate> rdf:type owl:Class ;
+                                                                   rdfs:subClassOf <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep> ;
+                                                                   rdfs:comment """A key->value template with which a WorkflowModelStep will replace values in its assigned SHACL shape.
+
+The key and values are arbitrary strings. The logic for storing/reading/processing these strings must be specified by e.g. extending the WorkflowModel dataclass in Python.""" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess

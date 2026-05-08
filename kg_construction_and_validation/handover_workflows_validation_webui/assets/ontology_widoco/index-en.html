@@ -13,11 +13,11 @@
 <script type="module" src="resources/dark-mode-toggle.mjs"></script><div class="darkmode">
 	<dark-mode-toggle class="slider"></dark-mode-toggle>
 </div>
- <title>CRC 1625 Ontology</title>
+ <title>CCSS Ontology</title>
 
 
 <!-- SCHEMA.ORG METADATA -->
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","url":"https://crc1625.mdi.ruhr-uni-bochum.de","image":"http://vowl.visualdataweb.org/webvowl/#iri=https://crc1625.mdi.ruhr-uni-bochum.de","name":"CRC 1625 Ontology", "headline":"Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625.", "dateReleased":"Thu Mar 19 12:08:08 CET 2026", "version":"1.0.0", "license":"http://creativecommons.org/licenses/by-sa/4.0/", "codeRepository":"https://github.com/DE-TUM/CRC1625", "author":[{"@type":"Person","name":"https://orcid.org/0009-0006-0232-8677","url":"https://orcid.org/0009-0006-0232-8677"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","url":"https://crc1625.mdi.ruhr-uni-bochum.de","image":"http://vowl.visualdataweb.org/webvowl/#iri=https://crc1625.mdi.ruhr-uni-bochum.de","name":"CCSS Ontology", "headline":"Ontology for supporting the analysis of Compositionally Complex Solid Solutions (CCSS) in the context of the Collaborative Research Center (CRC) 1625.", "dateReleased":"Fri May 08 13:39:19 CEST 2026", "version":"1.0.2", "license":"http://creativecommons.org/licenses/by-sa/4.0/", "codeRepository":"https://github.com/DE-TUM/CRC1625", "author":[{"@type":"Person","name":"https://orcid.org/0009-0006-0232-8677","url":"https://orcid.org/0009-0006-0232-8677"}]}</script>
 
 <script src="resources/jquery.js"></script> 
 <script src="resources/marked.min.js"></script> 
@@ -65,12 +65,12 @@ $(function(){
 <div class="container">
 <div class="head">
 <div style="float:right">language <a href="index-en.html"><b>en</b></a> </div>
-<h1>CRC 1625 Ontology</h1>
+<h1>CCSS Ontology</h1>
 
 
 <dl>
 <dt>Revision:</dt>
-<dd>1.0.0</dd>
+<dd>1.0.2</dd>
 <dt>Authors:</dt>
 <dd><a href="https://orcid.org/0009-0006-0232-8677">https://orcid.org/0009-0006-0232-8677</a></dd>
 
@@ -82,7 +82,7 @@ $(function(){
 
 <dt>Download serialization:</dt><dd><span><a href="ontology.jsonld" target="_blank"><img src="https://img.shields.io/badge/Format-JSON_LD-blue.svg" alt="JSON-LD" /></a> </span><span><a href="ontology.owl" target="_blank"><img src="https://img.shields.io/badge/Format-RDF/XML-blue.svg" alt="RDF/XML" /></a> </span><span><a href="ontology.nt" target="_blank"><img src="https://img.shields.io/badge/Format-N_Triples-blue.svg" alt="N-Triples" /></a> </span><span><a href="ontology.ttl" target="_blank"><img src="https://img.shields.io/badge/Format-TTL-blue.svg" alt="TTL" /></a> </span></dd><dt>License:</dt><dd><a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank"><img src="https://img.shields.io/badge/License-http://creativecommons.org/licenses/by_sa/4.0/-blue.svg" alt="http://creativecommons.org/licenses/by-sa/4.0/" /></a>
 </dd><!-- <dt>Evaluation:</dt><dd><a href="OOPSevaluation/oopsEval.html#" target="_blank"><img src="https://img.shields.io/badge/Evaluate_with-OOPS! (OntOlogy Pitfall Scanner!)-blue.svg" alt="Evaluate with OOPS!" /></a></dd> --><dt>Cite as:</dt>
-<dd>https://orcid.org/0009-0006-0232-8677. CRC 1625 Ontology. Revision: 1.0.0.</dd>
+<dd>https://orcid.org/0009-0006-0232-8677. CCSS Ontology. Revision: 1.0.2.</dd>
 <dt>Vocabulary maintained at:</dt>
 <dd><a href="https://github.com/DE-TUM/CRC1625">https://github.com/DE-TUM/CRC1625</a></dd>
 </dl>
@@ -94,12 +94,19 @@ $(function(){
 <span>Ontology Specification Draft</span>
 </div>
 </div>     <div id="abstract"><h2>Abstract</h2><span class="markdown">
-Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625.</span>
+Ontology for supporting the analysis of Compositionally Complex Solid Solutions (CCSS) in the context of the Collaborative Research Center (CRC) 1625.</span>
 </div>
-<div id="toc"></div>  
+<div id="toc"></div> 
+
+<!--INTRODUCTION SECTION-->
+    <div id="introduction"><h2 id="intro" class="list">Introduction <span class="backlink"> back to <a href="#toc">ToC</a></span></h2>
+<span class="markdown">
+This is a place holder text for the introduction. The introduction should briefly describe the ontology, its motivation, state of the art and goals.</span>
+</div>
+  
 
 <!--OVERVIEW SECTION-->
-    <div id="overview"><h2 id="overv" class="list">CRC 1625 Ontology: Overview <span class="backlink"> back to <a href="#toc">ToC</a></span></h2>
+    <div id="overview"><h2 id="overv" class="list">CCSS Ontology: Overview <span class="backlink"> back to <a href="#toc">ToC</a></span></h2>
 <span class="markdown">
 This ontology has the following classes and properties.</span>
 <h4>Classes</h4>
@@ -133,10 +140,6 @@ This ontology has the following classes and properties.</span>
    <li>
       <a href="#/CharacterizationActivityInstance"
          title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance">Characterization activity instance</a>
-   </li>
-   <li>
-      <a href="#/CharacterizationActivityModel"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel">Characterization activity model</a>
    </li>
    <li>
       <a href="#/ChemicalObject"
@@ -182,22 +185,6 @@ This ontology has the following classes and properties.</span>
    <li>
       <a href="#/HandoverWorkflowInstance"
          title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance">Handover workflow instance</a>
-   </li>
-   <li>
-      <a href="#/HandoverWorkflowInstanceAssignment"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment">Handover workflow instance assignment</a>
-   </li>
-   <li>
-      <a href="#/HandoverWorkflowModel"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel">Handover workflow model</a>
-   </li>
-   <li>
-      <a href="#/HandoverWorkflowModelInstance"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelInstance">Handover workflow model instance</a>
-   </li>
-   <li>
-      <a href="#/HandoverWorkflowModelStep"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep">Handover workflow model step</a>
    </li>
    <li>
       <a href="#/IdeaOrExperimentPlan"
@@ -373,6 +360,28 @@ This ontology has the following classes and properties.</span>
       </a>
    </li>
    <li>
+      <a href="#/WorkflowModel"
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel">Workflow model</a>
+   </li>
+   <li>
+      <a href="#/WorkflowModelInstance"
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelInstance">Workflow model instance</a>
+   </li>
+   <li>
+      <a href="#/WorkflowModelStep"
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep">Workflow model step</a>
+   </li>
+   <li>
+      <a href="#/WorkflowModelStepAssignment"
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepAssignment">Workflow model step assignment</a>
+   </li>
+   <li>
+      <a href="#/WorkflowModelStepTemplate"
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepTemplate">
+         <span>Workflow Model Step Template</span>
+      </a>
+   </li>
+   <li>
       <a href="#/XPSProcess"
          title="https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess">
          <span>X P S Process</span>
@@ -388,16 +397,16 @@ This ontology has the following classes and properties.</span>
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     class="hlist">
    <li>
-      <a href="#/allowedProject"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject">Allowed project</a>
-   </li>
-   <li>
-      <a href="#/assignedObject"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject">Assigned object</a>
+      <a href="#/assignedEntity"
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedEntity">Assigned entity</a>
    </li>
    <li>
       <a href="#/assignedTo"
          title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo">Assigned to</a>
+   </li>
+   <li>
+      <a href="#/assignedWorkflowModelStep"
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedWorkflowModelStep">Assigned workflow model step</a>
    </li>
    <li>
       <a href="#/characteristic"
@@ -425,12 +434,12 @@ This ontology has the following classes and properties.</span>
       </a>
    </li>
    <li>
-      <a href="#/handoverWorkflowModelInstanceOf"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/handoverWorkflowModelInstanceOf">Handover workflow model instance of</a>
-   </li>
-   <li>
       <a href="#/hasAssignment"
          title="https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment">Has assignment</a>
+   </li>
+   <li>
+      <a href="#/hasTemplate"
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/hasTemplate">Has template</a>
    </li>
    <li>
       <a href="#/input" title="https://crc1625.mdi.ruhr-uni-bochum.de/input">
@@ -447,10 +456,6 @@ This ontology has the following classes and properties.</span>
       </a>
    </li>
    <li>
-      <a href="#/nextProcessAcrossGroups"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/nextProcessAcrossGroups">next process across groups</a>
-   </li>
-   <li>
       <a href="#/nextStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/nextStep">
          <span>next Step</span>
       </a>
@@ -461,15 +466,11 @@ This ontology has the following classes and properties.</span>
       </a>
    </li>
    <li>
-      <a href="#/relatesToHandoverWorkflowStep"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep">Relates to Handover Workflow step</a>
+      <a href="#/propertyToFollow"
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/propertyToFollow">Property to follow</a>
    </li>
    <li>
-      <a href="#/requiresActivity"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/requiresActivity">Requires activity</a>
-   </li>
-   <li>
-      <a href="#/resource" title="https://crc1625.mdi.ruhr-uni-bochum.de/resource">Requires activity</a>
+      <a href="#/resource" title="https://crc1625.mdi.ruhr-uni-bochum.de/resource">Resource</a>
    </li>
    <li>
       <a href="#/substep" title="https://crc1625.mdi.ruhr-uni-bochum.de/substep">substep</a>
@@ -479,6 +480,10 @@ This ontology has the following classes and properties.</span>
          <span>surname</span>
       </a>
    </li>
+   <li>
+      <a href="#/workflowModelInstanceOf"
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstanceOf">Workflow model instance of</a>
+   </li>
 </ul><h4>Data Properties</h4><ul xmlns:widoco="https://w3id.org/widoco/vocab#"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     class="hlist">
@@ -487,12 +492,12 @@ This ontology has the following classes and properties.</span>
          title="https://crc1625.mdi.ruhr-uni-bochum.de/acceptedDate">Accepted date</a>
    </li>
    <li>
-      <a href="#/allowIntermediateHandoverGroups"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/allowIntermediateHandoverGroups">Allow intermediate handover groups</a>
-   </li>
-   <li>
       <a href="#/allowsOtherActivities"
          title="https://crc1625.mdi.ruhr-uni-bochum.de/allowsOtherActivities">Allows other activities</a>
+   </li>
+   <li>
+      <a href="#/assignedShape"
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedShape">Assigned shape</a>
    </li>
    <li>
       <a href="#/creationDate"
@@ -511,18 +516,16 @@ This ontology has the following classes and properties.</span>
       </a>
    </li>
    <li>
-      <a href="#/isHandoverWorkflowStepEnabled"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/isHandoverWorkflowStepEnabled">Is Handover workflow step enabled</a>
-   </li>
-   <li>
       <a href="#/resistance"
          title="https://crc1625.mdi.ruhr-uni-bochum.de/resistance">Resistance</a>
    </li>
    <li>
-      <a href="#/temporaryDatatypeProperty"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/temporaryDatatypeProperty">
-         <span>temporary Datatype Property</span>
-      </a>
+      <a href="#/templateKey"
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/templateKey">Template key</a>
+   </li>
+   <li>
+      <a href="#/templateValue"
+         title="https://crc1625.mdi.ruhr-uni-bochum.de/templateValue">Template value</a>
    </li>
    <li>
       <a href="#/tolerance" title="https://crc1625.mdi.ruhr-uni-bochum.de/tolerance">Tolerance</a>
@@ -540,61 +543,22 @@ This ontology has the following classes and properties.</span>
       <a href="#/y_position"
          title="https://crc1625.mdi.ruhr-uni-bochum.de/y_position">Y position</a>
    </li>
-</ul><h4>Annotation Properties</h4><ul xmlns:widoco="https://w3id.org/widoco/vocab#"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    class="hlist">
-   <li>
-      <a href="#http://purl.org/dc/terms/abstract" title="http://purl.org/dc/terms/abstract">
-         <span>abstract</span>
-      </a>
-   </li>
-   <li>
-      <a href="#http://schema.org/codeRepository" title="http://schema.org/codeRepository">
-         <span>code Repository</span>
-      </a>
-   </li>
-   <li>
-      <a href="#http://purl.org/dc/terms/date" title="http://purl.org/dc/terms/date">
-         <span>date</span>
-      </a>
-   </li>
-   <li>
-      <a href="#http://purl.org/dc/terms/description" title="http://purl.org/dc/terms/description">
-         <span>description</span>
-      </a>
-   </li>
-   <li>
-      <a href="#http://purl.org/vocommons/voaf#extends" title="http://purl.org/vocommons/voaf#extends">
-         <span>extends</span>
-      </a>
-   </li>
-   <li>
-      <a href="#/objectDescription"
-         title="https://crc1625.mdi.ruhr-uni-bochum.de/objectDescription">
-         <span>object Description</span>
-      </a>
-   </li>
-   <li>
-      <a href="#/objectName" title="https://crc1625.mdi.ruhr-uni-bochum.de/objectName">
-         <span>object Name</span>
-      </a>
-   </li>
 </ul>
 </div>
   
 
 <!--DESCRIPTION SECTION-->
-    <div id="description"><h2 id="desc" class="list">CRC 1625 Ontology: Description <span class="backlink"> back to <a href="#toc">ToC</a></span></h2>
+    <div id="description"><h2 id="desc" class="list">CCSS Ontology: Description <span class="backlink"> back to <a href="#toc">ToC</a></span></h2>
 
-<span class="markdown">Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625.
-                                          This ontology models the experimental (meta-)data, provenance and handover workflows present in MatInf instances, while additionally being compatible with existing Materials Science ontologies.
+<span class="markdown">Ontology for supporting the analysis of Compositionally Complex Solid Solutions (CCSS) in the context of the Collaborative Research Center (CRC) 1625.
+                                          This ontology models the experimental (meta-)data, provenance and handover workflows present in MatInf instances and vocabulary employed for the analysis of CCSS, while additionally being compatible with existing Materials Science ontologies.
                                           This additionally includes the modelling of handover workflow models, and other (meta-)data that is exclusively used by the MatInf semantic layer.
                                           Note that some classes are not present in the ontology document. Namely, specific measurement types are dynamically generated, as they change between MatInf instances. Processes and activities for them, however, are included here.</span></div>
    
 
 <!--CROSSREF SECTION-->
-   <div id="crossref"><h2 id="crossreference" class="list">Cross-reference for CRC 1625 Ontology classes, object properties and data properties <span class="backlink"> back to <a href="#toc">ToC</a></span></h2>
-This section provides details for each class and property defined by CRC 1625 Ontology.
+   <div id="crossref"><h2 id="crossreference" class="list">Cross-reference for CCSS Ontology classes, object properties and data properties <span class="backlink"> back to <a href="#toc">ToC</a></span></h2>
+This section provides details for each class and property defined by CCSS Ontology.
 <div xmlns:widoco="https://w3id.org/widoco/vocab#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="classes">
  <h3 id="classes-headline" class="list">Classes</h3>
  <ul class="hlist">
@@ -604,7 +568,6 @@ This section provides details for each class and property defined by CRC 1625 On
   <li><a href="#/BulkComposition" title="https://crc1625.mdi.ruhr-uni-bochum.de/BulkComposition">Bulk Composition</a></li>
   <li><a href="#/CharacterizationActivity" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity">Characterization activity</a></li>
   <li><a href="#/CharacterizationActivityInstance" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance">Characterization activity instance</a></li>
-  <li><a href="#/CharacterizationActivityModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel">Characterization activity model</a></li>
   <li><a href="#/ChemicalObject" title="https://crc1625.mdi.ruhr-uni-bochum.de/ChemicalObject"> <span>Chemical Object</span> </a></li>
   <li><a href="#/ComputationalSample" title="https://crc1625.mdi.ruhr-uni-bochum.de/ComputationalSample"> <span>Computational Sample</span> </a></li>
   <li><a href="#/EDXMicroscopyProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess">EDX Microscopy Process</a></li>
@@ -614,10 +577,6 @@ This section provides details for each class and property defined by CRC 1625 On
   <li><a href="#/HandoverGroup" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverGroup">Handover group</a></li>
   <li><a href="#/HandoverWorkflow" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflow">Handover workflow</a></li>
   <li><a href="#/HandoverWorkflowInstance" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance">Handover workflow instance</a></li>
-  <li><a href="#/HandoverWorkflowInstanceAssignment" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment">Handover workflow instance assignment</a></li>
-  <li><a href="#/HandoverWorkflowModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel">Handover workflow model</a></li>
-  <li><a href="#/HandoverWorkflowModelInstance" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelInstance">Handover workflow model instance</a></li>
-  <li><a href="#/HandoverWorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep">Handover workflow model step</a></li>
   <li><a href="#/IdeaOrExperimentPlan" title="https://crc1625.mdi.ruhr-uni-bochum.de/IdeaOrExperimentPlan">Idea or experiment plan</a></li>
   <li><a href="#/IdentifiableProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/IdentifiableProcess">Identifiable process</a></li>
   <li><a href="#/LEISProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/LEISProcess"> <span>L E I S Process</span> </a></li>
@@ -652,6 +611,11 @@ This section provides details for each class and property defined by CRC 1625 On
   <li><a href="#/User" title="https://crc1625.mdi.ruhr-uni-bochum.de/User"> <span>User</span> </a></li>
   <li><a href="#/VirtualHandover" title="https://crc1625.mdi.ruhr-uni-bochum.de/VirtualHandover">Virtual handover</a></li>
   <li><a href="#/VolumeComposition" title="https://crc1625.mdi.ruhr-uni-bochum.de/VolumeComposition"> <span>Volume Composition</span> </a></li>
+  <li><a href="#/WorkflowModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel">Workflow model</a></li>
+  <li><a href="#/WorkflowModelInstance" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelInstance">Workflow model instance</a></li>
+  <li><a href="#/WorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep">Workflow model step</a></li>
+  <li><a href="#/WorkflowModelStepAssignment" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepAssignment">Workflow model step assignment</a></li>
+  <li><a href="#/WorkflowModelStepTemplate" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepTemplate"> <span>Workflow Model Step Template</span> </a></li>
   <li><a href="#/XPSProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess"> <span>X P S Process</span> </a></li>
   <li><a href="#/XRDProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XRDProcess"> <span>X R D Process</span> </a></li>
  </ul>
@@ -729,7 +693,7 @@ This section provides details for each class and property defined by CRC 1625 On
     has sub-classes
    </dt>
    <dd>
-    <a href="#/APTProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/APTProcess">APT Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/AnnealingProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/AnnealingProcess">Annealing Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/BandgapProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/BandgapProcess">Bandgap Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/CharacterizationActivityInstance" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance">Characterization activity instance</a> <sup class="type-c" title="class">c</sup>, <a href="#/CharacterizationActivityModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel">Characterization activity model</a> <sup class="type-c" title="class">c</sup>, <a href="#/EDXMicroscopyProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess">EDX Microscopy Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/FIMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/FIMProcess">F I M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/LEISProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/LEISProcess">L E I S Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/PSMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/PSMProcess">P S M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/PhotoProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/PhotoProcess">Photo Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ReportProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ReportProcess">Report Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ResistanceProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ResistanceProcess">Resistance Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SDCProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SDCProcess">S D C Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SECCMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess">S E C C M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SEMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess">S E M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SynthesisOrTreatmentProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentProcess">Synthesis Or Treatment Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/TEMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/TEMProcess">T E M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ThicknessProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ThicknessProcess">Thickness Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/XPSProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess">X P S Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/XRDProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XRDProcess">X R D Process</a> <sup class="type-c" title="class">c</sup>
+    <a href="#/APTProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/APTProcess">APT Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/AnnealingProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/AnnealingProcess">Annealing Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/BandgapProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/BandgapProcess">Bandgap Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/CharacterizationActivityInstance" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance">Characterization activity instance</a> <sup class="type-c" title="class">c</sup>, <a href="#/EDXMicroscopyProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess">EDX Microscopy Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/FIMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/FIMProcess">F I M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/LEISProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/LEISProcess">L E I S Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/PSMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/PSMProcess">P S M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/PhotoProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/PhotoProcess">Photo Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ReportProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ReportProcess">Report Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ResistanceProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ResistanceProcess">Resistance Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SDCProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SDCProcess">S D C Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SECCMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess">S E C C M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SEMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess">S E M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SynthesisOrTreatmentProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentProcess">Synthesis Or Treatment Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/TEMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/TEMProcess">T E M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ThicknessProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ThicknessProcess">Thickness Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/XPSProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess">X P S Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/XRDProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XRDProcess">X R D Process</a> <sup class="type-c" title="class">c</sup>
    </dd>
   </dl>
  </div>
@@ -745,27 +709,6 @@ This section provides details for each class and property defined by CRC 1625 On
    </dt>
    <dd>
     <a href="#/CharacterizationActivity" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity">Characterization activity</a> <sup class="type-c" title="class">c</sup>, <a href="#/ProcessInstance" title="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance">Process Instance</a> <sup class="type-c" title="class">c</sup>
-   </dd>
-  </dl>
- </div>
- <div class="entity" id="/CharacterizationActivityModel">
-  <h3>Characterization activity model<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel</p>
-  <div class="comment">
-   <span class="markdown">A process indicating that a Handover workflow model step desires a set of measurements of the same time. An entity of this type indicates the type of its measurements by belonging to a unidentifiable process class. This will be used by e.g. the Handover workflows validation system to correctly validate measurements assigned to handovers.</span>
-  </div>
-  <dl class="description">
-   <dt>
-    has super-classes
-   </dt>
-   <dd>
-    <a href="#/CharacterizationActivity" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity">Characterization activity</a> <sup class="type-c" title="class">c</sup>, <a href="#/ProcessModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel">Process Model</a> <sup class="type-c" title="class">c</sup>
-   </dd>
-   <dt>
-    is in range of
-   </dt>
-   <dd>
-    <a href="#/requiresActivity" title="https://crc1625.mdi.ruhr-uni-bochum.de/requiresActivity">Requires activity</a> <sup class="type-op" title="object property">op</sup>
    </dd>
   </dl>
  </div>
@@ -882,7 +825,7 @@ This section provides details for each class and property defined by CRC 1625 On
     has sub-classes
    </dt>
    <dd>
-    <a href="#/HandoverWorkflowInstance" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance">Handover workflow instance</a> <sup class="type-c" title="class">c</sup>, <a href="#/HandoverWorkflowModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel">Handover workflow model</a> <sup class="type-c" title="class">c</sup>
+    <a href="#/HandoverWorkflowInstance" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance">Handover workflow instance</a> <sup class="type-c" title="class">c</sup>
    </dd>
   </dl>
  </div>
@@ -898,120 +841,6 @@ This section provides details for each class and property defined by CRC 1625 On
    </dt>
    <dd>
     <a href="#/HandoverWorkflow" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflow">Handover workflow</a> <sup class="type-c" title="class">c</sup>, <a href="#/ProcessInstance" title="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance">Process Instance</a> <sup class="type-c" title="class">c</sup>
-   </dd>
-   <dt>
-    is in domain of
-   </dt>
-   <dd>
-    <a href="#/handoverWorkflowModelInstanceOf" title="https://crc1625.mdi.ruhr-uni-bochum.de/handoverWorkflowModelInstanceOf">Handover workflow model instance of</a> <sup class="type-op" title="object property">op</sup>
-   </dd>
-  </dl>
- </div>
- <div class="entity" id="/HandoverWorkflowInstanceAssignment">
-  <h3>Handover workflow instance assignment<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment</p>
-  <div class="comment">
-   <span class="markdown">A process that indicates an assignment of one or more samples to a step in an entity of type HandoverWorkflowModel. A HandoverWorkflowModelInstance will contain one or more HandoverWorkflowInstanceAssignment instances to completely link a HandoverWorkflowModel to existing objects in the RDMS.</span>
-  </div>
-  <dl class="description">
-   <dt>
-    has super-classes
-   </dt>
-   <dd>
-    <a href="#/ProcessModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel">Process Model</a> <sup class="type-c" title="class">c</sup>, <a href="#/UnidentifiableProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess">Unidentifiable process</a> <sup class="type-c" title="class">c</sup>
-   </dd>
-   <dt>
-    is in domain of
-   </dt>
-   <dd>
-    <a href="#/assignedObject" title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject">Assigned object</a> <sup class="type-op" title="object property">op</sup>, <a href="#/relatesToHandoverWorkflowStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep">Relates to Handover Workflow step</a> <sup class="type-op" title="object property">op</sup>
-   </dd>
-   <dt>
-    is in range of
-   </dt>
-   <dd>
-    <a href="#/hasAssignment" title="https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment">Has assignment</a> <sup class="type-op" title="object property">op</sup>
-   </dd>
-  </dl>
- </div>
- <div class="entity" id="/HandoverWorkflowModel">
-  <h3>Handover workflow model<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel</p>
-  <div class="comment">
-   <span class="markdown">The beginning of a series of processes that need to be performed. An instance of this entity will contain a two-layer hierarchy of consecutive HandoverWorkflowModelStep instances that correspond to hypothetical handover groups of a given sample. Each step will contain zero or more Activity Model instances that dictate the desired measurements that the sample should contain, among other metadata, and that are taken at the time of any of the handovers within its corresponding handover group. Note that a Handover workflow Model instance dictates the processing steps, but are not linked to a specific samples - they instead act as templates that can be reused at will and assigned to different groups of samples. An entity of type HandoverWorkflowModelInstance will thus completely characterize a HandoverWorkflowModel by being able to apply it to existing objects in the RDMS during validation.</span>
-  </div>
-  <dl class="description">
-   <dt>
-    has super-classes
-   </dt>
-   <dd>
-    <a href="#/HandoverWorkflow" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflow">Handover workflow</a> <sup class="type-c" title="class">c</sup>, <a href="#/ProcessModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel">Process Model</a> <sup class="type-c" title="class">c</sup>
-   </dd>
-   <dt>
-    has sub-classes
-   </dt>
-   <dd>
-    <a href="#/HandoverWorkflowModelInstance" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelInstance">Handover workflow model instance</a> <sup class="type-c" title="class">c</sup>
-   </dd>
-   <dt>
-    is in domain of
-   </dt>
-   <dd>
-    <a href="#/allowIntermediateHandoverGroups" title="https://crc1625.mdi.ruhr-uni-bochum.de/allowIntermediateHandoverGroups">Allow intermediate handover groups</a> <sup class="type-dp" title="data property">dp</sup>
-   </dd>
-   <dt>
-    is in range of
-   </dt>
-   <dd>
-    <a href="#/handoverWorkflowModelInstanceOf" title="https://crc1625.mdi.ruhr-uni-bochum.de/handoverWorkflowModelInstanceOf">Handover workflow model instance of</a> <sup class="type-op" title="object property">op</sup>
-   </dd>
-  </dl>
- </div>
- <div class="entity" id="/HandoverWorkflowModelInstance">
-  <h3>Handover workflow model instance<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelInstance</p>
-  <div class="comment">
-   <span class="markdown">The beginning of a series of HandoverWorkflowModelStep instances. Each HandoverWorkflowModelStep instance indicates an assignment of one or more samples to a step in the same entity of type WorkflowModel. An entity of this class will thus completely characterize a WorkflowModel by being able to apply it to existing objects in the RDMS during validation.</span>
-  </div>
-  <dl class="description">
-   <dt>
-    has super-classes
-   </dt>
-   <dd>
-    <a href="#/HandoverWorkflowModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel">Handover workflow model</a> <sup class="type-c" title="class">c</sup>
-   </dd>
-   <dt>
-    is in domain of
-   </dt>
-   <dd>
-    <a href="#/hasAssignment" title="https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment">Has assignment</a> <sup class="type-op" title="object property">op</sup>
-   </dd>
-  </dl>
- </div>
- <div class="entity" id="/HandoverWorkflowModelStep">
-  <h3>Handover workflow model step<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep</p>
-  <div class="comment">
-   <span class="markdown">A step in a Handover workflow model, with a set of attributes indicating its settings, and references to Activity Models and projects</span>
-  </div>
-  <dl class="description">
-   <dt>
-    has super-classes
-   </dt>
-   <dd>
-    <a href="#/ProcessModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel">Process Model</a> <sup class="type-c" title="class">c</sup>, <a href="#/UnidentifiableProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess">Unidentifiable process</a> <sup class="type-c" title="class">c</sup>
-   </dd>
-   <dt>
-    is in domain of
-   </dt>
-   <dd>
-    <a href="#/allowedProject" title="https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject">Allowed project</a> <sup class="type-op" title="object property">op</sup>, <a href="#/allowsOtherActivities" title="https://crc1625.mdi.ruhr-uni-bochum.de/allowsOtherActivities">Allows other activities</a> <sup class="type-dp" title="data property">dp</sup>, <a href="#/isHandoverWorkflowStepEnabled" title="https://crc1625.mdi.ruhr-uni-bochum.de/isHandoverWorkflowStepEnabled">Is Handover workflow step enabled</a> <sup class="type-dp" title="data property">dp</sup>, <a href="#/requiresActivity" title="https://crc1625.mdi.ruhr-uni-bochum.de/requiresActivity">Requires activity</a> <sup class="type-op" title="object property">op</sup>
-   </dd>
-   <dt>
-    is in range of
-   </dt>
-   <dd>
-    <a href="#/relatesToHandoverWorkflowStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep">Relates to Handover Workflow step</a> <sup class="type-op" title="object property">op</sup>
    </dd>
   </dl>
  </div>
@@ -1096,12 +925,6 @@ This section provides details for each class and property defined by CRC 1625 On
    </dt>
    <dd>
     <a href="#/NoGradientSample" title="https://crc1625.mdi.ruhr-uni-bochum.de/NoGradientSample">No Gradient Sample</a> <sup class="type-c" title="class">c</sup>, <a href="#/Sample" title="https://crc1625.mdi.ruhr-uni-bochum.de/Sample">Sample</a> <sup class="type-c" title="class">c</sup>, <a href="#/StressChip" title="https://crc1625.mdi.ruhr-uni-bochum.de/StressChip">Stress Chip</a> <sup class="type-c" title="class">c</sup>
-   </dd>
-   <dt>
-    is in range of
-   </dt>
-   <dd>
-    <a href="#/assignedObject" title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject">Assigned object</a> <sup class="type-op" title="object property">op</sup>
    </dd>
   </dl>
  </div>
@@ -1199,7 +1022,7 @@ This section provides details for each class and property defined by CRC 1625 On
   <h3>Process Model<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
   <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel</p>
   <div class="comment">
-   <span class="markdown">A process that does not refer to a real event in the CRC / RDMS database, and instead refers to an entity within a Handover Workflow Model, such as a Handover workflow model step, an activity required by it or a Handover workflow step assignment.</span>
+   <span class="markdown">A process that does not refer to a real event in the CRC / RDMS database.</span>
   </div>
   <dl class="description">
    <dt>
@@ -1212,7 +1035,7 @@ This section provides details for each class and property defined by CRC 1625 On
     has sub-classes
    </dt>
    <dd>
-    <a href="#/CharacterizationActivityModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel">Characterization activity model</a> <sup class="type-c" title="class">c</sup>, <a href="#/HandoverWorkflowInstanceAssignment" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment">Handover workflow instance assignment</a> <sup class="type-c" title="class">c</sup>, <a href="#/HandoverWorkflowModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel">Handover workflow model</a> <sup class="type-c" title="class">c</sup>, <a href="#/HandoverWorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep">Handover workflow model step</a> <sup class="type-c" title="class">c</sup>
+    <a href="#/WorkflowModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel">Workflow model</a> <sup class="type-c" title="class">c</sup>
    </dd>
   </dl>
  </div>
@@ -1233,7 +1056,7 @@ This section provides details for each class and property defined by CRC 1625 On
     is in range of
    </dt>
    <dd>
-    <a href="#/allowedProject" title="https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject">Allowed project</a> <sup class="type-op" title="object property">op</sup>, <a href="#/memberOfProject" title="https://crc1625.mdi.ruhr-uni-bochum.de/memberOfProject">Member of project</a> <sup class="type-op" title="object property">op</sup>
+    <a href="#/memberOfProject" title="https://crc1625.mdi.ruhr-uni-bochum.de/memberOfProject">Member of project</a> <sup class="type-op" title="object property">op</sup>
    </dd>
   </dl>
  </div>
@@ -1494,7 +1317,7 @@ This section provides details for each class and property defined by CRC 1625 On
     has sub-classes
    </dt>
    <dd>
-    <a href="#/APTProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/APTProcess">APT Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/BandgapProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/BandgapProcess">Bandgap Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/EDXMicroscopyProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess">EDX Microscopy Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/FIMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/FIMProcess">F I M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/HandoverGroup" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverGroup">Handover group</a> <sup class="type-c" title="class">c</sup>, <a href="#/HandoverWorkflowInstanceAssignment" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment">Handover workflow instance assignment</a> <sup class="type-c" title="class">c</sup>, <a href="#/HandoverWorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep">Handover workflow model step</a> <sup class="type-c" title="class">c</sup>, <a href="#/LEISProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/LEISProcess">L E I S Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/PSMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/PSMProcess">P S M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/PhotoProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/PhotoProcess">Photo Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ProcessModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel">Process Model</a> <sup class="type-c" title="class">c</sup>, <a href="#/ReportProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ReportProcess">Report Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ResistanceProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ResistanceProcess">Resistance Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SDCProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SDCProcess">S D C Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SECCMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess">S E C C M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SEMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess">S E M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SynthesisOrTreatmentProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentProcess">Synthesis Or Treatment Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/TEMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/TEMProcess">T E M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ThicknessProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ThicknessProcess">Thickness Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/VirtualHandover" title="https://crc1625.mdi.ruhr-uni-bochum.de/VirtualHandover">Virtual handover</a> <sup class="type-c" title="class">c</sup>, <a href="#/XPSProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess">X P S Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/XRDProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XRDProcess">X R D Process</a> <sup class="type-c" title="class">c</sup>
+    <a href="#/APTProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/APTProcess">APT Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/BandgapProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/BandgapProcess">Bandgap Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/EDXMicroscopyProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess">EDX Microscopy Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/FIMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/FIMProcess">F I M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/HandoverGroup" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverGroup">Handover group</a> <sup class="type-c" title="class">c</sup>, <a href="#/LEISProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/LEISProcess">L E I S Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/PSMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/PSMProcess">P S M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/PhotoProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/PhotoProcess">Photo Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ProcessModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel">Process Model</a> <sup class="type-c" title="class">c</sup>, <a href="#/ReportProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ReportProcess">Report Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ResistanceProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ResistanceProcess">Resistance Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SDCProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SDCProcess">S D C Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SECCMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess">S E C C M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SEMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess">S E M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/SynthesisOrTreatmentProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentProcess">Synthesis Or Treatment Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/TEMProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/TEMProcess">T E M Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/ThicknessProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/ThicknessProcess">Thickness Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/VirtualHandover" title="https://crc1625.mdi.ruhr-uni-bochum.de/VirtualHandover">Virtual handover</a> <sup class="type-c" title="class">c</sup>, <a href="#/XPSProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess">X P S Process</a> <sup class="type-c" title="class">c</sup>, <a href="#/XRDProcess" title="https://crc1625.mdi.ruhr-uni-bochum.de/XRDProcess">X R D Process</a> <sup class="type-c" title="class">c</sup>
    </dd>
   </dl>
  </div>
@@ -1549,6 +1372,147 @@ This section provides details for each class and property defined by CRC 1625 On
    </dd>
   </dl>
  </div>
+ <div class="entity" id="/WorkflowModel">
+  <h3>Workflow model<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
+  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel</p>
+  <div class="comment">
+   <span class="markdown">A model of a data workflow. An instance of this entity will contain as its substep the beginning pf a sequence of WorkflowModelStep entities, each with a SHACL shape to be applied and (optionally) template key-value pairs. Important: You can find instructions on how to assign workflow model steps to data workflows in the documentation for the assignedEntity property or the Python validation API.</span>
+  </div>
+  <dl class="description">
+   <dt>
+    has super-classes
+   </dt>
+   <dd>
+    <a href="#/ProcessModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel">Process Model</a> <sup class="type-c" title="class">c</sup>
+   </dd>
+   <dt>
+    has sub-classes
+   </dt>
+   <dd>
+    <a href="#/WorkflowModelInstance" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelInstance">Workflow model instance</a> <sup class="type-c" title="class">c</sup>, <a href="#/WorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep">Workflow model step</a> <sup class="type-c" title="class">c</sup>
+   </dd>
+   <dt>
+    is in range of
+   </dt>
+   <dd>
+    <a href="#/workflowModelInstanceOf" title="https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstanceOf">Workflow model instance of</a> <sup class="type-op" title="object property">op</sup>
+   </dd>
+  </dl>
+ </div>
+ <div class="entity" id="/WorkflowModelInstance">
+  <h3>Workflow model instance<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
+  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelInstance</p>
+  <div class="comment">
+   <span class="markdown">An assignment of entities to the steps of a specific WorkflowModel A WorkflowModelInstance is composed of one or more WorkflowModelStepAssignment instances that indicate the entities to which the steps are validated against, alongside instructions on how to fetch the next target node(s) of the data workflow. Important: You can find instructions on how to assign workflow model steps to data workflows in the documentation for the assignedEntity property or the Python validation API.</span>
+  </div>
+  <dl class="description">
+   <dt>
+    has super-classes
+   </dt>
+   <dd>
+    <a href="#/WorkflowModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel">Workflow model</a> <sup class="type-c" title="class">c</sup>
+   </dd>
+   <dt>
+    has sub-classes
+   </dt>
+   <dd>
+    <a href="#/WorkflowModelStepAssignment" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepAssignment">Workflow model step assignment</a> <sup class="type-c" title="class">c</sup>
+   </dd>
+   <dt>
+    is in domain of
+   </dt>
+   <dd>
+    <a href="#/hasAssignment" title="https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment">Has assignment</a> <sup class="type-op" title="object property">op</sup>, <a href="#/workflowModelInstanceOf" title="https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstanceOf">Workflow model instance of</a> <sup class="type-op" title="object property">op</sup>
+   </dd>
+  </dl>
+ </div>
+ <div class="entity" id="/WorkflowModelStep">
+  <h3>Workflow model step<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
+  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep</p>
+  <div class="comment">
+   <span class="markdown">A WorkflowModelStep entity contains a SHACL shape to be applied to a target node and (optionally) template key-value pairs. The target nodes will correspond to entities in a data workflow, and are dynamically assigned by the validation process following the WorkflowModelStepAssignment entities related to this step from a WorkflowInstance. Important: You can find instructions on how to assign workflow model steps to data workflows in the documentation for the assignedEntity property or the Python validation API.</span>
+  </div>
+  <dl class="description">
+   <dt>
+    has super-classes
+   </dt>
+   <dd>
+    <a href="#/WorkflowModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel">Workflow model</a> <sup class="type-c" title="class">c</sup>
+   </dd>
+   <dt>
+    has sub-classes
+   </dt>
+   <dd>
+    <a href="#/WorkflowModelStepTemplate" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepTemplate">Workflow Model Step Template</a> <sup class="type-c" title="class">c</sup>
+   </dd>
+   <dt>
+    is in domain of
+   </dt>
+   <dd>
+    <a href="#/allowsOtherActivities" title="https://crc1625.mdi.ruhr-uni-bochum.de/allowsOtherActivities">Allows other activities</a> <sup class="type-dp" title="data property">dp</sup>, <a href="#/hasTemplate" title="https://crc1625.mdi.ruhr-uni-bochum.de/hasTemplate">Has template</a> <sup class="type-op" title="object property">op</sup>
+   </dd>
+   <dt>
+    is in range of
+   </dt>
+   <dd>
+    <a href="#/assignedEntity" title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedEntity">Assigned entity</a> <sup class="type-op" title="object property">op</sup>, <a href="#/assignedWorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedWorkflowModelStep">Assigned workflow model step</a> <sup class="type-op" title="object property">op</sup>
+   </dd>
+  </dl>
+ </div>
+ <div class="entity" id="/WorkflowModelStepAssignment">
+  <h3>Workflow model step assignment<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
+  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepAssignment</p>
+  <div class="comment">
+   <span class="markdown">A WorkflowModelStepAssignment instance indicates the entities to which a workflow model step is validated against, alongside a reference to the property with which the validation process will fetch the next target node(s) of the data workflow. Important: You can find instructions on how to assign workflow model steps to data workflows in the documentation for the assignedEntity property or the Python validation API.</span>
+  </div>
+  <dl class="description">
+   <dt>
+    has super-classes
+   </dt>
+   <dd>
+    <a href="#/WorkflowModelInstance" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelInstance">Workflow model instance</a> <sup class="type-c" title="class">c</sup>
+   </dd>
+   <dt>
+    is in domain of
+   </dt>
+   <dd>
+    <a href="#/assignedEntity" title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedEntity">Assigned entity</a> <sup class="type-op" title="object property">op</sup>, <a href="#/assignedWorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedWorkflowModelStep">Assigned workflow model step</a> <sup class="type-op" title="object property">op</sup>
+   </dd>
+   <dt>
+    is in range of
+   </dt>
+   <dd>
+    <a href="#/hasAssignment" title="https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment">Has assignment</a> <sup class="type-op" title="object property">op</sup>
+   </dd>
+  </dl>
+ </div>
+ <div class="entity" id="/WorkflowModelStepTemplate">
+  <h3>Workflow Model Step Template<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
+  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepTemplate</p>
+  <div class="comment">
+   <span class="markdown">A key-&gt;value template with which a WorkflowModelStep will replace values in its assigned SHACL shape. The key and values are arbitrary strings. The logic for storing/reading/processing these strings must be specified by e.g. extending the WorkflowModel dataclass in Python.</span>
+  </div>
+  <dl class="description">
+   <dt>
+    has super-classes
+   </dt>
+   <dd>
+    <a href="#/WorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep">Workflow model step</a> <sup class="type-c" title="class">c</sup>
+   </dd>
+   <dt>
+    is in domain of
+   </dt>
+   <dd>
+    <a href="#/assignedShape" title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedShape">Assigned shape</a> <sup class="type-dp" title="data property">dp</sup>, <a href="#/templateKey" title="https://crc1625.mdi.ruhr-uni-bochum.de/templateKey">Template key</a> <sup class="type-dp" title="data property">dp</sup>
+   </dd>
+   <dt>
+    is in range of
+   </dt>
+   <dd>
+    <a href="#/hasTemplate" title="https://crc1625.mdi.ruhr-uni-bochum.de/hasTemplate">Has template</a> <sup class="type-op" title="object property">op</sup>
+   </dd>
+  </dl>
+ </div>
  <div class="entity" id="/XPSProcess">
   <h3>X P S Process<sup class="type-c" title="class">c</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#classes">Class ToC</a> </span></h3>
   <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess</p>
@@ -1582,56 +1546,32 @@ This section provides details for each class and property defined by CRC 1625 On
 </div><div xmlns:widoco="https://w3id.org/widoco/vocab#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="objectproperties">
  <h3 id="properties" class="list">Object Properties</h3>
  <ul class="hlist">
-  <li><a href="#/allowedProject" title="https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject">Allowed project</a></li>
-  <li><a href="#/assignedObject" title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject">Assigned object</a></li>
+  <li><a href="#/assignedEntity" title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedEntity">Assigned entity</a></li>
   <li><a href="#/assignedTo" title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo">Assigned to</a></li>
+  <li><a href="#/assignedWorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedWorkflowModelStep">Assigned workflow model step</a></li>
   <li><a href="#/characteristic" title="https://crc1625.mdi.ruhr-uni-bochum.de/characteristic"> <span>characteristic</span> </a></li>
   <li><a href="#/composedOf" title="https://crc1625.mdi.ruhr-uni-bochum.de/composedOf"> <span>composed Of</span> </a></li>
   <li><a href="#/creator" title="https://crc1625.mdi.ruhr-uni-bochum.de/creator">Creator</a></li>
   <li><a href="#/element" title="https://crc1625.mdi.ruhr-uni-bochum.de/element"> <span>element</span> </a></li>
   <li><a href="#/givenName" title="https://crc1625.mdi.ruhr-uni-bochum.de/givenName"> <span>given Name</span> </a></li>
-  <li><a href="#/handoverWorkflowModelInstanceOf" title="https://crc1625.mdi.ruhr-uni-bochum.de/handoverWorkflowModelInstanceOf">Handover workflow model instance of</a></li>
   <li><a href="#/hasAssignment" title="https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment">Has assignment</a></li>
+  <li><a href="#/hasTemplate" title="https://crc1625.mdi.ruhr-uni-bochum.de/hasTemplate">Has template</a></li>
   <li><a href="#/input" title="https://crc1625.mdi.ruhr-uni-bochum.de/input"> <span>input</span> </a></li>
   <li><a href="#/memberOfProject" title="https://crc1625.mdi.ruhr-uni-bochum.de/memberOfProject">Member of project</a></li>
   <li><a href="#/name" title="https://crc1625.mdi.ruhr-uni-bochum.de/name"> <span>name</span> </a></li>
-  <li><a href="#/nextProcessAcrossGroups" title="https://crc1625.mdi.ruhr-uni-bochum.de/nextProcessAcrossGroups">next process across groups</a></li>
   <li><a href="#/nextStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/nextStep"> <span>next Step</span> </a></li>
   <li><a href="#/output" title="https://crc1625.mdi.ruhr-uni-bochum.de/output"> <span>output</span> </a></li>
-  <li><a href="#/relatesToHandoverWorkflowStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep">Relates to Handover Workflow step</a></li>
-  <li><a href="#/requiresActivity" title="https://crc1625.mdi.ruhr-uni-bochum.de/requiresActivity">Requires activity</a></li>
-  <li><a href="#/resource" title="https://crc1625.mdi.ruhr-uni-bochum.de/resource">Requires activity</a></li>
+  <li><a href="#/propertyToFollow" title="https://crc1625.mdi.ruhr-uni-bochum.de/propertyToFollow">Property to follow</a></li>
+  <li><a href="#/resource" title="https://crc1625.mdi.ruhr-uni-bochum.de/resource">Resource</a></li>
   <li><a href="#/substep" title="https://crc1625.mdi.ruhr-uni-bochum.de/substep">substep</a></li>
   <li><a href="#/surname" title="https://crc1625.mdi.ruhr-uni-bochum.de/surname"> <span>surname</span> </a></li>
+  <li><a href="#/workflowModelInstanceOf" title="https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstanceOf">Workflow model instance of</a></li>
  </ul>
- <div class="entity" id="/allowedProject">
-  <h3>Allowed project<sup class="type-op" title="object property">op</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#objectproperties">Object Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject</p>
+ <div class="entity" id="/assignedEntity">
+  <h3>Assigned entity<sup class="type-op" title="object property">op</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#objectproperties">Object Property ToC</a> </span></h3>
+  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/assignedEntity</p>
   <div class="comment">
-   <span class="markdown">Indicates that the handover group that the Handover workflow model step is checking is allowed to take place in the given group</span>
-  </div>
-  <div class="description">
-   <dl>
-    <dt>
-     has domain
-    </dt>
-    <dd>
-     <a href="#/HandoverWorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep">Handover workflow model step</a> <sup class="type-c" title="class">c</sup>
-    </dd>
-    <dt>
-     has range
-    </dt>
-    <dd>
-     <a href="#/Project" title="https://crc1625.mdi.ruhr-uni-bochum.de/Project">Project</a> <sup class="type-c" title="class">c</sup>
-    </dd>
-   </dl>
-  </div>
- </div>
- <div class="entity" id="/assignedObject">
-  <h3>Assigned object<sup class="type-op" title="object property">op</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#objectproperties">Object Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject</p>
-  <div class="comment">
-   <span class="markdown">Indicates that the Handover workflow assignment is related to the target materials library or sample</span>
+   <span class="markdown">Indicates that the given WorkflowModelStepAssignment is assigning an entity to its specified WorkflowModelStep. Note that the assigned entities should always point to the starting node of a data workflow. Each consecutive workflow model step assigned to the same entity will validate the successor of the previously validated entity, starting with the original entity itself (i.e., the entity assigned to a step serves as a marker for the starting point of the data workflow, and it appearing multiple times signals to continue validating on its successors). This removes the need to manually assign every individual target node to workflow model steps, and allows defining workflow model for possibly missing data.</span>
   </div>
   <div class="description">
    <dl>
@@ -1645,13 +1585,13 @@ This section provides details for each class and property defined by CRC 1625 On
      has domain
     </dt>
     <dd>
-     <a href="#/HandoverWorkflowInstanceAssignment" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment">Handover workflow instance assignment</a> <sup class="type-c" title="class">c</sup>
+     <a href="#/WorkflowModelStepAssignment" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepAssignment">Workflow model step assignment</a> <sup class="type-c" title="class">c</sup>
     </dd>
     <dt>
      has range
     </dt>
     <dd>
-     <a href="#/MaterialsLibrary" title="https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary">Materials Library</a> <sup class="type-c" title="class">c</sup>
+     <a href="#/WorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep">Workflow model step</a> <sup class="type-c" title="class">c</sup>
     </dd>
    </dl>
   </div>
@@ -1668,7 +1608,36 @@ This section provides details for each class and property defined by CRC 1625 On
      has sub-properties
     </dt>
     <dd>
-     <a href="#/assignedObject" title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject">Assigned object</a> <sup class="type-op" title="object property">op</sup>, <a href="#/relatesToHandoverWorkflowStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep">Relates to Handover Workflow step</a> <sup class="type-op" title="object property">op</sup>
+     <a href="#/assignedEntity" title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedEntity">Assigned entity</a> <sup class="type-op" title="object property">op</sup>, <a href="#/assignedWorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedWorkflowModelStep">Assigned workflow model step</a> <sup class="type-op" title="object property">op</sup>, <a href="#/hasTemplate" title="https://crc1625.mdi.ruhr-uni-bochum.de/hasTemplate">Has template</a> <sup class="type-op" title="object property">op</sup>, <a href="#/propertyToFollow" title="https://crc1625.mdi.ruhr-uni-bochum.de/propertyToFollow">Property to follow</a> <sup class="type-op" title="object property">op</sup>
+    </dd>
+   </dl>
+  </div>
+ </div>
+ <div class="entity" id="/assignedWorkflowModelStep">
+  <h3>Assigned workflow model step<sup class="type-op" title="object property">op</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#objectproperties">Object Property ToC</a> </span></h3>
+  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/assignedWorkflowModelStep</p>
+  <div class="comment">
+   <span class="markdown">Indicates that the given WorkflowModelStepAssignment is specifying the target WorkflowModelStep</span>
+  </div>
+  <div class="description">
+   <dl>
+    <dt>
+     has super-properties
+    </dt>
+    <dd>
+     <a href="#/assignedTo" title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo">Assigned to</a> <sup class="type-op" title="object property">op</sup>
+    </dd>
+    <dt>
+     has domain
+    </dt>
+    <dd>
+     <a href="#/WorkflowModelStepAssignment" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepAssignment">Workflow model step assignment</a> <sup class="type-c" title="class">c</sup>
+    </dd>
+    <dt>
+     has range
+    </dt>
+    <dd>
+     <a href="#/WorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep">Workflow model step</a> <sup class="type-c" title="class">c</sup>
     </dd>
    </dl>
   </div>
@@ -1756,29 +1725,6 @@ This section provides details for each class and property defined by CRC 1625 On
    <span class="markdown">The given name of a person</span>
   </div>
  </div>
- <div class="entity" id="/handoverWorkflowModelInstanceOf">
-  <h3>Handover workflow model instance of<sup class="type-op" title="object property">op</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#objectproperties">Object Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/handoverWorkflowModelInstanceOf</p>
-  <div class="comment">
-   <span class="markdown">Indicates that the Handover workflow model instance is an instantiation of the Handover workflow model</span>
-  </div>
-  <div class="description">
-   <dl>
-    <dt>
-     has domain
-    </dt>
-    <dd>
-     <a href="#/HandoverWorkflowInstance" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance">Handover workflow instance</a> <sup class="type-c" title="class">c</sup>
-    </dd>
-    <dt>
-     has range
-    </dt>
-    <dd>
-     <a href="#/HandoverWorkflowModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel">Handover workflow model</a> <sup class="type-c" title="class">c</sup>
-    </dd>
-   </dl>
-  </div>
- </div>
  <div class="entity" id="/hasAssignment">
   <h3>Has assignment<sup class="type-op" title="object property">op</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#objectproperties">Object Property ToC</a> </span></h3>
   <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment</p>
@@ -1791,13 +1737,42 @@ This section provides details for each class and property defined by CRC 1625 On
      has domain
     </dt>
     <dd>
-     <a href="#/HandoverWorkflowModelInstance" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelInstance">Handover workflow model instance</a> <sup class="type-c" title="class">c</sup>
+     <a href="#/WorkflowModelInstance" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelInstance">Workflow model instance</a> <sup class="type-c" title="class">c</sup>
     </dd>
     <dt>
      has range
     </dt>
     <dd>
-     <a href="#/HandoverWorkflowInstanceAssignment" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment">Handover workflow instance assignment</a> <sup class="type-c" title="class">c</sup>
+     <a href="#/WorkflowModelStepAssignment" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepAssignment">Workflow model step assignment</a> <sup class="type-c" title="class">c</sup>
+    </dd>
+   </dl>
+  </div>
+ </div>
+ <div class="entity" id="/hasTemplate">
+  <h3>Has template<sup class="type-op" title="object property">op</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#objectproperties">Object Property ToC</a> </span></h3>
+  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/hasTemplate</p>
+  <div class="comment">
+   <span class="markdown">Indicates that the WorkflowModelStep has the target WorkflowModelStepTemplate</span>
+  </div>
+  <div class="description">
+   <dl>
+    <dt>
+     has super-properties
+    </dt>
+    <dd>
+     <a href="#/assignedTo" title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo">Assigned to</a> <sup class="type-op" title="object property">op</sup>
+    </dd>
+    <dt>
+     has domain
+    </dt>
+    <dd>
+     <a href="#/WorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep">Workflow model step</a> <sup class="type-c" title="class">c</sup>
+    </dd>
+    <dt>
+     has range
+    </dt>
+    <dd>
+     <a href="#/WorkflowModelStepTemplate" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepTemplate">Workflow Model Step Template</a> <sup class="type-c" title="class">c</sup>
     </dd>
    </dl>
   </div>
@@ -1852,23 +1827,6 @@ This section provides details for each class and property defined by CRC 1625 On
    <span class="markdown">The name of a person</span>
   </div>
  </div>
- <div class="entity" id="/nextProcessAcrossGroups">
-  <h3>next process across groups<sup class="type-op" title="object property">op</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#objectproperties">Object Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/nextProcessAcrossGroups</p>
-  <div class="comment">
-   <span class="markdown">Connection between two processes that took place in two different groups each. Only used as an intermediate step during materialization.</span>
-  </div>
-  <div class="description">
-   <dl>
-    <dt>
-     has super-properties
-    </dt>
-    <dd>
-     <a href="https://w3id.org/pmd/co/nextProcess" target="_blank" title="https://w3id.org/pmd/co/nextProcess">next process</a> <sup class="type-op" title="object property">op</sup>
-    </dd>
-   </dl>
-  </div>
- </div>
  <div class="entity" id="/nextStep">
   <h3>next Step<sup class="type-op" title="object property">op</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#objectproperties">Object Property ToC</a> </span></h3>
   <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/nextStep</p>
@@ -1915,11 +1873,11 @@ This section provides details for each class and property defined by CRC 1625 On
    </dl>
   </div>
  </div>
- <div class="entity" id="/relatesToHandoverWorkflowStep">
-  <h3>Relates to Handover Workflow step<sup class="type-op" title="object property">op</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#objectproperties">Object Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep</p>
+ <div class="entity" id="/propertyToFollow">
+  <h3>Property to follow<sup class="type-op" title="object property">op</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#objectproperties">Object Property ToC</a> </span></h3>
+  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/propertyToFollow</p>
   <div class="comment">
-   <span class="markdown">Indicates that the handover Handover workflow assignment is related to the target Handover workflow model step</span>
+   <span class="markdown">Employed by a WorkflowModelStepAssignment entity to indicate the property that the validation process will use to query for the next target node(s) to assign to the next WorkflowModelStep to be validated, if any.</span>
   </div>
   <div class="description">
    <dl>
@@ -1929,46 +1887,11 @@ This section provides details for each class and property defined by CRC 1625 On
     <dd>
      <a href="#/assignedTo" title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo">Assigned to</a> <sup class="type-op" title="object property">op</sup>
     </dd>
-    <dt>
-     has domain
-    </dt>
-    <dd>
-     <a href="#/HandoverWorkflowInstanceAssignment" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment">Handover workflow instance assignment</a> <sup class="type-c" title="class">c</sup>
-    </dd>
-    <dt>
-     has range
-    </dt>
-    <dd>
-     <a href="#/HandoverWorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep">Handover workflow model step</a> <sup class="type-c" title="class">c</sup>
-    </dd>
-   </dl>
-  </div>
- </div>
- <div class="entity" id="/requiresActivity">
-  <h3>Requires activity<sup class="type-op" title="object property">op</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#objectproperties">Object Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/requiresActivity</p>
-  <div class="comment">
-   <span class="markdown">Indicates that the handover group that the Handover workflow model step is checking must contain a given activity within its handovers. The type of measurement is indicated by the targeted entity's class, by also belonging to one of the *Process classes (e.g. FIMProcess)</span>
-  </div>
-  <div class="description">
-   <dl>
-    <dt>
-     has domain
-    </dt>
-    <dd>
-     <a href="#/HandoverWorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep">Handover workflow model step</a> <sup class="type-c" title="class">c</sup>
-    </dd>
-    <dt>
-     has range
-    </dt>
-    <dd>
-     <a href="#/CharacterizationActivityModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel">Characterization activity model</a> <sup class="type-c" title="class">c</sup>
-    </dd>
    </dl>
   </div>
  </div>
  <div class="entity" id="/resource">
-  <h3>Requires activity<sup class="type-op" title="object property">op</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#objectproperties">Object Property ToC</a> </span></h3>
+  <h3>Resource<sup class="type-op" title="object property">op</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#objectproperties">Object Property ToC</a> </span></h3>
   <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/resource</p>
   <div class="comment">
    <span class="markdown">The resource object property is used to indicate that an uploaded file in the RDMS is related in some way to a given Materials library / Sample This property does not explicitly indicate that the given file is generated *for* the object it is connected to; instead, it indicates that they are *related* in a generic way. To indicate the former, the connection should instead be the other way around via the crc:characteristic property, as is in the majority of cases. </span>
@@ -2020,18 +1943,41 @@ This section provides details for each class and property defined by CRC 1625 On
    <span class="markdown">The surname of a person</span>
   </div>
  </div>
+ <div class="entity" id="/workflowModelInstanceOf">
+  <h3>Workflow model instance of<sup class="type-op" title="object property">op</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#objectproperties">Object Property ToC</a> </span></h3>
+  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstanceOf</p>
+  <div class="comment">
+   <span class="markdown">Indicates that the workflow model instance is specifying the target WorkflowModel</span>
+  </div>
+  <div class="description">
+   <dl>
+    <dt>
+     has domain
+    </dt>
+    <dd>
+     <a href="#/WorkflowModelInstance" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelInstance">Workflow model instance</a> <sup class="type-c" title="class">c</sup>
+    </dd>
+    <dt>
+     has range
+    </dt>
+    <dd>
+     <a href="#/WorkflowModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel">Workflow model</a> <sup class="type-c" title="class">c</sup>
+    </dd>
+   </dl>
+  </div>
+ </div>
 </div><div xmlns:widoco="https://w3id.org/widoco/vocab#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="dataproperties">
  <h3 id="dataproperties-headline" class="list">Data Properties</h3>
  <ul class="hlist">
   <li><a href="#/acceptedDate" title="https://crc1625.mdi.ruhr-uni-bochum.de/acceptedDate">Accepted date</a></li>
-  <li><a href="#/allowIntermediateHandoverGroups" title="https://crc1625.mdi.ruhr-uni-bochum.de/allowIntermediateHandoverGroups">Allow intermediate handover groups</a></li>
   <li><a href="#/allowsOtherActivities" title="https://crc1625.mdi.ruhr-uni-bochum.de/allowsOtherActivities">Allows other activities</a></li>
+  <li><a href="#/assignedShape" title="https://crc1625.mdi.ruhr-uni-bochum.de/assignedShape">Assigned shape</a></li>
   <li><a href="#/creationDate" title="https://crc1625.mdi.ruhr-uni-bochum.de/creationDate">Creation date</a></li>
   <li><a href="#/externalID" title="https://crc1625.mdi.ruhr-uni-bochum.de/externalID"> <span>External ID</span> </a></li>
   <li><a href="#/internalID" title="https://crc1625.mdi.ruhr-uni-bochum.de/internalID"> <span>Internal ID</span> </a></li>
-  <li><a href="#/isHandoverWorkflowStepEnabled" title="https://crc1625.mdi.ruhr-uni-bochum.de/isHandoverWorkflowStepEnabled">Is Handover workflow step enabled</a></li>
   <li><a href="#/resistance" title="https://crc1625.mdi.ruhr-uni-bochum.de/resistance">Resistance</a></li>
-  <li><a href="#/temporaryDatatypeProperty" title="https://crc1625.mdi.ruhr-uni-bochum.de/temporaryDatatypeProperty"> <span>temporary Datatype Property</span> </a></li>
+  <li><a href="#/templateKey" title="https://crc1625.mdi.ruhr-uni-bochum.de/templateKey">Template key</a></li>
+  <li><a href="#/templateValue" title="https://crc1625.mdi.ruhr-uni-bochum.de/templateValue">Template value</a></li>
   <li><a href="#/tolerance" title="https://crc1625.mdi.ruhr-uni-bochum.de/tolerance">Tolerance</a></li>
   <li><a href="#/value" title="https://crc1625.mdi.ruhr-uni-bochum.de/value"> <span>value</span> </a></li>
   <li><a href="#/x_position" title="https://crc1625.mdi.ruhr-uni-bochum.de/x_position">X position</a></li>
@@ -2066,29 +2012,6 @@ This section provides details for each class and property defined by CRC 1625 On
    </dl>
   </div>
  </div>
- <div class="entity" id="/allowIntermediateHandoverGroups">
-  <h3>Allow intermediate handover groups<sup class="type-dp" title="data property">dp</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#dataproperties">Data Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/allowIntermediateHandoverGroups</p>
-  <div class="comment">
-   <span class="markdown">Indicates if the validation of the Handover workflow model allows intermediate, non-compliant handover groups on an otherwise valid handover group chain while validating. If true, the validation system will attempt to keep validating the current Handover workflow model step on the next handover group if the current handover group was non-compliant.</span>
-  </div>
-  <div class="description">
-   <dl>
-    <dt>
-     has domain
-    </dt>
-    <dd>
-     <a href="#/HandoverWorkflowModel" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel">Handover workflow model</a> <sup class="type-c" title="class">c</sup>
-    </dd>
-    <dt>
-     has range
-    </dt>
-    <dd>
-     <a href="http://www.w3.org/2001/XMLSchema#boolean" target="_blank" title="http://www.w3.org/2001/XMLSchema#boolean">boolean</a>
-    </dd>
-   </dl>
-  </div>
- </div>
  <div class="entity" id="/allowsOtherActivities">
   <h3>Allows other activities<sup class="type-dp" title="data property">dp</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#dataproperties">Data Property ToC</a> </span></h3>
   <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/allowsOtherActivities</p>
@@ -2101,13 +2024,36 @@ This section provides details for each class and property defined by CRC 1625 On
      has domain
     </dt>
     <dd>
-     <a href="#/HandoverWorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep">Handover workflow model step</a> <sup class="type-c" title="class">c</sup>
+     <a href="#/WorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep">Workflow model step</a> <sup class="type-c" title="class">c</sup>
     </dd>
     <dt>
      has range
     </dt>
     <dd>
      <a href="http://www.w3.org/2001/XMLSchema#boolean" target="_blank" title="http://www.w3.org/2001/XMLSchema#boolean">boolean</a>
+    </dd>
+   </dl>
+  </div>
+ </div>
+ <div class="entity" id="/assignedShape">
+  <h3>Assigned shape<sup class="type-dp" title="data property">dp</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#dataproperties">Data Property ToC</a> </span></h3>
+  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/assignedShape</p>
+  <div class="comment">
+   <span class="markdown">Indicates that the WorkflowModelStepTemplate has the target SHACL shape string</span>
+  </div>
+  <div class="description">
+   <dl>
+    <dt>
+     has domain
+    </dt>
+    <dd>
+     <a href="#/WorkflowModelStepTemplate" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepTemplate">Workflow Model Step Template</a> <sup class="type-c" title="class">c</sup>
+    </dd>
+    <dt>
+     has range
+    </dt>
+    <dd>
+     <a href="http://www.w3.org/2001/XMLSchema#string" target="_blank" title="http://www.w3.org/2001/XMLSchema#string">string</a>
     </dd>
    </dl>
   </div>
@@ -2205,29 +2151,6 @@ This section provides details for each class and property defined by CRC 1625 On
    </dl>
   </div>
  </div>
- <div class="entity" id="/isHandoverWorkflowStepEnabled">
-  <h3>Is Handover workflow step enabled<sup class="type-dp" title="data property">dp</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#dataproperties">Data Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/isHandoverWorkflowStepEnabled</p>
-  <div class="comment">
-   <span class="markdown">Indicates if the current Handover workflow model step is to be validated by the system. If false, the system will keep checking the current handover group from the next Handover workflow model step.</span>
-  </div>
-  <div class="description">
-   <dl>
-    <dt>
-     has domain
-    </dt>
-    <dd>
-     <a href="#/HandoverWorkflowModelStep" title="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep">Handover workflow model step</a> <sup class="type-c" title="class">c</sup>
-    </dd>
-    <dt>
-     has range
-    </dt>
-    <dd>
-     <a href="http://www.w3.org/2001/XMLSchema#boolean" target="_blank" title="http://www.w3.org/2001/XMLSchema#boolean">boolean</a>
-    </dd>
-   </dl>
-  </div>
- </div>
  <div class="entity" id="/resistance">
   <h3>Resistance<sup class="type-dp" title="data property">dp</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#dataproperties">Data Property ToC</a> </span></h3>
   <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/resistance</p>
@@ -2257,11 +2180,40 @@ This section provides details for each class and property defined by CRC 1625 On
    </dl>
   </div>
  </div>
- <div class="entity" id="/temporaryDatatypeProperty">
-  <h3>temporary Datatype Property<sup class="type-dp" title="data property">dp</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#dataproperties">Data Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/temporaryDatatypeProperty</p>
+ <div class="entity" id="/templateKey">
+  <h3>Template key<sup class="type-dp" title="data property">dp</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#dataproperties">Data Property ToC</a> </span></h3>
+  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/templateKey</p>
   <div class="comment">
-   <span class="markdown">Property used exclusively during the mapping of SQL to RDF, deleted via a post-processing script after executing the Ontop mappings</span>
+   <span class="markdown">The key used for a WorkflowModelStepTemplate</span>
+  </div>
+  <div class="description">
+   <dl>
+    <dt>
+     has super-properties
+    </dt>
+    <dd>
+     <a href="http://www.w3.org/2002/07/owl#topDataProperty" target="_blank" title="http://www.w3.org/2002/07/owl#topDataProperty">top Data Property</a> <sup class="type-dp" title="data property">dp</sup>
+    </dd>
+    <dt>
+     has domain
+    </dt>
+    <dd>
+     <a href="#/WorkflowModelStepTemplate" title="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepTemplate">Workflow Model Step Template</a> <sup class="type-c" title="class">c</sup>
+    </dd>
+    <dt>
+     has range
+    </dt>
+    <dd>
+     <a href="http://www.w3.org/2001/XMLSchema#string" target="_blank" title="http://www.w3.org/2001/XMLSchema#string">string</a>
+    </dd>
+   </dl>
+  </div>
+ </div>
+ <div class="entity" id="/templateValue">
+  <h3>Template value<sup class="type-dp" title="data property">dp</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#dataproperties">Data Property ToC</a> </span></h3>
+  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/templateValue</p>
+  <div class="comment">
+   <span class="markdown">The value used for a WorkflowModelStepTemplate</span>
   </div>
   <div class="description">
    <dl>
@@ -2384,107 +2336,6 @@ This section provides details for each class and property defined by CRC 1625 On
    </dl>
   </div>
  </div>
-</div><div xmlns:widoco="https://w3id.org/widoco/vocab#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="annotationproperties">
- <h3 id="annotationproperties" class="list">Annotation Properties</h3>
- <ul class="hlist">
-  <li><a href="#http://purl.org/dc/terms/abstract" title="http://purl.org/dc/terms/abstract"> <span>abstract</span> </a></li>
-  <li><a href="#http://schema.org/codeRepository" title="http://schema.org/codeRepository"> <span>code Repository</span> </a></li>
-  <li><a href="#http://purl.org/dc/terms/date" title="http://purl.org/dc/terms/date"> <span>date</span> </a></li>
-  <li><a href="#http://purl.org/dc/terms/description" title="http://purl.org/dc/terms/description"> <span>description</span> </a></li>
-  <li><a href="#http://purl.org/vocommons/voaf#extends" title="http://purl.org/vocommons/voaf#extends"> <span>extends</span> </a></li>
-  <li><a href="#/objectDescription" title="https://crc1625.mdi.ruhr-uni-bochum.de/objectDescription"> <span>object Description</span> </a></li>
-  <li><a href="#/objectName" title="https://crc1625.mdi.ruhr-uni-bochum.de/objectName"> <span>object Name</span> </a></li>
- </ul>
- <div class="entity" id="http://purl.org/dc/terms/abstract">
-  <h3>abstract<sup class="type-ap" title="annotation property">ap</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#annotationproperties">Annotation Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> http://purl.org/dc/terms/abstract</p>
- </div>
- <div class="entity" id="http://schema.org/codeRepository">
-  <h3>code Repository<sup class="type-ap" title="annotation property">ap</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#annotationproperties">Annotation Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> http://schema.org/codeRepository</p>
- </div>
- <div class="entity" id="http://purl.org/dc/terms/date">
-  <h3>date<sup class="type-ap" title="annotation property">ap</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#annotationproperties">Annotation Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> http://purl.org/dc/terms/date</p>
- </div>
- <div class="entity" id="http://purl.org/dc/terms/description">
-  <h3>description<sup class="type-ap" title="annotation property">ap</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#annotationproperties">Annotation Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> http://purl.org/dc/terms/description</p>
- </div>
- <div class="entity" id="http://purl.org/vocommons/voaf#extends">
-  <h3>extends<sup class="type-ap" title="annotation property">ap</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#annotationproperties">Annotation Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> http://purl.org/vocommons/voaf#extends</p>
- </div>
- <div class="entity" id="/objectDescription">
-  <h3>object Description<sup class="type-ap" title="annotation property">ap</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#annotationproperties">Annotation Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/objectDescription</p>
-  <div class="comment">
-   <span class="markdown">The annotation property object description points to the description of the RDMS object it refers to.</span>
-  </div>
-  <div class="description">
-   <dl>
-    <dt>
-     has super-properties
-    </dt>
-    <dd>
-     <a href="http://www.w3.org/2000/01/rdf-schema#comment" target="_blank" title="http://www.w3.org/2000/01/rdf-schema#comment">comment</a>
-    </dd>
-    <dt>
-     has domain
-    </dt>
-    <dd>
-     <a href="http://www.w3.org/ns/prov#Activity" target="_blank" title="http://www.w3.org/ns/prov#Activity">Activity</a> <sup class="type-c" title="class">c</sup>
-    </dd>
-    <dd>
-     <a href="http://www.w3.org/ns/prov#Agent" target="_blank" title="http://www.w3.org/ns/prov#Agent">Agent</a> <sup class="type-c" title="class">c</sup>
-    </dd>
-    <dd>
-     <a href="http://www.w3.org/ns/prov#Entity" target="_blank" title="http://www.w3.org/ns/prov#Entity">Entity</a> <sup class="type-c" title="class">c</sup>
-    </dd>
-    <dt>
-     has range
-    </dt>
-    <dd>
-     <a href="http://www.w3.org/2000/01/rdf-schema#Literal" target="_blank" title="http://www.w3.org/2000/01/rdf-schema#Literal">Literal</a>
-    </dd>
-   </dl>
-  </div>
- </div>
- <div class="entity" id="/objectName">
-  <h3>object Name<sup class="type-ap" title="annotation property">ap</sup> <span class="backlink"> back to <a href="#toc">ToC</a> or <a href="#annotationproperties">Annotation Property ToC</a> </span></h3>
-  <p><strong>IRI:</strong> https://crc1625.mdi.ruhr-uni-bochum.de/objectName</p>
-  <div class="comment">
-   <span class="markdown">The datatype property object description points to the name of the RDMS object it refers to.</span>
-  </div>
-  <div class="description">
-   <dl>
-    <dt>
-     has super-properties
-    </dt>
-    <dd>
-     <a href="http://www.w3.org/2000/01/rdf-schema#label" target="_blank" title="http://www.w3.org/2000/01/rdf-schema#label">label</a>
-    </dd>
-    <dt>
-     has domain
-    </dt>
-    <dd>
-     <a href="http://www.w3.org/ns/prov#Activity" target="_blank" title="http://www.w3.org/ns/prov#Activity">Activity</a> <sup class="type-c" title="class">c</sup>
-    </dd>
-    <dd>
-     <a href="http://www.w3.org/ns/prov#Agent" target="_blank" title="http://www.w3.org/ns/prov#Agent">Agent</a> <sup class="type-c" title="class">c</sup>
-    </dd>
-    <dd>
-     <a href="http://www.w3.org/ns/prov#Entity" target="_blank" title="http://www.w3.org/ns/prov#Entity">Entity</a> <sup class="type-c" title="class">c</sup>
-    </dd>
-    <dt>
-     has range
-    </dt>
-    <dd>
-     <a href="http://www.w3.org/2000/01/rdf-schema#Literal" target="_blank" title="http://www.w3.org/2000/01/rdf-schema#Literal">Literal</a>
-    </dd>
-   </dl>
-  </div>
- </div>
 </div><div id="legend">
 <h2>Legend <span class="backlink"> back to <a href="#toc">ToC</a></span></h2>
 <div   class="entity">
@@ -2500,7 +2351,7 @@ This section provides details for each class and property defined by CRC 1625 On
   <div id="references">
 <h2 id="ref" class="list">References <span class="backlink"> back to <a href="#toc">ToC</a></span></h2>
 <span class="markdown">
-TBD.</span>
+Add your references here. It is recommended to have them as a list.</span>
 
 </div>
 <div id="acknowledgments">

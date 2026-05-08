@@ -63,21 +63,21 @@
     "@id" : "https://orcid.org/0009-0006-0232-8677"
   } ],
   "http://purl.org/dc/terms/abstract" : [ {
-    "@value" : "Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625."
+    "@value" : "Ontology for supporting the analysis of Compositionally Complex Solid Solutions (CCSS) in the context of the Collaborative Research Center (CRC) 1625."
   } ],
   "http://purl.org/dc/terms/date" : [ {
     "@type" : "http://www.w3.org/2001/XMLSchema#date",
     "@value" : "2026-03-19"
   } ],
   "http://purl.org/dc/terms/description" : [ {
-    "@value" : "Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625.\n                                          This ontology models the experimental (meta-)data, provenance and handover workflows present in MatInf instances, while additionally being compatible with existing Materials Science ontologies.\n                                          This additionally includes the modelling of handover workflow models, and other (meta-)data that is exclusively used by the MatInf semantic layer.\n                                          Note that some classes are not present in the ontology document. Namely, specific measurement types are dynamically generated, as they change between MatInf instances. Processes and activities for them, however, are included here."
+    "@value" : "Ontology for supporting the analysis of Compositionally Complex Solid Solutions (CCSS) in the context of the Collaborative Research Center (CRC) 1625.\n                                          This ontology models the experimental (meta-)data, provenance and handover workflows present in MatInf instances and vocabulary employed for the analysis of CCSS, while additionally being compatible with existing Materials Science ontologies.\n                                          This additionally includes the modelling of handover workflow models, and other (meta-)data that is exclusively used by the MatInf semantic layer.\n                                          Note that some classes are not present in the ontology document. Namely, specific measurement types are dynamically generated, as they change between MatInf instances. Processes and activities for them, however, are included here."
   } ],
   "http://purl.org/dc/terms/license" : [ {
     "@id" : "http://creativecommons.org/licenses/by-sa/4.0/"
   } ],
   "http://purl.org/dc/terms/title" : [ {
     "@language" : "en",
-    "@value" : "CRC 1625 Ontology"
+    "@value" : "CCSS Ontology"
   } ],
   "http://purl.org/vocommons/voaf#extends" : [ {
     "@id" : "https://w3id.org/pmd/co/2.0.8"
@@ -92,7 +92,7 @@
     "@id" : "https://w3id.org/pmd/co/2.0.8"
   } ],
   "http://www.w3.org/2002/07/owl#versionInfo" : [ {
-    "@value" : "1.0.0"
+    "@value" : "1.0.2"
   } ]
 }, {
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/APTProcess",
@@ -170,20 +170,6 @@
     "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
   }, {
     "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance"
-  } ]
-}, {
-  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel",
-  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
-  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "A process indicating that a Handover workflow model step desires a set of measurements of the same time.\n\nAn entity of this type indicates the type of its measurements by belonging to a unidentifiable process class. This will be used by e.g. the Handover workflows validation system to correctly validate measurements assigned to handovers."
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
-    "@value" : "Characterization activity model"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
-  }, {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel"
   } ]
 }, {
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ChemicalObject",
@@ -283,62 +269,6 @@
     "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflow"
   }, {
     "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance"
-  } ]
-}, {
-  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment",
-  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
-  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "A process that indicates an assignment of one or more samples to a step in an entity of type HandoverWorkflowModel. A HandoverWorkflowModelInstance will contain one or more HandoverWorkflowInstanceAssignment instances to completely link a HandoverWorkflowModel to existing objects in the RDMS."
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
-    "@value" : "Handover workflow instance assignment"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel"
-  }, {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
-  } ]
-}, {
-  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel",
-  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
-  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@language" : "en",
-    "@value" : "The beginning of a series of processes that need to be performed.\n\n\nAn instance of this entity will contain a two-layer hierarchy of consecutive HandoverWorkflowModelStep instances that correspond to hypothetical handover groups of a given sample. Each step will contain zero or more Activity Model instances that dictate the desired measurements that the sample should contain, among other metadata, and that are taken at the time of any of the handovers within its corresponding handover group.\n\nNote that a Handover workflow Model instance dictates the processing steps, but are not linked to a specific samples - they instead act as templates that can be reused at will and assigned to different groups of samples. An entity of type HandoverWorkflowModelInstance will thus completely characterize a HandoverWorkflowModel by being able to apply it to existing objects in the RDMS during validation."
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
-    "@language" : "en",
-    "@value" : "Handover workflow model"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflow"
-  }, {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel"
-  } ]
-}, {
-  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelInstance",
-  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
-  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "The beginning of a series of HandoverWorkflowModelStep instances. Each HandoverWorkflowModelStep instance indicates an assignment of one or more samples to a step in the same entity of type WorkflowModel.\n\n\nAn entity of this class will thus completely characterize a WorkflowModel by being able to apply it to existing objects in the RDMS during validation."
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
-    "@value" : "Handover workflow model instance"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel"
-  } ]
-}, {
-  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep",
-  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
-  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "A step in a Handover workflow model, with a set of attributes indicating its settings, and references to Activity Models and projects"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
-    "@value" : "Handover workflow model step"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel"
-  }, {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
   } ]
 }, {
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/IdeaOrExperimentPlan",
@@ -470,7 +400,7 @@
   "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
     "@language" : "en",
-    "@value" : "A process that does not refer to a real event in the CRC / RDMS database, and instead refers to an entity within a Handover Workflow Model, such as a Handover workflow model step, an activity required by it or a Handover workflow step assignment."
+    "@value" : "A process that does not refer to a real event in the CRC / RDMS database."
   } ],
   "http://www.w3.org/2000/01/rdf-schema#label" : [ {
     "@language" : "en",
@@ -722,6 +652,65 @@
     "@id" : "https://w3id.org/pmd/co/ChemicalComposition"
   } ]
 }, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@language" : "en",
+    "@value" : "A model of a data workflow.\n\nAn instance of this entity will contain as its substep the beginning pf a sequence of WorkflowModelStep entities, each with a SHACL shape to be applied and (optionally) template key-value pairs.\n\nImportant: You can find instructions on how to assign workflow model steps to data workflows in the documentation for the assignedEntity property or the Python validation API."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@language" : "en",
+    "@value" : "Workflow model"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelInstance",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "An assignment of entities to the steps of a specific WorkflowModel\n\nA WorkflowModelInstance is composed of one or more WorkflowModelStepAssignment instances that indicate the entities to which the steps are validated against, alongside instructions on how to fetch the next target node(s) of the data workflow.\n\nImportant: You can find instructions on how to assign workflow model steps to data workflows in the documentation for the assignedEntity property or the Python validation API."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Workflow model instance"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A WorkflowModelStep entity contains a SHACL shape to be applied to a target node and (optionally) template key-value pairs.\n\nThe target nodes will correspond to entities in a data workflow, and are dynamically assigned by the validation process following the WorkflowModelStepAssignment entities related to this step from a WorkflowInstance.\n\nImportant: You can find instructions on how to assign workflow model steps to data workflows in the documentation for the assignedEntity property or the Python validation API."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Workflow model step"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepAssignment",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A WorkflowModelStepAssignment instance indicates the entities to which a workflow model step is validated against, alongside a reference to the property with which the validation process will fetch the next target node(s) of the data workflow.\n\nImportant: You can find instructions on how to assign workflow model steps to data workflows in the documentation for the assignedEntity property or the Python validation API."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Workflow model step assignment"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelInstance"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepTemplate",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A key->value template with which a WorkflowModelStep will replace values in its assigned SHACL shape.\n\nThe key and values are arbitrary strings. The logic for storing/reading/processing these strings must be specified by e.g. extending the WorkflowModel dataclass in Python."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep"
+  } ]
+}, {
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess",
   "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
@@ -766,43 +755,13 @@
     "@id" : "http://www.w3.org/2002/07/owl#topDataProperty"
   } ]
 }, {
-  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/allowIntermediateHandoverGroups",
-  "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty" ],
-  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "Indicates if the validation of the Handover workflow model allows intermediate, non-compliant handover groups on an otherwise valid handover group chain while validating. If true, the validation system will attempt to keep validating the current Handover workflow model step on the next handover group if the current handover group was non-compliant."
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
-    "@value" : "Allow intermediate handover groups"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
-    "@id" : "http://www.w3.org/2001/XMLSchema#boolean"
-  } ]
-}, {
-  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject",
-  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
-  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "Indicates that the handover group that the Handover workflow model step is checking is allowed to take place in the given group"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
-    "@value" : "Allowed project"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/Project"
-  } ]
-}, {
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/allowsOtherActivities",
   "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty" ],
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
     "@value" : "Indicates that the handover group that the Handover workflow model step is validating is allowed to have activities other than the ones indicated by requiresActivity. If false, the presence of other activities will cause the validation to fail in this step."
   } ],
   "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep"
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep"
   } ],
   "http://www.w3.org/2000/01/rdf-schema#label" : [ {
     "@value" : "Allows other activities"
@@ -811,22 +770,37 @@
     "@id" : "http://www.w3.org/2001/XMLSchema#boolean"
   } ]
 }, {
-  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject",
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/assignedEntity",
   "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "Indicates that the Handover workflow assignment is related to the target materials library or sample"
+    "@value" : "Indicates that the given WorkflowModelStepAssignment is assigning an entity to its specified WorkflowModelStep.\n\nNote that the assigned entities should always point to the starting node of a data workflow. Each consecutive workflow model step assigned to the same entity will validate the successor of the previously validated entity, starting with the original entity itself (i.e., the entity assigned to a step serves as a marker for the starting point of the data workflow, and it appearing multiple times signals to continue validating on its successors).\n\nThis removes the need to manually assign every individual target node to workflow model steps, and allows defining workflow model for possibly missing data."
   } ],
   "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment"
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepAssignment"
   } ],
   "http://www.w3.org/2000/01/rdf-schema#label" : [ {
-    "@value" : "Assigned object"
+    "@value" : "Assigned entity"
   } ],
   "http://www.w3.org/2000/01/rdf-schema#range" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary"
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep"
   } ],
   "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
     "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/assignedShape",
+  "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "Indicates that the WorkflowModelStepTemplate has the target SHACL shape string"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepTemplate"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Assigned shape"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "http://www.w3.org/2001/XMLSchema#string"
   } ]
 }, {
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo",
@@ -836,6 +810,24 @@
   } ],
   "http://www.w3.org/2000/01/rdf-schema#label" : [ {
     "@value" : "Assigned to"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/assignedWorkflowModelStep",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "Indicates that the given WorkflowModelStepAssignment is specifying the target WorkflowModelStep"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepAssignment"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Assigned workflow model step"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo"
   } ]
 }, {
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/characteristic",
@@ -928,34 +920,37 @@
     "@value" : "The given name of a person"
   } ]
 }, {
-  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/handoverWorkflowModelInstanceOf",
-  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
-  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "Indicates that the Handover workflow model instance is an instantiation of the Handover workflow model"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
-    "@value" : "Handover workflow model instance of"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModel"
-  } ]
-}, {
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment",
   "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
     "@value" : "Indicates that the Handover workflow model instance has an assignment of samples to a Handover workflow model step further described in the target entity"
   } ],
   "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelInstance"
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelInstance"
   } ],
   "http://www.w3.org/2000/01/rdf-schema#label" : [ {
     "@value" : "Has assignment"
   } ],
   "http://www.w3.org/2000/01/rdf-schema#range" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment"
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepAssignment"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/hasTemplate",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "Indicates that the WorkflowModelStep has the target WorkflowModelStepTemplate"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Has template"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepTemplate"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo"
   } ]
 }, {
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/input",
@@ -990,21 +985,6 @@
     "@id" : "http://www.w3.org/2002/07/owl#topDataProperty"
   } ]
 }, {
-  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/isHandoverWorkflowStepEnabled",
-  "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty" ],
-  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "Indicates if the current Handover workflow model step is to be validated by the system. If false, the system will keep checking the current handover group from the next Handover workflow model step."
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
-    "@value" : "Is Handover workflow step enabled"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
-    "@id" : "http://www.w3.org/2001/XMLSchema#boolean"
-  } ]
-}, {
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/memberOfProject",
   "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
   "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
@@ -1022,18 +1002,6 @@
   "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
     "@value" : "The name of a person"
-  } ]
-}, {
-  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/nextProcessAcrossGroups",
-  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
-  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "Connection between two processes that took place in two different groups each. Only used as an intermediate step during materialization."
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
-    "@value" : "next process across groups"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
-    "@id" : "https://w3id.org/pmd/co/nextProcess"
   } ]
 }, {
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/nextStep",
@@ -1101,37 +1069,16 @@
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/percentage",
   "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty" ]
 }, {
-  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep",
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/propertyToFollow",
   "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "Indicates that the handover Handover workflow assignment is related to the target Handover workflow model step"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstanceAssignment"
+    "@value" : "Employed by a WorkflowModelStepAssignment entity to indicate the property that the validation process will use to query for the next target node(s) to assign to the next WorkflowModelStep to be validated, if any."
   } ],
   "http://www.w3.org/2000/01/rdf-schema#label" : [ {
-    "@value" : "Relates to Handover Workflow step"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep"
+    "@value" : "Property to follow"
   } ],
   "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
     "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo"
-  } ]
-}, {
-  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/requiresActivity",
-  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
-  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "Indicates that the handover group that the Handover workflow model step is checking must contain a given activity within its handovers. The type of measurement is indicated by the targeted entity's class, by also belonging to one of the *Process classes (e.g. FIMProcess)"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowModelStep"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
-    "@value" : "Requires activity"
-  } ],
-  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
-    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel"
   } ]
 }, {
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/resistance",
@@ -1161,7 +1108,7 @@
     "@id" : "https://w3id.org/pmd/co/ValueObject"
   } ],
   "http://www.w3.org/2000/01/rdf-schema#label" : [ {
-    "@value" : "Requires activity"
+    "@value" : "Resource"
   } ],
   "http://www.w3.org/2002/07/owl#equivalentProperty" : [ {
     "@id" : "https://w3id.org/pmd/co/resource"
@@ -1188,10 +1135,31 @@
     "@value" : "The surname of a person"
   } ]
 }, {
-  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/temporaryDatatypeProperty",
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/templateKey",
   "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty" ],
   "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
-    "@value" : "Property used exclusively during the mapping of SQL to RDF, deleted via a post-processing script after executing the Ontop mappings"
+    "@value" : "The key used for a WorkflowModelStepTemplate"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepTemplate"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Template key"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "http://www.w3.org/2001/XMLSchema#string"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "http://www.w3.org/2002/07/owl#topDataProperty"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/templateValue",
+  "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "The value used for a WorkflowModelStepTemplate"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Template value"
   } ],
   "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
     "@id" : "http://www.w3.org/2002/07/owl#topDataProperty"
@@ -1225,6 +1193,21 @@
   } ],
   "http://www.w3.org/2002/07/owl#equivalentProperty" : [ {
     "@id" : "https://w3id.org/pmd/co/value"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstanceOf",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "Indicates that the workflow model instance is specifying the target WorkflowModel"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelInstance"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Workflow model instance of"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel"
   } ]
 }, {
   "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/x_position",
