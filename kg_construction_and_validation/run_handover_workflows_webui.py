@@ -59,8 +59,10 @@ async def setup_debug_files(clear_main_graph: bool = False,
 
     # Avoid uploading demo data if this was a webserver restart
     if not await is_demo_data_already_loaded():
-        # Load Sir SHACLot alongside his demo MLs/Samples and handover workflows
-        await demo_data_loader.load_demo_data()
+        # Load Sir SHACLot's workflows
+        await demo_data_loader.load_demo_workflows()
+        # Load the triples for the main graph just it just in case if we are doing a cold boot
+        await demo_data_loader.load_demo_user_data()
 
 if __name__ in {"__main__", "__mp_main__"}:
     parser = argparse.ArgumentParser()

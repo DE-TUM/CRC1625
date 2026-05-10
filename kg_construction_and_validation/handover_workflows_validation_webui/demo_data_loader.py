@@ -305,8 +305,9 @@ async def is_demo_data_already_loaded():
 
     return result['boolean']
 
-async def load_demo_data():
+async def load_demo_user_data():
+    await rdf_datastore_client.upload_file(os.path.join(module_dir, "assets/demo_data_graph.ttl"))
+
+async def load_demo_workflows():
     await create_demo_workflow_1()
     await create_demo_workflow_2()
-
-    await rdf_datastore_client.upload_file(os.path.join(module_dir, "assets/demo_data_graph.ttl"))
