@@ -19,6 +19,7 @@ import handover_workflows_validation_webui.middleware
 from nicegui import ui, app
 
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import load_cytoscape_js_libs
+from handover_workflows_validation_webui.demo_data_loader import is_demo_data_already_loaded
 
 module_dir = os.path.dirname(__file__)
 load_dotenv(os.path.join(module_dir, '.env'))
@@ -56,8 +57,10 @@ async def setup_debug_files(clear_main_graph: bool = False,
     if clear_workflows_graph:
         await rdf_datastore_client.clear_triples(WORKFLOWS_GRAPH_IRI)
 
-    # Load Sir SHACLot alongside his demo MLs/Samples and handover workflows
-    await demo_data_loader.load_demo_data()
+    # Avoid uploading demo data if this was a restart
+    if not await is_demo_data_already_loaded():
+        # Load Sir SHACLot alongside his demo MLs/Samples and handover workflows
+        await demo_data_loader.load_demo_data()
 
 if __name__ in {"__main__", "__mp_main__"}:
     parser = argparse.ArgumentParser()

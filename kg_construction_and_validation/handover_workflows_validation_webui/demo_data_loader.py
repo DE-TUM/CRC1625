@@ -7,6 +7,8 @@ from workflows_validation.workflow_model import store_workflow_model, WorkflowMo
 
 module_dir = os.path.dirname(__file__)
 
+prefixes: str = open(os.path.join(module_dir, '../workflows_validation/queries/prefixes.sparql')).read()
+are_there_workflow_models_from_demo_user_query = prefixes + open(os.path.join(module_dir, 'queries/are_there_workflow_models_from_demo_user.sparql'), 'r').read()
 
 async def create_demo_workflow_1():
     demo_workflow_model = WorkflowModel()
@@ -297,6 +299,11 @@ async def create_demo_workflow_2():
 
     await store_workflow_instance(workflow_instance)
 
+
+async def is_demo_data_already_loaded():
+    result = await rdf_datastore_client.launch_query(are_there_workflow_models_from_demo_user_query)
+
+    return result['boolean']
 
 async def load_demo_data():
     await create_demo_workflow_1()
