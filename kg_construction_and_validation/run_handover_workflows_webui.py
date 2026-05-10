@@ -57,7 +57,7 @@ async def setup_debug_files(clear_main_graph: bool = False,
     if clear_workflows_graph:
         await rdf_datastore_client.clear_triples(WORKFLOWS_GRAPH_IRI)
 
-    # Avoid uploading demo data if this was a restart
+    # Avoid uploading demo data if this was a webserver restart
     if not await is_demo_data_already_loaded():
         # Load Sir SHACLot alongside his demo MLs/Samples and handover workflows
         await demo_data_loader.load_demo_data()

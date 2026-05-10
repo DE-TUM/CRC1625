@@ -3,6 +3,7 @@ Main script used to execute the complete KG generation pipeline. It can be calle
 (e.g., avoid performing postprocessing..., etc.)
 """
 import argparse
+import asyncio
 import logging
 import os
 import sys
@@ -12,7 +13,7 @@ import datastores.sql.sql_db as sql_db
 import materialization.materialization as materialization
 import postprocessing.postprocessing as postprocessing
 from datastores.rdf import rdf_datastore_client, rdf_datastore
-from handover_workflows_validation_webui.demo_data_loader import load_demo_data
+from handover_workflows_validation_webui.demo_data_loader import load_demo_data, is_demo_data_already_loaded
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -50,13 +51,13 @@ def upload_ontology_files(ontology_files: list[dict[str, str]]):
     rdf_datastore_client.run_sync(rdf_datastore_client.bulk_file_load([f["file"] for f in ontology_files], delete_files_after_upload=False))
 
 
-def serve_KG(skip_ontologies_upload: bool = True,
-             db_option: str = None,
-             skip_db_setup: bool = False,
-             skip_materialization: bool = False,
-             skip_postprocessing: bool = False,
-             delete_materialized_triples_files: bool = True,
-             use_rmlstreamer: bool = False):
+async def serve_KG(skip_ontologies_upload: bool = True,
+                   db_option: str = None,
+                   skip_db_setup: bool = False,
+                   skip_materialization: bool = False,
+                   skip_postprocessing: bool = False,
+                   delete_materialized_triples_files: bool = True,
+                   use_rmlstreamer: bool = False):
     performance_log_postprocessing = dict()
 
     db = sql_db.MSSQLDB()
@@ -96,8 +97,11 @@ def serve_KG(skip_ontologies_upload: bool = True,
     if not skip_db_setup and not db.is_remote:
         db.stop_DB()
 
-    # Load Sir SHACLot alongside his demo MLs/Samples and handover workflows
-    rdf_datastore_client.run_sync(load_demo_data())
+    # Avoid uploading demo data if this only was a main graph refresh
+    if not await is_demo_data_already_loaded():
+        # Load Sir SHACLot alongside his demo MLs/Samples and handover workflows
+        rdf_datastore_client.run_sync(load_demo_data())
+
     rdf_datastore_client.run_sync(rdf_datastore_client.signal_stop_materialization())
 
     return performance_log_mappings, resource_usage_mappings, performance_log_postprocessing, resource_usage_postprocessing, file_upload_end
@@ -173,10 +177,10 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    serve_KG(skip_ontologies_upload=args.skip_ontologies_upload,
-             db_option=args.db_option,
-             skip_db_setup=args.skip_db_setup,
-             skip_materialization=args.skip_materialization,
-             skip_postprocessing=args.skip_postprocessing,
-             delete_materialized_triples_files=not args.do_not_delete_materialized_triples_files,
-             use_rmlstreamer=args.use_rmlstreamer)
+    asyncio.run(serve_KG(skip_ontologies_upload=args.skip_ontologies_upload,
+                         db_option=args.db_option,
+                         skip_db_setup=args.skip_db_setup,
+                         skip_materialization=args.skip_materialization,
+                         skip_postprocessing=args.skip_postprocessing,
+                         delete_materialized_triples_files=not args.do_not_delete_materialized_triples_files,
+                         use_rmlstreamer=args.use_rmlstreamer))
