@@ -14,7 +14,7 @@ from datastores.rdf import rdf_datastore_client
 from handover_workflows_validation.handover_workflows_validation import get_workflow_model_names_and_creator_user_ids, \
     get_workflow_instances_of_model, read_workflow_model, store_workflow_model, WorkflowInstance, is_workflow_instance_valid, WorkflowModel, \
     create_workflow_instance, delete_workflow_instance
-from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent
+from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, NodeType
 from handover_workflows_validation_webui.middleware import matinf_or_demo_login_required, activate_demo_mode, log_out, show_materialization_card
 from handover_workflows_validation_webui.workflow_model_ui.edit_workflow_model_page import workflow_model_to_nodes_and_edges
 
@@ -546,6 +546,115 @@ def handle_demo_mode_button_click():
     activate_demo_mode()
     ui.navigate.to('/workflows')
 
+#new page for testing purposes
+@ui.page('/mlem')
+@matinf_or_demo_login_required
+async def mlem():
+    await ui.context.client.connected()
+    workflows_page_state = WorkflowsPageState()
+    workflows_page_state.main_content = ui.column().classes('w-full')
+
+    with ui.header().classes('items-center p-2 h-14'):
+            ui.label('This is a testing page, mlem!').classes('text-xl').style('color: #000000')
+            ui.space()
+            ui.label(f'Welcome, {app.storage.tab['user_name']} ({app.storage.tab['user_project']})').classes('text-xl').style('color: #000000')
+            ui.button('Log out', color='negative', on_click=lambda: log_out()).props('size=m')
+            ui.button('Return to the previous page', color='info', on_click=lambda: ui.navigate.to("/")).props('size=m')
+
+    with ui.grid(columns=1).classes('w-full gap-8'):
+            workflows_page_state.graph_component_column = ui.column()
+            with workflows_page_state.graph_component_column:
+                #graph_data = workflow_model_to_nodes_and_edges(app.storage.tab['current_workflow_model'])
+                
+                nodes = []
+                edges = []
+                
+                nodes.append({
+                    'data': {
+                        'id': "mlem",
+                        'label': "mlem",
+                        'projects': [],
+                        'activities': [],
+                        'identifiers_for_coloring': ["mlem"]
+                    },
+                    'classes': [NodeType.node_type_step.value]})
+                
+                nodes.append({
+                    'data': {
+                        'id': "mlem2",
+                        'label': "mlem2",
+                        'projects': [],
+                        'activities': [],
+                        'identifiers_for_coloring': ["mlem"]
+                    },
+                    'classes': [NodeType.node_type_step.value]})
+                
+                nodes.append({
+                    'data': {
+                        'id': "zlorp",
+                        'label': "zlorp",
+                        'projects': [],
+                        'activities': [],
+                        'identifiers_for_coloring': ["zlorp"]
+                    },
+                    'classes': [NodeType.node_type_step.value]
+                })
+
+                nodes.append({
+                    'data': {
+                        'id': "zlorpus",
+                        'label': "zlorpus",
+                        'projects': [],
+                        'activities': [],
+                        'identifiers_for_coloring': ["zlorpus"]
+                    },
+                    'classes': [NodeType.node_type_step.value]
+                })
+                
+                nodes.append({
+                    'data': {
+                        'id': "fluergh",
+                        'label': "fluergh",
+                        'projects': [],
+                        'activities': [],
+                        'identifiers_for_coloring': ["fluergh"]
+                    },
+                    'classes': [NodeType.node_type_step.value]
+                })
+
+                nodes.append({
+                    'data': {
+                        'id': "fluergh2",
+                        'label': "fluergh2",
+                        'projects': [],
+                        'activities': [],
+                        'identifiers_for_coloring': ["fluergh2"]
+                    },
+                    'classes': [NodeType.node_type_step.value]
+                })
+
+                edges.append({'data': {'source': "mlem", 'target': "mlem2"}})
+                edges.append({'data': {'source': "mlem2", 'target': "zlorp"}})
+                edges.append({'data': {'source': "mlem2", 'target': "zlorpus"}})
+                edges.append({'data': {'source': "mlem2", 'target': "fluergh"}})
+                edges.append({'data': {'source': "zlorp", 'target': "mlem"}})
+                edges.append({'data': {'source': "fluergh", 'target': "fluergh2"}})
+
+                workflows_page_state.graph_component = CytoscapeComponent(
+                    nodes,
+                    edges,
+                    lambda: None,
+                    None
+                )
+
+    with ui.footer().classes('items-center p-2 h-11'):
+            ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-m').style('color: #000000')
+            ui.space()
+            ui.image('/assets/crc_logo_black_letters_wide.png').classes('w-26')
+
+            
+
+
 
 @ui.page('/')
 async def landing_page():
@@ -574,8 +683,16 @@ async def landing_page():
         ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-m').style('color: #000000')
         ui.space()
         ui.image('/assets/crc_logo_black_letters_wide.png').classes('w-26')
-
+    
+    #HERE IS THE MLEM CARD
     with ui.row().classes('w-full justify-center gap-8 p-8'):
+        with ui.card().tight().classes('w-128 h-100 cursor-pointer hover:shadow-lg') \
+                .on('click', lambda: ui.navigate.to('/mlem')):
+            ui.image('assets/workflows_validation_header.png').props('fit=scale-down').classes('h-90')
+            with ui.column().classes('p-4 w-full bg-secondary'):
+                ui.label('Mlem').classes('text-h6')
+
+        
         with ui.card().tight().classes('w-128 h-100 cursor-pointer hover:shadow-lg') \
                 .on('click', lambda: ui.navigate.to('/workflows')):
             ui.image('assets/workflows_validation_header.png').props('fit=scale-down').classes('h-90')
