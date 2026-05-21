@@ -17,7 +17,7 @@ from handover_workflows_validation_webui.workflow_model_ui.edit_workflow_model_p
 from workflows_validation.CRC_1625_workflows_validator.CRC_1625_workflows_validator import get_creator_user_id, set_creator_user_id, CRC1625WorkflowModelStep, \
     crc_prefix
 from workflows_validation.workflow_instance import WorkflowInstance, delete_workflow_instance, store_workflow_instance, get_workflow_instances_of_model, \
-    StepAssignment
+    StepAssignment, is_workflow_instance_definition_valid
 from workflows_validation.workflow_model import store_workflow_model, read_workflow_model, WorkflowModel
 from workflows_validation.workflows_validator import is_workflow_instance_valid
 
@@ -92,19 +92,17 @@ async def handle_workflow_instance_deletion(workflows_page_state: WorkflowsPageS
 async def delete_workflow_instance_button_click(workflows_page_state: WorkflowsPageState):
     if app.storage.tab['demo_mode']:
         ui.notify("You cannot delete workflow instances as a demo user", type='negative')
-        return
     elif app.storage.tab['user_id'] != get_creator_user_id(app.storage.tab['current_workflow_instance']):
         ui.notify(f"You are not the owner of this workflow instance, so you cannot delete it", type='negative')
-        return
+    else:
+        with ui.dialog() as workflow_instance_deletion_dialog:
+            with ui.card(align_items='center'):
+                with ui.row(align_items='center').classes('w-full justify-center'):
+                    ui.label('Are you sure you want to delete this Workflow Instance?')
+                    ui.button('Yes', color='positive', on_click=lambda: handle_workflow_instance_deletion(workflows_page_state))
+                    ui.button('Cancel', color='negative', on_click=workflow_instance_deletion_dialog.close)
 
-    with ui.dialog() as workflow_instance_deletion_dialog:
-        with ui.card(align_items='center'):
-            with ui.row(align_items='center').classes('w-full justify-center'):
-                ui.label('Are you sure you want to delete this Workflow Instance?')
-                ui.button('Yes', color='positive', on_click=lambda: handle_workflow_instance_deletion(workflows_page_state))
-                ui.button('Cancel', color='negative', on_click=workflow_instance_deletion_dialog.close)
-
-    workflow_instance_deletion_dialog.open()
+        workflow_instance_deletion_dialog.open()
 
 
 def edit_handover_workflow_model_button_click():
@@ -210,13 +208,17 @@ async def create_empty_workflow_instance(workflow_instance_name: str,
         workflow_instance.step_assignments[step_iri].workflow_step_iri = step_iri
         workflow_instance.step_assignments[step_iri].property_to_follow = crc_prefix.nextStep
 
-    await store_workflow_instance(workflow_instance)
+    is_valid, msg = await is_workflow_instance_definition_valid(app.storage.tab['current_workflow_instance'])
+    if not is_valid:
+        ui.notify(msg, type='negative')
+    else:
+        await store_workflow_instance(workflow_instance)
 
-    # Show them again
-    await show_workflow_model_instances(app.storage.tab['current_workflow_model'].iri,
-                                        workflows_page_state)
+        # Show them again
+        await show_workflow_model_instances(app.storage.tab['current_workflow_model'].iri,
+                                            workflows_page_state)
 
-    ui.notify(f'Workflow Instance {workflow_instance_name} created', color='positive')
+        ui.notify(f'Workflow Instance {workflow_instance_name} created', color='positive')
 
 
 async def populate_workflow_instances_table(workflows_page_state: WorkflowsPageState):

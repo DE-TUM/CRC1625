@@ -10,7 +10,7 @@ from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_
 from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_step_controls import \
     create_workflow_instance_step_controls
 from workflows_validation.CRC_1625_workflows_validator.CRC_1625_workflows_validator import CRC1625WorkflowModelStep, get_creator_user_id, crc_prefix
-from workflows_validation.workflow_instance import overwrite_workflow_instance, get_workflow_instances_of_model
+from workflows_validation.workflow_instance import overwrite_workflow_instance, get_workflow_instances_of_model, is_workflow_instance_definition_valid
 from workflows_validation.workflow_model import read_workflow_model
 from workflows_validation.workflows_validator import WorkflowModel, WorkflowInstance, is_workflow_instance_valid
 
@@ -102,9 +102,14 @@ def handle_return_button(workflow_instance_page_state: WorkflowInstancePageState
                     ui.label('The workflow model has been modified. Save changes and exit?')
 
                     async def save_and_exit_and_close():
-                        await overwrite_workflow_instance(app.storage.tab['current_workflow_instance'])
-                        return_dialog.close()
-                        ui.navigate.to('/workflows')
+                        is_valid, msg = await is_workflow_instance_definition_valid(app.storage.tab['current_workflow_instance'])
+                        if not is_valid:
+                            ui.notify(msg, type='negative')
+                            return_dialog.close()
+                        else:
+                            await overwrite_workflow_instance(app.storage.tab['current_workflow_instance'])
+                            return_dialog.close()
+                            ui.navigate.to('/workflows')
 
                     def navigate_without_saving():
                         return_dialog.close()
@@ -157,13 +162,17 @@ def handle_undo_button(workflow_instance_page_state: WorkflowInstancePageState):
 async def handle_save_button(workflow_instance_page_state: WorkflowInstancePageState):
     if app.storage.tab['demo_mode']:
         ui.notify("You cannot save changes as a demo user", type='negative')
-    if app.storage.tab['user_id'] != get_creator_user_id(app.storage.tab['current_workflow_instance']):
+    elif app.storage.tab['user_id'] != get_creator_user_id(app.storage.tab['current_workflow_instance']):
         ui.notify("You are not the owner of this workflow instance, so you cannot edit it.", type='negative')
     else:
-        await overwrite_workflow_instance(app.storage.tab['current_workflow_instance'])
-        workflow_instance_page_state.changes_are_saved = True
-        workflow_instance_page_state.original_workflow_instance = app.storage.tab['current_workflow_instance']
-        ui.notify("The changes have been saved", type='positive')
+        is_valid, msg = await is_workflow_instance_definition_valid(app.storage.tab['current_workflow_instance'])
+        if not is_valid:
+            ui.notify(msg, type='negative')
+        else:
+            await overwrite_workflow_instance(app.storage.tab['current_workflow_instance'])
+            workflow_instance_page_state.changes_are_saved = True
+            workflow_instance_page_state.original_workflow_instance = app.storage.tab['current_workflow_instance']
+            ui.notify("The changes have been saved", type='positive')
 
 
 async def run_validation(workflow_instance_page_state: WorkflowInstancePageState):

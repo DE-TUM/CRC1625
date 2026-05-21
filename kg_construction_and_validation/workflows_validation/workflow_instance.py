@@ -8,7 +8,7 @@ from datastores.rdf import rdf_datastore_client
 from datastores.rdf.rdf_datastore import WORKFLOWS_GRAPH_IRI, UpdateType
 from workflows_validation.common import BaseWorkflowElement, crc_prefix, base_workflow_element_iri_to_config_key, prefixes, getURIOrString, getURIOrLiteral, \
     rdf_prefix
-from workflows_validation.workflow_model import WorkflowModel
+from workflows_validation.workflow_model import WorkflowModel, read_workflow_model, WorkflowModelStep
 
 module_dir = os.path.dirname(__file__)
 
@@ -136,11 +136,40 @@ async def get_workflow_instances_of_model(workflow_model: WorkflowModel) -> dict
     return workflow_instances
 
 
+async def is_workflow_instance_definition_valid(workflow_instance: WorkflowInstance):
+    workflow_model = await read_workflow_model(workflow_instance.workflow_model_iri)
+
+    def all_step_successors_have_no_overlapping_assigned_entities(current_step: WorkflowModelStep) -> bool:
+        assigned_entities_in_next_steps: list[URIRef] = []
+
+        for next_step_iri in current_step.next_steps:
+            if next_step_iri in workflow_instance.step_assignments:
+                for entity in workflow_instance.step_assignments[next_step_iri].assigned_entities:
+                    assigned_entities_in_next_steps.append(entity)
+        if len(assigned_entities_in_next_steps) != len(set(assigned_entities_in_next_steps)):
+            return False # There are overlapping entities between the successors
+
+        for next_step_iri in current_step.next_steps:
+            if not all_step_successors_have_no_overlapping_assigned_entities(workflow_model.workflow_model_steps[next_step_iri]):
+                return False
+
+        return True
+
+    if not all_step_successors_have_no_overlapping_assigned_entities(workflow_model.workflow_model_steps[workflow_model.initial_step_iri]):
+        return False, "An entity cannot be assigned to two or more consecutive steps in different branches"
+
+    return True, ""
+
+
 async def store_workflow_instance(workflow_instance: WorkflowInstance,
                                   return_file: bool = False) -> str | None:
     """
     Serializes the workflow instance into RDF and stores it
     """
+    valid, msg = await is_workflow_instance_definition_valid(workflow_instance)
+    if not valid:
+        raise ValueError(msg)
+
     g = Graph()
 
     if not workflow_instance.iri:  # The instance is new
@@ -219,6 +248,10 @@ async def overwrite_workflow_instance(workflow_instance: WorkflowInstance):
     """
     Given an (updated) workflow instance, deletes its and stores it again
     """
+    valid, msg = await is_workflow_instance_definition_valid(workflow_instance)
+    if not valid:
+        raise ValueError(msg)
+
     actions = []
     actions.append((await delete_workflow_instance(workflow_instance, return_query=True), UpdateType.query))
     actions.append((await store_workflow_instance(workflow_instance, return_file=True), UpdateType.file_upload))
