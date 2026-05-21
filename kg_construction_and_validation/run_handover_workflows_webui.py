@@ -24,8 +24,6 @@ from handover_workflows_validation_webui.demo_data_loader import is_demo_data_al
 module_dir = os.path.dirname(__file__)
 load_dotenv(os.path.join(module_dir, '.env'))
 
-module_dir = os.path.dirname(__file__)
-
 ASSETS_FOLDER = os.path.join(module_dir, 'handover_workflows_validation_webui/assets/')
 
 async def setup_debug_files(clear_main_graph: bool = False,

@@ -8,6 +8,7 @@ import random
 import sys
 import uuid
 from copy import deepcopy
+from itertools import chain
 
 from rdflib import URIRef, Graph
 
@@ -128,7 +129,7 @@ def test_valid_workflows():
 
         validation_results, steps_with_no_target_node = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True))
 
-        all_steps_conform = all(result.conforms for result in validation_results)
+        all_steps_conform = all(result.conforms for result in list(chain.from_iterable(chain.from_iterable(validation_results.values()))))
         if all_steps_conform and len(steps_with_no_target_node) == 0:
             logging.info(f"Valid workflow test of {n_steps} steps passed")
         else:
@@ -234,23 +235,25 @@ def test_invalid_workflows():
             Trace: {validation_results}
             """)
 
-        for validation_result in validation_results:
-            if validation_result.step_to_validate.paired_step.workflow_model_step.iri != invalid_workflow_model_step_iri:
-                if not validation_result.conforms:
-                    return ValueError(f"""
-                    A workflow model step expected to be valid did not conform
-                    Workflow model step invalidated in the test: {handover_definition_idx_to_invalidate}
-                    Step validation result: {validation_result}
-                    Trace: {validation_results}
-                    """)
-            else:
-                if validation_result.conforms:
-                    return ValueError(f"""
-                    A workflow model step expected to be invalid did conform
-                    Workflow model step invalidated in the test: {handover_definition_idx_to_invalidate}
-                    Step validation result: {validation_result}
-                    Trace: {validation_results}
-                    """)
+        for entity_iri, validation_paths in validation_results.items():
+            for validation_path in validation_paths:
+                for validation_result in validation_path:
+                    if validation_result.validation_job.paired_step.workflow_model_step.iri != invalid_workflow_model_step_iri:
+                        if not validation_result.conforms:
+                            return ValueError(f"""
+                            A workflow model step expected to be valid did not conform
+                            Workflow model step invalidated in the test: {handover_definition_idx_to_invalidate}
+                            Step validation result: {validation_result}
+                            Trace: {validation_results}
+                            """)
+                    else:
+                        if validation_result.conforms:
+                            return ValueError(f"""
+                            A workflow model step expected to be invalid did conform
+                            Workflow model step invalidated in the test: {handover_definition_idx_to_invalidate}
+                            Step validation result: {validation_result}
+                            Trace: {validation_results}
+                            """)
 
         logging.info(f"Workflow test with invalid data of {n_steps} steps passed")
 

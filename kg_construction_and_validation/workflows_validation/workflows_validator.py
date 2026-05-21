@@ -17,47 +17,44 @@ set up SHACL shapes and key-value replacements in a programmatic way. An example
 on `CRC_1625_workflows_validator.py`
 """
 
-import asyncio
 import os
-from concurrent.futures import ProcessPoolExecutor
+import urllib.parse
+from concurrent.futures import ProcessPoolExecutor, Future
 from dataclasses import dataclass, field
 from enum import Enum
+from itertools import chain
 
 from jinja2 import Template
 from pyshacl import validate
-from rdflib import Graph, URIRef, Namespace, Dataset
+from rdflib import Graph, URIRef, Dataset
 from rdflib.plugins.stores.sparqlstore import SPARQLStore
 
 from datastores.rdf import rdf_datastore_client
 from datastores.rdf.rdf_datastore_client import RDF_DATASTORE_API_ENDPOINT
-from workflows_validation.common import prefixes
+from workflows_validation.common import prefixes, crc_prefix
 from workflows_validation.workflow_instance import WorkflowInstance
 from workflows_validation.workflow_model import WorkflowModelStep, WorkflowModel
 
 module_dir = os.path.dirname(__file__)
 
 get_next_target_node_query = prefixes + open(os.path.join(module_dir, 'queries/get_next_target_node.sparql'), 'r').read()
+parse_validation_report_query = prefixes + open(os.path.join(module_dir, 'queries/parse_validation_report.sparql'), 'r').read()
+workflow_shape = open(os.path.join(module_dir, 'shapes/workflow_shape.shacl'), 'r').read()
 
 @dataclass
 class PairedStep:
     """
-    Convenience class for a Workflow model step and
-    the entity->target nodes for which it is to be validated
+    Convenience class for a Workflow model step and the entity->target nodes for which it is to be validated
     """
     workflow_model_step: WorkflowModelStep = field(default_factory=WorkflowModelStep)
     entity_to_target_node_assignments: dict[URIRef, list[URIRef]] = field(default_factory=dict)
 
 
 @dataclass
-class EvaluationTrace:
-    previous_paired_steps: list[PairedStep] = field(default_factory=list)
-
-
-@dataclass
-class StepToValidate:
+class ValidationJob:
     """
-    Convenience class for a step and its
-    generated SHACL shape
+    Convenience class containing a validation task for a step, its assigned entity and specific target node,
+    and the generated SHACL shape
     """
     paired_step: PairedStep = field(default_factory=PairedStep)
     entity: URIRef = ""
@@ -66,11 +63,9 @@ class StepToValidate:
 
 
 @dataclass
-class StepWithMissingData:
+class ValidationJobWithMissingData:
     """
-    Convenience class for a step and
-    the entity for which it could not
-    fetch a target node for
+    Convenience class for a validation job and the entity for which we could not fetch a target node for
     """
     workflow_model_step: WorkflowModelStep = field(default_factory=WorkflowModelStep)
     entity: URIRef = ""
@@ -78,6 +73,9 @@ class StepWithMissingData:
 
 async def get_next_target_nodes(current_target_node: URIRef,
                                 successor_property: URIRef) -> list[URIRef]:
+    """
+    Query for the successor node(s) of a given target node, using the given property
+    """
     next_target_nodes: list[URIRef] = list()
 
     substitutions = {
@@ -91,20 +89,44 @@ async def get_next_target_nodes(current_target_node: URIRef,
     return next_target_nodes
 
 
+class ValidationStatus(Enum):
+    """
+    Convenience class to indicate the validation status of a workflow as a whole
+    """
+    Valid = 1
+    Warning = 2
+    Error = 3
+
+    @property
+    def description(self):
+        descriptions = {
+            ValidationStatus.Valid: "All steps were validated successfully.",
+            ValidationStatus.Warning: "All steps were validated successfully, but some steps had no data to be validated against.",
+            ValidationStatus.Error: "One or more steps failed validation."
+        }
+        return descriptions[self]
+
+
 def fill_SHACL_template(workflow_model_step: WorkflowModelStep,
                         target_node: URIRef) -> str:
+    """
+    Fills the SHACL template of the given workflow model step via Jinja,
+    using its substitutions and details about its matched target node
+    """
     template = Template(workflow_model_step.SHACL_shape)
-    substitutions = {"target_node": str(target_node)}
+    # We use the target node to specify the IRI of its corresponding node shape
+    substitutions = {"node_shape_iri": crc_prefix[urllib.parse.quote(f"step_{workflow_model_step.name}_node_shape_for_{target_node}")]}
     substitutions.update(workflow_model_step.step_templates)
+
     return template.render(substitutions)
 
 
 async def generate_SHACL_shapes_for_workflow(workflow_model: WorkflowModel,
-                                             workflow_instance: WorkflowInstance) -> tuple[list[StepToValidate], list[StepWithMissingData]]:
+                                             workflow_instance: WorkflowInstance) -> tuple[dict[URIRef, list[ValidationJob]], list[ValidationJobWithMissingData]]:
     """
-    Returns a list of steps to validate for the workflow model, following the target node assignments of its workflow instance,
-    and a list of references to workflow model steps for which a target node did not have a corresponding successor for it
-    (i.e., more steps in the workflow model than entities in the data workflow).
+    Returns a list of steps to validate for the workflow model, indexed by the workflow model steps, following the target node
+    assignments of its workflow instance, and a list of references to workflow model steps for which a target node did not have
+    a corresponding successor for it (i.e., more steps in the workflow model than entities in the data workflow).
 
     It will iteratively follow the steps chain and generating as many shapes for a step as there are entities assigned to it,
     warning for loops.
@@ -118,10 +140,10 @@ async def generate_SHACL_shapes_for_workflow(workflow_model: WorkflowModel,
 
     # Nodes to visit, iteratively expanded by the successors of the current step being checked
     visitor_stack: list[tuple[PairedStep, PairedStep | None]] = list()
-    # Individual validation tasks to be run
-    validation_queue: list[StepToValidate] = list()
-    # References to the first step for which there was no target node from a given entity assigned to it
-    steps_with_missing_data: list[StepWithMissingData] = list()
+    # Individual validation jobs to be run, indexed by workflow model step IRIs
+    validation_queue: dict[URIRef, list[ValidationJob]] = dict()
+    # References to the steps for which there was no target node from a given entity assigned to it
+    jobs_with_missing_data: list[ValidationJobWithMissingData] = list()
 
     # Start validating from the initial step, for every entity that is assigned to it
     initial_step = workflow_model.workflow_model_steps[workflow_model.initial_step_iri]
@@ -138,16 +160,18 @@ async def generate_SHACL_shapes_for_workflow(workflow_model: WorkflowModel,
 
     while len(visitor_stack) > 0:
         current_paired_step, previous_paired_step = visitor_stack.pop()
-        if current_paired_step.workflow_model_step.iri in workflow_instance.step_assignments:  # Otherwise, don't do anything for this step
+        if current_paired_step.workflow_model_step.iri in workflow_instance.step_assignments:  # Otherwise, there are no assignments for this workflow model step
             for entity in workflow_instance.step_assignments[current_paired_step.workflow_model_step.iri].assigned_entities:
                 if previous_paired_step is None or entity not in previous_paired_step.entity_to_target_node_assignments:
                     # It's the initial step or a new entity, so we must target the entity itself
-                    step_to_validate = StepToValidate()
+                    step_to_validate = ValidationJob()
                     step_to_validate.entity = entity
                     step_to_validate.target_node = entity
                     step_to_validate.paired_step = current_paired_step
                     step_to_validate.shacl_shape = fill_SHACL_template(current_paired_step.workflow_model_step, entity)
-                    validation_queue.append(step_to_validate)
+                    if step_to_validate.paired_step.workflow_model_step.iri not in validation_queue:
+                        validation_queue[step_to_validate.paired_step.workflow_model_step.iri] = list()
+                    validation_queue[step_to_validate.paired_step.workflow_model_step.iri].append(step_to_validate)
 
                     # Overwrite the target nodes for the next iteration, if there are any steps after this one
                     current_paired_step.entity_to_target_node_assignments[entity] = [entity]
@@ -160,20 +184,16 @@ async def generate_SHACL_shapes_for_workflow(workflow_model: WorkflowModel,
                             next_target_nodes = await get_next_target_nodes(target_node,
                                                                             workflow_instance.step_assignments[
                                                                                 current_paired_step.workflow_model_step.iri].property_to_follow)
-                            if len(next_target_nodes) == 0:
-                                # There should be new target nodes, but we couldn't find any. We log it anyways as a step with missing data
-                                step_with_missing_data = StepWithMissingData()
-                                step_with_missing_data.entity = entity
-                                step_with_missing_data.workflow_model_step = current_paired_step.workflow_model_step
-                                steps_with_missing_data.append(step_with_missing_data)
-                            else:
-                                for next_target_node in next_target_nodes:
-                                    step_to_validate = StepToValidate()
-                                    step_to_validate.entity = entity
-                                    step_to_validate.target_node = next_target_node
-                                    step_to_validate.paired_step = current_paired_step
-                                    step_to_validate.shacl_shape = fill_SHACL_template(current_paired_step.workflow_model_step, next_target_node)
-                                    validation_queue.append(step_to_validate)
+                            # If there are no next target nodes, it's a workflow model step with no matching data
+                            for next_target_node in next_target_nodes:
+                                step_to_validate = ValidationJob()
+                                step_to_validate.entity = entity
+                                step_to_validate.target_node = next_target_node
+                                step_to_validate.paired_step = current_paired_step
+                                step_to_validate.shacl_shape = fill_SHACL_template(current_paired_step.workflow_model_step, next_target_node)
+                                if step_to_validate.paired_step.workflow_model_step.iri not in validation_queue:
+                                    validation_queue[step_to_validate.paired_step.workflow_model_step.iri] = list()
+                                validation_queue[step_to_validate.paired_step.workflow_model_step.iri].append(step_to_validate)
 
                             # Overwrite the target nodes for the next iteration, if there are any steps after this one
                             current_paired_step.entity_to_target_node_assignments[entity] = next_target_nodes
@@ -184,20 +204,102 @@ async def generate_SHACL_shapes_for_workflow(workflow_model: WorkflowModel,
             next_paired_step.workflow_model_step = workflow_model.workflow_model_steps[successor_model_step_iri]
             visitor_stack.append((next_paired_step, current_paired_step))
 
-    return validation_queue, steps_with_missing_data
+    # Check which entities couldn't be matched, and store references
+    # for every workflow model and unmatched entity pair
+    for workflow_model_step_iri, step_assignment in workflow_instance.step_assignments.items():
+        if workflow_model_step_iri in validation_queue:
+            matched_entities = [job.entity for job in validation_queue[workflow_model_step_iri]]
+            for assigned_entity_iri in step_assignment.assigned_entities:
+                if assigned_entity_iri not in matched_entities: # The entity is missing
+                    validation_job_with_missing_data = ValidationJobWithMissingData()
+                    validation_job_with_missing_data.workflow_model_step = workflow_model.workflow_model_steps[workflow_model_step_iri]
+                    validation_job_with_missing_data.entity = assigned_entity_iri
+                    jobs_with_missing_data.append(validation_job_with_missing_data)
+        else: # If it has any assigned entities, all of them are missing
+            for assigned_entity_iri in step_assignment.assigned_entities:
+                validation_job_with_missing_data = ValidationJobWithMissingData()
+                validation_job_with_missing_data.workflow_model_step = workflow_model.workflow_model_steps[workflow_model_step_iri]
+                validation_job_with_missing_data.entity = assigned_entity_iri
+                jobs_with_missing_data.append(validation_job_with_missing_data)
+
+    return validation_queue, jobs_with_missing_data
 
 
 @dataclass
 class ValidationResult:
-    step_to_validate: StepToValidate = field(default_factory=StepToValidate)
+    """
+    Complete trace of the details and execution of a validation job
+    including the validation report and pySHACL's output
+    """
+    validation_job: ValidationJob = None
     conforms: bool = False
+    validation_report: Graph = None
     pyshacl_output: str = ""
 
 
-def validate_workflow_model_step(step_to_validate: StepToValidate, results: list[ValidationResult]):
-    shacl_graph = Graph()
-    shacl_graph.parse(data=step_to_validate.shacl_shape, format="turtle")
+def parse_validation_report(workflow_model: WorkflowModel,
+                            path: list[ValidationJob],
+                            entity_to_validate: URIRef,
+                            validation_report: Graph,
+                            workflow_shape_graph: Graph) -> list[ValidationResult]:
+    """
+    Breaks down the validation_report from running a workflow shape into individual validation results
+    for every violation
+    """
+    result = (validation_report + workflow_shape_graph).query(parse_validation_report_query)
 
+    validation_results: list[ValidationResult] = list()
+    for violation in result:
+        validation_job = ValidationJob()
+        paired_step = PairedStep()
+        paired_step.workflow_model_step = workflow_model.workflow_model_steps[URIRef(violation.workflow_model_step)]
+        validation_job.paired_step = paired_step
+        validation_job.shacl_shape = workflow_shape_graph.serialize(format="turtle")
+        validation_job.entity = entity_to_validate
+        validation_job.target_node = URIRef(violation.target_node)
+
+        validation_result = ValidationResult()
+        validation_result.validation_job = validation_job
+        validation_result.validation_report = validation_report
+        validation_result.conforms = False
+        validation_result.pyshacl_output = str(violation.message)
+
+        validation_results.append(validation_result)
+
+    # The rest of the workflow model steps *in the path* are valid
+    step_iris_with_errors = set(r.validation_job.paired_step.workflow_model_step.iri for r in validation_results)
+    for validation_job in path:
+        step = validation_job.paired_step.workflow_model_step
+
+        if step.iri not in step_iris_with_errors:
+            validation_job = ValidationJob()
+            paired_step = PairedStep()
+            paired_step.workflow_model_step = step
+            validation_job.paired_step = paired_step
+            validation_job.shacl_shape = workflow_shape_graph.serialize(format="turtle")
+            validation_job.entity = entity_to_validate
+            # We cannot get the reference for the target node when validating with a workflow shape
+            #validation_job.target_node = URIRef(row.target_node)
+
+            validation_result = ValidationResult()
+            validation_result.validation_job = validation_job
+            validation_result.validation_report = Graph()
+            validation_result.conforms = True
+            validation_result.pyshacl_output = ""
+
+            validation_results.append(validation_result)
+
+    return validation_results
+
+
+def validate_workflow_shape(workflow_shape: str) -> Graph:
+    """
+    Runs the given SHACL shape against pySHACL and returns the validation report
+    """
+    shacl_graph = Graph()
+    shacl_graph.parse(data=workflow_shape, format="turtle")
+
+    # We intercept and "fix" the queries launched by pySHACL to avoid making Virtuoso explode
     store = SPARQLStore(
         query_endpoint=f"{RDF_DATASTORE_API_ENDPOINT}/launch_query_validation",
         method="POST"
@@ -205,80 +307,168 @@ def validate_workflow_model_step(step_to_validate: StepToValidate, results: list
 
     intercepted_data_graph = Dataset(store, default_union=True)
 
-    conforms, results_graph, pyshacl_output = validate(data_graph=intercepted_data_graph,
-                                                       shacl_graph=shacl_graph,
-                                                       inference=None,
-                                                       abort_on_first=False,
-                                                       allow_infos=False,
-                                                       allow_warnings=False,
-                                                       meta_shacl=False,
-                                                       advanced=False,
-                                                       js=False,
-                                                       sparql_mode=True,
-                                                       debug=False)
-    validation_result = ValidationResult()
-    validation_result.step_to_validate = step_to_validate
-    validation_result.conforms = conforms
-    validation_result.pyshacl_output = pyshacl_output
-    results.append(validation_result)
+    _, validation_report, _ = validate(data_graph=intercepted_data_graph,
+                                       shacl_graph=shacl_graph,
+                                       inference=None,
+                                       abort_on_first=False,
+                                       allow_infos=False,
+                                       allow_warnings=False,
+                                       meta_shacl=False,
+                                       advanced=False,
+                                       js=False,
+                                       sparql_mode=True,
+                                       debug=False)
+    return validation_report
 
 
-def validation_task_wrapper(step_to_validate: StepToValidate) -> ValidationResult:
-    local_results: list[ValidationResult] = []
-
-    validate_workflow_model_step(step_to_validate,
-                                 local_results)
-
-    return local_results[0]
-
-
-class ValidationStatus(Enum):
-    Valid = 1
-    Warning = 2
-    Error = 3
-
-    @property
-    def description(self):
-        descriptions = {
-            ValidationStatus.Valid: "All steps were validated successfully.",
-            ValidationStatus.Warning: "All steps were validated successfully, but some steps had no data to be validated against.",
-            ValidationStatus.Error: "One or more steps failed validation."
-        }
-        return descriptions[self]
+def run_validation_task(workflow_shape_for_path: str,
+                        workflow_model: WorkflowModel,
+                        path: list[ValidationJob],
+                        entity_iri: URIRef):
+    """
+    Validation task wrapper for the concurrent process pool
+    """
+    return parse_validation_report(
+        workflow_model,
+        path,
+        entity_iri,
+        validate_workflow_shape(workflow_shape_for_path),
+        Graph().parse(data=workflow_shape_for_path)
+    )
 
 
-async def is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=False) -> tuple[
-    ValidationStatus | list[ValidationResult], list[StepWithMissingData]]:
+def generate_validation_paths(workflow_model: WorkflowModel,
+                              validation_jobs: dict[URIRef, list[ValidationJob]]) -> dict[URIRef, list[list[ValidationJob]]]:
+    """
+    Given the validation jobs generated by `generate_SHACL_shapes_for_workflow`, breaks them down across paths for each entity that is assigned to it.
+    Each validation path corresponds to a sequence of consecutive workflow model steps paired against nodes in the same entity's data
+    workflow, and contains one ValidationJob for every pairing in the path
+    """
+    validation_paths: dict[URIRef, list[list[ValidationJob]]] = dict()
+
+    if workflow_model.initial_step_iri in validation_jobs:
+        initial_step_iri_to_validate = workflow_model.initial_step_iri
+    else:
+        # Look for the first step to validate by doing a DFS traversal
+        # (maybe we should forbid from having the initial step not assigned to any object)
+        def get_initial_step_iri_to_validate(current_iri: URIRef) -> URIRef | None:
+            if current_iri in validation_jobs:
+                return current_iri
+
+            step_data = workflow_model.workflow_model_steps.get(current_iri)
+            if step_data:
+                for next_step_iri in step_data.next_steps:
+                    found_step = get_initial_step_iri_to_validate(next_step_iri)
+                    if found_step:
+                        return found_step
+            return None
+
+        initial_step_iri_to_validate = get_initial_step_iri_to_validate(workflow_model.initial_step_iri)
+
+    if initial_step_iri_to_validate is not None:
+        visitor_stack: list[tuple[URIRef | None, URIRef]] = [(None, initial_step_iri_to_validate)]
+
+        while len(visitor_stack) > 0:
+            previous_step_iri_to_validate, current_step_iri_to_validate = visitor_stack.pop()
+
+            if previous_step_iri_to_validate is None:
+                for job in validation_jobs[current_step_iri_to_validate]:
+                    validation_paths[job.entity] = [[job]]
+            else:
+                if current_step_iri_to_validate in validation_jobs:
+                    for job in validation_jobs[current_step_iri_to_validate]:
+                        if job.entity in [j.entity for j in validation_jobs[previous_step_iri_to_validate]]:
+                            # If the entity was in the previous step, we add it to the latest path
+                            validation_paths[job.entity][-1].append(job)
+                        else:
+                            # If it was not in the previous step, it is a new path
+                            if job.entity not in validation_paths:
+                                validation_paths[job.entity] = []
+                            validation_paths[job.entity].append([job])
+
+            for next_step_iri in workflow_model.workflow_model_steps[current_step_iri_to_validate].next_steps:
+                visitor_stack.append((current_step_iri_to_validate, next_step_iri))
+
+    return validation_paths
+
+
+async def is_workflow_instance_valid(workflow_model: WorkflowModel,
+                                     workflow_instance: WorkflowInstance,
+                                     return_individual_results=False) -> tuple[ValidationStatus | dict[URIRef, list[list[ValidationResult]]], list[ValidationJobWithMissingData]]:
     """
     Returns a ValidationStatus of for the provided workflow model against its instance's assignments
 
-    `return_individual_results` can be set to `True` to instead return individual results for every workflow model step - entity - target node
-    combination that has been validated
+    `return_individual_results` can be set to `True` to instead return a full trace of the validation jobs
+    executed, as a dict of entity -> list of validation path traces executed for the entity. Each validation
+    path corresponds to a sequence of consecutive workflow model steps paired against nodes in the same entity's data
+    workflow, and contains one ValidationResult for every pairing. Note: Normally, only one validation path should
+    appear, unless the entity has been assigned to non-consecutive workflow model steps for whichever reason
 
-    The validation will be split into individual jobs run in a process pool
+    The validation is split into individual jobs run in a process pool
     """
-    steps_to_validate, first_steps_with_no_target_node = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance)
-
+    validation_jobs, first_steps_with_no_target_node = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance)
     with ProcessPoolExecutor() as executor:
-        tasks = []
+        # Get
+        validation_paths: dict[URIRef, list[list[ValidationJob]]] = generate_validation_paths(workflow_model, validation_jobs)
+        validation_results: dict[URIRef, list[list[ValidationResult]]] = dict()
 
-        for step_to_validate in steps_to_validate:
-            task = asyncio.get_running_loop().run_in_executor(
-                executor,
-                validation_task_wrapper,
-                step_to_validate
-            )
-            tasks.append(task)
+        futures_map: dict[Future, URIRef] = {}
 
-        results: list[ValidationResult] = await asyncio.gather(*tasks)
+        for entity_iri, jobs in validation_paths.items():
+            validation_results[entity_iri] = []
+
+            for path in jobs:
+                # Every path is validated with a "workflow shape", containing at least one node shape
+                # for the initial node in the data workflow, and 0 or more property shapes for the subsequent
+                # nodes in the data workflow
+                #
+                # It is templated via Jinja as in the case of the individual workflow model steps:
+                substitutions = {
+                    # Initial target node to which the workflow's SHACL shape will be assigned
+                    # (i.e., the entity itself that marks the beginning of the data workflow)
+                    #
+                    # The rest of the nodes in the data workflow are validated via sh:property
+                    # constraints
+                    #
+                    # Both the initial entity and all other nodes as validated as node shape
+                    # constraints, filled by their corresponding workflow model steps
+                    "entity_iri": entity_iri,
+                    # Stored as metadata in thr SHACL shape via `crc:correspondingTargetNode`
+                    # and `correspondingWorkflowModelStep` respectively, to be retrieved later
+                    # when parsing the validation report
+                    "target_node_iris": [j.target_node for j in path],
+                    "workflow_model_step_iris": [j.paired_step.workflow_model_step.iri for j in path],
+                    # Ordered list of paths to follow, indicated by the workflow model steps. They will be used to
+                    # build the property shapes
+                    "paths": [workflow_instance.step_assignments[j.paired_step.workflow_model_step.iri].property_to_follow for j in path],
+                    # Ordered list of (filled) workflow model step shapes and the IRIs to use in the workflow's shape
+                    "node_shapes": [j.shacl_shape for j in path],
+                    "node_shape_iris" : [crc_prefix[urllib.parse.quote(f"step_{j.paired_step.workflow_model_step.name}_node_shape_for_{j.target_node}")] for j in path],
+                }
+                future = executor.submit(
+                    run_validation_task,
+                    Template(workflow_shape).render(substitutions),
+                    workflow_model,
+                    path,
+                    entity_iri
+                )
+                futures_map[future] = entity_iri
+
+    for future in futures_map:
+        entity_iri = futures_map[future]
+        if entity_iri not in validation_results:
+            validation_results[entity_iri] = []
+
+        validation_results[entity_iri].append(future.result())
 
     if return_individual_results:
-        return results, first_steps_with_no_target_node
-
-    all_steps_conform = all(result.conforms for result in results)
-    if all_steps_conform and len(first_steps_with_no_target_node) == 0:
-        return ValidationStatus.Valid, first_steps_with_no_target_node
-    elif all_steps_conform:
-        return ValidationStatus.Warning, first_steps_with_no_target_node
+        return validation_results, first_steps_with_no_target_node
     else:
-        return ValidationStatus.Error, first_steps_with_no_target_node
+        flattened_validation_results: list[ValidationResult] = list(chain.from_iterable(chain.from_iterable(validation_results.values())))
+        all_steps_conform = all(result.conforms for result in flattened_validation_results)
+        if all_steps_conform and len(first_steps_with_no_target_node) == 0:
+            return ValidationStatus.Valid, first_steps_with_no_target_node
+        elif all_steps_conform:
+            return ValidationStatus.Warning, first_steps_with_no_target_node
+        else:
+            return ValidationStatus.Error, first_steps_with_no_target_node

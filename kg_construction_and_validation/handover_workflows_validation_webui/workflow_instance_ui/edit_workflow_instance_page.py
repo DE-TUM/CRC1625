@@ -174,28 +174,32 @@ async def run_validation(workflow_instance_page_state: WorkflowInstancePageState
                                                                                      app.storage.tab['current_workflow_instance'],
                                                                                      return_individual_results=True)
 
+    # TODO we should distinguish between objects
+    # TODO we can also show the individual validation path breakdowns across objects
     colored_steps = set()
-    for validation_result in validation_results:
-        step_name = validation_result.step_to_validate.paired_step.workflow_model_step.name
-        # TODO we can additionally distinguish between objects
-        # object_id = validation_result.step_to_validate.step_information.object_id
-        if validation_result.conforms:
-            workflow_instance_page_state.graph_component.set_node_as_valid(step_name, "This step is valid")
-        else:
-            workflow_instance_page_state.graph_component.set_node_as_invalid(step_name, validation_result.pyshacl_output)
+    for entity_iri, validation_paths in validation_results.items():
+        for validation_path in validation_paths:
+            for validation_result in validation_path:
+                step_name = validation_result.validation_job.paired_step.workflow_model_step.name
+                # object_id = validation_result.step_to_validate.step_information.object_id
+                if validation_result.conforms:
+                    workflow_instance_page_state.graph_component.set_node_as_valid(step_name, "This step is valid")
+                else:
+                    workflow_instance_page_state.graph_component.set_node_as_invalid(step_name, validation_result.pyshacl_output)
 
-        colored_steps.add(step_name)
+                colored_steps.add(step_name)
 
     for step_with_no_target_node in steps_with_no_target_node:
         workflow_instance_page_state.graph_component.set_node_as_missing(step_with_no_target_node.workflow_model_step.name,
+                                                                         # TODO show the actual ML / Sample ID instead of its first handover group
                                                                          f"ML / Sample with object ID {step_with_no_target_node.entity} had no matching handover group for this step")
         colored_steps.add(step_with_no_target_node.workflow_model_step.name)
 
-    # Same as above, with less detailed tooltips
+    # All remaining workflow model steps did not have any object assigned to them
     for step in app.storage.tab['current_workflow_model'].workflow_model_steps.values():
         if step.name not in colored_steps:
             workflow_instance_page_state.graph_component.set_node_as_not_checked(step.name,
-                                                                                 "No data was available to check this step")
+                                                                                 "This step was not assigned to any ML/Sample")
 
 
 @ui.page('/workflows/edit_workflow_instance/{workflow_model_uuid}/{workflow_instance_uuid}')

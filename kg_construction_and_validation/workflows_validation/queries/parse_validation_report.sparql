@@ -1,0 +1,12 @@
+SELECT DISTINCT ?target_node ?workflow_model_step ?message WHERE {
+    ?vr a sh:ValidationResult.
+
+    ?vr sh:sourceShape ?source_shape.
+    ?source_shape crc:correspondingTargetNode ?target_node.
+    ?source_shape crc:correspondingWorkflowModelStep ?workflow_model_step.
+
+    OPTIONAL {
+        ?vr sh:detail ?d.
+        ?d sh:resultMessage ?message.
+    }
+}

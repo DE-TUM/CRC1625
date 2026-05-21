@@ -1,0 +1,24 @@
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix crc:           <https://crc1625.mdi.ruhr-uni-bochum.de/> .
+
+crc:mainShape
+    a sh:NodeShape ;
+    sh:targetNode <{{ entity_iri }}> ;
+
+    sh:node <{{ node_shape_iris[0] }}> ;
+    crc:correspondingTargetNode <{{ target_node_iris[0] }}> ;
+    crc:correspondingWorkflowModelStep <{{ workflow_model_step_iris[0] }}> ;
+
+    {% for i in range(1, paths|length) %}
+    sh:property [
+        sh:path {% if paths[:i]|length == 1 %}<{{ paths[0] }}>{% else %}({% for p in paths[:i] %}<{{ p }}>{% if not loop.last %} {% endif %}{% endfor %}){% endif %};
+        sh:minCount 1;
+        sh:node <{{ node_shape_iris[i] }}> ;
+        crc:correspondingTargetNode <{{ target_node_iris[i] }}> ;
+        crc:correspondingWorkflowModelStep <{{ workflow_model_step_iris[i] }}>
+    ]{{ "." if loop.last else ";" }}
+    {% endfor %}
+
+{% for node_shape in node_shapes %}
+    {{ node_shape }}
+{% endfor %}
