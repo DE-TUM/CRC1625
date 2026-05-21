@@ -1,4 +1,3 @@
-import os
 from dataclasses import dataclass, field
 
 from nicegui import app
@@ -6,7 +5,6 @@ from nicegui.elements.column import Column
 from nicegui.elements.input import Input
 from rdflib import URIRef
 
-from datastores.rdf import rdf_datastore_client
 from handover_workflows_validation_webui.common_functions import get_sample_object_id_of_handover_group_iri, get_handover_group_iri_of_sample_object_id
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent
 from workflows_validation.workflows_validator import WorkflowInstance

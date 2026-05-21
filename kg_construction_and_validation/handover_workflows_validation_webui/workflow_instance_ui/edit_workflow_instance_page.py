@@ -12,7 +12,8 @@ from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_
 from workflows_validation.CRC_1625_workflows_validator.CRC_1625_workflows_validator import CRC1625WorkflowModelStep, get_creator_user_id, crc_prefix
 from workflows_validation.workflow_instance import overwrite_workflow_instance, get_workflow_instances_of_model, is_workflow_instance_definition_valid
 from workflows_validation.workflow_model import read_workflow_model
-from workflows_validation.workflows_validator import WorkflowModel, WorkflowInstance, is_workflow_instance_valid
+from workflows_validation.workflows_validator import WorkflowModel, WorkflowInstance, is_workflow_instance_valid, generate_SHACL_shapes_for_workflow, \
+    generate_validation_paths, ValidationJob
 
 
 def workflow_model_and_instance_to_nodes_and_edges(workflow_model: WorkflowModel,
@@ -94,6 +95,18 @@ def handle_workflow_instance_name_button(new_name: str):
     app.storage.tab['current_workflow_instance'].name = new_name
 
 
+async def check_for_objects_with_multiple_paths(workflow_model, workflow_instance):
+    validation_jobs, _ = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance)
+    validation_paths: dict[URIRef, list[list[ValidationJob]]] = generate_validation_paths(workflow_model, validation_jobs)
+    for entity_iri, paths in validation_paths.items():
+        if len(paths) > 1:
+            ui.notification("A Materials Library or Sample is assigned to non-consecutive workflow steps. Are you sure this is intended?",
+                            type='warning',
+                            timeout=None,
+                            close_button=True)
+            return
+
+
 def handle_return_button(workflow_instance_page_state: WorkflowInstancePageState):
     if not workflow_instance_page_state.changes_are_saved and not app.storage.tab['demo_mode']:
         with ui.dialog() as return_dialog:
@@ -104,9 +117,14 @@ def handle_return_button(workflow_instance_page_state: WorkflowInstancePageState
                     async def save_and_exit_and_close():
                         is_valid, msg = await is_workflow_instance_definition_valid(app.storage.tab['current_workflow_instance'])
                         if not is_valid:
-                            ui.notify(msg, type='negative')
+                            ui.notification(msg,
+                                            type='negative',
+                                            timeout=None,
+                                            close_button=True)
                             return_dialog.close()
                         else:
+                            await check_for_objects_with_multiple_paths(app.storage.tab['current_workflow_model'],
+                                                                        app.storage.tab['current_workflow_instance'])
                             await overwrite_workflow_instance(app.storage.tab['current_workflow_instance'])
                             return_dialog.close()
                             ui.navigate.to('/workflows')
@@ -167,8 +185,13 @@ async def handle_save_button(workflow_instance_page_state: WorkflowInstancePageS
     else:
         is_valid, msg = await is_workflow_instance_definition_valid(app.storage.tab['current_workflow_instance'])
         if not is_valid:
-            ui.notify(msg, type='negative')
+            ui.notification(msg,
+                            type='negative',
+                            timeout=None,
+                            close_button=True)
         else:
+            await check_for_objects_with_multiple_paths(app.storage.tab['current_workflow_model'],
+                                                        app.storage.tab['current_workflow_instance'])
             await overwrite_workflow_instance(app.storage.tab['current_workflow_instance'])
             workflow_instance_page_state.changes_are_saved = True
             workflow_instance_page_state.original_workflow_instance = app.storage.tab['current_workflow_instance']

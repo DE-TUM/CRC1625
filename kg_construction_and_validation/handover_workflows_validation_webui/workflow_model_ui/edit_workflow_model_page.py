@@ -88,7 +88,10 @@ async def handle_return_button(workflow_model_page_state: WorkflowModelPageState
                                                            workflow_model_page_state.original_workflow_model)
                             ui.navigate.to('/workflows')
                         else:
-                            ui.notify("You must select an initial step first and have no unconnected steps if there are multiple of them", type='negative')
+                            ui.notification("You must select an initial step first and have no unconnected steps if there are multiple of them",
+                                            type='negative',
+                                            timeout=None,
+                                            close_button=True)
 
                     async def navigate_without_saving():
                         return_dialog.close()
