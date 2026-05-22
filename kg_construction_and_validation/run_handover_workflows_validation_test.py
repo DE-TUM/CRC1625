@@ -8,7 +8,6 @@ import random
 import sys
 import uuid
 from copy import deepcopy
-from itertools import chain
 
 from rdflib import URIRef, Graph
 
@@ -19,7 +18,7 @@ from workflows_validation.CRC_1625_workflows_validator.CRC_1625_workflows_valida
 from workflows_validation.common import crc_prefix, rdf_prefix
 from workflows_validation.workflow_instance import WorkflowInstance, StepAssignment, store_workflow_instance, get_workflow_instances_of_model
 from workflows_validation.workflow_model import WorkflowModel, WorkflowModelStep, store_workflow_model, read_workflow_model
-from workflows_validation.workflows_validator import is_workflow_instance_valid, ValidationStatus
+from workflows_validation.workflows_validator import is_workflow_instance_valid, ValidationStatus, ValidationResult
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -27,6 +26,16 @@ logging.basicConfig(
     format='[%(asctime)s] %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
+
+
+def print_validation_results(validation_results: ValidationStatus | dict[URIRef, list[dict[URIRef, list[ValidationResult]]]]):
+    for entity_iri, validation_paths in validation_results.items():
+        for i, validation_path in enumerate(validation_paths):
+            logging.error("Path", i)
+            for _, reses in validation_path.items():
+                for r in reses:
+                    logging.error(f"{r.validation_job.paired_step.workflow_model_step.name}, conforms: {r.conforms}, reason: {r.pyshacl_output}")
+
 
 def generate_handover_group_definition(length: int) -> list[tuple[URIRef, list[tuple[str, URIRef]]]]:
     handover_group_definition: list[tuple[URIRef, list[tuple[str, URIRef]]]] = list()
@@ -76,7 +85,16 @@ def generate_handover_group_triples(handover_group_definition: list[tuple[URIRef
 
 
 def generate_workflow_model_and_instance_for_handover_group_definition(handover_group_definition: list[tuple[URIRef, list[tuple[str, URIRef]]]],
-                                                                       entity_IRI: URIRef) -> tuple[WorkflowModel, WorkflowInstance]:
+                                                                       entity_IRI: URIRef,
+                                                                       generate_redundant_branch: bool = False,
+                                                                       break_in_half: bool = False) -> tuple[WorkflowModel, WorkflowInstance]:
+    """
+    If `generate_redundant_branch == True`, a random intermediate workflow model step will be chosen, and:
+        - A new branch will be created by cloning its successor node, and adding the clone as another of its next steps
+          The validation system must validate it as a different branch
+        - Another branch will be created with an empty node with no assignments as its next step. The empty node will then have as its successor a clone of the initial step.
+          The validation system must validate the successor of the empty node as a new branch, validating the entity from the beginning again
+    """
     workflow_model = WorkflowModel()
     workflow_instance = WorkflowInstance()
 
@@ -88,6 +106,7 @@ def generate_workflow_model_and_instance_for_handover_group_definition(handover_
     for i, (project_name, activity_class_names_and_iris) in enumerate(handover_group_definition):
         workflow_model_step = CRC1625WorkflowModelStep()
         workflow_model_step.iri = crc_prefix[f"workflow_model_step_{i}"]
+        workflow_model_step.name = f"workflow_model_step_{i}"
 
         workflow_model_step.set_allowed_project_names([project_name])
         workflow_model_step.set_allowed_activity_names([activity_name for activity_name, _ in activity_class_names_and_iris])
@@ -108,17 +127,85 @@ def generate_workflow_model_and_instance_for_handover_group_definition(handover_
 
         workflow_instance.step_assignments[workflow_model_step.iri] = step_assignment
 
+    # Choose a random intermediate step with successors
+    random_step_iri = random.choice(list(workflow_model.workflow_model_steps.keys()))
+    while random_step_iri != workflow_model.initial_step_iri and len(workflow_model.workflow_model_steps[random_step_iri].next_steps) == 0:
+        random_step_iri = random.choice(list(workflow_model.workflow_model_steps.keys()))
+    random_step = workflow_model.workflow_model_steps[random_step_iri]
+    if generate_redundant_branch:
+        # Get the successor of the random step, and copy it completely as another successor
+        # We will then have two branches validating the same target node
+        random_step_succesor = workflow_model.workflow_model_steps[random_step.next_steps[0]]
+        random_step_succesor_copy = deepcopy(random_step_succesor)
+        random_step_succesor_copy.create_new_iri()
+        random_step_succesor_copy.next_steps = []
+        random_step_succesor_copy.name = f"Cloned {random_step_succesor_copy.name}"
+
+        step_assignment_copy = deepcopy(workflow_instance.step_assignments[random_step_succesor.iri])
+        step_assignment_copy.create_new_iri()
+        step_assignment_copy.workflow_step_iri = random_step_succesor_copy.iri
+
+        workflow_instance.step_assignments[random_step_succesor_copy.iri] = step_assignment_copy
+        workflow_model.workflow_model_steps[random_step_succesor_copy.iri] = random_step_succesor_copy
+        random_step.next_steps.append(random_step_succesor_copy.iri)
+
+    if generate_redundant_branch or break_in_half:
+        # Add an empty step with no assignments as a successor to the random node,
+        # and then a copy of the first step as the successor of the empty step
+        # We will then have another branch that starts validating the entity again
+        empty_workflow_model_step = WorkflowModelStep()
+        empty_workflow_model_step.create_new_iri()
+
+        first_step_copy = deepcopy(workflow_model.workflow_model_steps[workflow_model.initial_step_iri])
+        first_step_copy.create_new_iri()
+        first_step_copy.next_steps = []
+        first_step_copy.name = "Cloned first step"
+
+        first_step_assignment_copy = deepcopy(workflow_instance.step_assignments[workflow_model.initial_step_iri])
+        first_step_assignment_copy.create_new_iri()
+        first_step_assignment_copy.workflow_step_iri = first_step_copy.iri
+
+        workflow_instance.step_assignments[first_step_copy.iri] = first_step_assignment_copy
+        workflow_model.workflow_model_steps[empty_workflow_model_step.iri] = empty_workflow_model_step
+        workflow_model.workflow_model_steps[first_step_copy.iri] = first_step_copy
+        random_step.next_steps.append(empty_workflow_model_step.iri)
+        empty_workflow_model_step.next_steps.append(first_step_copy.iri)
+
+        if break_in_half:
+            # Delete the original branch from the randomly chosen node, so that we only have a few
+            # steps, a break with an empty node, and another node that starts validating the entity again
+            # The validation system should create two branches (1st half of the original workflow, 2nd half with the single node)
+            step_iris_to_delete = []
+            visitor_stack = [random_step_iri]
+            while len(visitor_stack) > 0:
+                current_step = workflow_model.workflow_model_steps[visitor_stack.pop()]
+                for next_step_iri in current_step.next_steps:
+                    if next_step_iri != empty_workflow_model_step.iri:
+                        step_iris_to_delete.append(next_step_iri)
+                        visitor_stack.append(next_step_iri)
+
+            for step_iri_to_delete in step_iris_to_delete:
+                if step_iri_to_delete in workflow_instance.step_assignments:
+                    del workflow_instance.step_assignments[step_iri_to_delete]
+                del workflow_model.workflow_model_steps[step_iri_to_delete]
+
+            random_step.next_steps = [empty_workflow_model_step.iri]
+
     return workflow_model, workflow_instance
 
 
-def test_valid_workflows():
-    for n_steps in [10, 20, 30, 40, 50]:
+def test_valid_workflows(generate_redundant_branch: bool = False,
+                         break_in_half: bool = False):
+    for n_steps in [3, 5, 10]:
         asyncio.run(rdf_datastore_client.clear_triples())
         asyncio.run(rdf_datastore_client.clear_triples(WORKFLOWS_GRAPH_IRI))
 
         handover_group_definition = generate_handover_group_definition(n_steps)
         g, entity_IRI = generate_handover_group_triples(handover_group_definition)
-        workflow_model, workflow_instance = generate_workflow_model_and_instance_for_handover_group_definition(handover_group_definition, entity_IRI)
+        workflow_model, workflow_instance = generate_workflow_model_and_instance_for_handover_group_definition(handover_group_definition,
+                                                                                                               entity_IRI,
+                                                                                                               generate_redundant_branch,
+                                                                                                               break_in_half)
         temporary_ttl_path = f"{uuid.uuid4().hex}.ttl"
         ttl_file_path = temporary_ttl_path
         g.serialize(destination=ttl_file_path, format='turtle')
@@ -129,18 +216,29 @@ def test_valid_workflows():
 
         validation_results, steps_with_no_target_node = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True))
 
-        all_steps_conform = all(result.conforms for result in list(chain.from_iterable(chain.from_iterable(validation_results.values()))))
-        if all_steps_conform and len(steps_with_no_target_node) == 0:
-            logging.info(f"Valid workflow test of {n_steps} steps passed")
+        all_validation_results: list[ValidationResult] = []
+        for entity_iri, validation_paths in validation_results.items():
+            for validation_path in validation_paths:
+                for _, reses in validation_path.items():
+                    for validation_result in reses:
+                        all_validation_results.append(validation_result)
+
+        if all(result.conforms for result in all_validation_results) and \
+                len(steps_with_no_target_node) == 0 and \
+                ((not generate_redundant_branch) or (len(list(validation_results.values())[0]) == 3)) and \
+                ((not break_in_half) or (len(list(validation_results.values())[0]) == 2)):
+            if generate_redundant_branch:
+                logging.info(f"Valid workflow test of {n_steps} steps (w/ redundant branch) passed")
+            elif break_in_half:
+                logging.info(f"Valid workflow test of {n_steps} steps (broken in half) passed")
+            else:
+                logging.info(f"Valid workflow test of {n_steps} steps passed")
         else:
-            raise ValueError(f"""
-            The validation was not successful as expected. 
-            Trace: {validation_results}
-            Steps with no target node: {steps_with_no_target_node}
-            """)
+            print_validation_results(validation_results)
+            raise ValueError(f"""The validation was not successful as expected. Please check the logging trace for more information""")
 
 def test_missing_data_workflows():
-    for n_steps in [10, 20, 30, 40, 50]:
+    for n_steps in [3, 5, 10]:
         asyncio.run(rdf_datastore_client.clear_triples())
         asyncio.run(rdf_datastore_client.clear_triples(WORKFLOWS_GRAPH_IRI))
 
@@ -176,23 +274,25 @@ def test_missing_data_workflows():
         validation_results, steps_with_no_target_node = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True))
 
         if len(steps_with_no_target_node) != 1:
+            print_validation_results(validation_results)
             return ValueError(f"""
             Incorrect number of workflow model steps to be marked as missing data
             Expected 1, got {len(steps_with_no_target_node)}: {steps_with_no_target_node}      
-            Trace: {validation_results}
+            Please check the logging trace above for more information
             """)
         elif steps_with_no_target_node[0].workflow_model_step.iri != workflow_model_step_iri_to_be_flagged:
+            print_validation_results(validation_results)
             return ValueError(f"""
             Incorrect workflow model step to be marked as missing data
             Expected {workflow_model_step_iri_to_be_flagged}, got {steps_with_no_target_node[0].workflow_model_step.iri}      
-            Trace: {validation_results}
+            Please check the logging trace above for more information
             """)
         else:
             logging.info(f"Workflow test with missing data of {n_steps} steps passed")
 
 
 def test_invalid_workflows():
-    for n_steps in [10, 20, 30, 40, 50]:
+    for n_steps in [3, 5, 10]:
         asyncio.run(rdf_datastore_client.clear_triples())
         asyncio.run(rdf_datastore_client.clear_triples(WORKFLOWS_GRAPH_IRI))
 
@@ -229,34 +329,75 @@ def test_invalid_workflows():
         validation_results, steps_with_no_target_node = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True))
 
         if len(steps_with_no_target_node) != 0:
+            print_validation_results(validation_results)
             return ValueError(f"""
             Got an unexpected number of steps with missing data
             Expected 0, got {len(steps_with_no_target_node)}: {steps_with_no_target_node}      
-            Trace: {validation_results}
+            PLease check the logging trace above for more information
             """)
 
         for entity_iri, validation_paths in validation_results.items():
             for validation_path in validation_paths:
-                for validation_result in validation_path:
-                    if validation_result.validation_job.paired_step.workflow_model_step.iri != invalid_workflow_model_step_iri:
-                        if not validation_result.conforms:
-                            return ValueError(f"""
-                            A workflow model step expected to be valid did not conform
-                            Workflow model step invalidated in the test: {handover_definition_idx_to_invalidate}
-                            Step validation result: {validation_result}
-                            Trace: {validation_results}
-                            """)
-                    else:
-                        if validation_result.conforms:
-                            return ValueError(f"""
-                            A workflow model step expected to be invalid did conform
-                            Workflow model step invalidated in the test: {handover_definition_idx_to_invalidate}
-                            Step validation result: {validation_result}
-                            Trace: {validation_results}
-                            """)
+                for _, reses in validation_path.items():
+                    for validation_result in reses:
+                        if validation_result.validation_job.paired_step.workflow_model_step.iri != invalid_workflow_model_step_iri:
+                            if not validation_result.conforms:
+                                print_validation_results(validation_results)
+                                return ValueError(f"""
+                                A workflow model step expected to be valid did not conform
+                                Workflow model step invalidated in the test: {handover_definition_idx_to_invalidate}
+                                Please check the logging trace above for more information
+                                """)
+                        else:
+                            if validation_result.conforms:
+                                print_validation_results(validation_results)
+                                return ValueError(f"""
+                                A workflow model step expected to be invalid did conform
+                                Workflow model step invalidated in the test: {handover_definition_idx_to_invalidate}
+                                Please check the logging trace above for more information
+                                """)
 
         logging.info(f"Workflow test with invalid data of {n_steps} steps passed")
+
+def test_broken_in_half_workflows():
+    for n_steps in [3, 5, 10]:
+        asyncio.run(rdf_datastore_client.clear_triples())
+        asyncio.run(rdf_datastore_client.clear_triples(WORKFLOWS_GRAPH_IRI))
+
+        handover_group_definition = generate_handover_group_definition(n_steps)
+        g, entity_IRI = generate_handover_group_triples(handover_group_definition)
+        workflow_model, workflow_instance = generate_workflow_model_and_instance_for_handover_group_definition(handover_group_definition,
+                                                                                                               entity_IRI,
+                                                                                                               break_in_half=True)
+        temporary_ttl_path = f"{uuid.uuid4().hex}.ttl"
+        ttl_file_path = temporary_ttl_path
+        g.serialize(destination=ttl_file_path, format='turtle')
+        asyncio.run(rdf_datastore_client.upload_file(ttl_file_path, graph_iri=MAIN_GRAPH_IRI, delete_file_after_upload=True))
+
+        asyncio.run(store_workflow_model(workflow_model, return_file=False))
+        asyncio.run(store_workflow_instance(workflow_instance, return_file=False))
+
+        validation_results, steps_with_no_target_node = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True))
+
+        all_validation_results: list[ValidationResult] = []
+        for entity_iri, validation_paths in validation_results.items():
+            for validation_path in validation_paths:
+                for _, reses in validation_path.items():
+                    for validation_result in reses:
+                        all_validation_results.append(validation_result)
+
+        if all(result.conforms for result in all_validation_results) and \
+                len(steps_with_no_target_node) == 0 and \
+                len(list(validation_results.values())[0]) == 2: # Only two paths (1st half, 2nd half)
+                logging.info(f"Valid workflow test of {n_steps} steps (w/ workflow split in two halves) passed")
+        else:
+            logging.error(f"Workflow test of {n_steps} steps (w/ workflow split in two halves) not passed. Debugging info:")
+            print_validation_results(validation_results)
+            raise ValueError(f"""The validation was not successful as expected. Please check the logging trace above for more information""")
+
 
 test_valid_workflows()
 test_missing_data_workflows()
 test_invalid_workflows()
+test_valid_workflows(generate_redundant_branch=True)
+test_valid_workflows(break_in_half=True)

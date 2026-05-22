@@ -16,13 +16,12 @@ All workflow classes are implemented as dataclasses, making it easy for them to 
 set up SHACL shapes and key-value replacements in a programmatic way. An example of this can be found
 on `CRC_1625_workflows_validator.py`
 """
-
+import logging
 import os
 import urllib.parse
 from concurrent.futures import ProcessPoolExecutor, Future
 from dataclasses import dataclass, field
 from enum import Enum
-from itertools import chain
 
 from jinja2 import Template
 from pyshacl import validate
@@ -61,6 +60,11 @@ class ValidationJob:
     target_node: URIRef = ""
     shacl_shape: str = ""  # Syntactically valid SHACL shape, as a serialized string in any RDF format
 
+    def __hash__(self):
+        return hash((self.paired_step.workflow_model_step.iri,
+                     self.entity,
+                     self.target_node,
+                     self.shacl_shape))
 
 @dataclass
 class ValidationJobWithMissingData:
@@ -222,6 +226,11 @@ async def generate_SHACL_shapes_for_workflow(workflow_model: WorkflowModel,
                 validation_job_with_missing_data.entity = assigned_entity_iri
                 jobs_with_missing_data.append(validation_job_with_missing_data)
 
+    logging.debug("Generated unsorted validation jobs:")
+    for i, jobs in enumerate(list(validation_queue.values())):
+        for job in jobs:
+            logging.debug(f"Job {i}: {job.paired_step.workflow_model_step.name} for {job.target_node} (entity: {job.entity})")
+
     return validation_queue, jobs_with_missing_data
 
 
@@ -241,14 +250,17 @@ def parse_validation_report(workflow_model: WorkflowModel,
                             path: list[ValidationJob],
                             entity_to_validate: URIRef,
                             validation_report: Graph,
-                            workflow_shape_graph: Graph) -> list[ValidationResult]:
+                            workflow_shape_graph: Graph) -> dict[URIRef, list[ValidationResult]]:
     """
     Breaks down the validation_report from running a workflow shape into individual validation results
-    for every violation
+    for every violation. The results are returned as a dict of workflow model step IRI -> Validation results.
+
+    If a workflow model step was validated successfully, there will be a single conforming ValidationResult. If not,
+    there will be one ValidationResult for every single violation found
     """
     result = (validation_report + workflow_shape_graph).query(parse_validation_report_query)
 
-    validation_results: list[ValidationResult] = list()
+    validation_results: dict[URIRef, list[ValidationResult]] = dict()
     for violation in result:
         validation_job = ValidationJob()
         paired_step = PairedStep()
@@ -264,10 +276,13 @@ def parse_validation_report(workflow_model: WorkflowModel,
         validation_result.conforms = False
         validation_result.pyshacl_output = str(violation.message)
 
-        validation_results.append(validation_result)
+        if paired_step.workflow_model_step.iri not in validation_results:
+            validation_results[paired_step.workflow_model_step.iri] = []
+
+        validation_results[paired_step.workflow_model_step.iri].append(validation_result)
 
     # The rest of the workflow model steps *in the path* are valid
-    step_iris_with_errors = set(r.validation_job.paired_step.workflow_model_step.iri for r in validation_results)
+    step_iris_with_errors = set(validation_results.keys())
     for validation_job in path:
         step = validation_job.paired_step.workflow_model_step
 
@@ -287,7 +302,7 @@ def parse_validation_report(workflow_model: WorkflowModel,
             validation_result.conforms = True
             validation_result.pyshacl_output = ""
 
-            validation_results.append(validation_result)
+            validation_results[step.iri] = [validation_result]
 
     return validation_results
 
@@ -324,7 +339,7 @@ def validate_workflow_shape(workflow_shape: str) -> Graph:
 def run_validation_task(workflow_shape_for_path: str,
                         workflow_model: WorkflowModel,
                         path: list[ValidationJob],
-                        entity_iri: URIRef):
+                        entity_iri: URIRef) -> dict[URIRef, list[ValidationResult]]:
     """
     Validation task wrapper for the concurrent process pool
     """
@@ -366,43 +381,88 @@ def generate_validation_paths(workflow_model: WorkflowModel,
         initial_step_iri_to_validate = get_initial_step_iri_to_validate(workflow_model.initial_step_iri)
 
     if initial_step_iri_to_validate is not None:
-        visitor_stack: list[tuple[URIRef | None, URIRef]] = [(None, initial_step_iri_to_validate)]
+        # List of (current_step_iri, active_paths_for_this_branch as a dict of Entity IRI -> Validation path)
+        visitor_stack: list[tuple[URIRef, dict[URIRef, list[ValidationJob]]]] = [(initial_step_iri_to_validate, dict())]
+
+        # Completed unique paths, prevents duplicates from overlapping traversals
+        seen_paths: dict[URIRef, set[tuple[ValidationJob, ...]]] = dict()
+
+        def save_path(completed_path: list[ValidationJob]):
+            if entity not in validation_paths:
+                validation_paths[entity] = []
+                seen_paths[entity] = set()
+
+            path_tuple = tuple(completed_path)
+            if path_tuple not in seen_paths[entity]:
+                validation_paths[entity].append(completed_path)
+                seen_paths[entity].add(path_tuple)
 
         while len(visitor_stack) > 0:
-            previous_step_iri_to_validate, current_step_iri_to_validate = visitor_stack.pop()
+            current_step_iri_to_validate, active_paths = visitor_stack.pop()
+            # Copy them
+            next_active_paths = {entity: list(path) for entity, path in active_paths.items()}
 
-            if previous_step_iri_to_validate is None:
-                for job in validation_jobs[current_step_iri_to_validate]:
-                    validation_paths[job.entity] = [[job]]
+            if current_step_iri_to_validate in validation_jobs:
+                current_step_jobs = validation_jobs[current_step_iri_to_validate]
+
+                for job in current_step_jobs:
+                    if job.entity in next_active_paths:
+                        # Continue the existing path in this branch
+                        next_active_paths[job.entity].append(job)
+                    else:
+                        # It's a new path
+                        next_active_paths[job.entity] = [job]
+
+            # Check the next steps
+            step_data = workflow_model.workflow_model_steps.get(current_step_iri_to_validate)
+            next_steps = step_data.next_steps if step_data else []
+
+            if not next_steps:
+                # We hit a leaf node, so we save all remaining active paths for this branch
+                for entity, completed_path in next_active_paths.items():
+                    save_path(completed_path)
             else:
-                if current_step_iri_to_validate in validation_jobs:
-                    for job in validation_jobs[current_step_iri_to_validate]:
-                        if job.entity in [j.entity for j in validation_jobs[previous_step_iri_to_validate]]:
-                            # If the entity was in the previous step, we add it to the latest path
-                            validation_paths[job.entity][-1].append(job)
-                        else:
-                            # If it was not in the previous step, it is a new path
-                            if job.entity not in validation_paths:
-                                validation_paths[job.entity] = []
-                            validation_paths[job.entity].append([job])
+                # Identify all entities that are assigned across all next steps
+                entities_in_next_steps = set()
+                for next_step_iri in next_steps:
+                    if next_step_iri in validation_jobs:
+                        for job in validation_jobs[next_step_iri]:
+                            entities_in_next_steps.add(job.entity)
 
-            for next_step_iri in workflow_model.workflow_model_steps[current_step_iri_to_validate].next_steps:
-                visitor_stack.append((current_step_iri_to_validate, next_step_iri))
+                # Save and close paths for entities that don't appear in any of them
+                for entity in list(next_active_paths.keys()):
+                    if entity not in entities_in_next_steps:
+                        save_path(next_active_paths.pop(entity))
+
+                for next_step_iri in next_steps:
+                    if next_step_iri not in validation_jobs:
+                        # This next step has no entities assigned to it, so it clears all paths
+                        visitor_stack.append((next_step_iri, dict()))
+                    else:
+                        # Push it with the paths
+                        visitor_stack.append((next_step_iri, next_active_paths))
+
+    logging.debug("Generated validation paths:")
+    for i, path in enumerate(list(validation_paths.values())[0]):
+        logging.debug(f"Path {i}")
+        logging.debug(f"{' -> '.join([vr.paired_step.workflow_model_step.name for vr in path])}")
 
     return validation_paths
 
 
 async def is_workflow_instance_valid(workflow_model: WorkflowModel,
                                      workflow_instance: WorkflowInstance,
-                                     return_individual_results=False) -> tuple[ValidationStatus | dict[URIRef, list[list[ValidationResult]]], list[ValidationJobWithMissingData]]:
+                                     return_individual_results=False) -> tuple[ValidationStatus | dict[URIRef, list[dict[URIRef, list[ValidationResult]]]], list[ValidationJobWithMissingData]]:
     """
     Returns a ValidationStatus of for the provided workflow model against its instance's assignments
 
     `return_individual_results` can be set to `True` to instead return a full trace of the validation jobs
     executed, as a dict of entity -> list of validation path traces executed for the entity. Each validation
-    path corresponds to a sequence of consecutive workflow model steps paired against nodes in the same entity's data
-    workflow, and contains one ValidationResult for every pairing. Note: Normally, only one validation path should
-    appear, unless the entity has been assigned to non-consecutive workflow model steps for whichever reason
+    path trace corresponds to a sequence of consecutive workflow model steps paired against nodes in the same entity's
+    data workflow, and contains a dict of workflow model step IRI -> ValidationResult.
+
+    Note: Normally, only one validation path should appear, unless the entity has been assigned to non-consecutive
+    workflow model steps for whichever reason
 
     The validation is split into individual jobs run in a process pool
     """
@@ -410,7 +470,7 @@ async def is_workflow_instance_valid(workflow_model: WorkflowModel,
     with ProcessPoolExecutor() as executor:
         # Get
         validation_paths: dict[URIRef, list[list[ValidationJob]]] = generate_validation_paths(workflow_model, validation_jobs)
-        validation_results: dict[URIRef, list[list[ValidationResult]]] = dict()
+        validation_results: dict[URIRef, list[dict[URIRef, list[ValidationResult]]]] = dict()
 
         futures_map: dict[Future, URIRef] = {}
 
@@ -464,11 +524,16 @@ async def is_workflow_instance_valid(workflow_model: WorkflowModel,
     if return_individual_results:
         return validation_results, first_steps_with_no_target_node
     else:
-        flattened_validation_results: list[ValidationResult] = list(chain.from_iterable(chain.from_iterable(validation_results.values())))
-        all_steps_conform = all(result.conforms for result in flattened_validation_results)
-        if all_steps_conform and len(first_steps_with_no_target_node) == 0:
+        all_validation_results: list[ValidationResult] = []
+        for _, validation_paths_for_entity in validation_results.items():
+            for validation_path in validation_paths_for_entity:
+                for _, reses in validation_path.items():
+                    for validation_result in reses:
+                        all_validation_results.append(validation_result)
+
+        if all(result.conforms for result in all_validation_results) and len(first_steps_with_no_target_node) == 0:
             return ValidationStatus.Valid, first_steps_with_no_target_node
-        elif all_steps_conform:
+        elif all(result.conforms for result in all_validation_results):
             return ValidationStatus.Warning, first_steps_with_no_target_node
         else:
             return ValidationStatus.Error, first_steps_with_no_target_node

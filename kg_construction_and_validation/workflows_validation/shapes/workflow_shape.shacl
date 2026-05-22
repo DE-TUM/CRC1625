@@ -7,7 +7,7 @@ crc:mainShape
 
     sh:node <{{ node_shape_iris[0] }}> ;
     crc:correspondingTargetNode <{{ target_node_iris[0] }}> ;
-    crc:correspondingWorkflowModelStep <{{ workflow_model_step_iris[0] }}> ;
+    crc:correspondingWorkflowModelStep <{{ workflow_model_step_iris[0] }}> {{ "." if paths|length == 1 else ";" }}
 
     {% for i in range(1, paths|length) %}
     sh:property [

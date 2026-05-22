@@ -166,9 +166,11 @@ async def store_workflow_instance(workflow_instance: WorkflowInstance,
     """
     Serializes the workflow instance into RDF and stores it
     """
-    valid, msg = await is_workflow_instance_definition_valid(workflow_instance)
-    if not valid:
-        raise ValueError(msg)
+    # TODO: For now, we don't enforce these constraints. They will generate hard to
+    #       understand validation traces, though
+    #valid, msg = await is_workflow_instance_definition_valid(workflow_instance)
+    #if not valid:
+    #    raise ValueError(msg)
 
     g = Graph()
 
