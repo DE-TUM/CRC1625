@@ -31,10 +31,10 @@ logging.basicConfig(
 def print_validation_results(validation_results: ValidationStatus | dict[URIRef, list[dict[URIRef, list[ValidationResult]]]]):
     for entity_iri, validation_paths in validation_results.items():
         for i, validation_path in enumerate(validation_paths):
-            logging.error("Path", i)
+            logging.error(f"Path {i}")
             for _, reses in validation_path.items():
                 for r in reses:
-                    logging.error(f"{r.validation_job.paired_step.workflow_model_step.name}, conforms: {r.conforms}, reason: {r.pyshacl_output}")
+                    logging.error(f"{r.validation_job.paired_step.workflow_model_step.name}, conforms: {r.conforms}, validation report: {r.validation_report}")
 
 
 def generate_handover_group_definition(length: int) -> list[tuple[URIRef, list[tuple[str, URIRef]]]]:
@@ -273,16 +273,16 @@ def test_missing_data_workflows():
 
         validation_results, steps_with_no_target_node = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True))
 
-        if len(steps_with_no_target_node) != 1:
+        if len(steps_with_no_target_node) != len(handover_group_definition[cutoff_idx:]):
             print_validation_results(validation_results)
-            return ValueError(f"""
+            raise ValueError(f"""
             Incorrect number of workflow model steps to be marked as missing data
-            Expected 1, got {len(steps_with_no_target_node)}: {steps_with_no_target_node}      
+            Expected {len(handover_group_definition[cutoff_idx:])}, got {len(steps_with_no_target_node)}: {steps_with_no_target_node}      
             Please check the logging trace above for more information
             """)
         elif steps_with_no_target_node[0].workflow_model_step.iri != workflow_model_step_iri_to_be_flagged:
             print_validation_results(validation_results)
-            return ValueError(f"""
+            raise ValueError(f"""
             Incorrect workflow model step to be marked as missing data
             Expected {workflow_model_step_iri_to_be_flagged}, got {steps_with_no_target_node[0].workflow_model_step.iri}      
             Please check the logging trace above for more information
@@ -330,7 +330,7 @@ def test_invalid_workflows():
 
         if len(steps_with_no_target_node) != 0:
             print_validation_results(validation_results)
-            return ValueError(f"""
+            raise ValueError(f"""
             Got an unexpected number of steps with missing data
             Expected 0, got {len(steps_with_no_target_node)}: {steps_with_no_target_node}      
             PLease check the logging trace above for more information
@@ -343,7 +343,7 @@ def test_invalid_workflows():
                         if validation_result.validation_job.paired_step.workflow_model_step.iri != invalid_workflow_model_step_iri:
                             if not validation_result.conforms:
                                 print_validation_results(validation_results)
-                                return ValueError(f"""
+                                raise ValueError(f"""
                                 A workflow model step expected to be valid did not conform
                                 Workflow model step invalidated in the test: {handover_definition_idx_to_invalidate}
                                 Please check the logging trace above for more information
@@ -351,7 +351,7 @@ def test_invalid_workflows():
                         else:
                             if validation_result.conforms:
                                 print_validation_results(validation_results)
-                                return ValueError(f"""
+                                raise ValueError(f"""
                                 A workflow model step expected to be invalid did conform
                                 Workflow model step invalidated in the test: {handover_definition_idx_to_invalidate}
                                 Please check the logging trace above for more information
