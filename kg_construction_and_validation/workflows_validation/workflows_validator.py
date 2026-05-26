@@ -20,6 +20,7 @@ import logging
 import os
 import urllib.parse
 from concurrent.futures import ProcessPoolExecutor, Future
+from copy import deepcopy
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -287,15 +288,6 @@ def parse_validation_report(workflow_model: WorkflowModel,
         step = validation_job.paired_step.workflow_model_step
 
         if step.iri not in step_iris_with_errors:
-            validation_job = ValidationJob()
-            paired_step = PairedStep()
-            paired_step.workflow_model_step = step
-            validation_job.paired_step = paired_step
-            validation_job.shacl_shape = workflow_shape_graph.serialize(format="turtle")
-            validation_job.entity = entity_to_validate
-            # We cannot get the reference for the target node when validating with a workflow shape
-            #validation_job.target_node = URIRef(row.target_node)
-
             validation_result = ValidationResult()
             validation_result.validation_job = validation_job
             validation_result.validation_report = Graph()
@@ -387,7 +379,7 @@ def generate_validation_paths(workflow_model: WorkflowModel,
         # Completed unique paths, prevents duplicates from overlapping traversals
         seen_paths: dict[URIRef, set[tuple[ValidationJob, ...]]] = dict()
 
-        def save_path(completed_path: list[ValidationJob]):
+        def save_path(entity, completed_path: list[ValidationJob]):
             if entity not in validation_paths:
                 validation_paths[entity] = []
                 seen_paths[entity] = set()
@@ -420,7 +412,7 @@ def generate_validation_paths(workflow_model: WorkflowModel,
             if not next_steps:
                 # We hit a leaf node, so we save all remaining active paths for this branch
                 for entity, completed_path in next_active_paths.items():
-                    save_path(completed_path)
+                    save_path(entity, completed_path)
             else:
                 # Identify all entities that are assigned across all next steps
                 entities_in_next_steps = set()
@@ -432,7 +424,7 @@ def generate_validation_paths(workflow_model: WorkflowModel,
                 # Save and close paths for entities that don't appear in any of them
                 for entity in list(next_active_paths.keys()):
                     if entity not in entities_in_next_steps:
-                        save_path(next_active_paths.pop(entity))
+                        save_path(entity, next_active_paths.pop(entity))
 
                 for next_step_iri in next_steps:
                     if next_step_iri not in validation_jobs:
