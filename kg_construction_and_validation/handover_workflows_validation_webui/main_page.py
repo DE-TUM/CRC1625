@@ -22,6 +22,7 @@ module_dir = os.path.dirname(__file__)
 prefixes: str = open(os.path.join(module_dir, '../handover_workflows_validation/queries/prefixes.sparql')).read()
 details_all_users_query = prefixes + open(os.path.join(module_dir, 'queries/details_all_users.sparql'), 'r').read()
 
+
 @dataclass
 class WorkflowsPageState:
     """
@@ -546,113 +547,6 @@ def handle_demo_mode_button_click():
     activate_demo_mode()
     ui.navigate.to('/workflows')
 
-#new page for testing purposes
-@ui.page('/mlem')
-@matinf_or_demo_login_required
-async def mlem():
-    await ui.context.client.connected()
-    workflows_page_state = WorkflowsPageState()
-    workflows_page_state.main_content = ui.column().classes('w-full')
-
-    with ui.header().classes('items-center p-2 h-14'):
-            ui.label('This is a testing page, mlem!').classes('text-xl').style('color: #000000')
-            ui.space()
-            ui.label(f'Welcome, {app.storage.tab['user_name']} ({app.storage.tab['user_project']})').classes('text-xl').style('color: #000000')
-            ui.button('Log out', color='negative', on_click=lambda: log_out()).props('size=m')
-            ui.button('Return to the previous page', color='info', on_click=lambda: ui.navigate.to("/")).props('size=m')
-
-    with ui.grid(columns=1).classes('w-full gap-8'):
-            workflows_page_state.graph_component_column = ui.column()
-            with workflows_page_state.graph_component_column:
-                #graph_data = workflow_model_to_nodes_and_edges(app.storage.tab['current_workflow_model'])
-                
-                nodes = []
-                edges = []
-                
-                nodes.append({
-                    'data': {
-                        'id': "mlem",
-                        'label': "mlem",
-                        'projects': [],
-                        'activities': [],
-                        'identifiers_for_coloring': ["mlem"]
-                    },
-                    'classes': [NodeType.node_type_step.value]})
-                
-                nodes.append({
-                    'data': {
-                        'id': "mlem2",
-                        'label': "mlem2",
-                        'projects': [],
-                        'activities': [],
-                        'identifiers_for_coloring': ["mlem"]
-                    },
-                    'classes': [NodeType.node_type_step.value]})
-                
-                nodes.append({
-                    'data': {
-                        'id': "zlorp",
-                        'label': "zlorp",
-                        'projects': [],
-                        'activities': [],
-                        'identifiers_for_coloring': ["zlorp"]
-                    },
-                    'classes': [NodeType.node_type_step.value]
-                })
-
-                nodes.append({
-                    'data': {
-                        'id': "zlorpus",
-                        'label': "zlorpus",
-                        'projects': [],
-                        'activities': [],
-                        'identifiers_for_coloring': ["zlorpus"]
-                    },
-                    'classes': [NodeType.node_type_step.value]
-                })
-                
-                nodes.append({
-                    'data': {
-                        'id': "fluergh",
-                        'label': "fluergh",
-                        'projects': [],
-                        'activities': [],
-                        'identifiers_for_coloring': ["fluergh"]
-                    },
-                    'classes': [NodeType.node_type_step.value]
-                })
-
-                nodes.append({
-                    'data': {
-                        'id': "fluergh2",
-                        'label': "fluergh2",
-                        'projects': [],
-                        'activities': [],
-                        'identifiers_for_coloring': ["fluergh2"]
-                    },
-                    'classes': [NodeType.node_type_step.value]
-                })
-
-                edges.append({'data': {'source': "mlem", 'target': "mlem2"}})
-                edges.append({'data': {'source': "mlem2", 'target': "zlorp"}})
-                edges.append({'data': {'source': "mlem2", 'target': "zlorpus"}})
-                edges.append({'data': {'source': "mlem2", 'target': "fluergh"}})
-                edges.append({'data': {'source': "zlorp", 'target': "mlem"}})
-                edges.append({'data': {'source': "fluergh", 'target': "fluergh2"}})
-
-                workflows_page_state.graph_component = CytoscapeComponent(
-                    nodes,
-                    edges,
-                    lambda: None,
-                    None
-                )
-
-    with ui.footer().classes('items-center p-2 h-11'):
-            ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-m').style('color: #000000')
-            ui.space()
-            ui.image('/assets/crc_logo_black_letters_wide.png').classes('w-26')
-
-            
 
 
 
@@ -687,10 +581,10 @@ async def landing_page():
     #HERE IS THE MLEM CARD
     with ui.row().classes('w-full justify-center gap-8 p-8'):
         with ui.card().tight().classes('w-128 h-100 cursor-pointer hover:shadow-lg') \
-                .on('click', lambda: ui.navigate.to('/mlem')):
+                .on('click', lambda: ui.navigate.to('/visualization_ui/%2D10')): #CHANGE THE '-10' FOR object_ID!!!
             ui.image('assets/workflows_validation_header.png').props('fit=scale-down').classes('h-90')
             with ui.column().classes('p-4 w-full bg-secondary'):
-                ui.label('Mlem').classes('text-h6')
+                ui.label('Handover visualization').classes('text-h6')
 
         
         with ui.card().tight().classes('w-128 h-100 cursor-pointer hover:shadow-lg') \
