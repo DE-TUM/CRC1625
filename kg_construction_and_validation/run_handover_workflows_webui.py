@@ -1,9 +1,17 @@
 import argparse
 import asyncio
 import os
+import logging
 
 from dotenv import load_dotenv
 from starlette.middleware.base import BaseHTTPMiddleware
+
+logging.basicConfig(
+    level=logging.WARNING,
+    format="%(module)s %(levelname)s %(message)s",
+)
+if os.getenv("LOG_LEVEL", "WARNING").upper() == "DEBUG":
+    logging.getLogger("workflows_validation.validation_cache").setLevel(logging.DEBUG)
 
 from datastores.rdf import rdf_datastore_client
 from datastores.rdf.rdf_datastore import WORKFLOWS_GRAPH_IRI

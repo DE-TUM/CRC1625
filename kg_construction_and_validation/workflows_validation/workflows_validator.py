@@ -31,6 +31,7 @@ from rdflib.plugins.stores.sparqlstore import SPARQLStore
 from datastores.rdf import rdf_datastore_client
 from datastores.rdf.rdf_datastore_client import RDF_DATASTORE_API_ENDPOINT
 from workflows_validation.common import prefixes, crc_prefix
+from workflows_validation.validation_cache import CachedValidation, cache
 from workflows_validation.workflow_instance import WorkflowInstance
 from workflows_validation.workflow_model import WorkflowModelStep, WorkflowModel
 
@@ -450,25 +451,14 @@ def generate_validation_paths(workflow_model: WorkflowModel,
     return validation_paths
 
 
-async def is_workflow_instance_valid(workflow_model: WorkflowModel,
-                                     workflow_instance: WorkflowInstance,
-                                     return_individual_results=False) -> tuple[ValidationStatus | dict[URIRef, list[dict[URIRef, list[ValidationResult]]]], list[ValidationJobWithMissingData]]:
+async def _compute_full_validation(workflow_model: WorkflowModel,
+                                   workflow_instance: WorkflowInstance) -> CachedValidation:
     """
-    Returns a ValidationStatus of for the provided workflow model against its instance's assignments
-
-    `return_individual_results` can be set to `True` to instead return a full trace of the validation jobs
-    executed, as a dict of entity -> list of validation path traces executed for the entity. Each validation
-    path trace corresponds to a sequence of consecutive workflow model steps paired against nodes in the same entity's
-    data workflow, and contains a dict of workflow model step IRI -> ValidationResult.
-
-    Note: Normally, only one validation path should appear, unless the entity has been assigned to non-consecutive
-    workflow model steps for whichever reason
-
-    The validation is split into individual jobs run in a process pool
+    Runs the full validation, always producing the rich per-path trace. The
+    rolled-up ValidationStatus is derived by the public wrapper when needed.
     """
     validation_jobs, first_steps_with_no_target_node = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance)
     with ProcessPoolExecutor() as executor:
-        # Get
         validation_paths: dict[URIRef, list[list[ValidationJob]]] = generate_validation_paths(workflow_model, validation_jobs)
         validation_results: dict[URIRef, list[dict[URIRef, list[ValidationResult]]]] = dict()
 
@@ -521,19 +511,46 @@ async def is_workflow_instance_valid(workflow_model: WorkflowModel,
 
         validation_results[entity_iri].append(future.result())
 
-    if return_individual_results:
-        return validation_results, first_steps_with_no_target_node
-    else:
-        all_validation_results: list[ValidationResult] = []
-        for _, validation_paths_for_entity in validation_results.items():
-            for validation_path in validation_paths_for_entity:
-                for _, reses in validation_path.items():
-                    for validation_result in reses:
-                        all_validation_results.append(validation_result)
+    return CachedValidation(validation_results=validation_results,
+                            steps_with_no_target_node=first_steps_with_no_target_node)
 
-        if all(result.conforms for result in all_validation_results) and len(first_steps_with_no_target_node) == 0:
-            return ValidationStatus.Valid, first_steps_with_no_target_node
-        elif all(result.conforms for result in all_validation_results):
-            return ValidationStatus.Warning, first_steps_with_no_target_node
-        else:
-            return ValidationStatus.Error, first_steps_with_no_target_node
+
+def _rollup_status(entry: CachedValidation) -> ValidationStatus:
+    all_conform = all(
+        r.conforms
+        for paths in entry.validation_results.values()
+        for path in paths
+        for results in path.values()
+        for r in results
+    )
+    if all_conform and not entry.steps_with_no_target_node:
+        return ValidationStatus.Valid
+    if all_conform:
+        return ValidationStatus.Warning
+    return ValidationStatus.Error
+
+
+async def is_workflow_instance_valid(workflow_model: WorkflowModel,
+                                     workflow_instance: WorkflowInstance,
+                                     return_individual_results=False) -> tuple[ValidationStatus | dict[URIRef, list[dict[URIRef, list[ValidationResult]]]], list[ValidationJobWithMissingData]]:
+    """
+    Returns a ValidationStatus of for the provided workflow model against its instance's assignments
+
+    `return_individual_results` can be set to `True` to instead return a full trace of the validation jobs
+    executed, as a dict of entity -> list of validation path traces executed for the entity. Each validation
+    path trace corresponds to a sequence of consecutive workflow model steps paired against nodes in the same entity's
+    data workflow, and contains a dict of workflow model step IRI -> ValidationResult.
+
+    Note: Normally, only one validation path should appear, unless the entity has been assigned to non-consecutive
+    workflow model steps for whichever reason
+
+    Results are cached in-process keyed on (model_iri, instance_iri). See validation_cache for invalidation.
+    """
+    entry = cache.get(workflow_model.iri, workflow_instance.iri)
+    if entry is None:
+        entry = await _compute_full_validation(workflow_model, workflow_instance)
+        cache.put(workflow_model.iri, workflow_instance.iri, entry)
+
+    if return_individual_results:
+        return entry.validation_results, entry.steps_with_no_target_node
+    return _rollup_status(entry), entry.steps_with_no_target_node

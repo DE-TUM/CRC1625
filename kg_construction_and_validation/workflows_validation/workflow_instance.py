@@ -8,6 +8,7 @@ from datastores.rdf import rdf_datastore_client
 from datastores.rdf.rdf_datastore import WORKFLOWS_GRAPH_IRI, UpdateType
 from workflows_validation.common import BaseWorkflowElement, crc_prefix, base_workflow_element_iri_to_config_key, prefixes, getURIOrString, getURIOrLiteral, \
     rdf_prefix
+from workflows_validation.validation_cache import cache
 from workflows_validation.workflow_model import WorkflowModel, read_workflow_model, WorkflowModelStep
 
 module_dir = os.path.dirname(__file__)
@@ -244,6 +245,7 @@ async def delete_workflow_instance(workflow_instance: WorkflowInstance,
     else:
         updates = [(query, UpdateType.query)]
         await rdf_datastore_client.launch_updates(updates, workflow_instance.iri)
+        cache.invalidate_instance(workflow_instance.workflow_model_iri, workflow_instance.iri)
 
 
 async def overwrite_workflow_instance(workflow_instance: WorkflowInstance):
@@ -259,3 +261,4 @@ async def overwrite_workflow_instance(workflow_instance: WorkflowInstance):
     actions.append((await store_workflow_instance(workflow_instance, return_file=True), UpdateType.file_upload))
 
     await rdf_datastore_client.launch_updates(actions, graph_iri=WORKFLOWS_GRAPH_IRI, delete_files_after_upload=True)
+    cache.invalidate_instance(workflow_instance.workflow_model_iri, workflow_instance.iri)
