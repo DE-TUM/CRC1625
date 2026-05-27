@@ -21,6 +21,7 @@ This module will use `logging` to log `debug` messages indicating validation pat
 import logging
 import os
 import urllib.parse
+from collections import OrderedDict
 from concurrent.futures import ProcessPoolExecutor, Future
 from copy import deepcopy
 from dataclasses import dataclass, field
@@ -253,13 +254,15 @@ def parse_validation_report(workflow_model: WorkflowModel,
                             path: list[ValidationJob],
                             entity_to_validate: URIRef,
                             validation_report: Graph,
-                            workflow_shape_graph: Graph) -> dict[URIRef, list[ValidationResult]]:
+                            workflow_shape_graph: Graph) -> OrderedDict[URIRef, list[ValidationResult]]:
     """
     Breaks down the validation_report from running a workflow shape into individual validation results
     for every violation. The results are returned as a dict of workflow model step IRI -> Validation results.
 
     If a workflow model step was validated successfully, there will be a single conforming ValidationResult. If not,
     there will be one ValidationResult for every single violation found
+
+    When traversed, the dictionary will be ordered exactly like the provided validation path
     """
     result = (validation_report + workflow_shape_graph).query(parse_validation_report_query)
 
@@ -272,7 +275,6 @@ def parse_validation_report(workflow_model: WorkflowModel,
         validation_job.shacl_shape = workflow_shape_graph.serialize(format="turtle")
         validation_job.entity = entity_to_validate
         validation_job.target_node = URIRef(violation.target_node)
-
         validation_result = ValidationResult()
         validation_result.validation_job = validation_job
         validation_result.validation_report = validation_report
@@ -298,7 +300,13 @@ def parse_validation_report(workflow_model: WorkflowModel,
 
             validation_results[step.iri] = [validation_result]
 
-    return validation_results
+    # Yield the results in the same order as the jobs list (i.e., the validation path)
+    ordered_validation_results: OrderedDict[URIRef, list[ValidationResult]] = OrderedDict()
+    for job in path:
+        step_iri = job.paired_step.workflow_model_step.iri
+        ordered_validation_results[step_iri] = validation_results[step_iri]
+
+    return ordered_validation_results
 
 
 def validate_workflow_shape(workflow_shape: str) -> Graph:
@@ -333,7 +341,7 @@ def validate_workflow_shape(workflow_shape: str) -> Graph:
 def run_validation_task(workflow_shape_for_path: str,
                         workflow_model: WorkflowModel,
                         path: list[ValidationJob],
-                        entity_iri: URIRef) -> dict[URIRef, list[ValidationResult]]:
+                        entity_iri: URIRef) -> OrderedDict[URIRef, list[ValidationResult]]:
     """
     Validation task wrapper for the concurrent process pool
     """
@@ -478,6 +486,7 @@ async def is_workflow_instance_valid(workflow_model: WorkflowModel,
     executed, as a dict of entity -> list of validation path traces executed for the entity. Each validation
     path trace corresponds to a sequence of consecutive workflow model steps paired against nodes in the same entity's
     data workflow, and contains a dict of workflow model step IRI -> ValidationResult.
+    When traversed, the dictionary will be ordered exactly like its corresponding validation path
 
     Note: Normally, only one validation path should appear, unless the entity has been assigned to non-consecutive
     workflow model steps for whichever reason
