@@ -15,6 +15,8 @@ performs a full test of its correctness using CRC 1625 workflows, or in the web 
 All workflow classes are implemented as dataclasses, making it easy for them to be extended to, e.g.,
 set up SHACL shapes and key-value replacements in a programmatic way. An example of this can be found
 on `CRC_1625_workflows_validator.py`
+
+This module will use `logging` to log `debug` messages indicating validation paths, if set.
 """
 import logging
 import os
@@ -373,37 +375,42 @@ def generate_validation_paths(workflow_model: WorkflowModel,
         initial_step_iri_to_validate = get_initial_step_iri_to_validate(workflow_model.initial_step_iri)
 
     if initial_step_iri_to_validate is not None:
-        # List of (current_step_iri, active_paths_for_this_branch as a dict of Entity IRI -> Validation path)
-        visitor_stack: list[tuple[URIRef, dict[URIRef, list[ValidationJob]]]] = [(initial_step_iri_to_validate, dict())]
+        # List of (current_step_iri, active_paths_for_this_branch as a dict of Entity IRI -> list[(ValidationJob, is_active)]
+        visitor_stack: list[tuple[URIRef, dict[URIRef, tuple[list[ValidationJob], bool]]]] = [(initial_step_iri_to_validate, dict())]
 
         # Completed unique paths, prevents duplicates from overlapping traversals
         seen_paths: dict[URIRef, set[tuple[ValidationJob, ...]]] = dict()
 
-        def save_path(entity, completed_path: list[ValidationJob]):
-            if entity not in validation_paths:
-                validation_paths[entity] = []
-                seen_paths[entity] = set()
+        def save_path(entity_iri: URIRef, completed_path: tuple[list[ValidationJob], bool]):
+            if entity_iri not in validation_paths:
+                validation_paths[entity_iri] = []
+                seen_paths[entity_iri] = set()
 
-            path_tuple = tuple(completed_path)
-            if path_tuple not in seen_paths[entity]:
-                validation_paths[entity].append(completed_path)
-                seen_paths[entity].add(path_tuple)
+            jobs = completed_path[0]
+            path_tuple = tuple(jobs)
+            if path_tuple not in seen_paths[entity_iri]:
+                validation_paths[entity_iri].append(jobs)
+                seen_paths[entity_iri].add(path_tuple)
 
         while len(visitor_stack) > 0:
             current_step_iri_to_validate, active_paths = visitor_stack.pop()
-            # Copy them
-            next_active_paths = {entity: list(path) for entity, path in active_paths.items()}
 
+            # Deep copy active paths and reset their status
+            next_active_paths = deepcopy(active_paths)
+            for entity, path_info in list(next_active_paths.items()):
+                next_active_paths[entity] = (path_info[0], False) # Reset their "is_active" status
+
+            # Add validation jobs to those paths that are present in this node
             if current_step_iri_to_validate in validation_jobs:
                 current_step_jobs = validation_jobs[current_step_iri_to_validate]
 
                 for job in current_step_jobs:
-                    if job.entity in next_active_paths:
-                        # Continue the existing path in this branch
-                        next_active_paths[job.entity].append(job)
-                    else:
-                        # It's a new path
-                        next_active_paths[job.entity] = [job]
+                    if job.entity in next_active_paths: # Existing path
+                        path, _ = next_active_paths[job.entity]
+                        path.append(job)
+                        next_active_paths[job.entity] = (path, True)
+                    else: # New path (i.e., this entity was newly assigned to this step)
+                        next_active_paths[job.entity] = ([job], True)
 
             # Check the next steps
             step_data = workflow_model.workflow_model_steps.get(current_step_iri_to_validate)
@@ -411,36 +418,55 @@ def generate_validation_paths(workflow_model: WorkflowModel,
 
             if not next_steps:
                 # We hit a leaf node, so we save all remaining active paths for this branch
-                for entity, completed_path in next_active_paths.items():
-                    save_path(entity, completed_path)
+                #
+                # Those that are still active will contain nodes up to this one, while
+                # the rest will contain nodes up to the previous (parent) step
+                for entity, path_info in next_active_paths.items():
+                    save_path(entity, path_info)
             else:
-                # Identify all entities that are assigned across all next steps
-                entities_in_next_steps = set()
+                # Save all paths that *completely* stop here
+                #
+                # We know that a path stops by looking ahead and checking whether
+                # the entity of each path is present in any of the next steps
+                # If it is not present or it is not active in this node, then we
+                # save it
+                all_next_step_entities = set()
                 for next_step_iri in next_steps:
                     if next_step_iri in validation_jobs:
-                        for job in validation_jobs[next_step_iri]:
-                            entities_in_next_steps.add(job.entity)
+                        all_next_step_entities.update(job.entity for job in validation_jobs[next_step_iri])
 
-                # Save and close paths for entities that don't appear in any of them
-                for entity in list(next_active_paths.keys()):
-                    if entity not in entities_in_next_steps:
-                        save_path(entity, next_active_paths.pop(entity))
+                for entity, path_info in list(next_active_paths.items()):
+                    is_active = path_info[1]
+                    if entity not in all_next_step_entities or not is_active:
+                        save_path(entity, path_info)
+                        del next_active_paths[entity] # And delete it to avoid propagating non-active paths
 
+                # Propagate the remaining active paths to the next nodes
                 for next_step_iri in next_steps:
                     if next_step_iri not in validation_jobs:
-                        # This next step has no entities assigned to it, so it clears all paths
+                        # Visit without any active paths, it resets everything
                         visitor_stack.append((next_step_iri, dict()))
                     else:
-                        # Push it with the paths
-                        visitor_stack.append((next_step_iri, next_active_paths))
+                        # We only forward paths that are still active and belong to an entity
+                        # that will continue being validated in this specific next step
+                        next_step_entities = {job.entity for job in validation_jobs[next_step_iri]}
+                        branch_active_paths = dict()
 
-    logging.debug("Generated validation paths:")
-    for i, path in enumerate(list(validation_paths.values())[0]):
-        logging.debug(f"Path {i}")
-        logging.debug(f"{' -> '.join([vr.paired_step.workflow_model_step.name for vr in path])}")
+                        for entity, path_info in next_active_paths.items():
+                            if entity in next_step_entities:
+                                branch_active_paths[entity] = path_info
+
+                        visitor_stack.append((next_step_iri, branch_active_paths))
+
+    if validation_paths:
+        logging.debug("Generated validation paths:")
+        for entity, paths in validation_paths.items():
+            logging.debug(" Entity:", entity)
+            for i, path in enumerate(paths):
+                logging.debug(f"        Path {i}")
+                logging.debug(f"        {' -> '.join([vr.paired_step.workflow_model_step.name for vr in path])}")
 
     return validation_paths
-
 
 async def is_workflow_instance_valid(workflow_model: WorkflowModel,
                                      workflow_instance: WorkflowInstance,
