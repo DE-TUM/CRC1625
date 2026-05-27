@@ -10,20 +10,21 @@ from nicegui.elements.select import Select
 from rdflib import URIRef
 
 from datastores.rdf import rdf_datastore_client
-from handover_workflows_validation_webui.common_functions import get_sample_object_id_of_handover_group_iri
-from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent
+#from handover_workflows_validation_webui.common_functions import get_sample_object_id_of_handover_group_iri
+from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, NodeType
 from handover_workflows_validation_webui.middleware import matinf_or_demo_login_required, activate_demo_mode, log_out, show_materialization_card
 from handover_workflows_validation_webui.workflow_model_ui.edit_workflow_model_page import workflow_model_to_nodes_and_edges
-from workflows_validation.CRC_1625_workflows_validator.CRC_1625_workflows_validator import get_creator_user_id, set_creator_user_id, CRC1625WorkflowModelStep, \
-    crc_prefix
-from workflows_validation.workflow_instance import WorkflowInstance, delete_workflow_instance, store_workflow_instance, get_workflow_instances_of_model, \
-    StepAssignment, is_workflow_instance_definition_valid
-from workflows_validation.workflow_model import store_workflow_model, read_workflow_model, WorkflowModel
-from workflows_validation.workflows_validator import is_workflow_instance_valid
+#from workflows_validation.CRC_1625_workflows_validator.CRC_1625_workflows_validator import get_creator_user_id, set_creator_user_id, CRC1625WorkflowModelStep, \
+#    crc_prefix
+#from workflows_validation.workflow_instance import WorkflowInstance, delete_workflow_instance, store_workflow_instance, get_workflow_instances_of_model, \
+#    StepAssignment, is_workflow_instance_definition_valid
+#from workflows_validation.workflow_model import store_workflow_model, read_workflow_model, WorkflowModel
+#from workflows_validation.workflows_validator import is_workflow_instance_valid
 
 module_dir = os.path.dirname(__file__)
 prefixes: str = open(os.path.join(module_dir, '../workflows_validation/queries/prefixes.sparql')).read()
 details_all_users_query = prefixes + open(os.path.join(module_dir, 'queries/details_all_users.sparql'), 'r').read()
+
 get_workflow_models_and_creators_query = prefixes + open(os.path.join(module_dir, 'queries/get_workflow_models_and_creators.sparql'), 'r').read()
 
 
@@ -565,6 +566,8 @@ def handle_demo_mode_button_click():
     ui.navigate.to('/workflows')
 
 
+
+
 @ui.page('/')
 async def landing_page():
     """
@@ -592,8 +595,16 @@ async def landing_page():
         ui.label('© 2025-2027 - CRC 1625 A06 Project - Work in progress').classes('text-m').style('color: #000000')
         ui.space()
         ui.image('/assets/crc_logo_black_letters_wide.png').classes('w-26')
-
+    
+    #HERE IS THE MLEM CARD
     with ui.row().classes('w-full justify-center gap-8 p-8'):
+        with ui.card().tight().classes('w-128 h-100 cursor-pointer hover:shadow-lg') \
+                .on('click', lambda: ui.navigate.to('/visualization_ui/%2D10')): #CHANGE THE '-10' FOR object_ID!!!
+            ui.image('assets/workflows_validation_header.png').props('fit=scale-down').classes('h-90')
+            with ui.column().classes('p-4 w-full bg-secondary'):
+                ui.label('Handover visualization').classes('text-h6')
+
+        
         with ui.card().tight().classes('w-128 h-100 cursor-pointer hover:shadow-lg') \
                 .on('click', lambda: ui.navigate.to('/workflows')):
             ui.image('assets/workflows_validation_header.png').props('fit=scale-down').classes('h-90')

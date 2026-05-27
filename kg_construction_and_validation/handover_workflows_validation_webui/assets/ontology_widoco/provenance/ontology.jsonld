@@ -1,0 +1,1271 @@
+[ {
+  "@id" : "_:genid1",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2002/07/owl#unionOf" : [ {
+    "@list" : [ {
+      "@id" : "http://www.w3.org/ns/prov#Activity"
+    }, {
+      "@id" : "http://www.w3.org/ns/prov#Entity"
+    } ]
+  } ]
+}, {
+  "@id" : "_:genid4",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2002/07/owl#unionOf" : [ {
+    "@list" : [ {
+      "@id" : "http://www.w3.org/ns/prov#Activity"
+    }, {
+      "@id" : "http://www.w3.org/ns/prov#Entity"
+    } ]
+  } ]
+}, {
+  "@id" : "_:genid7",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2002/07/owl#unionOf" : [ {
+    "@list" : [ {
+      "@id" : "http://www.w3.org/ns/prov#Activity"
+    }, {
+      "@id" : "http://www.w3.org/ns/prov#Entity"
+    } ]
+  } ]
+}, {
+  "@id" : "http://purl.org/dc/terms/abstract",
+  "@type" : [ "http://www.w3.org/2002/07/owl#AnnotationProperty" ]
+}, {
+  "@id" : "http://purl.org/dc/terms/date",
+  "@type" : [ "http://www.w3.org/2002/07/owl#AnnotationProperty" ]
+}, {
+  "@id" : "http://purl.org/dc/terms/description",
+  "@type" : [ "http://www.w3.org/2002/07/owl#AnnotationProperty" ]
+}, {
+  "@id" : "http://purl.org/vocommons/voaf#extends",
+  "@type" : [ "http://www.w3.org/2002/07/owl#AnnotationProperty" ]
+}, {
+  "@id" : "http://schema.org/codeRepository",
+  "@type" : [ "http://www.w3.org/2002/07/owl#AnnotationProperty" ]
+}, {
+  "@id" : "http://www.w3.org/2001/XMLSchema#date",
+  "@type" : [ "http://www.w3.org/2000/01/rdf-schema#Datatype" ]
+}, {
+  "@id" : "http://www.w3.org/ns/prov#wasAssociatedWith",
+  "http://www.w3.org/2002/07/owl#equivalentProperty" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo"
+  } ]
+}, {
+  "@id" : "http://www.w3.org/ns/prov#wasAttributedTo",
+  "http://www.w3.org/2002/07/owl#equivalentProperty" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/creator"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Ontology" ],
+  "http://purl.org/dc/elements/1.1/creator" : [ {
+    "@id" : "https://orcid.org/0009-0006-0232-8677"
+  } ],
+  "http://purl.org/dc/terms/abstract" : [ {
+    "@value" : "Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625."
+  } ],
+  "http://purl.org/dc/terms/date" : [ {
+    "@type" : "http://www.w3.org/2001/XMLSchema#date",
+    "@value" : "2026-03-19"
+  } ],
+  "http://purl.org/dc/terms/description" : [ {
+    "@value" : "Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625.\n                                          This ontology models the experimental (meta-)data, provenance and handover workflows present in MatInf instances, while additionally being compatible with existing Materials Science ontologies.\n                                          This additionally includes the modelling of handover workflow models, and other (meta-)data that is exclusively used by the MatInf semantic layer.\n                                          Note that some classes are not present in the ontology document. Namely, specific measurement types are dynamically generated, as they change between MatInf instances. Processes and activities for them, however, are included here."
+  } ],
+  "http://purl.org/dc/terms/license" : [ {
+    "@id" : "http://creativecommons.org/licenses/by-sa/4.0/"
+  } ],
+  "http://purl.org/dc/terms/title" : [ {
+    "@language" : "en",
+    "@value" : "CRC 1625 Ontology"
+  } ],
+  "http://purl.org/vocommons/voaf#extends" : [ {
+    "@id" : "https://w3id.org/pmd/co/2.0.8"
+  } ],
+  "http://schema.org/codeRepository" : [ {
+    "@type" : "http://www.w3.org/2001/XMLSchema#anyURI",
+    "@value" : "https://github.com/DE-TUM/CRC1625"
+  } ],
+  "http://www.w3.org/2002/07/owl#imports" : [ {
+    "@id" : "https://purl.bioontology.org/ontology/OCE"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/2.0.8"
+  } ],
+  "http://www.w3.org/2002/07/owl#versionInfo" : [ {
+    "@value" : "1.0.0"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/APTProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process where APT measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "APT Process"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/AnnealingProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/BandgapProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process where Bandgap measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/BulkComposition",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@language" : "en",
+    "@value" : "The composition of a Materials Library as a whole"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@language" : "en",
+    "@value" : "Bulk Composition"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://w3id.org/pmd/co/ChemicalObject"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process that represents to the act of applying a measurement technique on an object in the CRC. Further specified by its subclasses.\n\nNote: Not to be confused with prov:Activity, which acts as the superclass of Process.\n\nAn entity of this class or any of its subclasses indicates the nature of its measurements by also belonging to one of the *Process classes (e.g. FIMProcess)"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Characterization activity"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://w3id.org/pmd/co/Process"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process that has as output a series of measurements of the same nature (e.g. EDX, TEM, FIM...) within the same handover of a sample in time, that results in one or more files being uploaded to the RDMS.\n\nThis is an additional abstraction that acts as a subordinate process of a handover, and has as outputs one or more measurements corresponding to the same type of measurement  (e.g., for EDX, EDX_raw and EDX_csv files)."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Characterization activity instance"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process indicating that a Handover workflow model step desires a set of measurements of the same time.\n\nAn entity of this type indicates the type of its measurements by belonging to a unidentifiable process class. This will be used by e.g. the Handover workflows validation system to correctly validate measurements assigned to handovers."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Characterization activity model"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ChemicalObject",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2002/07/owl#equivalentClass" : [ {
+    "@id" : "https://w3id.org/pmd/co/ChemicalObject"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ComputationalSample",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://w3id.org/pmd/co/DigitalEntity"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process where EDX measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "EDX Microscopy Process"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/MicroscopyProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/EngineeredMaterial",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2002/07/owl#equivalentClass" : [ {
+    "@id" : "https://w3id.org/pmd/co/EngineeredMaterial"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/FIMProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process where FIM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/Handover",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "The process of handing an object (for now, samples) from one person to another. This represents the transfer of physical objects between members of the same or different projects within the CRC to perform different analysis."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/IdentifiableProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverGroup",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "Abstraction that has as subordinate process a chain or one or more handovers that took place consecutively within the same CRC project (i.e., all destination users belong to the sam eproject)"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Handover group"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflow",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@language" : "en",
+    "@value" : "A process composed of a series of processing steps as part of the work of the CRC, which involve the act of physically moving a sample to be studied to another person and/or project.\nIts subclasses narrow its application."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Handover workflow"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://w3id.org/pmd/co/Process"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@language" : "en",
+    "@value" : "The beginning of a series of processes belonging to the same sample in the RDMS.\n\nAn instance of this entity will contain a three-layer hierarchy of consecutive HandoverGroup instances, each containing a series of consecutive Handover instances, which finally can contain Activity Instance entities with measurements as their outputs."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@language" : "en",
+    "@value" : "Handover workflow instance"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflow"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowInstanceAssignment",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process that indicates an assignment of one or more samples to a step in an entity of type WorkflowModel. A workflowModelInstance will contain one or more WorkflowInstanceAssignment instances to completely link a WorkflowModel to existing objects in the RDMS."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Handover workflow instance assignment"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@language" : "en",
+    "@value" : "The beginning of a series of processes that need to be performed.\n\n\nAn instance of this entity will contain a two-layer hierarchy of consecutive WorkflowModelStep instances that correspond to hypothetical handover groups of a given sample. Each step will contain zero or more Activity Model instances that dictate the desired measurements that the sample should contain, among other metadata, and that are taken at the time of any of the handovers within its corresponding handover group.\n\nNote that a Handover workflow Model instance dictates the processing steps, but are not linked to a specific samples - they instead act as templates that can be reused at will and assigned to different groups of samples. An entity of type workflowModelInstance will thus completely characterize a WorkflowModel by being able to apply it to existing objects in the RDMS during validation."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@language" : "en",
+    "@value" : "Handover workflow model"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflow"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstance",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "The beginning of a series of WorkflowModelStep instances. Each WorkflowModelStep instance indicates an assignment of one or more samples to a step in the same entity of type WorkflowModel.\n\n\nAn entity of this class will thus completely characterize a WorkflowModel by being able to apply it to existing objects in the RDMS during validation."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Handover workflow model instance"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A step in a Handover workflow model, with a set of attributes indicating its settings, and references to Activity Models and projects"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Handover workflow model step"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/IdeaOrExperimentPlan",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@language" : "en",
+    "@value" : "An idea or experiment plan that may kickstart a Handover Workflow Model, requests for synthesis of samples and eventually a Handover Workflow Instance for one or more Materials Libraries"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@language" : "en",
+    "@value" : "Idea or experiment plan"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/IdentifiableProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/IdentifiableProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process that is identified by an ID in the RDMS"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Identifiable process"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/LEISProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process where LEIS measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/LiteratureReference",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://w3id.org/pmd/co/Document"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@language" : "en",
+    "@value" : "A complete thin-film Materials Library, composed of 342 measurement areas to be analyzed or treated in any way."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@language" : "en",
+    "@value" : "Materials Library"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://w3id.org/pmd/co/EngineeredMaterial"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/Measurement",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2002/07/owl#equivalentClass" : [ {
+    "@id" : "https://w3id.org/pmd/co/Measurement"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/MeasurementArea",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "One of the 342 defined locations of a materials library, which may be part of the materials library (thin film) itself, or a sample (piece) of it."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Measurement area"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://w3id.org/pmd/co/EngineeredMaterial"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/NoGradientSample",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "From Satyakam"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/PSMProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/PhotoProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process where photos have been taken. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Photo Process"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process that refers to a real event in the CRC / RDMS database, such a handover, or an abstraction over it (activities, virtual handovers and handover groups). Thus, it can be identifiable or not."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@language" : "en",
+    "@value" : "Process Instance"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://w3id.org/pmd/co/Process"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@language" : "en",
+    "@value" : "A process that does not refer to a real event in the CRC / RDMS database, and instead refers to an entity within a Handover Workflow Model, such as a Handover workflow model step, an activity required by it or a Handover workflow step assignment."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@language" : "en",
+    "@value" : "Process Model"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/Project",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "One of the projects of the CRC (e.g. A01, B03...)"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@language" : "en",
+    "@value" : "Project"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://w3id.org/pmd/co/Organization"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/Publication",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://w3id.org/pmd/co/Document"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ReportProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process where a non-synthesis related report has been uploaded (i.e., anything from presentations to .pdf documents). We treat it as a characterization. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/RequestForSynthesis",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@language" : "en",
+    "@value" : "A request for the synthesis of a Materials Library / Sample with a desired composition.\n\nNote that other parameters will be modelled in the future."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@language" : "en",
+    "@value" : "Request for synthesis"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://w3id.org/pmd/co/ValueObject"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ResistanceProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process where Resistance measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/SDCProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process where SDC measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process where SECCM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process where SEM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/Sample",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A physical piece of a materials library, containing a subset of its 342 measurement areas."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Sample"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary"
+  } ],
+  "http://www.w3.org/2002/07/owl#equivalentClass" : [ {
+    "@id" : "https://w3id.org/pmd/co/Sample"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/StressChip",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/StripeSample",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/Sample"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/Substrate",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@language" : "en",
+    "@value" : "The subtrate that conforms the bottom layer of material of a Materials Library / Sample"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@language" : "en",
+    "@value" : "Substrate"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://w3id.org/pmd/co/ValueObject"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/SurfaceComposition",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://w3id.org/pmd/co/ChemicalComposition"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process where a synthesis or treatment has been performed, resulting in a synthesis report. We treat it as a characterization. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentReport",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@language" : "en",
+    "@value" : "A synthesis or treatment (e.g. annealing) report for a ML or Sample"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@language" : "en",
+    "@value" : "Synthesis or treatment Report"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://w3id.org/pmd/co/Document"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/TEMProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process where TEM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ThicknessProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process where Thickness measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process that is not identified by an ID in the RDMS"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Unidentifiable process"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://w3id.org/pmd/co/Process"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UploadedFile",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2002/07/owl#equivalentClass" : [ {
+    "@id" : "https://w3id.org/pmd/co/ValueObject"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/User",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2002/07/owl#equivalentClass" : [ {
+    "@id" : "https://w3id.org/pmd/co/Operator"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/VirtualHandover",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A handover to which all measurements of a sample that were uploaded to the RDMS before any actual handover was logged. It will always act as the first handover of the chain on every sample, and may be part of a handover group alone or with other handovers."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Virtual handover"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/VolumeComposition",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://w3id.org/pmd/co/ChemicalComposition"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process where XPS measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/XRDProcess",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "A process where XRD measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subClassOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"
+  }, {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"
+  }, {
+    "@id" : "https://w3id.org/pmd/co/AnalysingProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/acceptedDate",
+  "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "The date a handover was accepted in the RDMS bt the destination user. Note that it does not need to match with its creation date"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "http://www.w3.org/ns/prov#Activity"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Accepted date"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "http://www.w3.org/2001/XMLSchema#dateTime"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "http://www.w3.org/2002/07/owl#topDataProperty"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/allowIntermediateHandoverGroups",
+  "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "Indicates if the validation of the Handover workflow model allows intermediate, non-compliant handover groups on an otherwise valid handover group chain while validating. If true, the validation system will attempt to keep validating the current Handover workflow model step on the next handover group if the current handover group was non-compliant."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Allow intermediate handover groups"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "http://www.w3.org/2001/XMLSchema#boolean"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "Indicates that the handover group that the Handover workflow model step is checking is allowed to take place in the given group"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Allowed project"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/Project"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/allowsOtherActivities",
+  "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "Indicates that the handover group that the Handover workflow model step is validating is allowed to have activities other than the ones indicated by requiresActivity. If false, the presence of other activities will cause the validation to fail in this step."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Allows other activities"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "http://www.w3.org/2001/XMLSchema#boolean"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "Indicates that the Handover workflow assignment is related to the target materials library or sample"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowInstanceAssignment"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Assigned object"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "The assigned to object property is used to associate a user or project to a step in the handover workflow. Note that association does not imply authorship, for which the creator property exists.\n\nThis is used to associate Handover Groups to specific projects, and invididual Handovers to their corresponding receiver users."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Assigned to"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/characteristic",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "The object property characteristic indicates a relationship between a Materials Library, Sample or Measurement Area and anything that further describes it in the RDMS.\n\nThis can be the result of applying an actual characterization technique on a sample (e.g., the results of TEM, EDX...), or associating it with miscellaneous file uploads (photos, documents...). A Measurement Area can also contain characteristics, such as individual EDX composition results.\n\nThe entity pointed by at by this property may contain metadata such as creators and dates, whose raw values (e.g. file paths or composition values) can be accessed by the crc:value property"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "http://www.w3.org/2002/07/owl#topObjectProperty"
+  } ],
+  "http://www.w3.org/2002/07/owl#equivalentProperty" : [ {
+    "@id" : "https://w3id.org/pmd/co/characteristic"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/composedOf",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "The composed of object property is used to indicate that a Materials Library or Sample is composed of other objects. These can be sample (pieces), treated samples (e.g. annealed samples) or any other kind of derivation that is registered in the RDMS as a separate object for better traceability."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "http://www.w3.org/2002/07/owl#topObjectProperty"
+  } ],
+  "http://www.w3.org/2002/07/owl#equivalentProperty" : [ {
+    "@id" : "https://w3id.org/pmd/co/composedOf"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/creationDate",
+  "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@language" : "en",
+    "@value" : "The creation date of an RDMS object"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "_:genid1"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@language" : "en",
+    "@value" : "Creation date"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "http://www.w3.org/2001/XMLSchema#dateTime"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "http://www.w3.org/2002/07/owl#topDataProperty"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/creator",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "The creator of the object, characterization, etc. it refers to, as indicated in the RDMS."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Creator"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/element",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "The element object property relates Materials Libraries, Samples and compositions with the elements they are composed of.\n\nThe elements themselves are CheBI entities that can be individually accessed for more information (i.e., the formula for performing string matching)"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "http://www.w3.org/2002/07/owl#topObjectProperty"
+  } ],
+  "http://www.w3.org/2002/07/owl#equivalentProperty" : [ {
+    "@id" : "https://w3id.org/pmd/co/relatesToElement"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/externalID",
+  "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty", "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "External ID assigned to a Materials Library / Sample"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "_:genid4"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@language" : "en",
+    "@value" : "External ID"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "http://www.w3.org/2001/XMLSchema#integer"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "http://www.w3.org/2002/07/owl#topDataProperty"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/givenName",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "The given name of a person"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstanceOf",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "Indicates that the Handover workflow model instance is an instantiation of the Handover workflow model"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Handover workflow model instance of"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "Indicates that the Handover workflow model instance has an assignment of samples to a Handover workflow model step further described in the target entity"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstance"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Has assignment"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowInstanceAssignment"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/input",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "The object property input is used to point at the anything that influenced or was used by a step in a handover workflow.\n\nThis is employed by the characterization activities (the leaf/most basic step of a handover workflow) to point at the actual results (e.g. a photo or EDX results file) they refer to."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "http://www.w3.org/2002/07/owl#topObjectProperty"
+  } ],
+  "http://www.w3.org/2002/07/owl#equivalentProperty" : [ {
+    "@id" : "https://w3id.org/pmd/co/input"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/internalID",
+  "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty", "http://www.w3.org/2002/07/owl#Class" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@language" : "en",
+    "@value" : "internal ID (AKA object ID or Type ID) of an entity in the RDMS"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "_:genid7"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@language" : "en",
+    "@value" : "Internal ID"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "http://www.w3.org/2001/XMLSchema#integer"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "http://www.w3.org/2002/07/owl#topDataProperty"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/isHandoverWorkflowStepEnabled",
+  "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "Indicates if the current Handover workflow model step is to be validated by the system. If false, the system will keep checking the current handover group from the next Handover workflow model step."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Is Handover workflow step enabled"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "http://www.w3.org/2001/XMLSchema#boolean"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/memberOfProject",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "https://w3id.org/pmd/co/Person"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@language" : "en",
+    "@value" : "Member of project"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/Project"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/name",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "The name of a person"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/nextProcessAcrossGroups",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "Connection between two processes that took place in two different groups each. Only used as an intermediate step during materialization."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "next process across groups"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "https://w3id.org/pmd/co/nextProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/nextStep",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "The next step object property is used to indicate the next step in a chain of Handover Groups or Handovers."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "http://www.w3.org/ns/prov#wasInformedBy"
+  } ],
+  "http://www.w3.org/2002/07/owl#equivalentProperty" : [ {
+    "@id" : "https://w3id.org/pmd/co/nextProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/objectDescription",
+  "@type" : [ "http://www.w3.org/2002/07/owl#AnnotationProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "The annotation property object description points to the description of the RDMS object it refers to."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "http://www.w3.org/ns/prov#Activity"
+  }, {
+    "@id" : "http://www.w3.org/ns/prov#Agent"
+  }, {
+    "@id" : "http://www.w3.org/ns/prov#Entity"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "http://www.w3.org/2000/01/rdf-schema#Literal"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "http://www.w3.org/2000/01/rdf-schema#comment"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/objectName",
+  "@type" : [ "http://www.w3.org/2002/07/owl#AnnotationProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "The datatype property object description points to the name of the RDMS object it refers to."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "http://www.w3.org/ns/prov#Activity"
+  }, {
+    "@id" : "http://www.w3.org/ns/prov#Agent"
+  }, {
+    "@id" : "http://www.w3.org/ns/prov#Entity"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "http://www.w3.org/2000/01/rdf-schema#Literal"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "http://www.w3.org/2000/01/rdf-schema#label"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/output",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "The object property output is used to point at the results of a step in a handover workflow.\n\nThis is employed by the characterization activities (the leaf/most basic step of a handover workflow) to point at the actual results (e.g. a photo or EDX results file) they refer to."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "http://www.w3.org/2002/07/owl#topObjectProperty"
+  } ],
+  "http://www.w3.org/2002/07/owl#equivalentProperty" : [ {
+    "@id" : "https://w3id.org/pmd/co/output"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/percentage",
+  "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty" ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "Indicates that the handover Handover workflow assignment is related to the target Handover workflow model step"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowInstanceAssignment"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Relates to Handover Workflow step"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/requiresActivity",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "Indicates that the handover group that the Handover workflow model step is checking must contain a given activity within its handovers. The type of measurement is indicated by the targeted entity's class, by also belonging to one of the *Process classes (e.g. FIMProcess)"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Requires activity"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/resistance",
+  "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "Measured resistance in a specific measurement area of a sample"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "https://w3id.org/pmd/co/ChemicalComposition"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Resistance"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "http://www.w3.org/2001/XMLSchema#double"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "http://www.w3.org/2002/07/owl#topDataProperty"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/resource",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "The resource object property is used to indicate that an uploaded file in the RDMS is related in some way to a given Materials library / Sample\n\nThis property does not explicitly indicate that the given file is generated *for* the object it is connected to; instead, it indicates that they are *related* in a generic way.\nTo indicate the former, the connection should instead be the other way around via the crc:characteristic property, as is in the majority of cases.\n             "
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "https://w3id.org/pmd/co/ValueObject"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Requires activity"
+  } ],
+  "http://www.w3.org/2002/07/owl#equivalentProperty" : [ {
+    "@id" : "https://w3id.org/pmd/co/resource"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/substep",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "The substep object property is used to indicate a part of a step in a handover workflow that has been broken into smaller (sub)steps. This is also employed in handover workflow models.\n\nMore specifically, in a handover workflow, this is employed by Handover Groups to point to the start of the chain of handovers that they represent, and by an inidividual Handover to point to the individual characterization activities that happened inside it."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "substep"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "http://www.w3.org/2002/07/owl#topObjectProperty"
+  } ],
+  "http://www.w3.org/2002/07/owl#equivalentProperty" : [ {
+    "@id" : "https://w3id.org/pmd/co/subordinateProcess"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/surname",
+  "@type" : [ "http://www.w3.org/2002/07/owl#ObjectProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "The surname of a person"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/temporaryDatatypeProperty",
+  "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "Property used exclusively during the mapping of SQL to RDF, deleted via a post-processing script after executing the Ontop mappings"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "http://www.w3.org/2002/07/owl#topDataProperty"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/tolerance",
+  "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "Measured tolerance in a specific measurement area of a sample"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "https://w3id.org/pmd/co/ChemicalComposition"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Tolerance"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "http://www.w3.org/2001/XMLSchema#double"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "http://www.w3.org/2002/07/owl#topDataProperty"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/value",
+  "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "The raw value the entity referred by the characteristic object property refers to.\n\nWhile the entity pointed by at by the crc:characteristic property may contain metadata such as creators and dates, its raw values (e.g. file paths or composition values) can be accessed by this property."
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "http://www.w3.org/2002/07/owl#topDataProperty"
+  } ],
+  "http://www.w3.org/2002/07/owl#equivalentProperty" : [ {
+    "@id" : "https://w3id.org/pmd/co/value"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/x_position",
+  "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "X coordinate within a sample on which a composition was taken for a particular measurement area"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "https://w3id.org/pmd/co/ChemicalComposition"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "X position"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "http://www.w3.org/2001/XMLSchema#double"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "http://www.w3.org/2002/07/owl#topDataProperty"
+  } ]
+}, {
+  "@id" : "https://crc1625.mdi.ruhr-uni-bochum.de/y_position",
+  "@type" : [ "http://www.w3.org/2002/07/owl#DatatypeProperty" ],
+  "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+    "@value" : "X coordinate within a sample on which a composition was taken for a particular measurement area"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#domain" : [ {
+    "@id" : "https://w3id.org/pmd/co/ChemicalComposition"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+    "@value" : "Y position"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#range" : [ {
+    "@id" : "http://www.w3.org/2001/XMLSchema#double"
+  } ],
+  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf" : [ {
+    "@id" : "http://www.w3.org/2002/07/owl#topDataProperty"
+  } ]
+}, {
+  "@id" : "https://w3id.org/pmd/co/Organization",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ]
+}, {
+  "@id" : "https://w3id.org/pmd/co/Person",
+  "@type" : [ "http://www.w3.org/2002/07/owl#Class" ]
+} ]

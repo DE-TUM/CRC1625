@@ -5,6 +5,16 @@
     "measurement_class_name": "PhotoProcess"
   },
   {
+    "measurement_ids": ["28", "49", "128", "140", "141", "160"],
+    "measurement_name": "AFM",
+    "measurement_class_name": "AFMProcess"
+  },
+  {
+    "measurement_ids": ["137"],
+    "measurement_name": "EBSD",
+    "measurement_class_name": "EBSDProcess"
+  },
+  {
     "measurement_ids": ["13", "15", "19", "53", "78", "79"],
     "measurement_name": "EDX",
     "measurement_class_name": "EDXMicroscopyProcess"
@@ -60,6 +70,11 @@
     "measurement_class_name": "SDCProcess"
   },
   {
+    "measurement_ids": ["51", "52", "123"],
+    "measurement_name": "STM",
+    "measurement_class_name": "STMProcess"
+  },
+  {
     "measurement_ids": ["50", "59", "60", "86", "87"],
     "measurement_name": "SECCM",
     "measurement_class_name": "SECCMProcess"
@@ -68,6 +83,11 @@
     "measurement_ids": ["47"],
     "measurement_name": "FIM",
     "measurement_class_name": "FIMProcess"
+  },
+  {
+    "measurement_ids": ["111", "112", "151"],
+    "measurement_name": "FIB",
+    "measurement_class_name": "FIBProcess"
   },
   {
     "measurement_ids": ["147"],

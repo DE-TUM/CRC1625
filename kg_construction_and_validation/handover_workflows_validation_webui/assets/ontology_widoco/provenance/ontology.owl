@@ -1,0 +1,1313 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="https://crc1625.mdi.ruhr-uni-bochum.de#"
+     xml:base="https://crc1625.mdi.ruhr-uni-bochum.de"
+     xmlns:co="https://w3id.org/pmd/co/"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:obo="http://purl.obolibrary.org/obo/"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:prov="http://www.w3.org/ns/prov#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+     xmlns:voaf="http://purl.org/vocommons/voaf#"
+     xmlns:swrla="http://swrl.stanford.edu/ontologies/3.3/swrla.owl#"
+     xmlns:terms="http://purl.org/dc/terms/"
+     xmlns:schema="http://schema.org/"
+     xmlns:crc1625="https://crc1625.mdi.ruhr-uni-bochum.de/">
+    <owl:Ontology rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de">
+        <owl:imports rdf:resource="https://purl.bioontology.org/ontology/OCE"/>
+        <owl:imports rdf:resource="https://w3id.org/pmd/co/2.0.8"/>
+        <dc:creator rdf:resource="https://orcid.org/0009-0006-0232-8677"/>
+        <terms:abstract>Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625.</terms:abstract>
+        <terms:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2026-03-19</terms:date>
+        <terms:description>Ontology for the semantic layer built upon MatInf databases, currently in use for the CRC 1625.
+                                          This ontology models the experimental (meta-)data, provenance and handover workflows present in MatInf instances, while additionally being compatible with existing Materials Science ontologies.
+                                          This additionally includes the modelling of handover workflow models, and other (meta-)data that is exclusively used by the MatInf semantic layer.
+                                          Note that some classes are not present in the ontology document. Namely, specific measurement types are dynamically generated, as they change between MatInf instances. Processes and activities for them, however, are included here.</terms:description>
+        <terms:license rdf:resource="http://creativecommons.org/licenses/by-sa/4.0/"/>
+        <terms:title xml:lang="en">CRC 1625 Ontology</terms:title>
+        <voaf:extends rdf:resource="https://w3id.org/pmd/co/2.0.8"/>
+        <schema:codeRepository rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://github.com/DE-TUM/CRC1625</schema:codeRepository>
+        <owl:versionInfo>1.0.0</owl:versionInfo>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- http://purl.org/dc/terms/abstract -->
+
+
+    <owl:AnnotationProperty rdf:about="http://purl.org/dc/terms/abstract"/>
+    
+
+
+    <!-- http://purl.org/dc/terms/date -->
+
+
+    <owl:AnnotationProperty rdf:about="http://purl.org/dc/terms/date"/>
+    
+
+
+    <!-- http://purl.org/dc/terms/description -->
+
+
+    <owl:AnnotationProperty rdf:about="http://purl.org/dc/terms/description"/>
+    
+
+
+    <!-- http://purl.org/vocommons/voaf#extends -->
+
+
+    <owl:AnnotationProperty rdf:about="http://purl.org/vocommons/voaf#extends"/>
+    
+
+
+    <!-- http://schema.org/codeRepository -->
+
+
+    <owl:AnnotationProperty rdf:about="http://schema.org/codeRepository"/>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/objectDescription -->
+
+
+    <owl:AnnotationProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/objectDescription">
+        <rdfs:comment>The annotation property object description points to the description of the RDMS object it refers to.</rdfs:comment>
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#comment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+        <rdfs:domain rdf:resource="http://www.w3.org/ns/prov#Activity"/>
+        <rdfs:domain rdf:resource="http://www.w3.org/ns/prov#Agent"/>
+        <rdfs:domain rdf:resource="http://www.w3.org/ns/prov#Entity"/>
+    </owl:AnnotationProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/objectName -->
+
+
+    <owl:AnnotationProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/objectName">
+        <rdfs:comment>The datatype property object description points to the name of the RDMS object it refers to.</rdfs:comment>
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#label"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+        <rdfs:domain rdf:resource="http://www.w3.org/ns/prov#Activity"/>
+        <rdfs:domain rdf:resource="http://www.w3.org/ns/prov#Agent"/>
+        <rdfs:domain rdf:resource="http://www.w3.org/ns/prov#Entity"/>
+    </owl:AnnotationProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Datatypes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- http://www.w3.org/2001/XMLSchema#date -->
+
+
+    <rdfs:Datatype rdf:about="http://www.w3.org/2001/XMLSchema#date"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- http://www.w3.org/ns/prov#wasAssociatedWith -->
+
+
+    <rdf:Description rdf:about="http://www.w3.org/ns/prov#wasAssociatedWith">
+        <owl:equivalentProperty rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#wasAttributedTo -->
+
+
+    <rdf:Description rdf:about="http://www.w3.org/ns/prov#wasAttributedTo">
+        <owl:equivalentProperty rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/creator"/>
+    </rdf:Description>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject -->
+
+
+    <owl:ObjectProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/allowedProject">
+        <rdfs:domain rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep"/>
+        <rdfs:range rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/Project"/>
+        <rdfs:comment>Indicates that the handover group that the Handover workflow model step is checking is allowed to take place in the given group</rdfs:comment>
+        <rdfs:label>Allowed project</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject -->
+
+
+    <owl:ObjectProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/assignedObject">
+        <rdfs:subPropertyOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo"/>
+        <rdfs:domain rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowInstanceAssignment"/>
+        <rdfs:range rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary"/>
+        <rdfs:comment>Indicates that the Handover workflow assignment is related to the target materials library or sample</rdfs:comment>
+        <rdfs:label>Assigned object</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo -->
+
+
+    <owl:ObjectProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo">
+        <rdfs:comment>The assigned to object property is used to associate a user or project to a step in the handover workflow. Note that association does not imply authorship, for which the creator property exists.
+
+This is used to associate Handover Groups to specific projects, and invididual Handovers to their corresponding receiver users.</rdfs:comment>
+        <rdfs:label>Assigned to</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/characteristic -->
+
+
+    <owl:ObjectProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/characteristic">
+        <owl:equivalentProperty rdf:resource="https://w3id.org/pmd/co/characteristic"/>
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <rdfs:comment>The object property characteristic indicates a relationship between a Materials Library, Sample or Measurement Area and anything that further describes it in the RDMS.
+
+This can be the result of applying an actual characterization technique on a sample (e.g., the results of TEM, EDX...), or associating it with miscellaneous file uploads (photos, documents...). A Measurement Area can also contain characteristics, such as individual EDX composition results.
+
+The entity pointed by at by this property may contain metadata such as creators and dates, whose raw values (e.g. file paths or composition values) can be accessed by the crc:value property</rdfs:comment>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/composedOf -->
+
+
+    <owl:ObjectProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/composedOf">
+        <owl:equivalentProperty rdf:resource="https://w3id.org/pmd/co/composedOf"/>
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <rdfs:comment>The composed of object property is used to indicate that a Materials Library or Sample is composed of other objects. These can be sample (pieces), treated samples (e.g. annealed samples) or any other kind of derivation that is registered in the RDMS as a separate object for better traceability.</rdfs:comment>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/creator -->
+
+
+    <owl:ObjectProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/creator">
+        <rdfs:comment>The creator of the object, characterization, etc. it refers to, as indicated in the RDMS.</rdfs:comment>
+        <rdfs:label>Creator</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/element -->
+
+
+    <owl:ObjectProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/element">
+        <owl:equivalentProperty rdf:resource="https://w3id.org/pmd/co/relatesToElement"/>
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <rdfs:comment>The element object property relates Materials Libraries, Samples and compositions with the elements they are composed of.
+
+The elements themselves are CheBI entities that can be individually accessed for more information (i.e., the formula for performing string matching)</rdfs:comment>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/givenName -->
+
+
+    <owl:ObjectProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/givenName">
+        <rdfs:comment>The given name of a person</rdfs:comment>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstanceOf -->
+
+
+    <owl:ObjectProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstanceOf">
+        <rdfs:domain rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance"/>
+        <rdfs:range rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel"/>
+        <rdfs:comment>Indicates that the Handover workflow model instance is an instantiation of the Handover workflow model</rdfs:comment>
+        <rdfs:label>Handover workflow model instance of</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment -->
+
+
+    <owl:ObjectProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/hasAssignment">
+        <rdfs:domain rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstance"/>
+        <rdfs:range rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowInstanceAssignment"/>
+        <rdfs:comment>Indicates that the Handover workflow model instance has an assignment of samples to a Handover workflow model step further described in the target entity</rdfs:comment>
+        <rdfs:label>Has assignment</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/input -->
+
+
+    <owl:ObjectProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/input">
+        <owl:equivalentProperty rdf:resource="https://w3id.org/pmd/co/input"/>
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <rdfs:comment>The object property input is used to point at the anything that influenced or was used by a step in a handover workflow.
+
+This is employed by the characterization activities (the leaf/most basic step of a handover workflow) to point at the actual results (e.g. a photo or EDX results file) they refer to.</rdfs:comment>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/memberOfProject -->
+
+
+    <owl:ObjectProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/memberOfProject">
+        <rdfs:domain rdf:resource="https://w3id.org/pmd/co/Person"/>
+        <rdfs:range rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/Project"/>
+        <rdfs:label xml:lang="en">Member of project</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/name -->
+
+
+    <owl:ObjectProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/name">
+        <rdfs:comment>The name of a person</rdfs:comment>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/nextProcessAcrossGroups -->
+
+
+    <owl:ObjectProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/nextProcessAcrossGroups">
+        <rdfs:subPropertyOf rdf:resource="https://w3id.org/pmd/co/nextProcess"/>
+        <rdfs:comment>Connection between two processes that took place in two different groups each. Only used as an intermediate step during materialization.</rdfs:comment>
+        <rdfs:label>next process across groups</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/nextStep -->
+
+
+    <owl:ObjectProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/nextStep">
+        <owl:equivalentProperty rdf:resource="https://w3id.org/pmd/co/nextProcess"/>
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/ns/prov#wasInformedBy"/>
+        <rdfs:comment>The next step object property is used to indicate the next step in a chain of Handover Groups or Handovers.</rdfs:comment>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/output -->
+
+
+    <owl:ObjectProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/output">
+        <owl:equivalentProperty rdf:resource="https://w3id.org/pmd/co/output"/>
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <rdfs:comment>The object property output is used to point at the results of a step in a handover workflow.
+
+This is employed by the characterization activities (the leaf/most basic step of a handover workflow) to point at the actual results (e.g. a photo or EDX results file) they refer to.</rdfs:comment>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep -->
+
+
+    <owl:ObjectProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/relatesToHandoverWorkflowStep">
+        <rdfs:subPropertyOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo"/>
+        <rdfs:domain rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowInstanceAssignment"/>
+        <rdfs:range rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep"/>
+        <rdfs:comment>Indicates that the handover Handover workflow assignment is related to the target Handover workflow model step</rdfs:comment>
+        <rdfs:label>Relates to Handover Workflow step</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/requiresActivity -->
+
+
+    <owl:ObjectProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/requiresActivity">
+        <rdfs:domain rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep"/>
+        <rdfs:range rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel"/>
+        <rdfs:comment>Indicates that the handover group that the Handover workflow model step is checking must contain a given activity within its handovers. The type of measurement is indicated by the targeted entity&apos;s class, by also belonging to one of the *Process classes (e.g. FIMProcess)</rdfs:comment>
+        <rdfs:label>Requires activity</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/resource -->
+
+
+    <owl:ObjectProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/resource">
+        <owl:equivalentProperty rdf:resource="https://w3id.org/pmd/co/resource"/>
+        <rdfs:domain rdf:resource="https://w3id.org/pmd/co/ValueObject"/>
+        <rdfs:comment>The resource object property is used to indicate that an uploaded file in the RDMS is related in some way to a given Materials library / Sample
+
+This property does not explicitly indicate that the given file is generated *for* the object it is connected to; instead, it indicates that they are *related* in a generic way.
+To indicate the former, the connection should instead be the other way around via the crc:characteristic property, as is in the majority of cases.
+             </rdfs:comment>
+        <rdfs:label>Requires activity</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/substep -->
+
+
+    <owl:ObjectProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/substep">
+        <owl:equivalentProperty rdf:resource="https://w3id.org/pmd/co/subordinateProcess"/>
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <rdfs:comment>The substep object property is used to indicate a part of a step in a handover workflow that has been broken into smaller (sub)steps. This is also employed in handover workflow models.
+
+More specifically, in a handover workflow, this is employed by Handover Groups to point to the start of the chain of handovers that they represent, and by an inidividual Handover to point to the individual characterization activities that happened inside it.</rdfs:comment>
+        <rdfs:label>substep</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/surname -->
+
+
+    <owl:ObjectProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/surname">
+        <rdfs:comment>The surname of a person</rdfs:comment>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/acceptedDate -->
+
+
+    <owl:DatatypeProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/acceptedDate">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+        <rdfs:domain rdf:resource="http://www.w3.org/ns/prov#Activity"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>The date a handover was accepted in the RDMS bt the destination user. Note that it does not need to match with its creation date</rdfs:comment>
+        <rdfs:label>Accepted date</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/allowIntermediateHandoverGroups -->
+
+
+    <owl:DatatypeProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/allowIntermediateHandoverGroups">
+        <rdfs:domain rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Indicates if the validation of the Handover workflow model allows intermediate, non-compliant handover groups on an otherwise valid handover group chain while validating. If true, the validation system will attempt to keep validating the current Handover workflow model step on the next handover group if the current handover group was non-compliant.</rdfs:comment>
+        <rdfs:label>Allow intermediate handover groups</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/allowsOtherActivities -->
+
+
+    <owl:DatatypeProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/allowsOtherActivities">
+        <rdfs:domain rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Indicates that the handover group that the Handover workflow model step is validating is allowed to have activities other than the ones indicated by requiresActivity. If false, the presence of other activities will cause the validation to fail in this step.</rdfs:comment>
+        <rdfs:label>Allows other activities</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/creationDate -->
+
+
+    <owl:DatatypeProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/creationDate">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.w3.org/ns/prov#Activity"/>
+                    <rdf:Description rdf:about="http://www.w3.org/ns/prov#Entity"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment xml:lang="en">The creation date of an RDMS object</rdfs:comment>
+        <rdfs:label xml:lang="en">Creation date</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/externalID -->
+
+
+    <owl:DatatypeProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/externalID">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.w3.org/ns/prov#Activity"/>
+                    <rdf:Description rdf:about="http://www.w3.org/ns/prov#Entity"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/internalID -->
+
+
+    <owl:DatatypeProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/internalID">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.w3.org/ns/prov#Activity"/>
+                    <rdf:Description rdf:about="http://www.w3.org/ns/prov#Entity"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/isHandoverWorkflowStepEnabled -->
+
+
+    <owl:DatatypeProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/isHandoverWorkflowStepEnabled">
+        <rdfs:domain rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Indicates if the current Handover workflow model step is to be validated by the system. If false, the system will keep checking the current handover group from the next Handover workflow model step.</rdfs:comment>
+        <rdfs:label>Is Handover workflow step enabled</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/percentage -->
+
+
+    <owl:DatatypeProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/percentage"/>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/resistance -->
+
+
+    <owl:DatatypeProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/resistance">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+        <rdfs:domain rdf:resource="https://w3id.org/pmd/co/ChemicalComposition"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+        <rdfs:comment>Measured resistance in a specific measurement area of a sample</rdfs:comment>
+        <rdfs:label>Resistance</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/temporaryDatatypeProperty -->
+
+
+    <owl:DatatypeProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/temporaryDatatypeProperty">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+        <rdfs:comment>Property used exclusively during the mapping of SQL to RDF, deleted via a post-processing script after executing the Ontop mappings</rdfs:comment>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/tolerance -->
+
+
+    <owl:DatatypeProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/tolerance">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+        <rdfs:domain rdf:resource="https://w3id.org/pmd/co/ChemicalComposition"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+        <rdfs:comment>Measured tolerance in a specific measurement area of a sample</rdfs:comment>
+        <rdfs:label>Tolerance</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/value -->
+
+
+    <owl:DatatypeProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/value">
+        <owl:equivalentProperty rdf:resource="https://w3id.org/pmd/co/value"/>
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+        <rdfs:comment>The raw value the entity referred by the characteristic object property refers to.
+
+While the entity pointed by at by the crc:characteristic property may contain metadata such as creators and dates, its raw values (e.g. file paths or composition values) can be accessed by this property.</rdfs:comment>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/x_position -->
+
+
+    <owl:DatatypeProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/x_position">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+        <rdfs:domain rdf:resource="https://w3id.org/pmd/co/ChemicalComposition"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+        <rdfs:comment>X coordinate within a sample on which a composition was taken for a particular measurement area</rdfs:comment>
+        <rdfs:label>X position</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/y_position -->
+
+
+    <owl:DatatypeProperty rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/y_position">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+        <rdfs:domain rdf:resource="https://w3id.org/pmd/co/ChemicalComposition"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+        <rdfs:comment>X coordinate within a sample on which a composition was taken for a particular measurement area</rdfs:comment>
+        <rdfs:label>Y position</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/APTProcess -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/APTProcess">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/AnalysingProcess"/>
+        <rdfs:comment>A process where APT measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</rdfs:comment>
+        <rdfs:label>APT Process</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/AnnealingProcess -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/AnnealingProcess">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"/>
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/AnalysingProcess"/>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/BandgapProcess -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/BandgapProcess">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/AnalysingProcess"/>
+        <rdfs:comment>A process where Bandgap measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/BulkComposition -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/BulkComposition">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/ChemicalObject"/>
+        <rdfs:comment xml:lang="en">The composition of a Materials Library as a whole</rdfs:comment>
+        <rdfs:label xml:lang="en">Bulk Composition</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/Process"/>
+        <rdfs:comment>A process that represents to the act of applying a measurement technique on an object in the CRC. Further specified by its subclasses.
+
+Note: Not to be confused with prov:Activity, which acts as the superclass of Process.
+
+An entity of this class or any of its subclasses indicates the nature of its measurements by also belonging to one of the *Process classes (e.g. FIMProcess)</rdfs:comment>
+        <rdfs:label>Characterization activity</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityInstance">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance"/>
+        <rdfs:comment>A process that has as output a series of measurements of the same nature (e.g. EDX, TEM, FIM...) within the same handover of a sample in time, that results in one or more files being uploaded to the RDMS.
+
+This is an additional abstraction that acts as a subordinate process of a handover, and has as outputs one or more measurements corresponding to the same type of measurement  (e.g., for EDX, EDX_raw and EDX_csv files).</rdfs:comment>
+        <rdfs:label>Characterization activity instance</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivityModel">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel"/>
+        <rdfs:comment>A process indicating that a Handover workflow model step desires a set of measurements of the same time.
+
+An entity of this type indicates the type of its measurements by belonging to a unidentifiable process class. This will be used by e.g. the Handover workflows validation system to correctly validate measurements assigned to handovers.</rdfs:comment>
+        <rdfs:label>Characterization activity model</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/ChemicalObject -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/ChemicalObject">
+        <owl:equivalentClass rdf:resource="https://w3id.org/pmd/co/ChemicalObject"/>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/ComputationalSample -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/ComputationalSample">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/DigitalEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/EDXMicroscopyProcess">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/MicroscopyProcess"/>
+        <rdfs:comment>A process where EDX measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</rdfs:comment>
+        <rdfs:label>EDX Microscopy Process</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/EngineeredMaterial -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/EngineeredMaterial">
+        <owl:equivalentClass rdf:resource="https://w3id.org/pmd/co/EngineeredMaterial"/>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/FIMProcess -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/FIMProcess">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/AnalysingProcess"/>
+        <rdfs:comment>A process where FIM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/Handover -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/Handover">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/IdentifiableProcess"/>
+        <rdfs:comment>The process of handing an object (for now, samples) from one person to another. This represents the transfer of physical objects between members of the same or different projects within the CRC to perform different analysis.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/HandoverGroup -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverGroup">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:comment>Abstraction that has as subordinate process a chain or one or more handovers that took place consecutively within the same CRC project (i.e., all destination users belong to the sam eproject)</rdfs:comment>
+        <rdfs:label>Handover group</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflow -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflow">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/Process"/>
+        <rdfs:comment xml:lang="en">A process composed of a series of processing steps as part of the work of the CRC, which involve the act of physically moving a sample to be studied to another person and/or project.
+Its subclasses narrow its application.</rdfs:comment>
+        <rdfs:label>Handover workflow</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflowInstance">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflow"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance"/>
+        <rdfs:comment xml:lang="en">The beginning of a series of processes belonging to the same sample in the RDMS.
+
+An instance of this entity will contain a three-layer hierarchy of consecutive HandoverGroup instances, each containing a series of consecutive Handover instances, which finally can contain Activity Instance entities with measurements as their outputs.</rdfs:comment>
+        <rdfs:label xml:lang="en">Handover workflow instance</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowInstanceAssignment -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowInstanceAssignment">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:comment>A process that indicates an assignment of one or more samples to a step in an entity of type WorkflowModel. A workflowModelInstance will contain one or more WorkflowInstanceAssignment instances to completely link a WorkflowModel to existing objects in the RDMS.</rdfs:comment>
+        <rdfs:label>Handover workflow instance assignment</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/HandoverWorkflow"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel"/>
+        <rdfs:comment xml:lang="en">The beginning of a series of processes that need to be performed.
+
+
+An instance of this entity will contain a two-layer hierarchy of consecutive WorkflowModelStep instances that correspond to hypothetical handover groups of a given sample. Each step will contain zero or more Activity Model instances that dictate the desired measurements that the sample should contain, among other metadata, and that are taken at the time of any of the handovers within its corresponding handover group.
+
+Note that a Handover workflow Model instance dictates the processing steps, but are not linked to a specific samples - they instead act as templates that can be reused at will and assigned to different groups of samples. An entity of type workflowModelInstance will thus completely characterize a WorkflowModel by being able to apply it to existing objects in the RDMS during validation.</rdfs:comment>
+        <rdfs:label xml:lang="en">Handover workflow model</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstance -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/workflowModelInstance">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModel"/>
+        <rdfs:comment>The beginning of a series of WorkflowModelStep instances. Each WorkflowModelStep instance indicates an assignment of one or more samples to a step in the same entity of type WorkflowModel.
+
+
+An entity of this class will thus completely characterize a WorkflowModel by being able to apply it to existing objects in the RDMS during validation.</rdfs:comment>
+        <rdfs:label>Handover workflow model instance</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:comment>A step in a Handover workflow model, with a set of attributes indicating its settings, and references to Activity Models and projects</rdfs:comment>
+        <rdfs:label>Handover workflow model step</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/IdeaOrExperimentPlan -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/IdeaOrExperimentPlan">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/IdentifiableProcess"/>
+        <rdfs:comment xml:lang="en">An idea or experiment plan that may kickstart a Handover Workflow Model, requests for synthesis of samples and eventually a Handover Workflow Instance for one or more Materials Libraries</rdfs:comment>
+        <rdfs:label xml:lang="en">Idea or experiment plan</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/IdentifiableProcess -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/IdentifiableProcess">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance"/>
+        <rdfs:comment>A process that is identified by an ID in the RDMS</rdfs:comment>
+        <rdfs:label>Identifiable process</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/LEISProcess -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/LEISProcess">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/AnalysingProcess"/>
+        <rdfs:comment>A process where LEIS measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/LiteratureReference -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/LiteratureReference">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/Document"/>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/EngineeredMaterial"/>
+        <rdfs:comment xml:lang="en">A complete thin-film Materials Library, composed of 342 measurement areas to be analyzed or treated in any way.</rdfs:comment>
+        <rdfs:label xml:lang="en">Materials Library</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/Measurement -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/Measurement">
+        <owl:equivalentClass rdf:resource="https://w3id.org/pmd/co/Measurement"/>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/MeasurementArea -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/MeasurementArea">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/EngineeredMaterial"/>
+        <rdfs:comment>One of the 342 defined locations of a materials library, which may be part of the materials library (thin film) itself, or a sample (piece) of it.</rdfs:comment>
+        <rdfs:label>Measurement area</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/NoGradientSample -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/NoGradientSample">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary"/>
+        <rdfs:comment>From Satyakam</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/PSMProcess -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/PSMProcess">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/AnalysingProcess"/>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/PhotoProcess -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/PhotoProcess">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/AnalysingProcess"/>
+        <rdfs:comment>A process where photos have been taken. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</rdfs:comment>
+        <rdfs:label>Photo Process</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/Process"/>
+        <rdfs:comment>A process that refers to a real event in the CRC / RDMS database, such a handover, or an abstraction over it (activities, virtual handovers and handover groups). Thus, it can be identifiable or not.</rdfs:comment>
+        <rdfs:label xml:lang="en">Process Instance</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessModel">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:comment xml:lang="en">A process that does not refer to a real event in the CRC / RDMS database, and instead refers to an entity within a Handover Workflow Model, such as a Handover workflow model step, an activity required by it or a Handover workflow step assignment.</rdfs:comment>
+        <rdfs:label xml:lang="en">Process Model</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/Project -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/Project">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/Organization"/>
+        <rdfs:comment>One of the projects of the CRC (e.g. A01, B03...)</rdfs:comment>
+        <rdfs:label xml:lang="en">Project</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/Publication -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/Publication">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/Document"/>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/ReportProcess -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/ReportProcess">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/AnalysingProcess"/>
+        <rdfs:comment>A process where a non-synthesis related report has been uploaded (i.e., anything from presentations to .pdf documents). We treat it as a characterization. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/RequestForSynthesis -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/RequestForSynthesis">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/ValueObject"/>
+        <rdfs:comment xml:lang="en">A request for the synthesis of a Materials Library / Sample with a desired composition.
+
+Note that other parameters will be modelled in the future.</rdfs:comment>
+        <rdfs:label xml:lang="en">Request for synthesis</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/ResistanceProcess -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/ResistanceProcess">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/AnalysingProcess"/>
+        <rdfs:comment>A process where Resistance measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/SDCProcess -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/SDCProcess">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/AnalysingProcess"/>
+        <rdfs:comment>A process where SDC measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/SECCMProcess">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/AnalysingProcess"/>
+        <rdfs:comment>A process where SECCM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/SEMProcess">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/AnalysingProcess"/>
+        <rdfs:comment>A process where SEM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/Sample -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/Sample">
+        <owl:equivalentClass rdf:resource="https://w3id.org/pmd/co/Sample"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary"/>
+        <rdfs:comment>A physical piece of a materials library, containing a subset of its 342 measurement areas.</rdfs:comment>
+        <rdfs:label>Sample</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/StressChip -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/StressChip">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/MaterialsLibrary"/>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/StripeSample -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/StripeSample">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/Sample"/>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/Substrate -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/Substrate">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/ValueObject"/>
+        <rdfs:comment xml:lang="en">The subtrate that conforms the bottom layer of material of a Materials Library / Sample</rdfs:comment>
+        <rdfs:label xml:lang="en">Substrate</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/SurfaceComposition -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/SurfaceComposition">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/ChemicalComposition"/>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentProcess -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentProcess">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/AnalysingProcess"/>
+        <rdfs:comment>A process where a synthesis or treatment has been performed, resulting in a synthesis report. We treat it as a characterization. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentReport -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/SynthesisOrTreatmentReport">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/Document"/>
+        <rdfs:comment xml:lang="en">A synthesis or treatment (e.g. annealing) report for a ML or Sample</rdfs:comment>
+        <rdfs:label xml:lang="en">Synthesis or treatment Report</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/TEMProcess -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/TEMProcess">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/AnalysingProcess"/>
+        <rdfs:comment>A process where TEM measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/ThicknessProcess -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/ThicknessProcess">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/AnalysingProcess"/>
+        <rdfs:comment>A process where Thickness measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/Process"/>
+        <rdfs:comment>A process that is not identified by an ID in the RDMS</rdfs:comment>
+        <rdfs:label>Unidentifiable process</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/UploadedFile -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/UploadedFile">
+        <owl:equivalentClass rdf:resource="https://w3id.org/pmd/co/ValueObject"/>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/User -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/User">
+        <owl:equivalentClass rdf:resource="https://w3id.org/pmd/co/Operator"/>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/VirtualHandover -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/VirtualHandover">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/ProcessInstance"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:comment>A handover to which all measurements of a sample that were uploaded to the RDMS before any actual handover was logged. It will always act as the first handover of the chain on every sample, and may be part of a handover group alone or with other handovers.</rdfs:comment>
+        <rdfs:label>Virtual handover</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/VolumeComposition -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/VolumeComposition">
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/ChemicalComposition"/>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/XPSProcess">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/AnalysingProcess"/>
+        <rdfs:comment>A process where XPS measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/XRDProcess -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/XRDProcess">
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity"/>
+        <rdfs:subClassOf rdf:resource="https://crc1625.mdi.ruhr-uni-bochum.de/UnidentifiableProcess"/>
+        <rdfs:subClassOf rdf:resource="https://w3id.org/pmd/co/AnalysingProcess"/>
+        <rdfs:comment>A process where XRD measurements have been performed. Used by Activity instances and Activity Models to denote the type of measurements they refer to.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/externalID -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/externalID"/>
+    
+
+
+    <!-- https://crc1625.mdi.ruhr-uni-bochum.de/internalID -->
+
+
+    <owl:Class rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/internalID"/>
+    
+
+
+    <!-- https://w3id.org/pmd/co/Organization -->
+
+
+    <owl:Class rdf:about="https://w3id.org/pmd/co/Organization"/>
+    
+
+
+    <!-- https://w3id.org/pmd/co/Person -->
+
+
+    <owl:Class rdf:about="https://w3id.org/pmd/co/Person"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotations
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    <rdf:Description rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/externalID">
+        <rdfs:comment>External ID assigned to a Materials Library / Sample</rdfs:comment>
+        <rdfs:label xml:lang="en">External ID</rdfs:label>
+    </rdf:Description>
+    <rdf:Description rdf:about="https://crc1625.mdi.ruhr-uni-bochum.de/internalID">
+        <rdfs:comment xml:lang="en">internal ID (AKA object ID or Type ID) of an entity in the RDMS</rdfs:comment>
+        <rdfs:label xml:lang="en">Internal ID</rdfs:label>
+    </rdf:Description>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 5.1.18) https://github.com/owlcs/owlapi/ -->
+
+

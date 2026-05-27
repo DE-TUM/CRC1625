@@ -15,6 +15,8 @@ import handover_workflows_validation_webui.workflow_model_ui.edit_workflow_model
 import handover_workflows_validation_webui.main_page
 import handover_workflows_validation_webui.sparql_ui.yasgui_wrapper
 import handover_workflows_validation_webui.middleware
+import handover_workflows_validation_webui.visualization_ui.visualization_ui
+
 
 from nicegui import ui, app
 
