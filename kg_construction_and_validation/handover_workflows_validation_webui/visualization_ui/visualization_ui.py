@@ -18,7 +18,7 @@ from nicegui.elements.input import Input
 from nicegui.elements.select import Select
 
 module_dir = os.path.dirname(__file__)
-prefixes: str = open(os.path.join(module_dir, '../../handover_workflows_validation/queries/prefixes.sparql')).read()
+prefixes: str = open(os.path.join(module_dir, '../queries/prefixes.sparql')).read()
 handover_viz_query = prefixes + open(os.path.join(module_dir, 'queries/handover_visualisation.sparql'), 'r').read()
 
 

@@ -10,16 +10,16 @@ from nicegui.elements.select import Select
 from rdflib import URIRef
 
 from datastores.rdf import rdf_datastore_client
-#from handover_workflows_validation_webui.common_functions import get_sample_object_id_of_handover_group_iri
+from handover_workflows_validation_webui.common_functions import get_sample_object_id_of_handover_group_iri
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, NodeType
 from handover_workflows_validation_webui.middleware import matinf_or_demo_login_required, activate_demo_mode, log_out, show_materialization_card
 from handover_workflows_validation_webui.workflow_model_ui.edit_workflow_model_page import workflow_model_to_nodes_and_edges
-#from workflows_validation.CRC_1625_workflows_validator.CRC_1625_workflows_validator import get_creator_user_id, set_creator_user_id, CRC1625WorkflowModelStep, \
-#    crc_prefix
-#from workflows_validation.workflow_instance import WorkflowInstance, delete_workflow_instance, store_workflow_instance, get_workflow_instances_of_model, \
-#    StepAssignment, is_workflow_instance_definition_valid
-#from workflows_validation.workflow_model import store_workflow_model, read_workflow_model, WorkflowModel
-#from workflows_validation.workflows_validator import is_workflow_instance_valid
+from workflows_validation.CRC_1625_workflows_validator.CRC_1625_workflows_validator import get_creator_user_id, set_creator_user_id, CRC1625WorkflowModelStep, \
+    crc_prefix
+from workflows_validation.workflow_instance import WorkflowInstance, delete_workflow_instance, store_workflow_instance, get_workflow_instances_of_model, \
+    StepAssignment, is_workflow_instance_definition_valid
+from workflows_validation.workflow_model import store_workflow_model, read_workflow_model, WorkflowModel
+from workflows_validation.workflows_validator import is_workflow_instance_valid
 
 module_dir = os.path.dirname(__file__)
 prefixes: str = open(os.path.join(module_dir, '../workflows_validation/queries/prefixes.sparql')).read()
