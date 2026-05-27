@@ -214,7 +214,7 @@ def test_valid_workflows(generate_redundant_branch: bool = False,
         asyncio.run(store_workflow_model(workflow_model, return_file=False))
         asyncio.run(store_workflow_instance(workflow_instance, return_file=False))
 
-        validation_results, steps_with_no_target_node = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True))
+        validation_results = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True))
 
         all_validation_results: list[ValidationResult] = []
         for entity_iri, validation_paths in validation_results.items():
@@ -224,7 +224,7 @@ def test_valid_workflows(generate_redundant_branch: bool = False,
                         all_validation_results.append(validation_result)
 
         if all(result.conforms for result in all_validation_results) and \
-                len(steps_with_no_target_node) == 0 and \
+                all(not result.is_missing_data for result in all_validation_results) and \
                 ((not generate_redundant_branch) or (len(list(validation_results.values())[0]) == 3)) and \
                 ((not break_in_half) or (len(list(validation_results.values())[0]) == 2)):
             if generate_redundant_branch:
@@ -271,20 +271,28 @@ def test_missing_data_workflows():
         asyncio.run(store_workflow_model(workflow_model, return_file=False))
         asyncio.run(store_workflow_instance(workflow_instance, return_file=False))
 
-        validation_results, steps_with_no_target_node = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True))
+        validation_results = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True))
 
+        all_validation_results: list[ValidationResult] = []
+        for entity_iri, validation_paths in validation_results.items():
+            for validation_path in validation_paths:
+                for _, reses in validation_path.items():
+                    for validation_result in reses:
+                        all_validation_results.append(validation_result)
+
+        steps_with_no_target_node = [result for result in all_validation_results if result.is_missing_data]
         if len(steps_with_no_target_node) != len(handover_group_definition[cutoff_idx:]):
             print_validation_results(validation_results)
             raise ValueError(f"""
             Incorrect number of workflow model steps to be marked as missing data
-            Expected {len(handover_group_definition[cutoff_idx:])}, got {len(steps_with_no_target_node)}: {steps_with_no_target_node}      
+            Expected {len(handover_group_definition[cutoff_idx:])}, got {len(steps_with_no_target_node)}     
             Please check the logging trace above for more information
             """)
-        elif steps_with_no_target_node[0].workflow_model_step.iri != workflow_model_step_iri_to_be_flagged:
+        elif steps_with_no_target_node[0].validation_job.paired_step.workflow_model_step.iri != workflow_model_step_iri_to_be_flagged:
             print_validation_results(validation_results)
             raise ValueError(f"""
             Incorrect workflow model step to be marked as missing data
-            Expected {workflow_model_step_iri_to_be_flagged}, got {steps_with_no_target_node[0].workflow_model_step.iri}      
+            Expected {workflow_model_step_iri_to_be_flagged}, got {steps_with_no_target_node[0].validation_job.paired_step.workflow_model_step.iri}      
             Please check the logging trace above for more information
             """)
         else:
@@ -326,14 +334,21 @@ def test_invalid_workflows():
         asyncio.run(store_workflow_model(workflow_model, return_file=False))
         asyncio.run(store_workflow_instance(workflow_instance, return_file=False))
 
-        validation_results, steps_with_no_target_node = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True))
+        validation_results = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True))
 
-        if len(steps_with_no_target_node) != 0:
+        all_validation_results: list[ValidationResult] = []
+        for entity_iri, validation_paths in validation_results.items():
+            for validation_path in validation_paths:
+                for _, reses in validation_path.items():
+                    for validation_result in reses:
+                        all_validation_results.append(validation_result)
+
+        if any(result.is_missing_data for result in all_validation_results):
             print_validation_results(validation_results)
             raise ValueError(f"""
             Got an unexpected number of steps with missing data
-            Expected 0, got {len(steps_with_no_target_node)}: {steps_with_no_target_node}      
-            PLease check the logging trace above for more information
+            Expected 0, got {len([result for result in all_validation_results if result.is_missing_data])}      
+            Please check the logging trace above for more information
             """)
 
         for entity_iri, validation_paths in validation_results.items():
