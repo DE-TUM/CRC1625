@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 
 from nicegui import app
+from nicegui.elements.row import Row
 from nicegui.elements.column import Column
 from nicegui.elements.input import Input
 from rdflib import URIRef
@@ -16,6 +17,7 @@ class WorkflowInstancePageState:
     State dataclass containing references to UI elements and contents of pages in this module.
     Initialized by accessing the main page and thus local to the user.
     """
+    validation_paths_row: Row = None
     graph_component: CytoscapeComponent = None
     graph_component_column: Column = None
     node_controls_column: Column = None

@@ -96,7 +96,7 @@ def handle_workflow_instance_name_button(new_name: str):
 
 
 async def check_for_objects_with_multiple_paths(workflow_model, workflow_instance):
-    validation_jobs, _ = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance)
+    validation_jobs = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance)
     validation_paths: dict[URIRef, list[list[ValidationJob]]] = generate_validation_paths(workflow_model, validation_jobs)
     for entity_iri, paths in validation_paths.items():
         if len(paths) > 1:
@@ -202,38 +202,121 @@ async def run_validation(workflow_instance_page_state: WorkflowInstancePageState
     # Remove the previous node colors
     workflow_instance_page_state.graph_component.clear_validation_results()
 
-    validation_results, steps_with_no_target_node = await is_workflow_instance_valid(app.storage.tab['current_workflow_model'],
-                                                                                     app.storage.tab['current_workflow_instance'],
-                                                                                     return_individual_results=True)
+    validation_results = await is_workflow_instance_valid(app.storage.tab['current_workflow_model'],
+                                                          app.storage.tab['current_workflow_instance'],
+                                                          return_individual_results=True)
 
-    # TODO we should distinguish between objects
-    # TODO we can also show the individual validation path breakdowns across objects
+    # TODOs:
+    #  - Show prettified ML / Sample names
+    #  - Make the table scrollable
+
+    # Update the nodes in the Cytoscape view
     colored_steps = set()
     for entity_iri, validation_paths in validation_results.items():
         for validation_path in validation_paths:
-            for _, validation_results in validation_path.items():
-                for validation_result in validation_results:
+            for _, validation_results_for_step in validation_path.items():
+                for validation_result in validation_results_for_step:
                     step_name = validation_result.validation_job.paired_step.workflow_model_step.name
-                    # object_id = validation_result.step_to_validate.step_information.object_id
                     if validation_result.conforms:
                         workflow_instance_page_state.graph_component.set_node_as_valid(step_name, "This step is valid")
+                    elif validation_result.is_missing_data:
+                        workflow_instance_page_state.graph_component.set_node_as_missing(step_name,"There is missing data for MLs / Samples assigned to this step")
                     else:
                         workflow_instance_page_state.graph_component.set_node_as_invalid(step_name, validation_result.pyshacl_output)
 
                     colored_steps.add(step_name)
 
-    for step_with_no_target_node in steps_with_no_target_node:
-        workflow_instance_page_state.graph_component.set_node_as_missing(step_with_no_target_node.workflow_model_step.name,
-                                                                         # TODO show the actual ML / Sample ID instead of its first handover group
-                                                                         f"ML / Sample with object ID {step_with_no_target_node.entity} had no matching handover group for this step")
-        colored_steps.add(step_with_no_target_node.workflow_model_step.name)
-
     # All remaining workflow model steps did not have any object assigned to them
     for step in app.storage.tab['current_workflow_model'].workflow_model_steps.values():
         if step.name not in colored_steps:
-            workflow_instance_page_state.graph_component.set_node_as_not_checked(step.name,
-                                                                                 "This step was not assigned to any ML/Sample")
+            workflow_instance_page_state.graph_component.set_node_as_not_checked(step.name, "This step was not assigned to any ML/Sample")
 
+    # Show the individual validation paths at the top
+    table_rows = []
+    for entity_iri, validation_paths in validation_results.items():
+        steps_data = []
+        for validation_path in validation_paths:
+            for step_iri, validation_results_for_step in validation_path.items():
+                for validation_result in validation_results_for_step:
+                    trace_message = f'\nTarget node: {validation_result.validation_job.target_node}' if not validation_result.is_missing_data else ''
+
+                    steps_data.append({
+                        'name': str(validation_result.validation_job.paired_step.workflow_model_step.name),
+                        'status': 'valid' if validation_result.conforms else ('missing_data' if validation_result.is_missing_data else 'invalid'),
+                        'tooltip': f'This step is valid{trace_message}' if validation_result.conforms else (f'This step could not be matched to a handover group{trace_message}' if validation_result.is_missing_data else f'{validation_result.pyshacl_output}{trace_message}'),
+                    })
+
+        table_rows.append({
+            'entity': str(entity_iri),
+            'steps': steps_data
+        })
+
+    table_columns = [
+        {'name': 'entity', 'label': 'Entity', 'field': 'entity', 'align': 'left', 'sortable': True},
+        {'name': 'trace', 'label': 'Trace Steps', 'field': 'steps', 'align': 'left', 'sortable': False}
+    ]
+
+    with workflow_instance_page_state.validation_paths_row:
+        workflow_instance_page_state.validation_paths_row.clear()
+
+    if table_rows:
+        table = ui.table(columns=table_columns, rows=table_rows).classes('w-full')
+
+        # TODO the styling is a bit ugly, we cannot 100% mimic the border and background node styles from Cytoscape
+        table.add_slot('body-cell-trace', '''
+            <q-td :props="props">
+                <div class="row items-center q-gutter-sm">
+                    <div v-for="(step, index) in props.value" :key="index" class="row items-center no-wrap">
+                        
+                        <div class="column items-center cursor-pointer" style="width: 100px;">
+                            
+                            <div :style="step.status === 'valid' ? {
+                                     backgroundColor: '#369c4e',
+                                     backgroundImage: 'url(/assets/check_circle.svg)',
+                                     backgroundSize: 'contain',
+                                     backgroundRepeat: 'no-repeat',
+                                     backgroundPosition: 'center',
+                                     backgroundBlendMode: 'soft-light'
+                                 } : step.status === 'invalid' ? {
+                                     backgroundColor: '#dc7682',
+                                     backgroundImage: 'url(/assets/error.svg)',
+                                     backgroundSize: 'contain',
+                                     backgroundRepeat: 'no-repeat',
+                                     backgroundPosition: 'center',
+                                     backgroundBlendMode: 'soft-light'
+                                 } : {
+                                     backgroundColor: '#e6b772',
+                                     backgroundImage: 'url(/assets/error.svg)',
+                                     backgroundSize: 'contain',
+                                     backgroundRepeat: 'no-repeat',
+                                     backgroundPosition: 'center',
+                                     backgroundBlendMode: 'soft-light'
+                                 }"
+                                 class="rounded-borders text-white q-mb-xs"
+                                 style="width: 100px; height: 100px; border-radius: 50%;">
+                            </div>
+                            
+                            <div class="text-center text-grey-9 text-weight-medium" 
+                                 style="font-size: 11px; line-height: 1.2; word-break: break-word; width: 100px; padding: 0 4px;">
+                                {{ step.name }}
+                            </div>
+
+                            <q-tooltip class="bg-black text-body2" style="white-space: pre-line;" anchor="top middle" self="bottom middle" :offset="[10, 10]">
+                                {{ step.tooltip }}
+                            </q-tooltip>
+                        </div>
+                        
+                        <q-icon v-if="index < props.value.length - 1" 
+                                name="arrow_forward" 
+                                size="sm" 
+                                class="text-grey q-mx-xs" 
+                                style="transform: translateY(-10px);" />
+                    </div>
+                </div>
+            </q-td>
+        ''')
+    else:
+        ui.label('No validation results available.')
 
 @ui.page('/workflows/edit_workflow_instance/{workflow_model_uuid}/{workflow_instance_uuid}')
 @matinf_or_demo_login_required
@@ -276,6 +359,8 @@ async def edit_workflow_instance_page(workflow_model_uuid: str,
         ui.button('Undo all changes', color='negative', on_click=lambda: handle_undo_button(workflow_instance_page_state))
         ui.button('Save all changes', color='positive', on_click=lambda: handle_save_button(workflow_instance_page_state))
         ui.button('Validate workflow', color='info', on_click=lambda: run_validation(workflow_instance_page_state))
+
+    workflow_instance_page_state.validation_paths_row = ui.row().classes('w-full items-center')
 
     graph_data = workflow_model_and_instance_to_nodes_and_edges(app.storage.tab['current_workflow_model'],
                                                                 app.storage.tab['current_workflow_instance'],

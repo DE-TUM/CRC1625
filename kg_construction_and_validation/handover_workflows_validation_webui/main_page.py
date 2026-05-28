@@ -116,7 +116,6 @@ async def copy_handover_workflow_model(workflows_page_state: WorkflowsPageState)
 
     await store_workflow_model(copy_of_current_workflow_model)
 
-    print(f"Cloned {app.storage.tab['current_workflow_model'].iri} into {copy_of_current_workflow_model.iri}")
     ui.notify(f'Workflow copied as {copy_of_current_workflow_model.name}', color='positive')
 
     # Add it to the left sidebar's table
@@ -235,9 +234,9 @@ async def populate_workflow_instances_table(workflows_page_state: WorkflowsPageS
             """
             Runs validation for the workflow model and instance pair, and updates the corresponding icon according to the results
             """
-            validation_status, _ = await is_workflow_instance_valid(workflow_model,
-                                                                    workflow_instance,
-                                                                    return_individual_results=False)
+            validation_status = await is_workflow_instance_valid(workflow_model,
+                                                                 workflow_instance,
+                                                                 return_individual_results=False)
 
             validation_icon_column.clear()
             with validation_icon_column:
