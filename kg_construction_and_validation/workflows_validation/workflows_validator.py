@@ -34,7 +34,7 @@ from rdflib.plugins.stores.sparqlstore import SPARQLStore
 
 from datastores.rdf import rdf_datastore_client
 from datastores.rdf.rdf_datastore_client import RDF_DATASTORE_API_ENDPOINT
-from workflows_validation.common import prefixes, crc_prefix
+from workflows_validation.common import prefixes, dw_prefix
 from workflows_validation.workflow_instance import WorkflowInstance
 from workflows_validation.workflow_model import WorkflowModelStep, WorkflowModel
 
@@ -123,7 +123,7 @@ def fill_SHACL_template(workflow_model_step: WorkflowModelStep,
     """
     template = Template(workflow_model_step.SHACL_shape)
     # We use the target node to specify the IRI of its corresponding node shape
-    substitutions = {"node_shape_iri": crc_prefix[urllib.parse.quote(f"step_{workflow_model_step.name}_node_shape_for_{target_node}")]}
+    substitutions = {"node_shape_iri": dw_prefix[urllib.parse.quote(f"step_{workflow_model_step.name}_node_shape_for_{target_node}")]}
     substitutions.update(workflow_model_step.step_templates)
 
     return template.render(substitutions)
@@ -558,7 +558,7 @@ async def is_workflow_instance_valid(workflow_model: WorkflowModel,
                     "paths": [workflow_instance.step_assignments[j.paired_step.workflow_model_step.iri].property_to_follow for j in path_without_missing_data_jobs],
                     # Ordered list of (filled) workflow model step shapes and the IRIs to use in the workflow's shape
                     "node_shapes": [j.shacl_shape for j in path_without_missing_data_jobs],
-                    "node_shape_iris" : [crc_prefix[urllib.parse.quote(f"step_{j.paired_step.workflow_model_step.name}_node_shape_for_{j.target_node}")] for j in path_without_missing_data_jobs],
+                    "node_shape_iris" : [dw_prefix[urllib.parse.quote(f"step_{j.paired_step.workflow_model_step.name}_node_shape_for_{j.target_node}")] for j in path_without_missing_data_jobs],
                 }
                 future = executor.submit(
                     run_validation_task,

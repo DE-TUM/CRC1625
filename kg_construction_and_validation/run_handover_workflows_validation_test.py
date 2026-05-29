@@ -15,9 +15,9 @@ from datastores.rdf import rdf_datastore_client
 from datastores.rdf.rdf_datastore import WORKFLOWS_GRAPH_IRI, MAIN_GRAPH_IRI
 from workflows_validation.CRC_1625_workflows_validator.CRC_1625_workflows_validator import CRC1625WorkflowModelStep, \
     activity_name_to_class_iri, project_name_to_iri
-from workflows_validation.common import crc_prefix, rdf_prefix
-from workflows_validation.workflow_instance import WorkflowInstance, StepAssignment, store_workflow_instance, get_workflow_instances_of_model
-from workflows_validation.workflow_model import WorkflowModel, WorkflowModelStep, store_workflow_model, read_workflow_model
+from workflows_validation.common import dw_prefix, rdf_prefix
+from workflows_validation.workflow_instance import WorkflowInstance, StepAssignment
+from workflows_validation.workflow_model import WorkflowModel, WorkflowModelStep
 from workflows_validation.workflows_validator import is_workflow_instance_valid, ValidationStatus, ValidationResult
 
 logging.basicConfig(
@@ -51,31 +51,31 @@ def generate_handover_group_definition(length: int) -> list[tuple[URIRef, list[t
 def generate_handover_group_triples(handover_group_definition: list[tuple[URIRef, list[tuple[str, URIRef]]]]) -> tuple[Graph, URIRef]:
     g = Graph()
 
-    workflow_instance_iri = crc_prefix.handover_workflow_instance
-    g.add((workflow_instance_iri, rdf_prefix.type, crc_prefix.workflowModelInstance))
+    workflow_instance_iri = dw_prefix.handover_workflow_instance
+    g.add((workflow_instance_iri, rdf_prefix.type, dw_prefix.workflowModelInstance))
 
     first_handover_group_iri = None
     previous_handover_group_iri = None
     for i, (project_name, activity_class_names_and_iris) in enumerate(handover_group_definition):
-        handover_group_iri = crc_prefix[f"handover_group_{i}"]
+        handover_group_iri = dw_prefix[f"handover_group_{i}"]
         if i == 0:
-            g.add((workflow_instance_iri, crc_prefix.substep, handover_group_iri))
+            g.add((workflow_instance_iri, dw_prefix.substep, handover_group_iri))
             first_handover_group_iri = handover_group_iri
         else:
-            g.add((previous_handover_group_iri, crc_prefix.nextStep, handover_group_iri))
+            g.add((previous_handover_group_iri, dw_prefix.nextStep, handover_group_iri))
 
-        g.add((handover_group_iri, crc_prefix.assignedTo, project_name_to_iri[project_name]))
-        g.add((handover_group_iri, rdf_prefix.type, crc_prefix.HandoverGroup))
+        g.add((handover_group_iri, dw_prefix.assignedTo, project_name_to_iri[project_name]))
+        g.add((handover_group_iri, rdf_prefix.type, dw_prefix.HandoverGroup))
 
         for _, activity_class_iri in activity_class_names_and_iris:
-            handover_iri = crc_prefix[uuid.uuid4().hex]
-            activity_iri = crc_prefix[uuid.uuid4().hex]
+            handover_iri = dw_prefix[uuid.uuid4().hex]
+            activity_iri = dw_prefix[uuid.uuid4().hex]
 
-            g.add((handover_group_iri, crc_prefix.substep, handover_iri))
-            g.add((handover_iri, crc_prefix.substep, activity_iri))
-            g.add((handover_iri, rdf_prefix.type, crc_prefix.Handover))
+            g.add((handover_group_iri, dw_prefix.substep, handover_iri))
+            g.add((handover_iri, dw_prefix.substep, activity_iri))
+            g.add((handover_iri, rdf_prefix.type, dw_prefix.Handover))
 
-            g.add((activity_iri, rdf_prefix.type, crc_prefix.CharacterizationActivityInstance))
+            g.add((activity_iri, rdf_prefix.type, dw_prefix.CharacterizationActivityInstance))
             g.add((activity_iri, rdf_prefix.type, activity_class_iri))
 
 
@@ -105,7 +105,7 @@ def generate_workflow_model_and_instance_for_handover_group_definition(handover_
     previous_workflow_model_step = None
     for i, (project_name, activity_class_names_and_iris) in enumerate(handover_group_definition):
         workflow_model_step = CRC1625WorkflowModelStep()
-        workflow_model_step.iri = crc_prefix[f"workflow_model_step_{i}"]
+        workflow_model_step.iri = dw_prefix[f"workflow_model_step_{i}"]
         workflow_model_step.name = f"workflow_model_step_{i}"
 
         workflow_model_step.set_allowed_project_names([project_name])
@@ -123,7 +123,7 @@ def generate_workflow_model_and_instance_for_handover_group_definition(handover_
         step_assignment.create_new_iri()
         step_assignment.workflow_step_iri = workflow_model_step.iri
         step_assignment.assigned_entities.append(entity_IRI)
-        step_assignment.property_to_follow = crc_prefix.nextStep
+        step_assignment.property_to_follow = dw_prefix.nextStep
 
         workflow_instance.step_assignments[workflow_model_step.iri] = step_assignment
 
@@ -211,8 +211,8 @@ def test_valid_workflows(generate_redundant_branch: bool = False,
         g.serialize(destination=ttl_file_path, format='turtle')
         asyncio.run(rdf_datastore_client.upload_file(ttl_file_path, graph_iri=MAIN_GRAPH_IRI, delete_file_after_upload=True))
 
-        asyncio.run(store_workflow_model(workflow_model, return_file=False))
-        asyncio.run(store_workflow_instance(workflow_instance, return_file=False))
+        asyncio.run(rdf_datastore_client.launch_update(workflow_model.get_insert_query()))
+        asyncio.run(rdf_datastore_client.launch_update(workflow_instance.get_insert_query()))
 
         validation_results = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True))
 
@@ -268,8 +268,8 @@ def test_missing_data_workflows():
         g.serialize(destination=ttl_file_path, format='turtle')
         asyncio.run(rdf_datastore_client.upload_file(ttl_file_path, graph_iri=MAIN_GRAPH_IRI, delete_file_after_upload=True))
 
-        asyncio.run(store_workflow_model(workflow_model, return_file=False))
-        asyncio.run(store_workflow_instance(workflow_instance, return_file=False))
+        asyncio.run(rdf_datastore_client.launch_update(workflow_model.get_insert_query()))
+        asyncio.run(rdf_datastore_client.launch_update(workflow_instance.get_insert_query()))
 
         validation_results = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True))
 
@@ -331,8 +331,8 @@ def test_invalid_workflows():
         g.serialize(destination=ttl_file_path, format='turtle')
         asyncio.run(rdf_datastore_client.upload_file(ttl_file_path, graph_iri=MAIN_GRAPH_IRI, delete_file_after_upload=True))
 
-        asyncio.run(store_workflow_model(workflow_model, return_file=False))
-        asyncio.run(store_workflow_instance(workflow_instance, return_file=False))
+        asyncio.run(rdf_datastore_client.launch_update(workflow_model.get_insert_query()))
+        asyncio.run(rdf_datastore_client.launch_update(workflow_instance.get_insert_query()))
 
         validation_results = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True))
 
@@ -389,8 +389,8 @@ def test_broken_in_half_workflows():
         g.serialize(destination=ttl_file_path, format='turtle')
         asyncio.run(rdf_datastore_client.upload_file(ttl_file_path, graph_iri=MAIN_GRAPH_IRI, delete_file_after_upload=True))
 
-        asyncio.run(store_workflow_model(workflow_model, return_file=False))
-        asyncio.run(store_workflow_instance(workflow_instance, return_file=False))
+        asyncio.run(rdf_datastore_client.launch_update(workflow_model.get_insert_query()))
+        asyncio.run(rdf_datastore_client.launch_update(workflow_instance.get_insert_query()))
 
         validation_results, steps_with_no_target_node = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True))
 

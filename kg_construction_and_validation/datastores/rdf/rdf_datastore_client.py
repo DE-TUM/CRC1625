@@ -5,7 +5,7 @@ from typing import List, Tuple, Coroutine
 from dotenv import load_dotenv
 
 import httpx
-from rdflib import Dataset
+from rdflib import Dataset, Graph
 from rdflib.plugins.stores.sparqlstore import SPARQLStore
 
 from datastores.rdf.rdf_datastore import UpdateType, MAIN_GRAPH_IRI, WORKFLOWS_GRAPH_IRI

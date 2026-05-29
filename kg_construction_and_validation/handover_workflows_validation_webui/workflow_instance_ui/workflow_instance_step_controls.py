@@ -2,7 +2,7 @@ from nicegui import ui, app
 
 from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_page_state import WorkflowInstancePageState
 from handover_workflows_validation_webui.workflow_model_ui.workflow_model_page_state import get_iri_for_workflow_step_name
-from workflows_validation.CRC_1625_workflows_validator.CRC_1625_workflows_validator import crc_prefix
+from workflows_validation.CRC_1625_workflows_validator.CRC_1625_workflows_validator import dw_prefix
 from workflows_validation.workflow_instance import StepAssignment
 
 
@@ -28,7 +28,7 @@ async def add_edge_action(step_name: str | None,
         step_assignment = StepAssignment()
         step_assignment.create_new_iri()
         step_assignment.assigned_entities = []
-        step_assignment.property_to_follow = crc_prefix.nextStep
+        step_assignment.property_to_follow = dw_prefix.nextStep
         step_assignment.workflow_step_iri = workflow_step_iri
         app.storage.tab['current_workflow_instance'].step_assignments[workflow_step_iri] = step_assignment
 

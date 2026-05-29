@@ -3,15 +3,16 @@ from copy import deepcopy
 from nicegui import ui, app
 from rdflib import URIRef
 
+from datastores.rdf import rdf_datastore_client
+from datastores.rdf.rdf_datastore import UpdateType
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, NodeType
 from handover_workflows_validation_webui.middleware import matinf_or_demo_login_required, log_out
 from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_controls import create_graph_controls
 from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_page_state import WorkflowInstancePageState
 from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_step_controls import \
     create_workflow_instance_step_controls
-from workflows_validation.CRC_1625_workflows_validator.CRC_1625_workflows_validator import CRC1625WorkflowModelStep, get_creator_user_id, crc_prefix
-from workflows_validation.workflow_instance import overwrite_workflow_instance, get_workflow_instances_of_model, is_workflow_instance_definition_valid
-from workflows_validation.workflow_model import read_workflow_model
+from workflows_validation.CRC_1625_workflows_validator.CRC_1625_workflows_validator import CRC1625WorkflowModelStep, get_creator_user_id, dw_prefix
+from workflows_validation.extra_functions import read_workflow_model, get_workflow_instances_assigned_to_model
 from workflows_validation.workflows_validator import WorkflowModel, WorkflowInstance, is_workflow_instance_valid, generate_SHACL_shapes_for_workflow, \
     generate_validation_paths, ValidationJob
 
@@ -115,7 +116,7 @@ def handle_return_button(workflow_instance_page_state: WorkflowInstancePageState
                     ui.label('The workflow model has been modified. Save changes and exit?')
 
                     async def save_and_exit_and_close():
-                        is_valid, msg = await is_workflow_instance_definition_valid(app.storage.tab['current_workflow_instance'])
+                        is_valid, msg = app.storage.tab['current_workflow_instance'].is_definition_valid(app.storage.tab['current_workflow_model'])
                         if not is_valid:
                             ui.notification(msg,
                                             type='negative',
@@ -125,7 +126,7 @@ def handle_return_button(workflow_instance_page_state: WorkflowInstancePageState
                         else:
                             await check_for_objects_with_multiple_paths(app.storage.tab['current_workflow_model'],
                                                                         app.storage.tab['current_workflow_instance'])
-                            await overwrite_workflow_instance(app.storage.tab['current_workflow_instance'])
+                            await rdf_datastore_client.launch_updates([(q, UpdateType.query) for q in app.storage.tab['current_workflow_instance'].get_overwrite_queries()])
                             return_dialog.close()
                             ui.navigate.to('/workflows')
 
@@ -183,7 +184,7 @@ async def handle_save_button(workflow_instance_page_state: WorkflowInstancePageS
     elif app.storage.tab['user_id'] != get_creator_user_id(app.storage.tab['current_workflow_instance']):
         ui.notify("You are not the owner of this workflow instance, so you cannot edit it.", type='negative')
     else:
-        is_valid, msg = await is_workflow_instance_definition_valid(app.storage.tab['current_workflow_instance'])
+        is_valid, msg = app.storage.tab['current_workflow_instance'].is_definition_valid(app.storage.tab['current_workflow_model'])
         if not is_valid:
             ui.notification(msg,
                             type='negative',
@@ -192,7 +193,7 @@ async def handle_save_button(workflow_instance_page_state: WorkflowInstancePageS
         else:
             await check_for_objects_with_multiple_paths(app.storage.tab['current_workflow_model'],
                                                         app.storage.tab['current_workflow_instance'])
-            await overwrite_workflow_instance(app.storage.tab['current_workflow_instance'])
+            await rdf_datastore_client.launch_updates([(q, UpdateType.query) for q in app.storage.tab['current_workflow_instance'].get_overwrite_queries()])
             workflow_instance_page_state.changes_are_saved = True
             workflow_instance_page_state.original_workflow_instance = app.storage.tab['current_workflow_instance']
             ui.notify("The changes have been saved", type='positive')
@@ -324,14 +325,14 @@ async def edit_workflow_instance_page(workflow_model_uuid: str,
                                       workflow_instance_uuid: str):
     await ui.context.client.connected()
 
-    workflow_instance_iri = URIRef(crc_prefix[workflow_instance_uuid])
+    workflow_instance_iri = URIRef(dw_prefix[workflow_instance_uuid])
 
     workflow_instance_page_state = WorkflowInstancePageState()
 
     if app.storage.tab.get('current_workflow_model', None):  # The page has been reloaded
-        app.storage.tab['current_workflow_model'] = await read_workflow_model(URIRef(crc_prefix[workflow_model_uuid]))
+        app.storage.tab['current_workflow_model'] = await read_workflow_model(URIRef(dw_prefix[workflow_model_uuid]), rdf_datastore_client.launch_query)
 
-    workflow_instances_of_current_workflow_model = await get_workflow_instances_of_model(app.storage.tab['current_workflow_model'])
+    workflow_instances_of_current_workflow_model = await get_workflow_instances_assigned_to_model(app.storage.tab['current_workflow_model'], rdf_datastore_client.launch_query)
     app.storage.tab['workflow_instances_of_current_workflow_model'] = list(workflow_instances_of_current_workflow_model.values())
     app.storage.tab['current_workflow_instance'] = workflow_instances_of_current_workflow_model[workflow_instance_iri]
 

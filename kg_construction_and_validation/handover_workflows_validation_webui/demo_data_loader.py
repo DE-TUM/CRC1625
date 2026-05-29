@@ -1,9 +1,9 @@
 import os
 
 from datastores.rdf import rdf_datastore_client
-from workflows_validation.CRC_1625_workflows_validator.CRC_1625_workflows_validator import CRC1625WorkflowModelStep, set_creator_user_id, crc_prefix, crc_handover_prefix
-from workflows_validation.workflow_instance import StepAssignment, WorkflowInstance, store_workflow_instance
-from workflows_validation.workflow_model import store_workflow_model, WorkflowModel
+from workflows_validation.CRC_1625_workflows_validator.CRC_1625_workflows_validator import CRC1625WorkflowModelStep, set_creator_user_id, dw_prefix, crc_handover_prefix
+from workflows_validation.workflow_instance import StepAssignment, WorkflowInstance
+from workflows_validation.workflow_model import WorkflowModel
 
 module_dir = os.path.dirname(__file__)
 
@@ -69,7 +69,7 @@ async def create_demo_workflow_1():
     demo_workflow_model.workflow_model_steps = {step.iri: step for step in [step_1, step_2, step_3, step_4, step_5, step_6]}
     demo_workflow_model.initial_step_iri = step_1.iri
 
-    await store_workflow_model(demo_workflow_model)
+    await rdf_datastore_client.launch_update(demo_workflow_model.get_insert_query())
 
     workflow_instance = WorkflowInstance()
     workflow_instance.create_new_iri()
@@ -80,39 +80,39 @@ async def create_demo_workflow_1():
 
     workflow_assignment_1 = StepAssignment()
     workflow_assignment_1.create_new_iri()
-    workflow_assignment_1.property_to_follow = crc_prefix.nextStep
+    workflow_assignment_1.property_to_follow = dw_prefix.nextStep
     workflow_assignment_1.assigned_entities = [crc_handover_prefix["hnd_group_initial_work_for_Demo_ML"]]
     workflow_assignment_1.workflow_step_iri = step_1.iri
 
     workflow_assignment_2 = StepAssignment()
     workflow_assignment_2.create_new_iri()
-    workflow_assignment_2.property_to_follow = crc_prefix.nextStep
+    workflow_assignment_2.property_to_follow = dw_prefix.nextStep
     workflow_assignment_2.assigned_entities = [crc_handover_prefix["hnd_group_initial_work_for_Demo_ML"]]
     workflow_assignment_2.workflow_step_iri = step_2.iri
 
     workflow_assignment_3 = StepAssignment()
     workflow_assignment_3.create_new_iri()
-    workflow_assignment_3.property_to_follow = crc_prefix.nextStep
+    workflow_assignment_3.property_to_follow = dw_prefix.nextStep
     workflow_assignment_3.assigned_entities = [crc_handover_prefix["hnd_group_initial_work_for_Demo_ML"]]
     workflow_assignment_3.workflow_step_iri = step_3.iri
 
     workflow_assignment_4 = StepAssignment()
     workflow_assignment_4.create_new_iri()
-    workflow_assignment_4.property_to_follow = crc_prefix.nextStep
+    workflow_assignment_4.property_to_follow = dw_prefix.nextStep
     workflow_assignment_4.assigned_entities = [crc_handover_prefix["hnd_group_initial_work_for_Sample_Piece_1"],
                                                crc_handover_prefix["hnd_group_initial_work_for_Sample_Piece_2"]]
     workflow_assignment_4.workflow_step_iri = step_4.iri
 
     workflow_assignment_5 = StepAssignment()
     workflow_assignment_5.create_new_iri()
-    workflow_assignment_5.property_to_follow = crc_prefix.nextStep
+    workflow_assignment_5.property_to_follow = dw_prefix.nextStep
     workflow_assignment_5.assigned_entities = [crc_handover_prefix["hnd_group_initial_work_for_Sample_Piece_1"],
                                                crc_handover_prefix["hnd_group_initial_work_for_Sample_Piece_2"]]
     workflow_assignment_5.workflow_step_iri = step_5.iri
 
     workflow_assignment_6 = StepAssignment()
     workflow_assignment_6.create_new_iri()
-    workflow_assignment_6.property_to_follow = crc_prefix.nextStep
+    workflow_assignment_6.property_to_follow = dw_prefix.nextStep
     workflow_assignment_6.assigned_entities = [crc_handover_prefix["hnd_group_initial_work_for_Sample_Piece_1"],
                                                crc_handover_prefix["hnd_group_initial_work_for_Sample_Piece_2"]]
     workflow_assignment_6.workflow_step_iri = step_6.iri
@@ -121,7 +121,7 @@ async def create_demo_workflow_1():
                                                                               workflow_assignment_3, workflow_assignment_4,
                                                                               workflow_assignment_5, workflow_assignment_6]}
 
-    await store_workflow_instance(workflow_instance)
+    await rdf_datastore_client.launch_update(workflow_instance.get_insert_query())
 
 
 async def create_demo_workflow_2():
@@ -190,7 +190,7 @@ async def create_demo_workflow_2():
     demo_workflow_model.workflow_model_steps = {step.iri: step for step in [step_1, step_2, step_3, step_4, step_5, step_6_1, step_6_2]}
     demo_workflow_model.initial_step_iri = step_1.iri
 
-    await store_workflow_model(demo_workflow_model)
+    await rdf_datastore_client.launch_update(demo_workflow_model.get_insert_query())
 
     workflow_instance = WorkflowInstance()
     workflow_instance.create_new_iri()
@@ -201,45 +201,45 @@ async def create_demo_workflow_2():
 
     workflow_assignment_1 = StepAssignment()
     workflow_assignment_1.create_new_iri()
-    workflow_assignment_1.property_to_follow = crc_prefix.nextStep
+    workflow_assignment_1.property_to_follow = dw_prefix.nextStep
     workflow_assignment_1.assigned_entities = [crc_handover_prefix["hnd_group_initial_work_for_Demo_ML"]]
     workflow_assignment_1.workflow_step_iri = step_1.iri
 
     workflow_assignment_2 = StepAssignment()
     workflow_assignment_2.create_new_iri()
-    workflow_assignment_2.property_to_follow = crc_prefix.nextStep
+    workflow_assignment_2.property_to_follow = dw_prefix.nextStep
     workflow_assignment_2.assigned_entities = [crc_handover_prefix["hnd_group_initial_work_for_Demo_ML"]]
     workflow_assignment_2.workflow_step_iri = step_2.iri
 
     workflow_assignment_3 = StepAssignment()
     workflow_assignment_3.create_new_iri()
-    workflow_assignment_3.property_to_follow = crc_prefix.nextStep
+    workflow_assignment_3.property_to_follow = dw_prefix.nextStep
     workflow_assignment_3.assigned_entities = [crc_handover_prefix["hnd_group_initial_work_for_Demo_ML"]]
     workflow_assignment_3.workflow_step_iri = step_3.iri
 
     workflow_assignment_4 = StepAssignment()
     workflow_assignment_4.create_new_iri()
-    workflow_assignment_4.property_to_follow = crc_prefix.nextStep
+    workflow_assignment_4.property_to_follow = dw_prefix.nextStep
     workflow_assignment_4.assigned_entities = [crc_handover_prefix["hnd_group_initial_work_for_Sample_Piece_1"],
                                                crc_handover_prefix["hnd_group_initial_work_for_Sample_Piece_2"]]
     workflow_assignment_4.workflow_step_iri = step_4.iri
 
     workflow_assignment_5 = StepAssignment()
     workflow_assignment_5.create_new_iri()
-    workflow_assignment_5.property_to_follow = crc_prefix.nextStep
+    workflow_assignment_5.property_to_follow = dw_prefix.nextStep
     workflow_assignment_5.assigned_entities = [crc_handover_prefix["hnd_group_initial_work_for_Sample_Piece_1"],
                                                crc_handover_prefix["hnd_group_initial_work_for_Sample_Piece_2"]]
     workflow_assignment_5.workflow_step_iri = step_5.iri
 
     workflow_assignment_6_1 = StepAssignment()
     workflow_assignment_6_1.create_new_iri()
-    workflow_assignment_6_1.property_to_follow = crc_prefix.nextStep
+    workflow_assignment_6_1.property_to_follow = dw_prefix.nextStep
     workflow_assignment_6_1.assigned_entities = [crc_handover_prefix["hnd_group_initial_work_for_Sample_Piece_1"]]
     workflow_assignment_6_1.workflow_step_iri = step_6_1.iri
 
     workflow_assignment_6_2 = StepAssignment()
     workflow_assignment_6_2.create_new_iri()
-    workflow_assignment_6_2.property_to_follow = crc_prefix.nextStep
+    workflow_assignment_6_2.property_to_follow = dw_prefix.nextStep
     workflow_assignment_6_2.assigned_entities = [crc_handover_prefix["hnd_group_initial_work_for_Sample_Piece_2"]]
     workflow_assignment_6_2.workflow_step_iri = step_6_2.iri
 
@@ -248,7 +248,7 @@ async def create_demo_workflow_2():
                                                                               workflow_assignment_5, workflow_assignment_6_1,
                                                                               workflow_assignment_6_2]}
 
-    await store_workflow_instance(workflow_instance)
+    await rdf_datastore_client.launch_update(workflow_instance.get_insert_query())
 
     workflow_instance = WorkflowInstance()
     workflow_instance.create_new_iri()
@@ -259,37 +259,37 @@ async def create_demo_workflow_2():
 
     workflow_assignment_1 = StepAssignment()
     workflow_assignment_1.create_new_iri()
-    workflow_assignment_1.property_to_follow = crc_prefix.nextStep
+    workflow_assignment_1.property_to_follow = dw_prefix.nextStep
     workflow_assignment_1.assigned_entities = [crc_handover_prefix["hnd_group_initial_work_for_Demo_ML"]]
     workflow_assignment_1.workflow_step_iri = step_1.iri
 
     workflow_assignment_2 = StepAssignment()
     workflow_assignment_2.create_new_iri()
-    workflow_assignment_2.property_to_follow = crc_prefix.nextStep
+    workflow_assignment_2.property_to_follow = dw_prefix.nextStep
     workflow_assignment_2.assigned_entities = [crc_handover_prefix["hnd_group_initial_work_for_Demo_ML"]]
     workflow_assignment_2.workflow_step_iri = step_2.iri
 
     workflow_assignment_3 = StepAssignment()
     workflow_assignment_3.create_new_iri()
-    workflow_assignment_3.property_to_follow = crc_prefix.nextStep
+    workflow_assignment_3.property_to_follow = dw_prefix.nextStep
     workflow_assignment_3.assigned_entities = [crc_handover_prefix["hnd_group_initial_work_for_Demo_ML"]]
     workflow_assignment_3.workflow_step_iri = step_3.iri
 
     workflow_assignment_4 = StepAssignment()
     workflow_assignment_4.create_new_iri()
-    workflow_assignment_4.property_to_follow = crc_prefix.nextStep
+    workflow_assignment_4.property_to_follow = dw_prefix.nextStep
     workflow_assignment_4.assigned_entities = [crc_handover_prefix["hnd_group_initial_work_for_Demo_ML"]]
     workflow_assignment_4.workflow_step_iri = step_4.iri
 
     workflow_assignment_5 = StepAssignment()
     workflow_assignment_5.create_new_iri()
-    workflow_assignment_5.property_to_follow = crc_prefix.nextStep
+    workflow_assignment_5.property_to_follow = dw_prefix.nextStep
     workflow_assignment_5.assigned_entities = [crc_handover_prefix["hnd_group_initial_work_for_Demo_ML"]]
     workflow_assignment_5.workflow_step_iri = step_5.iri
 
     workflow_assignment_6_1 = StepAssignment()
     workflow_assignment_6_1.create_new_iri()
-    workflow_assignment_6_1.property_to_follow = crc_prefix.nextStep
+    workflow_assignment_6_1.property_to_follow = dw_prefix.nextStep
     workflow_assignment_6_1.assigned_entities = [crc_handover_prefix["hnd_group_initial_work_for_Demo_ML"]]
     workflow_assignment_6_1.workflow_step_iri = step_6_1.iri
 
@@ -297,7 +297,7 @@ async def create_demo_workflow_2():
                                                                               workflow_assignment_3, workflow_assignment_4,
                                                                               workflow_assignment_5, workflow_assignment_6_1]}
 
-    await store_workflow_instance(workflow_instance)
+    await rdf_datastore_client.launch_update(workflow_instance.get_insert_query())
 
 
 async def is_demo_data_already_loaded():

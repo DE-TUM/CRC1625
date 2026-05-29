@@ -14,11 +14,11 @@ from handover_workflows_validation_webui.common_functions import get_sample_obje
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent
 from handover_workflows_validation_webui.middleware import matinf_or_demo_login_required, activate_demo_mode, log_out, show_materialization_card
 from handover_workflows_validation_webui.workflow_model_ui.edit_workflow_model_page import workflow_model_to_nodes_and_edges
-from workflows_validation.CRC_1625_workflows_validator.CRC_1625_workflows_validator import get_creator_user_id, set_creator_user_id, CRC1625WorkflowModelStep, \
-    crc_prefix
-from workflows_validation.workflow_instance import WorkflowInstance, delete_workflow_instance, store_workflow_instance, get_workflow_instances_of_model, \
-    StepAssignment, is_workflow_instance_definition_valid
-from workflows_validation.workflow_model import store_workflow_model, read_workflow_model, WorkflowModel
+from workflows_validation.CRC_1625_workflows_validator.CRC_1625_workflows_validator import get_creator_user_id, set_creator_user_id, CRC1625WorkflowModelStep
+from workflows_validation.common import dw_prefix
+from workflows_validation.extra_functions import read_workflow_model, get_workflow_instances_assigned_to_model
+from workflows_validation.workflow_instance import WorkflowInstance, StepAssignment
+from workflows_validation.workflow_model import WorkflowModel
 from workflows_validation.workflows_validator import is_workflow_instance_valid
 
 module_dir = os.path.dirname(__file__)
@@ -82,7 +82,7 @@ def edit_handover_workflow_instance_button_click():
 
 
 async def handle_workflow_instance_deletion(workflows_page_state: WorkflowsPageState):
-    await delete_workflow_instance(app.storage.tab['current_workflow_instance'])
+    await rdf_datastore_client.launch_update(app.storage.tab['current_workflow_instance'].get_delete_query())
     ui.notify(f'Workflow Instance {app.storage.tab['current_workflow_instance'].name} deleted', color='positive')
     # Force the suer to select the workflow model again
     workflows_page_state.main_content.clear()
@@ -114,7 +114,7 @@ async def copy_handover_workflow_model(workflows_page_state: WorkflowsPageState)
     copy_of_current_workflow_model = app.storage.tab['current_workflow_model'].create_copy()
     set_creator_user_id(copy_of_current_workflow_model, app.storage.tab['user_id'])
 
-    await store_workflow_model(copy_of_current_workflow_model)
+    await rdf_datastore_client.launch_update(copy_of_current_workflow_model.get_insert_query())
 
     ui.notify(f'Workflow copied as {copy_of_current_workflow_model.name}', color='positive')
 
@@ -205,13 +205,13 @@ async def create_empty_workflow_instance(workflow_instance_name: str,
         workflow_instance.step_assignments[step_iri] = StepAssignment()
         workflow_instance.step_assignments[step_iri].create_new_iri()
         workflow_instance.step_assignments[step_iri].workflow_step_iri = step_iri
-        workflow_instance.step_assignments[step_iri].property_to_follow = crc_prefix.nextStep
+        workflow_instance.step_assignments[step_iri].property_to_follow = dw_prefix.nextStep
 
-    is_valid, msg = await is_workflow_instance_definition_valid(app.storage.tab['current_workflow_instance'])
+    is_valid, msg = await app.storage.tab['current_workflow_instance'].is_definition_valid(app.storage.tab['current_workflow_model'])
     if not is_valid:
         ui.notify(msg, type='negative')
     else:
-        await store_workflow_instance(workflow_instance)
+        await rdf_datastore_client.launch_update(app.storage.tab['current_workflow_instance'].get_insert_query())
 
         # Show them again
         await show_workflow_model_instances(app.storage.tab['current_workflow_model'].iri,
@@ -322,8 +322,8 @@ async def show_workflow_model_instances(workflow_model_iri: URIRef,
     Workflow instances of the selected workflow model from the left drawer, also allowing to edit or copy the model and to create a new instance. Empty until so
     """
     # Load the selected workflow model and its instances
-    app.storage.tab['current_workflow_model'] = await read_workflow_model(workflow_model_iri)
-    workflow_instances_of_current_workflow_model = await get_workflow_instances_of_model(app.storage.tab['current_workflow_model'])
+    app.storage.tab['current_workflow_model'] = await read_workflow_model(workflow_model_iri, rdf_datastore_client.launch_query)
+    workflow_instances_of_current_workflow_model = await get_workflow_instances_assigned_to_model(app.storage.tab['current_workflow_model'], rdf_datastore_client.launch_query)
     app.storage.tab['workflow_instances_of_current_workflow_model'] = list(workflow_instances_of_current_workflow_model.values())
     workflows_page_state.filtered_workflow_instances_of_current_workflow_model = app.storage.tab['workflow_instances_of_current_workflow_model']
 
@@ -447,7 +447,7 @@ async def create_workflows_model_left_drawer(workflows_page_state: WorkflowsPage
         workflow_model.workflow_model_steps[workflow_model_step.iri] = workflow_model_step
         workflow_model.initial_step_iri = workflow_model_step.iri
 
-        await store_workflow_model(workflow_model)
+        await rdf_datastore_client.launch_update(workflow_model.get_insert_query())
 
         workflows_page_state.workflow_model_details[workflow_model.iri] = (workflow_model_name, str(app.storage.tab['user_id']))
 

@@ -3,6 +3,8 @@ from copy import deepcopy
 from nicegui import ui, app
 from rdflib import URIRef
 
+from datastores.rdf import rdf_datastore_client
+from datastores.rdf.rdf_datastore import UpdateType
 from handover_workflows_validation_webui.cytoscape_component.cytoscape_component import CytoscapeComponent, NodeType
 from handover_workflows_validation_webui.middleware import matinf_or_demo_login_required, log_out
 from handover_workflows_validation_webui.workflow_model_ui.workflow_model_controls import create_graph_controls
@@ -10,8 +12,9 @@ from handover_workflows_validation_webui.workflow_model_ui.workflow_model_page_s
 from handover_workflows_validation_webui.workflow_model_ui.workflow_model_step_controls import \
     create_workflow_model_step_controls
 from workflows_validation.CRC_1625_workflows_validator.CRC_1625_workflows_validator import CRC1625WorkflowModelStep
-from workflows_validation.common import crc_prefix
-from workflows_validation.workflow_model import WorkflowModel, overwrite_workflow_model, read_workflow_model
+from workflows_validation.common import dw_prefix
+from workflows_validation.extra_functions import read_workflow_model
+from workflows_validation.workflow_model import WorkflowModel
 
 
 def workflow_model_to_nodes_and_edges(workflow_model: WorkflowModel):
@@ -84,8 +87,7 @@ async def handle_return_button(workflow_model_page_state: WorkflowModelPageState
                         return_dialog.close()
 
                         if can_current_workflow_model_be_saved():
-                            await overwrite_workflow_model(app.storage.tab['current_workflow_model'],
-                                                           workflow_model_page_state.original_workflow_model)
+                            await rdf_datastore_client.launch_updates([(q, UpdateType.query) for q in app.storage.tab['current_workflow_model'].get_overwrite_queries(workflow_model_page_state.original_workflow_model)])
                             ui.navigate.to('/workflows')
                         else:
                             ui.notification("You must select an initial step first and have no unconnected steps if there are multiple of them",
@@ -145,8 +147,10 @@ async def handle_save_button(workflow_model_page_state: WorkflowModelPageState):
         ui.notify("You cannot save changes as a demo user", type='negative')
     else:
         if can_current_workflow_model_be_saved():
-            await overwrite_workflow_model(app.storage.tab['current_workflow_model'],
-                                           workflow_model_page_state.original_workflow_model)
+            for cosa in [(q, UpdateType.query) for q in app.storage.tab['current_workflow_model'].get_overwrite_queries(workflow_model_page_state.original_workflow_model)]:
+                print(cosa)
+                print()
+            await rdf_datastore_client.launch_updates([(q, UpdateType.query) for q in app.storage.tab['current_workflow_model'].get_overwrite_queries(workflow_model_page_state.original_workflow_model)])
             workflow_model_page_state.changes_are_saved = True
             workflow_model_page_state.original_workflow_model = app.storage.tab['current_workflow_model']
             ui.notify("The changes have been saved", type='positive')
@@ -162,7 +166,7 @@ async def edit_workflow_model_page(workflow_model_uuid: str):
     workflow_model_page_state = WorkflowModelPageState()
 
     if app.storage.tab.get('current_workflow_model', None):  # The page has been reloaded
-        app.storage.tab['current_workflow_model'] = await read_workflow_model(URIRef(crc_prefix[workflow_model_uuid]))
+        app.storage.tab['current_workflow_model'] = await read_workflow_model(URIRef(dw_prefix[workflow_model_uuid]), rdf_datastore_client.launch_query)
     workflow_model_page_state.original_workflow_model = deepcopy(app.storage.tab['current_workflow_model'])
 
     with ui.header().classes('items-center p-2 h-14'):

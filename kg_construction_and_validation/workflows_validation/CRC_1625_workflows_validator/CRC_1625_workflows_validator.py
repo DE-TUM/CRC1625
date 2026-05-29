@@ -5,7 +5,7 @@ from dataclasses import dataclass, asdict
 
 from rdflib import URIRef, Namespace
 
-from workflows_validation.common import crc_prefix, BaseWorkflowElement
+from workflows_validation.common import dw_prefix, BaseWorkflowElement
 from workflows_validation.workflows_validator import WorkflowModelStep
 
 module_dir = os.path.dirname(__file__)
@@ -13,9 +13,9 @@ measurement_type_ids_to_activities: list[dict[str, list[str]]] = json.load(
     open(os.path.join(module_dir, "../../materialization/mappings/measurement_type_ids_to_activities.json")))
 SHACL_shape = open(os.path.join(module_dir, "CRC_1625_handover_workflow_group_shape.shacl"), "r").read()
 
-activity_name_to_class_iri = {str(m["measurement_name"]): crc_prefix[m["measurement_class_name"]] for m in measurement_type_ids_to_activities}
+activity_name_to_class_iri = {str(m["measurement_name"]): dw_prefix[m["measurement_class_name"]] for m in measurement_type_ids_to_activities}
 
-crc_prefix = Namespace("https://crc1625.mdi.ruhr-uni-bochum.de/")
+dw_prefix = Namespace("https://crc1625.mdi.ruhr-uni-bochum.de/")
 crc_workflow_prefix = Namespace("https://crc1625.mdi.ruhr-uni-bochum.de/workflow/")
 crc_project_prefix = Namespace("https://crc1625.mdi.ruhr-uni-bochum.de/project/")
 crc_handover_prefix = Namespace("https://crc1625.mdi.ruhr-uni-bochum.de/handover/")
@@ -52,7 +52,7 @@ project_name_to_iri = {
 
 project_iri_to_name = {v: k for k, v in project_name_to_iri.items()}
 
-allowed_activities = [crc_prefix[measurement_class_name] for measurement_class_name in activity_name_to_class_iri.values()]
+allowed_activities = [dw_prefix[measurement_class_name] for measurement_class_name in activity_name_to_class_iri.values()]
 
 
 @dataclass
@@ -133,7 +133,7 @@ class CRC1625WorkflowModelStep(WorkflowModelStep):
 
 
 def get_creator_user_id(workflow_element: BaseWorkflowElement) -> int:
-    creator_iri = crc_prefix.creator
+    creator_iri = dw_prefix.creator
 
     if creator_iri in workflow_element.provenance_records:
         user_id_str = str(workflow_element.provenance_records[creator_iri][0]).rsplit('/', 1)[-1]
@@ -147,6 +147,6 @@ def get_creator_user_id(workflow_element: BaseWorkflowElement) -> int:
 
 
 def set_creator_user_id(workflow_element: BaseWorkflowElement, user_id: int):
-    creator_iri = crc_prefix.creator
+    creator_iri = dw_prefix.creator
 
     workflow_element.provenance_records[creator_iri] = [crc_user_prefix[str(user_id)]]
