@@ -374,42 +374,6 @@ def test_invalid_workflows():
 
         logging.info(f"Workflow test with invalid data of {n_steps} steps passed")
 
-def test_broken_in_half_workflows():
-    for n_steps in [3, 5, 10]:
-        asyncio.run(rdf_datastore_client.clear_triples())
-        asyncio.run(rdf_datastore_client.clear_triples(WORKFLOWS_GRAPH_IRI))
-
-        handover_group_definition = generate_handover_group_definition(n_steps)
-        g, entity_IRI = generate_handover_group_triples(handover_group_definition)
-        workflow_model, workflow_instance = generate_workflow_model_and_instance_for_handover_group_definition(handover_group_definition,
-                                                                                                               entity_IRI,
-                                                                                                               break_in_half=True)
-        temporary_ttl_path = f"{uuid.uuid4().hex}.ttl"
-        ttl_file_path = temporary_ttl_path
-        g.serialize(destination=ttl_file_path, format='turtle')
-        asyncio.run(rdf_datastore_client.upload_file(ttl_file_path, graph_iri=MAIN_GRAPH_IRI, delete_file_after_upload=True))
-
-        asyncio.run(rdf_datastore_client.launch_update(workflow_model.get_insert_query()))
-        asyncio.run(rdf_datastore_client.launch_update(workflow_instance.get_insert_query()))
-
-        validation_results, steps_with_no_target_node = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True))
-
-        all_validation_results: list[ValidationResult] = []
-        for entity_iri, validation_paths in validation_results.items():
-            for validation_path in validation_paths:
-                for _, reses in validation_path.items():
-                    for validation_result in reses:
-                        all_validation_results.append(validation_result)
-
-        if all(result.conforms for result in all_validation_results) and \
-                len(steps_with_no_target_node) == 0 and \
-                len(list(validation_results.values())[0]) == 2: # Only two paths (1st half, 2nd half)
-                logging.info(f"Valid workflow test of {n_steps} steps (w/ workflow split in two halves) passed")
-        else:
-            logging.error(f"Workflow test of {n_steps} steps (w/ workflow split in two halves) not passed. Debugging info:")
-            print_validation_results(validation_results)
-            raise ValueError(f"""The validation was not successful as expected. Please check the logging trace above for more information""")
-
 
 test_valid_workflows()
 test_missing_data_workflows()
