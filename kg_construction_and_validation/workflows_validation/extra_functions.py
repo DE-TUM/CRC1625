@@ -71,6 +71,10 @@ async def get_workflow_instances_assigned_to_model(workflow_model: WorkflowModel
             else:  # Add it to provenance records
                 workflow_instance.set_option("provenance_records", (p, get_iri_or_literal(o)))
 
+    # Coerce the cache fields (e.g. the stale flag) from their string representation to proper Python types
+    for workflow_instance in workflow_instances.values():
+        workflow_instance.normalize_cache_fields()
+
     # Fetch step assignments
     for workflow_instance in workflow_instances.values():
         query = workflow_instance_step_details_query.replace("{workflow_instance_iri}", workflow_instance.iri)

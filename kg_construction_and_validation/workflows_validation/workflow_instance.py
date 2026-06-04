@@ -1,6 +1,7 @@
 import os
 import uuid
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 
 from rdflib import URIRef, Graph, Literal, XSD
 
@@ -11,11 +12,15 @@ from workflows_validation.workflow_model import WorkflowModel, WorkflowModelStep
 module_dir = os.path.dirname(__file__)
 
 delete_workflow_instance_query = prefixes + open(os.path.join(module_dir, 'queries/delete_workflow_instance.sparql'), 'r').read()
+update_workflow_instance_validation_cache_query = prefixes + open(os.path.join(module_dir, 'queries/update_workflow_instance_validation_cache.sparql'), 'r').read()
 
 
 workflow_instance_iri_to_config_key = {
     **base_workflow_element_iri_to_config_key,
     str(dw_prefix.workflowModelInstanceOf): "workflow_model_iri",
+    str(dw_prefix.lastValidatedAt): "last_validated_at",
+    str(dw_prefix.cachedValidationStatus): "cached_validation_status",
+    str(dw_prefix.validationCacheStale): "validation_cache_stale",
 }
 workflow_instance_config_key_to_iri = {v: k for k, v in workflow_instance_iri_to_config_key.items()}
 
@@ -64,6 +69,63 @@ class WorkflowInstance(BaseWorkflowElement):
     Step assignments, indexed by the workflow model step IRI they are assigned to
     """
     step_assignments: dict[URIRef, StepAssignment] = field(default_factory=dict)
+
+    """
+    ISO 8601 timestamp of the last time this instance was validated and its result cached.
+    Empty if the instance has never been validated
+    """
+    last_validated_at: str = ""
+
+    """
+    Cached overall validation status name (e.g. "Valid", "Warning", "Error") from the last validation.
+    Empty if the instance has never been validated
+    """
+    cached_validation_status: str = ""
+
+    """
+    Whether the cached validation result is out of date (e.g. the instance or its model was edited) and
+    the instance should be re-validated instead of returning the cache
+    """
+    validation_cache_stale: bool = False
+
+
+    def normalize_cache_fields(self) -> None:
+        """
+        Coerces the cache fields to their proper Python types after being read from RDF, where they
+        arrive as plain strings
+        """
+        if isinstance(self.validation_cache_stale, str):
+            self.validation_cache_stale = self.validation_cache_stale.strip().lower() == "true"
+
+
+    def has_valid_cache(self) -> bool:
+        """
+        Whether this instance holds a usable cached validation result, i.e. it has been validated at
+        least once and the cache has not been marked stale
+        """
+        return bool(self.last_validated_at) and not self.validation_cache_stale
+
+
+    def mark_validated(self, validation_status_name: str) -> None:
+        """
+        Updates the in-memory cache fields to reflect a freshly computed validation result. Use
+        `get_cache_update_query` afterwards to persist them
+        """
+        self.last_validated_at = datetime.now(timezone.utc).isoformat()
+        self.cached_validation_status = validation_status_name
+        self.validation_cache_stale = False
+
+
+    def get_cache_update_query(self) -> str:
+        """
+        Yields a SPARQL update that overwrites the cached validation fields of this instance in the KG
+        with their current in-memory values
+        """
+        return (update_workflow_instance_validation_cache_query
+                .replace("{workflow_instance_iri}", self.iri)
+                .replace("{last_validated_at}", self.last_validated_at)
+                .replace("{cached_validation_status}", self.cached_validation_status)
+                .replace("{validation_cache_stale}", "true" if self.validation_cache_stale else "false"))
 
 
     def is_definition_valid(self, assigned_workflow_model: WorkflowModel) -> tuple[bool, str]:
@@ -115,6 +177,12 @@ class WorkflowInstance(BaseWorkflowElement):
 
         # Link to workflow model
         g.add((self.iri, URIRef(workflow_instance_config_key_to_iri["workflow_model_iri"]), self.workflow_model_iri))
+
+        # Cached validation result (only serialize the timestamp/status if the instance has been validated)
+        if self.last_validated_at:
+            g.add((self.iri, URIRef(workflow_instance_config_key_to_iri["last_validated_at"]), Literal(self.last_validated_at, datatype=XSD.dateTime)))
+            g.add((self.iri, URIRef(workflow_instance_config_key_to_iri["cached_validation_status"]), Literal(self.cached_validation_status, datatype=XSD.string)))
+        g.add((self.iri, URIRef(workflow_instance_config_key_to_iri["validation_cache_stale"]), Literal(self.validation_cache_stale, datatype=XSD.boolean)))
 
         for step_assignment in self.step_assignments.values():
             # Type
@@ -168,5 +236,8 @@ class WorkflowInstance(BaseWorkflowElement):
     def get_overwrite_queries(self) -> list[str]:
         """
         Yields the SPARQL query strings required to delete the existing workflow instance and store it again
+
+        Overwriting an instance means its definition changed, so its cached validation result is invalidated
         """
+        self.validation_cache_stale = True
         return [self.get_delete_query(), self.get_insert_query()]

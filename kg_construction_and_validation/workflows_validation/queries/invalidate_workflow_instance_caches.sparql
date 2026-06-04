@@ -1,0 +1,16 @@
+DELETE {
+    GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
+        ?workflow_instance crc:validationCacheStale ?validation_cache_stale.
+    }
+}
+INSERT {
+    GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
+        ?workflow_instance crc:validationCacheStale true.
+    }
+}
+WHERE {
+    GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
+        ?workflow_instance crc:workflowModelInstanceOf <{workflow_model_iri}>.
+        OPTIONAL { ?workflow_instance crc:validationCacheStale ?validation_cache_stale. }
+    }
+}

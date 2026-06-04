@@ -517,7 +517,16 @@ async def is_workflow_instance_valid(workflow_model: WorkflowModel,
     workflow model steps for whichever reason
 
     The validation is split into individual jobs run in a process pool
+
+    If the instance holds a valid (non-stale) cached validation result, the cached overall status is returned
+    directly without running any validation jobs. Caching is only used for the overall status; a full trace
+    (`return_individual_results=True`) is always recomputed
     """
+    if (not return_individual_results
+            and workflow_instance.has_valid_cache()
+            and workflow_instance.cached_validation_status in ValidationStatus.__members__):
+        return ValidationStatus[workflow_instance.cached_validation_status]
+
     validation_jobs = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance)
     with ProcessPoolExecutor() as executor:
         # Get

@@ -10,6 +10,7 @@ from workflows_validation.common import BaseWorkflowElement, base_workflow_eleme
 module_dir = os.path.dirname(__file__)
 delete_workflow_model_query = prefixes + open(os.path.join(module_dir, 'queries/delete_workflow_model.sparql'), 'r').read()
 redirect_workflow_instances_query = prefixes + open(os.path.join(module_dir, 'queries/redirect_workflow_instances.sparql'), 'r').read()
+invalidate_workflow_instance_caches_query = prefixes + open(os.path.join(module_dir, 'queries/invalidate_workflow_instance_caches.sparql'), 'r').read()
 redirect_workflow_instance_steps_query = prefixes + open(os.path.join(module_dir, 'queries/redirect_workflow_instance_steps.sparql'), 'r').read()
 delete_workflow_instance_assignments_related_to_step_query = prefixes + open(os.path.join(module_dir, 'queries/delete_workflow_instance_assignments_related_to_step.sparql'), 'r').read()
 
@@ -213,5 +214,10 @@ def _get_redirection_queries(new_workflow_model: WorkflowModel,
         queries.append((redirect_workflow_instances_query
                         .replace("{old_workflow_model_iri}", old_workflow_model.iri)
                         .replace("{new_workflow_model_iri}", new_workflow_model.iri)))
+
+    # The model definition changed, so the cached validation results of all its instances are now stale.
+    # This runs after the redirection above, so the instances already point to the new model IRI
+    queries.append(invalidate_workflow_instance_caches_query
+                   .replace("{workflow_model_iri}", new_workflow_model.iri))
 
     return queries

@@ -234,9 +234,16 @@ async def populate_workflow_instances_table(workflows_page_state: WorkflowsPageS
             """
             Runs validation for the workflow model and instance pair, and updates the corresponding icon according to the results
             """
+            # When the cache is missing or stale, `is_workflow_instance_valid` recomputes the status; persist it
+            cache_was_valid = workflow_instance.has_valid_cache()
+
             validation_status = await is_workflow_instance_valid(workflow_model,
                                                                  workflow_instance,
                                                                  return_individual_results=False)
+
+            if not cache_was_valid and not app.storage.tab['demo_mode']:
+                workflow_instance.mark_validated(validation_status.name)
+                await rdf_datastore_client.launch_update(workflow_instance.get_cache_update_query())
 
             validation_icon_column.clear()
             with validation_icon_column:

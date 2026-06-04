@@ -316,6 +316,33 @@ crc:templateValue rdf:type owl:DatatypeProperty ;
                   rdfs:label "Template value" .
 
 
+###  https://crc1625.mdi.ruhr-uni-bochum.de/lastValidatedAt
+crc:lastValidatedAt rdf:type owl:DatatypeProperty ;
+                    rdfs:subPropertyOf owl:topDataProperty ;
+                    rdfs:domain crc:WorkflowModelInstance ;
+                    rdfs:range xsd:dateTime ;
+                    rdfs:comment "Timestamp of the last time this WorkflowModelInstance was validated and its validation result cached. Absent if the instance has never been validated." ;
+                    rdfs:label "Last validated at" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/cachedValidationStatus
+crc:cachedValidationStatus rdf:type owl:DatatypeProperty ;
+                           rdfs:subPropertyOf owl:topDataProperty ;
+                           rdfs:domain crc:WorkflowModelInstance ;
+                           rdfs:range xsd:string ;
+                           rdfs:comment "Cached overall validation status (Valid, Warning or Error) computed during the last validation of this WorkflowModelInstance." ;
+                           rdfs:label "Cached validation status" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/validationCacheStale
+crc:validationCacheStale rdf:type owl:DatatypeProperty ;
+                         rdfs:subPropertyOf owl:topDataProperty ;
+                         rdfs:domain crc:WorkflowModelInstance ;
+                         rdfs:range xsd:boolean ;
+                         rdfs:comment "Flag indicating that the cached validation result of this WorkflowModelInstance is out of date (e.g. the instance or its workflow model was edited) and the instance should be re-validated." ;
+                         rdfs:label "Validation cache stale" .
+
+
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/tolerance
 crc:tolerance rdf:type owl:DatatypeProperty ;
               rdfs:subPropertyOf owl:topDataProperty ;

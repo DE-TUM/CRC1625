@@ -1,0 +1,21 @@
+DELETE {
+    GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
+        <{workflow_instance_iri}> crc:lastValidatedAt ?last_validated_at.
+        <{workflow_instance_iri}> crc:cachedValidationStatus ?cached_validation_status.
+        <{workflow_instance_iri}> crc:validationCacheStale ?validation_cache_stale.
+    }
+}
+INSERT {
+    GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
+        <{workflow_instance_iri}> crc:lastValidatedAt "{last_validated_at}"^^xsd:dateTime.
+        <{workflow_instance_iri}> crc:cachedValidationStatus "{cached_validation_status}"^^xsd:string.
+        <{workflow_instance_iri}> crc:validationCacheStale {validation_cache_stale}.
+    }
+}
+WHERE {
+    GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
+        OPTIONAL { <{workflow_instance_iri}> crc:lastValidatedAt ?last_validated_at. }
+        OPTIONAL { <{workflow_instance_iri}> crc:cachedValidationStatus ?cached_validation_status. }
+        OPTIONAL { <{workflow_instance_iri}> crc:validationCacheStale ?validation_cache_stale. }
+    }
+}
