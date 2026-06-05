@@ -74,9 +74,13 @@ async def invalidate_stale_validation_caches() -> int:
 
         current_hash = await compute_footprint_hash(instance_iri)
         if current_hash != stored_hash:
+            logger.info("[CACHE invalidate (re-materialization)] instance=%s stored=%s current=%s",
+                        instance_iri, stored_hash, current_hash)
             await rdf_datastore_client.launch_update(
                 mark_workflow_instance_cache_stale_query.replace("{workflow_instance_iri}", instance_iri))
             invalidated += 1
+        logger.info("[CACHE not invalidated because nothing changed (re-materialization)] instance=%s stored=%s current=%s",
+                                instance_iri, stored_hash, current_hash)
 
     logger.info("Validation cache: marked %d of %d cached instance(s) stale after re-materialization",
                 invalidated, len(bindings))

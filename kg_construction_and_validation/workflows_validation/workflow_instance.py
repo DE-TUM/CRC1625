@@ -2,6 +2,7 @@ import os
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+import logging
 
 from rdflib import URIRef, Graph, Literal, XSD
 
@@ -101,10 +102,13 @@ class WorkflowInstance(BaseWorkflowElement):
     def normalize_cache_fields(self) -> None:
         """
         Coerces the cache fields to their proper Python types after being read from RDF, where they
-        arrive as plain strings
+        arrive as plain strings.
+
+        xsd:boolean has four valid lexical forms ("true"/"false"/"1"/"0"), and the store may return
+        either "true"/"false" or "1"/"0", so we accept all truthy forms instead of only "true".
         """
         if isinstance(self.validation_cache_stale, str):
-            self.validation_cache_stale = self.validation_cache_stale.strip().lower() == "true"
+            self.validation_cache_stale = self.validation_cache_stale.strip().lower() in ("true", "1")
 
 
     def has_valid_cache(self) -> bool:
@@ -121,6 +125,8 @@ class WorkflowInstance(BaseWorkflowElement):
         hash of the validation footprint that result was computed against. Use `get_cache_update_query`
         afterwards to persist them
         """
+        logging.info("[CACHE put] instance=%s status=%s hash=%s",
+                     self.iri or self.name, validation_status_name, footprint_hash)
         self.last_validated_at = datetime.now(timezone.utc).isoformat()
         self.cached_validation_status = validation_status_name
         self.validation_cache_stale = False
@@ -253,4 +259,5 @@ class WorkflowInstance(BaseWorkflowElement):
         Overwriting an instance means its definition changed, so its cached validation result is invalidated
         """
         self.validation_cache_stale = True
+        logging.info("[CACHE invalidate instance (edit)] instance=%s", self.iri or self.name)
         return [self.get_delete_query(), self.get_insert_query()]

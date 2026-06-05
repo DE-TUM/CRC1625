@@ -19,6 +19,7 @@ on `CRC_1625_workflows_validator.py`
 This module will use `logging` to log `debug` messages indicating validation paths, if set.
 """
 import logging
+import sys
 import multiprocessing
 import os
 import urllib.parse
@@ -38,6 +39,13 @@ from datastores.rdf.rdf_datastore_client import RDF_DATASTORE_API_ENDPOINT
 from workflows_validation.common import prefixes, dw_prefix
 from workflows_validation.workflow_instance import WorkflowInstance
 from workflows_validation.workflow_model import WorkflowModelStep, WorkflowModel
+
+logging.basicConfig(
+    stream=sys.stdout,
+    level=logging.INFO,
+    format='[%(asctime)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 module_dir = os.path.dirname(__file__)
 
@@ -523,11 +531,14 @@ async def is_workflow_instance_valid(workflow_model: WorkflowModel,
     directly without running any validation jobs. Caching is only used for the overall status; a full trace
     (`return_individual_results=True`) is always recomputed
     """
-    if (not return_individual_results
+    if (not return_individual_results # TODO: support individual results
             and workflow_instance.has_valid_cache()
             and workflow_instance.cached_validation_status in ValidationStatus.__members__):
+        logging.info("[CACHE hit] instance=%s status=%s",
+                     workflow_instance.iri, workflow_instance.cached_validation_status)
         return ValidationStatus[workflow_instance.cached_validation_status]
 
+    logging.info("[CACHE miss] instance=%s", workflow_instance.iri)
     validation_jobs = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance)
     # Pin the start method to "fork" (the default on Linux before Python 3.14). The 3.14 default,
     # "forkserver", spawns a helper process whose socket gets torn down when the web server reloads,

@@ -1,3 +1,4 @@
+import logging
 import os
 from copy import deepcopy
 from dataclasses import dataclass, field
@@ -217,6 +218,7 @@ def _get_redirection_queries(new_workflow_model: WorkflowModel,
 
     # The model definition changed, so the cached validation results of all its instances are now stale.
     # This runs after the redirection above, so the instances already point to the new model IRI
+    logging.info("[CACHE invalidate model (edit)] model=%s", new_workflow_model.iri or new_workflow_model.name)
     queries.append(invalidate_workflow_instance_caches_query
                    .replace("{workflow_model_iri}", new_workflow_model.iri))
 
