@@ -11,7 +11,7 @@
         sh:message "The handover group is within an incorrect project"
     ] ;
 
-    {% if not other_activities_allowed and projects is iterable and projects is not string%}
+    {% if not other_activities_allowed and allowed_activities is iterable and allowed_activities is not string%}
     sh:property [
         sh:path (crc:substep [ sh:zeroOrMorePath crc:nextStep ] crc:substep) ;
 
@@ -19,9 +19,9 @@
             sh:class crc:CharacterizationActivityInstance ;
         ] ;
 
-        sh:qualifiedMinCount {{ projects|length }} ;
-        sh:qualifiedMaxCount {{ projects|length }} ;
-        sh:message "There is a different number of activities done in the handover group. We expected {{ projects|length }}"
+        sh:qualifiedMinCount {{ allowed_activities|length }} ;
+        sh:qualifiedMaxCount {{ allowed_activities|length }} ;
+        sh:message "There is a different number of activities done in the handover group. We expected {{ allowed_activities|length }}"
     ] ;
     {% endif %}
 
