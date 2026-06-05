@@ -19,6 +19,7 @@ on `CRC_1625_workflows_validator.py`
 This module will use `logging` to log `debug` messages indicating validation paths, if set.
 """
 import logging
+import multiprocessing
 import os
 import urllib.parse
 from collections import OrderedDict
@@ -528,7 +529,10 @@ async def is_workflow_instance_valid(workflow_model: WorkflowModel,
         return ValidationStatus[workflow_instance.cached_validation_status]
 
     validation_jobs = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance)
-    with ProcessPoolExecutor() as executor:
+    # Pin the start method to "fork" (the default on Linux before Python 3.14). The 3.14 default,
+    # "forkserver", spawns a helper process whose socket gets torn down when the web server reloads,
+    # making executor.submit() fail with a ConnectionResetError mid-validation
+    with ProcessPoolExecutor(mp_context=multiprocessing.get_context("fork")) as executor:
         # Get
         validation_paths: dict[URIRef, list[list[ValidationJob]]] = generate_validation_paths(workflow_model, validation_jobs)
         validation_results: dict[URIRef, list[tuple[OrderedDict[URIRef, list[ValidationResult]], int]]] = dict()
