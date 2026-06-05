@@ -20,6 +20,7 @@ from workflows_validation.extra_functions import read_workflow_model, get_workfl
 from workflows_validation.workflow_instance import WorkflowInstance, StepAssignment
 from workflows_validation.workflow_model import WorkflowModel
 from workflows_validation.workflows_validator import is_workflow_instance_valid
+from workflows_validation.validation_cache import compute_footprint_hash
 
 module_dir = os.path.dirname(__file__)
 prefixes: str = open(os.path.join(module_dir, '../workflows_validation/queries/prefixes.sparql')).read()
@@ -241,8 +242,11 @@ async def populate_workflow_instances_table(workflows_page_state: WorkflowsPageS
                                                                  workflow_instance,
                                                                  return_individual_results=False)
 
-            if not cache_was_valid and not app.storage.tab['demo_mode']:
-                workflow_instance.mark_validated(validation_status.name)
+            if not cache_was_valid:# and not app.storage.tab['demo_mode']:
+                # Store the hash of the data this result was based on, so the pipeline can later tell
+                # whether a re-materialization changed it
+                footprint_hash = await compute_footprint_hash(workflow_instance.iri)
+                workflow_instance.mark_validated(validation_status.name, footprint_hash)
                 await rdf_datastore_client.launch_update(workflow_instance.get_cache_update_query())
 
             validation_icon_column.clear()

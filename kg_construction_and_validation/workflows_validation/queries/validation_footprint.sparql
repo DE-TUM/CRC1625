@@ -1,0 +1,62 @@
+# Returns the exact set of data-graph (MAIN) tuples that the validation of a workflow instance
+# depends on - its "validation footprint" - as ?s ?p ?o rows. Hashing this set lets the ETL pipeline
+# detect, after a re-materialization, whether the underlying data of a cached result changed.
+#
+# IMPORTANT: this MUST mirror the property paths checked by the SHACL shape in
+# CRC_1625_workflows_validator/CRC_1625_handover_workflow_group_shape.shacl. If that shape changes,
+# update this query. The footprint deliberately stops at activity rdf:type (it does NOT descend into
+# measurement values/compositions), and excludes the (constant) rdfs:subClassOf* TBox.
+#
+# Rooted at the instance's assigned entities (handover groups), it collects, for every group reachable
+# along the group-level crc:nextStep chain:
+#   - the group-to-group chain                          (?group crc:nextStep ?nextGroup)
+#   - the group's project assignment                    (?group crc:assignedTo ?project)
+#   - the group -> first handover link                  (?group crc:substep ?handover)
+#   - the within-group handover chain                   (?handover crc:nextStep ?nextHandover)
+#   - the handover -> activity links                    (?handover crc:substep ?activity)
+#   - each activity's asserted type                     (?activity rdf:type ?class)
+SELECT DISTINCT ?s ?p ?o
+WHERE {
+    GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
+        <{workflow_instance_iri}> crc:hasAssignment ?assignment .
+        ?assignment crc:assignedEntity ?entity .
+    }
+    GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph> {
+        # Every handover group reachable from an assigned entity along the group-level chain
+        ?entity crc:nextStep* ?group .
+
+        {
+            ?group crc:nextStep ?o .
+            BIND(?group AS ?s)
+            BIND(crc:nextStep AS ?p)
+        } UNION {
+            ?group crc:assignedTo ?o .
+            BIND(?group AS ?s)
+            BIND(crc:assignedTo AS ?p)
+        } UNION {
+            ?group crc:substep ?o .
+            BIND(?group AS ?s)
+            BIND(crc:substep AS ?p)
+        } UNION {
+            # All handovers in the group: first handover then its crc:nextStep* successors
+            ?group crc:substep ?first_handover .
+            ?first_handover crc:nextStep* ?handover .
+            ?handover crc:nextStep ?o .
+            BIND(?handover AS ?s)
+            BIND(crc:nextStep AS ?p)
+        } UNION {
+            ?group crc:substep ?first_handover .
+            ?first_handover crc:nextStep* ?handover .
+            ?handover crc:substep ?o .
+            BIND(?handover AS ?s)
+            BIND(crc:substep AS ?p)
+        } UNION {
+            ?group crc:substep ?first_handover .
+            ?first_handover crc:nextStep* ?handover .
+            ?handover crc:substep ?activity .
+            ?activity rdf:type ?o .
+            BIND(?activity AS ?s)
+            BIND(rdf:type AS ?p)
+        }
+    }
+}

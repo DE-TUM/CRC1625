@@ -14,6 +14,7 @@ import materialization.materialization as materialization
 import postprocessing.postprocessing as postprocessing
 from datastores.rdf import rdf_datastore_client, rdf_datastore
 from handover_workflows_validation_webui.demo_data_loader import load_demo_user_data
+from workflows_validation.validation_cache import invalidate_stale_validation_caches
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -99,6 +100,9 @@ def serve_KG(skip_ontologies_upload: bool = True,
 
     # Load Sir SHACLot alongside his demo MLs/Samples and handover workflows
     rdf_datastore_client.run_sync(load_demo_user_data())
+
+    # The data graph was rebuilt, so any cached validation result whose data changed is now stale
+    rdf_datastore_client.run_sync(invalidate_stale_validation_caches())
 
     rdf_datastore_client.run_sync(rdf_datastore_client.signal_stop_materialization())
 

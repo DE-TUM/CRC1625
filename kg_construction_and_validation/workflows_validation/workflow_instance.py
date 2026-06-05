@@ -21,6 +21,7 @@ workflow_instance_iri_to_config_key = {
     str(dw_prefix.lastValidatedAt): "last_validated_at",
     str(dw_prefix.cachedValidationStatus): "cached_validation_status",
     str(dw_prefix.validationCacheStale): "validation_cache_stale",
+    str(dw_prefix.validationCacheHash): "validation_cache_hash",
 }
 workflow_instance_config_key_to_iri = {v: k for k, v in workflow_instance_iri_to_config_key.items()}
 
@@ -88,6 +89,14 @@ class WorkflowInstance(BaseWorkflowElement):
     """
     validation_cache_stale: bool = False
 
+    """
+    SHA-256 hash of the exact set of data-graph tuples the cached validation result depended on (its
+    validation footprint). Used by the ETL pipeline to detect, after a re-materialization, whether the
+    underlying data changed and the cache should be marked stale. Empty if never validated.
+    See workflows_validation.validation_cache.
+    """
+    validation_cache_hash: str = ""
+
 
     def normalize_cache_fields(self) -> None:
         """
@@ -106,14 +115,16 @@ class WorkflowInstance(BaseWorkflowElement):
         return bool(self.last_validated_at) and not self.validation_cache_stale
 
 
-    def mark_validated(self, validation_status_name: str) -> None:
+    def mark_validated(self, validation_status_name: str, footprint_hash: str) -> None:
         """
-        Updates the in-memory cache fields to reflect a freshly computed validation result. Use
-        `get_cache_update_query` afterwards to persist them
+        Updates the in-memory cache fields to reflect a freshly computed validation result, storing the
+        hash of the validation footprint that result was computed against. Use `get_cache_update_query`
+        afterwards to persist them
         """
         self.last_validated_at = datetime.now(timezone.utc).isoformat()
         self.cached_validation_status = validation_status_name
         self.validation_cache_stale = False
+        self.validation_cache_hash = footprint_hash
 
 
     def get_cache_update_query(self) -> str:
@@ -125,7 +136,8 @@ class WorkflowInstance(BaseWorkflowElement):
                 .replace("{workflow_instance_iri}", self.iri)
                 .replace("{last_validated_at}", self.last_validated_at)
                 .replace("{cached_validation_status}", self.cached_validation_status)
-                .replace("{validation_cache_stale}", "true" if self.validation_cache_stale else "false"))
+                .replace("{validation_cache_stale}", "true" if self.validation_cache_stale else "false")
+                .replace("{validation_cache_hash}", self.validation_cache_hash))
 
 
     def is_definition_valid(self, assigned_workflow_model: WorkflowModel) -> tuple[bool, str]:
@@ -178,10 +190,11 @@ class WorkflowInstance(BaseWorkflowElement):
         # Link to workflow model
         g.add((self.iri, URIRef(workflow_instance_config_key_to_iri["workflow_model_iri"]), self.workflow_model_iri))
 
-        # Cached validation result (only serialize the timestamp/status if the instance has been validated)
+        # Cached validation result (only serialize the timestamp/status/hash if the instance has been validated)
         if self.last_validated_at:
             g.add((self.iri, URIRef(workflow_instance_config_key_to_iri["last_validated_at"]), Literal(self.last_validated_at, datatype=XSD.dateTime)))
             g.add((self.iri, URIRef(workflow_instance_config_key_to_iri["cached_validation_status"]), Literal(self.cached_validation_status, datatype=XSD.string)))
+            g.add((self.iri, URIRef(workflow_instance_config_key_to_iri["validation_cache_hash"]), Literal(self.validation_cache_hash, datatype=XSD.string)))
         g.add((self.iri, URIRef(workflow_instance_config_key_to_iri["validation_cache_stale"]), Literal(self.validation_cache_stale, datatype=XSD.boolean)))
 
         for step_assignment in self.step_assignments.values():

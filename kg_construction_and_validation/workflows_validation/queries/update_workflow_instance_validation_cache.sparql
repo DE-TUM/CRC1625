@@ -3,6 +3,7 @@ DELETE {
         <{workflow_instance_iri}> crc:lastValidatedAt ?last_validated_at.
         <{workflow_instance_iri}> crc:cachedValidationStatus ?cached_validation_status.
         <{workflow_instance_iri}> crc:validationCacheStale ?validation_cache_stale.
+        <{workflow_instance_iri}> crc:validationCacheHash ?validation_cache_hash.
     }
 }
 INSERT {
@@ -10,6 +11,7 @@ INSERT {
         <{workflow_instance_iri}> crc:lastValidatedAt "{last_validated_at}"^^xsd:dateTime.
         <{workflow_instance_iri}> crc:cachedValidationStatus "{cached_validation_status}"^^xsd:string.
         <{workflow_instance_iri}> crc:validationCacheStale {validation_cache_stale}.
+        <{workflow_instance_iri}> crc:validationCacheHash "{validation_cache_hash}"^^xsd:string.
     }
 }
 WHERE {
@@ -17,5 +19,6 @@ WHERE {
         OPTIONAL { <{workflow_instance_iri}> crc:lastValidatedAt ?last_validated_at. }
         OPTIONAL { <{workflow_instance_iri}> crc:cachedValidationStatus ?cached_validation_status. }
         OPTIONAL { <{workflow_instance_iri}> crc:validationCacheStale ?validation_cache_stale. }
+        OPTIONAL { <{workflow_instance_iri}> crc:validationCacheHash ?validation_cache_hash. }
     }
 }

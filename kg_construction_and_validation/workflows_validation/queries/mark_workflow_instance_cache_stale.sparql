@@ -1,0 +1,18 @@
+# Marks a single workflow instance's cached validation result as stale. Used by the ETL pipeline when
+# a re-materialization changed the instance's validation footprint. Only sets the flag (to true);
+# clearing it is reserved for an actual re-validation (WorkflowInstance.mark_validated).
+DELETE {
+    GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
+        <{workflow_instance_iri}> crc:validationCacheStale ?stale.
+    }
+}
+INSERT {
+    GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
+        <{workflow_instance_iri}> crc:validationCacheStale true.
+    }
+}
+WHERE {
+    GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
+        OPTIONAL { <{workflow_instance_iri}> crc:validationCacheStale ?stale. }
+    }
+}
