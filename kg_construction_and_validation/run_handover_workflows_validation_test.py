@@ -375,8 +375,9 @@ def test_invalid_workflows():
         logging.info(f"Workflow test with invalid data of {n_steps} steps passed")
 
 
-test_valid_workflows()
-test_missing_data_workflows()
-test_invalid_workflows()
-test_valid_workflows(generate_redundant_branch=True)
-test_valid_workflows(break_in_half=True)
+if __name__ == "__main__":
+    test_valid_workflows()
+    test_missing_data_workflows()
+    test_invalid_workflows()
+    test_valid_workflows(generate_redundant_branch=True)
+    test_valid_workflows(break_in_half=True)
