@@ -42,29 +42,22 @@ import resource
 import sys
 import threading
 import time
-import uuid
 from statistics import fmean, pstdev
 
 import psutil
-from rdflib import Graph, URIRef
 
 import matplotlib
 matplotlib.use("Agg")  # Headless: render straight to file, never open a window
 import matplotlib.pyplot as plt
 
-from datastores.rdf import rdf_datastore_client
-from datastores.rdf.rdf_datastore import WORKFLOWS_GRAPH_IRI, MAIN_GRAPH_IRI
-from workflows_validation.common import dw_prefix
-from workflows_validation.extra_functions import get_workflow_instances_assigned_to_model
-from workflows_validation.validation_cache import compute_footprint_hash
 from workflows_validation.workflow_instance import WorkflowInstance
 from workflows_validation.workflow_model import WorkflowModel
-from workflows_validation.workflows_validator import is_workflow_instance_valid, ValidationStatus
+from workflows_validation.workflows_validator import is_workflow_instance_valid
 
-from run_handover_workflows_validation_test import (
-    generate_handover_group_definition,
-    generate_handover_group_triples,
-    generate_workflow_model_and_instance_for_handover_group_definition,
+from cache_performance_test.cache_test_common import (
+    build_model_with_instances,
+    reload_instances,
+    store_in_cache,
 )
 
 logging.basicConfig(
@@ -79,93 +72,7 @@ module_dir = os.path.dirname(__file__)
 DEFAULT_N_STEPS = 5
 DEFAULT_INSTANCE_COUNTS = [1, 5, 10, 25, 50, 100]
 DEFAULT_REPETITIONS = 3
-DEFAULT_OUTPUT_DIR = os.path.join(module_dir, "./cache_performance_test")
-
-
-# --------------------------------------------------------------------------- #
-# Scenario construction (one model, N instances)
-# --------------------------------------------------------------------------- #
-def _make_entity_graph_unique(graph: Graph, entity_iri: URIRef, suffix: str) -> tuple[Graph, URIRef]:
-    """
-    `generate_handover_group_triples` reuses fixed IRIs (handover_workflow_instance, handover_group_<i>)
-    for every call, so each instance would otherwise share the same entity data. This rewrites those
-    colliding IRIs with a per-instance suffix, yielding a distinct entity graph (and its entity IRI) so
-    every instance validates against its own data, like in reality.
-    """
-    base = str(dw_prefix)
-    workflow_instance_iri = str(dw_prefix.handover_workflow_instance)
-    handover_group_prefix = base + "handover_group_"
-
-    def remap(node):
-        if isinstance(node, URIRef):
-            node_str = str(node)
-            if node_str == workflow_instance_iri or node_str.startswith(handover_group_prefix):
-                return URIRef(f"{node_str}__inst{suffix}")
-        return node
-
-    unique_graph = Graph()
-    for s, p, o in graph:
-        unique_graph.add((remap(s), remap(p), remap(o)))
-
-    return unique_graph, remap(entity_iri)
-
-
-async def setup_model_with_instances(n_instances: int, n_steps: int) -> tuple[WorkflowModel, list[WorkflowInstance]]:
-    """
-    Clears both graphs and builds a single workflow model with `n_instances` instances assigned to it,
-    each owning its own (valid) handover-group data. Loads the data, the model and the instances into the
-    store. The instances have no cache yet, so their first validation is a miss.
-    """
-    await rdf_datastore_client.clear_triples()
-    await rdf_datastore_client.clear_triples(WORKFLOWS_GRAPH_IRI)
-
-    # One shared model. The generator is deterministic for a given definition (fixed step IRIs), so we
-    # build the model once and reuse it across all instances.
-    definition = generate_handover_group_definition(n_steps)
-    model, _ = generate_workflow_model_and_instance_for_handover_group_definition(definition, dw_prefix["__model_seed_entity"])
-
-    instances: list[WorkflowInstance] = []
-    for i in range(n_instances):
-        main_graph, entity_iri = generate_handover_group_triples(definition)
-        main_graph, entity_iri = _make_entity_graph_unique(main_graph, entity_iri, str(i))
-
-        # Reuse the generator to build the instance + its step assignments, then point it at the shared
-        # model. The model it returns is identical to `model` (same fixed step IRIs) and discarded.
-        _, instance = generate_workflow_model_and_instance_for_handover_group_definition(definition, entity_iri)
-        instance.workflow_model_iri = model.iri
-
-        ttl_path = f"{uuid.uuid4().hex}.ttl"
-        main_graph.serialize(destination=ttl_path, format='turtle')
-        await rdf_datastore_client.upload_file(ttl_path, graph_iri=MAIN_GRAPH_IRI, delete_file_after_upload=True)
-
-        instances.append(instance)
-
-    await rdf_datastore_client.launch_update(model.get_insert_query())
-    for instance in instances:
-        await rdf_datastore_client.launch_update(instance.get_insert_query())
-
-    return model, instances
-
-
-async def reload_instances(model: WorkflowModel) -> list[WorkflowInstance]:
-    """
-    Re-reads the model's instances from the store, so their cache fields match what the UI sees on
-    reload. Done before every timed pass and kept out of the timed window.
-    """
-    instances = await get_workflow_instances_assigned_to_model(model, rdf_datastore_client.launch_query)
-    return list(instances.values())
-
-
-async def prime_cache(instances: list[WorkflowInstance]) -> None:
-    """
-    Does what the UI does after validating: stores a fresh (non-stale) cache result for every instance,
-    so the next validation pass is an all-hits run. The instances are valid by construction, so the
-    stored status is `Valid`.
-    """
-    for instance in instances:
-        footprint_hash = await compute_footprint_hash(instance.iri)
-        instance.mark_validated(ValidationStatus.Valid.name, footprint_hash)
-        await rdf_datastore_client.launch_update(instance.get_cache_update_query())
+DEFAULT_OUTPUT_DIR = os.path.join(module_dir, "./cache_performance_test/results")
 
 
 # --------------------------------------------------------------------------- #
@@ -253,23 +160,23 @@ async def run_experiment(instance_counts: list[int], n_steps: int, repetitions: 
 
     for n_instances in instance_counts:
         logging.info("Setting up model with %d instance(s) of %d steps...", n_instances, n_steps)
-        model, _ = await setup_model_with_instances(n_instances, n_steps)
+        model, _, _ = await build_model_with_instances(n_instances, n_steps)
 
         # WITHOUT cache: reload fresh (uncached) instances before every pass, so each is a true cold run
         no_cache_runs = []
         for rep in range(repetitions):
-            instances = await reload_instances(model)
+            instances = list((await reload_instances(model)).values())
             measurement = await measure_validation_pass(model, instances)
             no_cache_runs.append(measurement)
             logging.info("[no-cache] n=%d rep=%d latency=%.3fs cpu=%.3fs peak_rss=%.1fMiB",
                          n_instances, rep, measurement["latency_s"], measurement["cpu_s"],
                          measurement["peak_rss_bytes"] / 1024 ** 2)
 
-        # WITH cache: prime once, then reload (cache fields present) before every all-hits pass
-        await prime_cache(await reload_instances(model))
+        # WITH cache: prime every instance once, then reload (cache fields present) before each all-hits pass
+        await store_in_cache(list((await reload_instances(model)).values()))
         cache_runs = []
         for rep in range(repetitions):
-            instances = await reload_instances(model)
+            instances = list((await reload_instances(model)).values())
             measurement = await measure_validation_pass(model, instances)
             cache_runs.append(measurement)
             logging.info("[cache]    n=%d rep=%d latency=%.3fs cpu=%.3fs peak_rss=%.1fMiB",
