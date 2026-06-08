@@ -20,8 +20,8 @@ Two kinds of metric are recorded, per number of instances:
                         spawns is invisible to wall-clock once work is parallelized, but its CPU and
                         memory cost still scale with the number of instances.
 
-Results are saved to a .json file and rendered as two plots (latency, and CPU/peak-RSS), with the number
-of instances per model on the x-axis and one line per regime.
+Results are saved to a .json file and rendered as three PDF plots (latency, CPU-seconds and peak RSS),
+with the number of instances per model on the x-axis and one line per regime.
 
 Reuses the scenario generators from `run_handover_workflows_validation_test.py` (as `run_cache_test.py`
 does) and the cache plumbing from `workflows_validation`. The measured operation mirrors the Web UI; the
@@ -228,47 +228,54 @@ def save_latency_plot(aggregated: dict, path: str) -> None:
     ax.grid(True, linestyle='--', alpha=0.4)
     ax.legend()
     fig.tight_layout()
-    fig.savefig(path, dpi=150)
+    fig.savefig(path)
     plt.close(fig)
     logging.info("Latency plot saved to: %s", path)
 
 
-def save_compute_plot(aggregated: dict, path: str) -> None:
-    """CPU-seconds and peak RSS (no-cache vs cache) against number of instances, side by side."""
+def save_cpu_plot(aggregated: dict, path: str) -> None:
+    """Two lines (no-cache vs cache) of total CPU-seconds against number of instances."""
     ns = aggregated["n_instances"]
 
-    fig, (ax_cpu, ax_rss) = plt.subplots(1, 2, figsize=(13, 5))
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.errorbar(ns, aggregated["no_cache_cpu_s_mean"], yerr=aggregated["no_cache_cpu_s_std"],
+                marker='o', capsize=3, label="Without cache (recompute)")
+    ax.errorbar(ns, aggregated["cache_cpu_s_mean"], yerr=aggregated["cache_cpu_s_std"],
+                marker='s', capsize=3, label="With cache (all hits)")
+    ax.set_xlabel("Number of instances per workflow model")
+    ax.set_ylabel("Total CPU time (s)")
+    ax.set_title("Validation-status compute cost (CPU-seconds): cache vs no cache")
+    ax.grid(True, linestyle='--', alpha=0.4)
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(path)
+    plt.close(fig)
+    logging.info("CPU-time plot saved to: %s", path)
 
-    ax_cpu.errorbar(ns, aggregated["no_cache_cpu_s_mean"], yerr=aggregated["no_cache_cpu_s_std"],
-                    marker='o', capsize=3, label="Without cache (recompute)")
-    ax_cpu.errorbar(ns, aggregated["cache_cpu_s_mean"], yerr=aggregated["cache_cpu_s_std"],
-                    marker='s', capsize=3, label="With cache (all hits)")
-    ax_cpu.set_xlabel("Number of instances per workflow model")
-    ax_cpu.set_ylabel("Total CPU time (s)")
-    ax_cpu.set_title("Compute cost (CPU-seconds)")
-    ax_cpu.grid(True, linestyle='--', alpha=0.4)
-    ax_cpu.legend()
+
+def save_rss_plot(aggregated: dict, path: str) -> None:
+    """Two lines (no-cache vs cache) of peak resident memory against number of instances."""
+    ns = aggregated["n_instances"]
 
     no_cache_rss_mib = [v / 1024 ** 2 for v in aggregated["no_cache_peak_rss_bytes_mean"]]
     cache_rss_mib = [v / 1024 ** 2 for v in aggregated["cache_peak_rss_bytes_mean"]]
     no_cache_rss_std_mib = [v / 1024 ** 2 for v in aggregated["no_cache_peak_rss_bytes_std"]]
     cache_rss_std_mib = [v / 1024 ** 2 for v in aggregated["cache_peak_rss_bytes_std"]]
 
-    ax_rss.errorbar(ns, no_cache_rss_mib, yerr=no_cache_rss_std_mib,
-                    marker='o', capsize=3, label="Without cache (recompute)")
-    ax_rss.errorbar(ns, cache_rss_mib, yerr=cache_rss_std_mib,
-                    marker='s', capsize=3, label="With cache (all hits)")
-    ax_rss.set_xlabel("Number of instances per workflow model")
-    ax_rss.set_ylabel("Peak resident memory (MiB)")
-    ax_rss.set_title("Compute cost (peak RSS)")
-    ax_rss.grid(True, linestyle='--', alpha=0.4)
-    ax_rss.legend()
-
-    fig.suptitle("Validation-status compute cost: cache vs no cache")
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.errorbar(ns, no_cache_rss_mib, yerr=no_cache_rss_std_mib,
+                marker='o', capsize=3, label="Without cache (recompute)")
+    ax.errorbar(ns, cache_rss_mib, yerr=cache_rss_std_mib,
+                marker='s', capsize=3, label="With cache (all hits)")
+    ax.set_xlabel("Number of instances per workflow model")
+    ax.set_ylabel("Peak resident memory (MiB)")
+    ax.set_title("Validation-status compute cost (peak RSS): cache vs no cache")
+    ax.grid(True, linestyle='--', alpha=0.4)
+    ax.legend()
     fig.tight_layout()
-    fig.savefig(path, dpi=150)
+    fig.savefig(path)
     plt.close(fig)
-    logging.info("Compute plot saved to: %s", path)
+    logging.info("Peak-RSS plot saved to: %s", path)
 
 
 if __name__ == "__main__":
@@ -329,8 +336,9 @@ if __name__ == "__main__":
         )
     logging.info("Results saved to: %s", results_path)
 
-    save_latency_plot(aggregated, os.path.join(args.output_dir, "cache_latency.png"))
+    save_latency_plot(aggregated, os.path.join(args.output_dir, "cache_latency.pdf"))
     if not args.skip_compute_plot:
-        save_compute_plot(aggregated, os.path.join(args.output_dir, "cache_compute.png"))
+        save_cpu_plot(aggregated, os.path.join(args.output_dir, "cache_cpu.pdf"))
+        save_rss_plot(aggregated, os.path.join(args.output_dir, "cache_rss.pdf"))
 
     logging.info("Cache performance test complete.")
