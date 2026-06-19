@@ -14,23 +14,21 @@ Correctness tests for the workflow-instance validation cache:
 import asyncio
 import logging
 import sys
-import uuid
 
 from rdflib import URIRef
 
 from datastores.rdf import rdf_datastore_client
 from datastores.rdf.rdf_datastore import WORKFLOWS_GRAPH_IRI, MAIN_GRAPH_IRI
 from workflows_validation.common import dw_prefix
-from workflows_validation.extra_functions import get_workflow_instances_assigned_to_model
 from workflows_validation.validation_cache import compute_footprint_hash, invalidate_stale_validation_caches
 from workflows_validation.workflow_instance import WorkflowInstance
 from workflows_validation.workflow_model import WorkflowModel
 from workflows_validation.workflows_validator import is_workflow_instance_valid, ValidationStatus
 
-from run_handover_workflows_validation_test import (
-    generate_handover_group_definition,
-    generate_handover_group_triples,
-    generate_workflow_model_and_instance_for_handover_group_definition,
+from cache_performance_test.cache_test_common import (
+    build_model_with_instances,
+    reload_instances,
+    store_in_cache,
 )
 
 logging.basicConfig(
@@ -42,43 +40,21 @@ logging.basicConfig(
 
 DEFAULT_N_STEPS = 5
 
+# The shared store-setup scaffolding (building the scenario, reloading instances, storing a cache result)
+# lives in cache_performance_test.cache_test_common, alongside `store_in_cache` (imported above). The
+# wrappers below adapt the multi-instance helpers to this test's single-instance scenarios.
 async def setup_scenario(n_steps: int = DEFAULT_N_STEPS) -> tuple[WorkflowModel, WorkflowInstance, URIRef]:
     """
-    Clears both graphs, builds a valid scenario, and loads the data and the model + instance.
-    Returns (model, instance, entity_iri). The instance has no cache yet, so its first check is a miss.
+    Builds and loads a single-instance valid scenario (data + model + instance). Returns
+    (model, instance, entity_iri). The instance has no cache yet, so its first check is a miss.
     """
-    await rdf_datastore_client.clear_triples()
-    await rdf_datastore_client.clear_triples(WORKFLOWS_GRAPH_IRI)
-
-    definition = generate_handover_group_definition(n_steps)
-    main_graph, entity_iri = generate_handover_group_triples(definition)
-    model, instance = generate_workflow_model_and_instance_for_handover_group_definition(definition, entity_iri)
-
-    ttl_path = f"{uuid.uuid4().hex}.ttl"
-    main_graph.serialize(destination=ttl_path, format='turtle')
-    await rdf_datastore_client.upload_file(ttl_path, graph_iri=MAIN_GRAPH_IRI, delete_file_after_upload=True)
-
-    await rdf_datastore_client.launch_update(model.get_insert_query())
-    await rdf_datastore_client.launch_update(instance.get_insert_query())
-
-    return model, instance, entity_iri
-
-
-async def store_in_cache(instance: WorkflowInstance, status_name: str) -> str:
-    """
-    Does what the UI does after validating: hashes the instance's current data and saves the result.
-    `status_name` can be a wrong status to "poison" the cache for hit tests. Returns the saved hash.
-    """
-    footprint_hash = await compute_footprint_hash(instance.iri)
-    instance.mark_validated(status_name, footprint_hash)
-    await rdf_datastore_client.launch_update(instance.get_cache_update_query())
-    return footprint_hash
+    model, instances, entity_iris = await build_model_with_instances(1, n_steps)
+    return model, instances[0], entity_iris[0]
 
 
 async def reload_instance(model: WorkflowModel, instance_iri: URIRef) -> WorkflowInstance:
     """Re-reads the instance from the store, so its cache fields match what the UI sees on reload."""
-    instances = await get_workflow_instances_assigned_to_model(model, rdf_datastore_client.launch_query)
-    return instances[instance_iri]
+    return (await reload_instances(model))[instance_iri]
 
 
 async def overall_status(model: WorkflowModel, instance: WorkflowInstance, individual: bool) -> ValidationStatus:

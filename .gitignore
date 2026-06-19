@@ -1,2 +1,30 @@
 .env
 certs/
+
+# Local dev
+.envrc
+
+# Python
+__pycache__/
+*.pyc
+
+# MSSQL container runtime data
+kg_construction_and_validation/datastores/sql/db_data/
+
+# RMLMapper / RMLStreamer jars (downloaded via setup_files_and_permissions.sh)
+kg_construction_and_validation/materialization/*.jar
+
+# Generated RML mapping file
+kg_construction_and_validation/materialization/mappings/final_RML_file.rml
+
+# Cache performance test results (generated json + plots)
+kg_construction_and_validation/cache_performance_test/results/
+
+# Virtuoso runtime data (keep the tracked .placeholder)
+virtuoso/data/*
+!virtuoso/data/.placeholder
+virtuoso/virtuoso-db/
+
+uv.lock
+
+.vscode/
