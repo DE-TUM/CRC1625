@@ -7,13 +7,14 @@ import logging
 from rdflib import URIRef, Graph, Literal, XSD
 
 from datastores.rdf.rdf_datastore import WORKFLOWS_GRAPH_IRI
-from workflows_validation.common import BaseWorkflowElement, dw_prefix, base_workflow_element_iri_to_config_key, prefixes, rdf_prefix
+from workflows_validation.common import BaseWorkflowElement, dw_prefix, base_workflow_element_iri_to_config_key, prefixes, rdf_prefix, generate_unique_identifier
 from workflows_validation.workflow_model import WorkflowModel, WorkflowModelStep
 
 module_dir = os.path.dirname(__file__)
 
 delete_workflow_instance_query = prefixes + open(os.path.join(module_dir, 'queries/delete_workflow_instance.sparql'), 'r').read()
 update_workflow_instance_validation_cache_query = prefixes + open(os.path.join(module_dir, 'queries/update_workflow_instance_validation_cache.sparql'), 'r').read()
+delete_cached_validation_results_query = prefixes + open(os.path.join(module_dir, 'queries/delete_cached_validation_results.sparql'), 'r').read()
 
 
 workflow_instance_iri_to_config_key = {
@@ -144,6 +145,58 @@ class WorkflowInstance(BaseWorkflowElement):
                 .replace("{cached_validation_status}", self.cached_validation_status)
                 .replace("{validation_cache_stale}", "true" if self.validation_cache_stale else "false")
                 .replace("{validation_cache_hash}", self.validation_cache_hash))
+
+
+    def get_validation_trace_update_queries(self, individual_results: dict) -> list[str]:
+        """
+        Yields the SPARQL updates that overwrite this instance's cached per-step validation trace with a
+        freshly computed one. `individual_results` is the structure returned by `is_workflow_instance_valid`
+        with `return_individual_results=True`: entity IRI -> list of validation paths, each an ordered dict
+        of workflow model step IRI -> list of ValidationResult.
+
+        One `crc:CachedValidationResult` node is stored per ValidationResult, hung off the step assignment
+        of its step, carrying its entity, target node, conforms/missing/output, and the path/step indices
+        needed to rebuild the nested structure exactly. Existing results are deleted first, so re-validation
+        overwrites rather than accumulates.
+
+        The result triples are built via rdflib so arbitrary pySHACL output (quotes, newlines) is stored
+        verbatim and safely.
+        """
+        queries = [delete_cached_validation_results_query.replace("{workflow_instance_iri}", self.iri)]
+
+        g = Graph()
+        for entity_iri, validation_paths in individual_results.items():
+            for path_index, validation_path in enumerate(validation_paths):
+                for step_seq, (step_iri, results_for_step) in enumerate(validation_path.items()):
+                    step_assignment = self.step_assignments.get(step_iri)
+                    if step_assignment is None:
+                        continue  # No assignment to hang the result off (shouldn't happen); skip defensively
+
+                    for result in results_for_step:
+                        result_iri = dw_prefix[generate_unique_identifier()]
+                        g.add((step_assignment.iri, dw_prefix.hasCachedValidationResult, result_iri))
+                        g.add((result_iri, rdf_prefix.type, dw_prefix.CachedValidationResult))
+                        g.add((result_iri, dw_prefix.resultForEntity, URIRef(entity_iri)))
+                        g.add((result_iri, dw_prefix.resultConforms, Literal(result.conforms, datatype=XSD.boolean)))
+                        g.add((result_iri, dw_prefix.resultIsMissingData, Literal(result.is_missing_data, datatype=XSD.boolean)))
+                        g.add((result_iri, dw_prefix.resultPyshaclOutput, Literal(result.pyshacl_output or "", datatype=XSD.string)))
+                        g.add((result_iri, dw_prefix.resultPathIndex, Literal(path_index, datatype=XSD.integer)))
+                        g.add((result_iri, dw_prefix.resultStepSeq, Literal(step_seq, datatype=XSD.integer)))
+
+                        target_node = result.validation_job.target_node if result.validation_job else None
+                        if target_node is not None:
+                            g.add((result_iri, dw_prefix.resultTargetNode, URIRef(target_node)))
+
+        if len(g) > 0:
+            queries.append(f"""
+            INSERT DATA {{
+                GRAPH <{WORKFLOWS_GRAPH_IRI}> {{
+                    {g.serialize(format='nt')}
+                }}
+            }}
+            """)
+
+        return queries
 
 
     def is_definition_valid(self, assigned_workflow_model: WorkflowModel) -> tuple[bool, str]:

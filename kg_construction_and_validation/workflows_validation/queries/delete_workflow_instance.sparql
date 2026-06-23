@@ -17,5 +17,15 @@ WHERE {
       <{workflow_instance_iri}> crc:hasAssignment ?s.
       ?s ?p ?o.
     }
+
+    # Cached validation result nodes hanging off its assignments (two hops down).
+    # The link triple (?a crc:hasCachedValidationResult ?s) is already covered by the branch above;
+    # this also removes the result nodes' own triples, which would otherwise be orphaned.
+    UNION
+    {
+      <{workflow_instance_iri}> crc:hasAssignment ?a.
+      ?a crc:hasCachedValidationResult ?s.
+      ?s ?p ?o.
+    }
   }
 }

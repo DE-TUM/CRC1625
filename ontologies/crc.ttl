@@ -352,6 +352,79 @@ crc:validationCacheHash rdf:type owl:DatatypeProperty ;
                         rdfs:label "Validation cache hash" .
 
 
+###  https://crc1625.mdi.ruhr-uni-bochum.de/CachedValidationResult
+crc:CachedValidationResult rdf:type owl:Class ;
+                           rdfs:comment "A cached individual validation result for a single (entity, target node) pairing of a workflow model step, as produced during workflow validation. These are stored so the per-step validation trace can be served from cache without re-running SHACL. They are gated by the overall cache validity (crc:validationCacheStale) of their WorkflowModelInstance." ;
+                           rdfs:label "Cached validation result" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/hasCachedValidationResult
+crc:hasCachedValidationResult rdf:type owl:ObjectProperty ;
+                              rdfs:domain crc:WorkflowModelStepAssignment ;
+                              rdfs:range crc:CachedValidationResult ;
+                              rdfs:comment "Links a WorkflowModelStepAssignment to one of its cached individual validation results." ;
+                              rdfs:label "Has cached validation result" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/resultForEntity
+crc:resultForEntity rdf:type owl:ObjectProperty ;
+                    rdfs:domain crc:CachedValidationResult ;
+                    rdfs:comment "The assigned entity (the root of a data workflow) that this cached validation result belongs to." ;
+                    rdfs:label "Result for entity" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/resultTargetNode
+crc:resultTargetNode rdf:type owl:ObjectProperty ;
+                     rdfs:domain crc:CachedValidationResult ;
+                     rdfs:comment "The specific target node that was validated for this cached validation result. Absent when the result represents missing data." ;
+                     rdfs:label "Result target node" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/resultConforms
+crc:resultConforms rdf:type owl:DatatypeProperty ;
+                   rdfs:subPropertyOf owl:topDataProperty ;
+                   rdfs:domain crc:CachedValidationResult ;
+                   rdfs:range xsd:boolean ;
+                   rdfs:comment "Whether this cached validation result conforms (passed SHACL validation)." ;
+                   rdfs:label "Result conforms" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/resultIsMissingData
+crc:resultIsMissingData rdf:type owl:DatatypeProperty ;
+                        rdfs:subPropertyOf owl:topDataProperty ;
+                        rdfs:domain crc:CachedValidationResult ;
+                        rdfs:range xsd:boolean ;
+                        rdfs:comment "Whether this cached validation result represents a workflow model step that had no data (target node) to validate against." ;
+                        rdfs:label "Result is missing data" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/resultPyshaclOutput
+crc:resultPyshaclOutput rdf:type owl:DatatypeProperty ;
+                        rdfs:subPropertyOf owl:topDataProperty ;
+                        rdfs:domain crc:CachedValidationResult ;
+                        rdfs:range xsd:string ;
+                        rdfs:comment "The pySHACL output of this cached validation result (the violation message for a non-conforming result; empty otherwise)." ;
+                        rdfs:label "Result pySHACL output" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/resultPathIndex
+crc:resultPathIndex rdf:type owl:DatatypeProperty ;
+                    rdfs:subPropertyOf owl:topDataProperty ;
+                    rdfs:domain crc:CachedValidationResult ;
+                    rdfs:range xsd:integer ;
+                    rdfs:comment "Index of the validation path (within its entity's list of paths) this cached validation result belongs to. Used to reconstruct the nested validation trace." ;
+                    rdfs:label "Result path index" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/resultStepSeq
+crc:resultStepSeq rdf:type owl:DatatypeProperty ;
+                  rdfs:subPropertyOf owl:topDataProperty ;
+                  rdfs:domain crc:CachedValidationResult ;
+                  rdfs:range xsd:integer ;
+                  rdfs:comment "Position of the workflow model step within its validation path. Used to reconstruct the ordered validation trace." ;
+                  rdfs:label "Result step sequence" .
+
+
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/tolerance
 crc:tolerance rdf:type owl:DatatypeProperty ;
               rdfs:subPropertyOf owl:topDataProperty ;

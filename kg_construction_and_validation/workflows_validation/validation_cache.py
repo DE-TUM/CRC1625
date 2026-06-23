@@ -79,7 +79,8 @@ async def invalidate_stale_validation_caches() -> int:
             await rdf_datastore_client.launch_update(
                 mark_workflow_instance_cache_stale_query.replace("{workflow_instance_iri}", instance_iri))
             invalidated += 1
-        logger.info("[CACHE not invalidated because nothing changed (re-materialization)] instance=%s stored=%s current=%s",
+        else:
+            logger.info("[CACHE not invalidated because nothing changed (re-materialization)] instance=%s stored=%s current=%s",
                                 instance_iri, stored_hash, current_hash)
 
     logger.info("Validation cache: marked %d of %d cached instance(s) stale after re-materialization",

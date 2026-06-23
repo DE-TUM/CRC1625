@@ -214,7 +214,7 @@ def test_valid_workflows(generate_redundant_branch: bool = False,
         asyncio.run(rdf_datastore_client.launch_update(workflow_model.get_insert_query()))
         asyncio.run(rdf_datastore_client.launch_update(workflow_instance.get_insert_query()))
 
-        validation_results = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True))
+        validation_results = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True, persist_cache=False))
 
         all_validation_results: list[ValidationResult] = []
         for entity_iri, validation_paths in validation_results.items():
@@ -271,7 +271,7 @@ def test_missing_data_workflows():
         asyncio.run(rdf_datastore_client.launch_update(workflow_model.get_insert_query()))
         asyncio.run(rdf_datastore_client.launch_update(workflow_instance.get_insert_query()))
 
-        validation_results = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True))
+        validation_results = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True, persist_cache=False))
 
         all_validation_results: list[ValidationResult] = []
         for entity_iri, validation_paths in validation_results.items():
@@ -334,7 +334,7 @@ def test_invalid_workflows():
         asyncio.run(rdf_datastore_client.launch_update(workflow_model.get_insert_query()))
         asyncio.run(rdf_datastore_client.launch_update(workflow_instance.get_insert_query()))
 
-        validation_results = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True))
+        validation_results = asyncio.run(is_workflow_instance_valid(workflow_model, workflow_instance, return_individual_results=True, persist_cache=False))
 
         all_validation_results: list[ValidationResult] = []
         for entity_iri, validation_paths in validation_results.items():

@@ -37,6 +37,7 @@ from rdflib.plugins.stores.sparqlstore import SPARQLStore
 from datastores.rdf import rdf_datastore_client
 from datastores.rdf.rdf_datastore_client import RDF_DATASTORE_API_ENDPOINT
 from workflows_validation.common import prefixes, dw_prefix
+from workflows_validation.validation_cache import compute_footprint_hash
 from workflows_validation.workflow_instance import WorkflowInstance
 from workflows_validation.workflow_model import WorkflowModelStep, WorkflowModel
 
@@ -51,6 +52,7 @@ module_dir = os.path.dirname(__file__)
 
 get_next_target_node_query = prefixes + open(os.path.join(module_dir, 'queries/get_next_target_node.sparql'), 'r').read()
 parse_validation_report_query = prefixes + open(os.path.join(module_dir, 'queries/parse_validation_report.sparql'), 'r').read()
+get_cached_validation_results_query = prefixes + open(os.path.join(module_dir, 'queries/get_cached_validation_results.sparql'), 'r').read()
 workflow_shape = open(os.path.join(module_dir, 'shapes/workflow_shape.shacl'), 'r').read()
 
 @dataclass
@@ -507,9 +509,67 @@ def generate_validation_paths(workflow_model: WorkflowModel,
 
     return validation_paths
 
+def reconstruct_individual_results(workflow_model: WorkflowModel,
+                                   cached_rows: list[dict]) -> dict[URIRef, list[OrderedDict[URIRef, list[ValidationResult]]]]:
+    """
+    Rebuilds the nested validation trace (entity -> list of paths -> ordered step IRI -> list of
+    ValidationResult) from the cached result rows returned by `get_cached_validation_results.sparql`.
+
+    The rows are regrouped by entity, then by path index, then ordered by step sequence, exactly mirroring
+    what `is_workflow_instance_valid(return_individual_results=True)` computes. Each rebuilt ValidationResult
+    has `validation_report=None` and an empty `shacl_shape`.
+    ordering of multiple results within a single step is not significant and is not preserved.
+    """
+    # entity -> path_index -> step_seq -> (step_iri, list[ValidationResult])
+    grouped: dict[URIRef, dict[int, dict[int, tuple[URIRef, list[ValidationResult]]]]] = dict()
+
+    for binding in cached_rows:
+        entity = URIRef(binding["entity"]["value"])
+        step_iri = URIRef(binding["step"]["value"])
+        path_index = int(binding["path_index"]["value"])
+        step_seq = int(binding["step_seq"]["value"])
+        conforms = binding["conforms"]["value"].strip().lower() in ("true", "1")
+        is_missing_data = binding["missing"]["value"].strip().lower() in ("true", "1")
+        pyshacl_output = binding["output"]["value"] if "output" in binding else ""
+        target_node = URIRef(binding["target"]["value"]) if "target" in binding else None
+
+        paired_step = PairedStep()
+        paired_step.workflow_model_step = workflow_model.workflow_model_steps[step_iri]
+        validation_job = ValidationJob()
+        validation_job.paired_step = paired_step
+        validation_job.entity = entity
+        validation_job.target_node = target_node
+
+        validation_result = ValidationResult()
+        validation_result.validation_job = validation_job
+        validation_result.conforms = conforms
+        validation_result.is_missing_data = is_missing_data
+        validation_result.pyshacl_output = pyshacl_output
+        validation_result.validation_report = None
+
+        path_buckets = grouped.setdefault(entity, dict())
+        step_buckets = path_buckets.setdefault(path_index, dict())
+        if step_seq not in step_buckets:
+            step_buckets[step_seq] = (step_iri, [])
+        step_buckets[step_seq][1].append(validation_result)
+
+    reconstructed: dict[URIRef, list[OrderedDict[URIRef, list[ValidationResult]]]] = dict()
+    for entity, path_buckets in grouped.items():
+        reconstructed[entity] = []
+        for path_index in sorted(path_buckets.keys()):
+            ordered_steps: OrderedDict[URIRef, list[ValidationResult]] = OrderedDict()
+            for step_seq in sorted(path_buckets[path_index].keys()):
+                step_iri, results_for_step = path_buckets[path_index][step_seq]
+                ordered_steps[step_iri] = results_for_step
+            reconstructed[entity].append(ordered_steps)
+
+    return reconstructed
+
+
 async def is_workflow_instance_valid(workflow_model: WorkflowModel,
                                      workflow_instance: WorkflowInstance,
-                                     return_individual_results=False) -> ValidationStatus | dict[URIRef, list[OrderedDict[URIRef, list[ValidationResult]]]]:
+                                     return_individual_results=False,
+                                     persist_cache=True) -> ValidationStatus | dict[URIRef, list[OrderedDict[URIRef, list[ValidationResult]]]]:
     """
     Returns a ValidationStatus of for the provided workflow model against its instance's assignments
 
@@ -527,16 +587,30 @@ async def is_workflow_instance_valid(workflow_model: WorkflowModel,
 
     The validation is split into individual jobs run in a process pool
 
-    If the instance holds a valid (non-stale) cached validation result, the cached overall status is returned
-    directly without running any validation jobs. Caching is only used for the overall status; a full trace
-    (`return_individual_results=True`) is always recomputed
+    If the instance holds a valid (non-stale) cached validation result, it is returned directly without
+    running any validation jobs: the overall status for the simple mode, or the reconstructed per-step
+    trace for `return_individual_results=True` (rebuilt from the cached `crc:CachedValidationResult` nodes).
+
+    When `persist_cache` is set (the default), a cache miss persists the freshly computed result — the
+    overall status, the footprint hash and the full per-step trace — so subsequent calls in either mode hit
+    the cache. Tests pass `persist_cache=False` to keep validation side-effect free.
     """
-    if (not return_individual_results # TODO: support individual results
-            and workflow_instance.has_valid_cache()
-            and workflow_instance.cached_validation_status in ValidationStatus.__members__):
+    cache_usable = (workflow_instance.has_valid_cache()
+                    and workflow_instance.cached_validation_status in ValidationStatus.__members__)
+
+    if cache_usable and not return_individual_results:
         logging.info("[CACHE hit] instance=%s status=%s",
                      workflow_instance.iri, workflow_instance.cached_validation_status)
         return ValidationStatus[workflow_instance.cached_validation_status]
+
+    if cache_usable and return_individual_results:
+        cached_rows = (await rdf_datastore_client.launch_query(
+            get_cached_validation_results_query.replace("{workflow_instance_iri}", workflow_instance.iri)
+        ))["results"]["bindings"]
+        if cached_rows:
+            logging.info("[CACHE hit individual] instance=%s", workflow_instance.iri)
+            return reconstruct_individual_results(workflow_model, cached_rows)
+        # The overall status is cached but the per-step trace is not (e.g. never requested yet); recompute it
 
     logging.info("[CACHE miss] instance=%s", workflow_instance.iri)
     validation_jobs = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance)
@@ -633,19 +707,33 @@ async def is_workflow_instance_valid(workflow_model: WorkflowModel,
         for (validation_results_for_path, _) in reses:
             validation_results_to_return[entity_iri].append(validation_results_for_path)
 
+    # Derive the overall status (always, since we persist it regardless of the requested return mode)
+    all_validation_results: list[ValidationResult] = []
+    for _, validation_paths_for_entity in validation_results.items():
+        for (validation_path, _) in validation_paths_for_entity:
+            for _, reses in validation_path.items():
+                for validation_result in reses:
+                    all_validation_results.append(validation_result)
+
+    if all(result.conforms for result in all_validation_results) and not steps_with_missing_data_present:
+        validation_status = ValidationStatus.Valid
+    elif all((result.conforms or result.is_missing_data) for result in all_validation_results):
+        validation_status = ValidationStatus.Warning
+    else:
+        validation_status = ValidationStatus.Error
+
+    # Persist the freshly computed result on a miss: the overall status + footprint hash, and the full
+    # per-step trace. This always runs, even for return_individual_results=False, so the detailed trace is
+    # cached too.
+    if persist_cache:
+        footprint_hash = await compute_footprint_hash(workflow_instance.iri)
+        workflow_instance.mark_validated(validation_status.name, footprint_hash)
+        update_queries = [workflow_instance.get_cache_update_query()]
+        update_queries += workflow_instance.get_validation_trace_update_queries(validation_results_to_return)
+        for update_query in update_queries:
+            await rdf_datastore_client.launch_update(update_query)
+
     if return_individual_results:
         return validation_results_to_return
     else:
-        all_validation_results: list[ValidationResult] = []
-        for _, validation_paths_for_entity in validation_results.items():
-            for (validation_path, _) in validation_paths_for_entity:
-                for _, reses in validation_path.items():
-                    for validation_result in reses:
-                        all_validation_results.append(validation_result)
-
-        if all(result.conforms for result in all_validation_results) and not steps_with_missing_data_present:
-            return ValidationStatus.Valid
-        elif all((result.conforms or result.is_missing_data) for result in all_validation_results):
-            return ValidationStatus.Warning
-        else:
-            return ValidationStatus.Error
+        return validation_status

@@ -1,0 +1,21 @@
+# Returns every cached individual validation result for a workflow instance, as one row per
+# CachedValidationResult node. The owning step assignment's crc:assignedWorkflowModelStep yields the
+# workflow model step the result belongs to. These rows are regrouped (by entity, then path index,
+# then step sequence) to rebuild the nested validation trace returned by is_workflow_instance_valid.
+SELECT ?step ?entity ?target ?conforms ?missing ?output ?path_index ?step_seq
+WHERE {
+    GRAPH <https://crc1625.mdi.ruhr-uni-bochum.de/graph/workflows> {
+        <{workflow_instance_iri}> crc:hasAssignment ?assignment .
+        ?assignment crc:assignedWorkflowModelStep ?step .
+        ?assignment crc:hasCachedValidationResult ?result .
+
+        ?result crc:resultForEntity ?entity ;
+                crc:resultConforms ?conforms ;
+                crc:resultIsMissingData ?missing ;
+                crc:resultPathIndex ?path_index ;
+                crc:resultStepSeq ?step_seq .
+
+        OPTIONAL { ?result crc:resultTargetNode ?target . }
+        OPTIONAL { ?result crc:resultPyshaclOutput ?output . }
+    }
+}

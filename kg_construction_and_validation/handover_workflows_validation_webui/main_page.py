@@ -20,7 +20,6 @@ from workflows_validation.extra_functions import read_workflow_model, get_workfl
 from workflows_validation.workflow_instance import WorkflowInstance, StepAssignment
 from workflows_validation.workflow_model import WorkflowModel
 from workflows_validation.workflows_validator import is_workflow_instance_valid
-from workflows_validation.validation_cache import compute_footprint_hash
 
 module_dir = os.path.dirname(__file__)
 prefixes: str = open(os.path.join(module_dir, '../workflows_validation/queries/prefixes.sparql')).read()
@@ -235,19 +234,11 @@ async def populate_workflow_instances_table(workflows_page_state: WorkflowsPageS
             """
             Runs validation for the workflow model and instance pair, and updates the corresponding icon according to the results
             """
-            # When the cache is missing or stale, `is_workflow_instance_valid` recomputes the status; persist it
-            cache_was_valid = workflow_instance.has_valid_cache()
-
+            # On a cache miss, is_workflow_instance_valid persists the result itself (overall status,
+            # footprint hash and the per-step trace), so no explicit caching is needed here
             validation_status = await is_workflow_instance_valid(workflow_model,
                                                                  workflow_instance,
                                                                  return_individual_results=False)
-
-            if not cache_was_valid:# and not app.storage.tab['demo_mode']:
-                # Store the hash of the data this result was based on, so the pipeline can later tell
-                # whether a re-materialization changed it
-                footprint_hash = await compute_footprint_hash(workflow_instance.iri)
-                workflow_instance.mark_validated(validation_status.name, footprint_hash)
-                await rdf_datastore_client.launch_update(workflow_instance.get_cache_update_query())
 
             validation_icon_column.clear()
             with validation_icon_column:

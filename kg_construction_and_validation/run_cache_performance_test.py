@@ -58,6 +58,7 @@ from cache_performance_test.cache_test_common import (
     build_model_with_instances,
     reload_instances,
     store_in_cache,
+    mark_model_instances_stale,
 )
 
 logging.basicConfig(
@@ -162,9 +163,11 @@ async def run_experiment(instance_counts: list[int], n_steps: int, repetitions: 
         logging.info("Setting up model with %d instance(s) of %d steps...", n_instances, n_steps)
         model, _, _ = await build_model_with_instances(n_instances, n_steps)
 
-        # WITHOUT cache: reload fresh (uncached) instances before every pass, so each is a true cold run
+        # WITHOUT cache: validation now stores its result on a miss, so mark every instance stale before
+        # each pass to keep it a cold run
         no_cache_runs = []
         for rep in range(repetitions):
+            await mark_model_instances_stale(model)
             instances = list((await reload_instances(model)).values())
             measurement = await measure_validation_pass(model, instances)
             no_cache_runs.append(measurement)
