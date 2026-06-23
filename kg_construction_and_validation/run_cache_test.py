@@ -61,7 +61,7 @@ async def overall_status(model: WorkflowModel, instance: WorkflowInstance, indiv
     """
     Validates and returns one status for both modes.
     """
-    result = await is_workflow_instance_valid(model, instance, return_individual_results=individual)
+    result = await is_workflow_instance_valid(model, instance, return_individual_results=individual, persist_cache=False)
     return result if not individual else _status_from_trace(result)
 
 
@@ -73,6 +73,25 @@ def _status_from_trace(trace) -> ValidationStatus:
     if any(getattr(r, "is_missing_data", False) for r in results):
         return ValidationStatus.Warning
     return ValidationStatus.Valid
+
+
+def _trace_shape(trace) -> dict:
+    """
+    A comparable summary of a detailed trace: per entity, per path, the (sorted) set of per-result fields.
+    Within-step result ordering is not preserved by the cache, so each path's results are sorted.
+    """
+    shape = {}
+    for entity, paths in trace.items():
+        shape[str(entity)] = []
+        for path in paths:
+            step_results = []
+            for step_iri, results in path.items():
+                for r in results:
+                    target = r.validation_job.target_node if r.validation_job else None
+                    step_results.append((str(step_iri), r.conforms, r.is_missing_data,
+                                         r.pyshacl_output, str(target) if target is not None else None))
+            shape[str(entity)].append(sorted(step_results))
+    return shape
 
 
 # SPARQL for mutating the graphs from a test
@@ -122,7 +141,7 @@ async def test_store_in_cache():
     """Storing a result saves all the cache fields, read back with the right types."""
     model, instance, _ = await setup_scenario()
 
-    status = await is_workflow_instance_valid(model, instance, return_individual_results=False)  # miss -> Valid
+    status = await is_workflow_instance_valid(model, instance, return_individual_results=False, persist_cache=False)  # miss -> Valid
     stored_hash = await store_in_cache(instance, status.name)
 
     reloaded = await reload_instance(model, instance.iri)
@@ -152,8 +171,9 @@ async def test_cache_hit():
     # the simple mode uses the cache, so we get the poisoned status back
     assert (await overall_status(model, reloaded, individual=False)) == ValidationStatus.Error
 
-    # the detailed mode currently skips the cache and recomputes (so the true status).
-    # once detailed results are cached too, this should also be Error.
+    # the detailed mode reconstructs from cached per-step result nodes, but store_in_cache only writes the
+    # overall status (no trace nodes), so here it finds no cached trace and recomputes the true status.
+    # The detailed-trace cache hit is covered by test_individual_results_cache.
     assert (await overall_status(model, reloaded, individual=True)) == ValidationStatus.Valid
 
 
@@ -187,7 +207,7 @@ async def test_invalidation_via_tuple_change():
     """The data re-check marks stale only when the footprint really changed."""
     # change inside the footprint -> invalidated
     model, instance, entity_iri = await setup_scenario()
-    status = await is_workflow_instance_valid(model, instance, return_individual_results=False)
+    status = await is_workflow_instance_valid(model, instance, return_individual_results=False, persist_cache=False)
     await store_in_cache(instance, status.name)
     await change_group_project(entity_iri)            # changes something the footprint looks at
     n = await invalidate_stale_validation_caches()
@@ -196,7 +216,7 @@ async def test_invalidation_via_tuple_change():
 
     # change outside the footprint -> not invalidated
     model, instance, _ = await setup_scenario()
-    status = await is_workflow_instance_valid(model, instance, return_individual_results=False)
+    status = await is_workflow_instance_valid(model, instance, return_individual_results=False, persist_cache=False)
     await store_in_cache(instance, status.name)
     await add_unrelated_triple()                      # changes something the footprint ignores
     n = await invalidate_stale_validation_caches()
@@ -253,7 +273,7 @@ async def test_revalidation_clears_stale():
     stale_instance = await reload_instance(model, instance.iri)
     assert stale_instance.validation_cache_stale is True
 
-    status = await is_workflow_instance_valid(model, stale_instance, return_individual_results=False)  # miss
+    status = await is_workflow_instance_valid(model, stale_instance, return_individual_results=False, persist_cache=False)  # miss
     new_hash = await store_in_cache(stale_instance, status.name)
 
     reloaded = await reload_instance(model, instance.iri)
@@ -261,11 +281,32 @@ async def test_revalidation_clears_stale():
     assert reloaded.validation_cache_hash == new_hash == await compute_footprint_hash(instance.iri)
 
 
+async def test_individual_results_cache():
+    """The per-step trace is persisted on a miss, served on a hit, and recomputed when stale."""
+    model, instance, _ = await setup_scenario()
+
+    # A detailed validation is a miss: it persists the overall status AND the per-step trace
+    fresh = await is_workflow_instance_valid(model, instance, return_individual_results=True, persist_cache=True)
+    reloaded = await reload_instance(model, instance.iri)
+    assert reloaded.has_valid_cache(), "a detailed validation must populate the cache"
+
+    # Served from the cached trace now (persist_cache=False proves it does not recompute and rewrite)
+    cached = await is_workflow_instance_valid(model, reloaded, return_individual_results=True, persist_cache=False)
+    assert _trace_shape(cached) == _trace_shape(fresh), "the cached trace must match the freshly computed one"
+
+    # Marking the cache stale forces the detailed trace to be recomputed
+    await force_stale(instance.iri)
+    stale = await reload_instance(model, instance.iri)
+    recomputed = await is_workflow_instance_valid(model, stale, return_individual_results=True, persist_cache=False)
+    assert _status_from_trace(recomputed) == ValidationStatus.Valid, "a stale instance must be recomputed"
+
+
 if __name__ == "__main__":
     tests = [
         test_store_in_cache,
         test_cache_miss,
         test_cache_hit,
+        test_individual_results_cache,
         test_invalidation_via_instance_edit,
         test_invalidation_via_model_edit,
         test_invalidation_via_tuple_change,
