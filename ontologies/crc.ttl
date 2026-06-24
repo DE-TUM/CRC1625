@@ -135,6 +135,14 @@ crc:hasAssignment rdf:type owl:ObjectProperty ;
                   rdfs:label "Has assignment" .
 
 
+###  https://crc1625.mdi.ruhr-uni-bochum.de/hasCachedValidationResult
+crc:hasCachedValidationResult rdf:type owl:ObjectProperty ;
+                              rdfs:domain crc:WorkflowModelStepAssignment ;
+                              rdfs:range crc:CachedValidationResult ;
+                              rdfs:comment "Links a WorkflowModelStepAssignment to one of its cached individual validation results." ;
+                              rdfs:label "Has cached validation result" .
+
+
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/hasTemplate
 crc:hasTemplate rdf:type owl:ObjectProperty ;
                 rdfs:subPropertyOf crc:assignedTo ;
@@ -198,6 +206,20 @@ This property does not explicitly indicate that the given file is generated *for
 To indicate the former, the connection should instead be the other way around via the crc:characteristic property, as is in the majority of cases.
              """ ;
              rdfs:label "Resource" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/resultForEntity
+crc:resultForEntity rdf:type owl:ObjectProperty ;
+                    rdfs:domain crc:CachedValidationResult ;
+                    rdfs:comment "The assigned entity (the root of a data workflow) that this cached validation result belongs to." ;
+                    rdfs:label "Result for entity" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/resultTargetNode
+crc:resultTargetNode rdf:type owl:ObjectProperty ;
+                     rdfs:domain crc:CachedValidationResult ;
+                     rdfs:comment "The specific target node that was validated for this cached validation result. Absent when the result represents missing data." ;
+                     rdfs:label "Result target node" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/substep
@@ -352,34 +374,6 @@ crc:validationCacheHash rdf:type owl:DatatypeProperty ;
                         rdfs:label "Validation cache hash" .
 
 
-###  https://crc1625.mdi.ruhr-uni-bochum.de/CachedValidationResult
-crc:CachedValidationResult rdf:type owl:Class ;
-                           rdfs:comment "A cached individual validation result for a single (entity, target node) pairing of a workflow model step, as produced during workflow validation. These are stored so the per-step validation trace can be served from cache without re-running SHACL. They are gated by the overall cache validity (crc:validationCacheStale) of their WorkflowModelInstance." ;
-                           rdfs:label "Cached validation result" .
-
-
-###  https://crc1625.mdi.ruhr-uni-bochum.de/hasCachedValidationResult
-crc:hasCachedValidationResult rdf:type owl:ObjectProperty ;
-                              rdfs:domain crc:WorkflowModelStepAssignment ;
-                              rdfs:range crc:CachedValidationResult ;
-                              rdfs:comment "Links a WorkflowModelStepAssignment to one of its cached individual validation results." ;
-                              rdfs:label "Has cached validation result" .
-
-
-###  https://crc1625.mdi.ruhr-uni-bochum.de/resultForEntity
-crc:resultForEntity rdf:type owl:ObjectProperty ;
-                    rdfs:domain crc:CachedValidationResult ;
-                    rdfs:comment "The assigned entity (the root of a data workflow) that this cached validation result belongs to." ;
-                    rdfs:label "Result for entity" .
-
-
-###  https://crc1625.mdi.ruhr-uni-bochum.de/resultTargetNode
-crc:resultTargetNode rdf:type owl:ObjectProperty ;
-                     rdfs:domain crc:CachedValidationResult ;
-                     rdfs:comment "The specific target node that was validated for this cached validation result. Absent when the result represents missing data." ;
-                     rdfs:label "Result target node" .
-
-
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/resultConforms
 crc:resultConforms rdf:type owl:DatatypeProperty ;
                    rdfs:subPropertyOf owl:topDataProperty ;
@@ -494,6 +488,12 @@ crc:BulkComposition rdf:type owl:Class ;
                     rdfs:subClassOf pmdco:ChemicalObject ;
                     rdfs:comment "The composition of a Materials Library as a whole"@en ;
                     rdfs:label "Bulk Composition"@en .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/CachedValidationResult
+crc:CachedValidationResult rdf:type owl:Class ;
+                           rdfs:comment "A cached individual validation result for a single (entity, target node) pairing of a workflow model step, as produced during workflow validation. These are stored so the per-step validation trace can be served from cache without re-running SHACL. They are gated by the overall cache validity (crc:validationCacheStale) of their WorkflowModelInstance." ;
+                           rdfs:label "Cached validation result" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/CharacterizationActivity
