@@ -51,6 +51,7 @@ import psutil
 import matplotlib
 matplotlib.use("Agg")  # Headless: render straight to file, never open a window
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter, NullFormatter
 
 from workflows_validation.workflow_instance import WorkflowInstance
 from workflows_validation.workflow_model import WorkflowModel
@@ -241,6 +242,11 @@ def save_latency_plot(aggregated: dict, path: str, x_label: str) -> None:
     ax.errorbar(ns, aggregated["cache_latency_s_mean"], yerr=aggregated["cache_latency_s_std"],
                 marker='s', capsize=3, label="With cache (all hits)")
     ax.set_xlabel(x_label)
+    ax.set_yscale("log")
+    # Plain numbers on the log y-axis (1, 10, 100, ...), and suppress minor-tick labels so narrow-range
+    # plots (e.g. RSS spans ~1 decade) show clean decade labels instead of 2x10^3, 3x10^2, etc.
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
+    ax.yaxis.set_minor_formatter(NullFormatter())
     ax.set_ylabel("Validation-status latency (s)")
     ax.set_title("Validation-status retrieval latency: cache vs no cache")
     ax.grid(True, linestyle='--', alpha=0.4)
@@ -261,6 +267,11 @@ def save_cpu_plot(aggregated: dict, path: str, x_label: str) -> None:
     ax.errorbar(ns, aggregated["cache_cpu_s_mean"], yerr=aggregated["cache_cpu_s_std"],
                 marker='s', capsize=3, label="With cache (all hits)")
     ax.set_xlabel(x_label)
+    ax.set_yscale("log")
+    # Plain numbers on the log y-axis (1, 10, 100, ...), and suppress minor-tick labels so narrow-range
+    # plots (e.g. RSS spans ~1 decade) show clean decade labels instead of 2x10^3, 3x10^2, etc.
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
+    ax.yaxis.set_minor_formatter(NullFormatter())
     ax.set_ylabel("Total CPU time (s)")
     ax.set_title("Validation-status compute cost (CPU-seconds): cache vs no cache")
     ax.grid(True, linestyle='--', alpha=0.4)
@@ -286,6 +297,11 @@ def save_rss_plot(aggregated: dict, path: str, x_label: str) -> None:
     ax.errorbar(ns, cache_rss_mib, yerr=cache_rss_std_mib,
                 marker='s', capsize=3, label="With cache (all hits)")
     ax.set_xlabel(x_label)
+    ax.set_yscale("log")
+    # Plain numbers on the log y-axis (1, 10, 100, ...), and suppress minor-tick labels so narrow-range
+    # plots (e.g. RSS spans ~1 decade) show clean decade labels instead of 2x10^3, 3x10^2, etc.
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
+    ax.yaxis.set_minor_formatter(NullFormatter())
     ax.set_ylabel("Peak resident memory (MiB)")
     ax.set_title("Validation-status compute cost (peak RSS): cache vs no cache")
     ax.grid(True, linestyle='--', alpha=0.4)
