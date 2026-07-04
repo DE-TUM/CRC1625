@@ -137,6 +137,28 @@ async def _store_one_in_cache(instance: WorkflowInstance, status_name: str) -> s
     return footprint_hash
 
 
+async def mark_instances_stale(instances: list[WorkflowInstance]) -> None:
+    """
+    Marks the given instances' caches stale in a single update, so their next validation is a miss.
+
+    Used by the performance test to establish a chosen cache-hit ratio: validation re-caches misses
+    during a measured pass, so the miss subset must be re-staled before every pass.
+    """
+    if not instances:
+        return
+
+    iris = ", ".join(f"<{instance.iri}>" for instance in instances)
+    await rdf_datastore_client.launch_update(f"""
+        DELETE {{ GRAPH <{WORKFLOWS_GRAPH_IRI}> {{ ?instance <{dw_prefix.validationCacheStale}> ?stale }} }}
+        INSERT {{ GRAPH <{WORKFLOWS_GRAPH_IRI}> {{ ?instance <{dw_prefix.validationCacheStale}> true }} }}
+        WHERE  {{ GRAPH <{WORKFLOWS_GRAPH_IRI}> {{
+            ?instance <{dw_prefix.workflowModelInstanceOf}> ?model .
+            OPTIONAL {{ ?instance <{dw_prefix.validationCacheStale}> ?stale }}
+            FILTER(?instance IN ({iris}))
+        }} }}
+    """)
+
+
 async def mark_model_instances_stale(model: WorkflowModel) -> None:
     """
     Marks every instance of `model` as having a stale cache, so the next validation of each is a guaranteed

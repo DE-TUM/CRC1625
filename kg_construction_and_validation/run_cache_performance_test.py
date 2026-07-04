@@ -7,10 +7,12 @@ validation cache help as the number of instances per model grows?
 
 For a single workflow model with a varying number of instances, it measures the cost of retrieving the
 validation status of *all* of them at once (exactly what `populate_workflow_instances_table` does via
-`asyncio.gather` over `is_workflow_instance_valid`), in two regimes:
+`asyncio.gather` over `is_workflow_instance_valid`), at one or more cache-hit ratios:
 
-  - WITHOUT cache: every instance is recomputed (full SHACL validation in a process pool)
-  - WITH cache:    every instance is a cache hit (we prime the cache first, so no validation runs)
+A hit ratio of p% means p% of the instances hold a valid cached result (hits, no validation runs) while
+the rest are recomputed (misses: full SHACL validation in a process pool, including writing the fresh
+result back to the cache). 0% is the all-miss ("without cache") regime, 100% the all-hit regime, and
+anything in between models a partially warm cache, as after an edit or a partial invalidation.
 
 Two kinds of metric are recorded, per number of instances:
 
@@ -21,9 +23,11 @@ Two kinds of metric are recorded, per number of instances:
                         memory cost still scale with the number of instances.
 
 Two sweeps are run, each writing its own results .json and three PDF plots (latency, CPU-seconds and peak
-RSS), with one line per regime and the swept dimension on the x-axis:
-  - by_instances: a varying number of instances per model, at a fixed step count (scaling with breadth)
-  - by_steps:     a single instance, at a varying number of steps                 (scaling with depth)
+RSS), with one line per cache-hit ratio and the swept dimension on the x-axis:
+  - by_instances: a varying number of instances per model, at a fixed step count (scaling with breadth);
+                  sweeps every ratio passed via --hit_ratios
+  - by_steps:     a single instance, at a varying number of steps (scaling with depth); always runs only
+                  0% and 100%, since one instance either hits or misses as a whole
 
 Reuses the scenario generators from `run_handover_workflows_validation_test.py` (as `run_cache_test.py`
 does) and the cache plumbing from `workflows_validation`. The measured operation mirrors the Web UI; the
@@ -61,7 +65,7 @@ from cache_performance_test.cache_test_common import (
     build_model_with_instances,
     reload_instances,
     store_in_cache,
-    mark_model_instances_stale,
+    mark_instances_stale,
 )
 
 logging.basicConfig(
@@ -75,8 +79,11 @@ module_dir = os.path.dirname(__file__)
 
 DEFAULT_N_STEPS = 5
 DEFAULT_INSTANCE_COUNTS = [1, 5, 10, 25, 50, 100]
-DEFAULT_STEP_COUNTS = [1, 5, 10, 25, 50, 100]
+DEFAULT_STEP_COUNTS = [1, 5, 10, 25, 50]
+DEFAULT_HIT_RATIO_PERCENTS = [0, 50, 100]
 DEFAULT_REPETITIONS = 3
+
+METRICS = ("latency_s", "cpu_s", "peak_rss_bytes")
 DEFAULT_OUTPUT_DIR = os.path.join(module_dir, "./cache_performance_test/results")
 
 
@@ -163,15 +170,23 @@ async def _build_model(n_instances: int, n_steps: int) -> WorkflowModel:
 
 
 async def run_experiment(x_values: list[int], build_model_for_x, repetitions: int,
-                         x_name: str = "x") -> list[dict]:
+                         hit_ratios: list[float], x_name: str = "x") -> list[dict]:
     """
     Generic cache benchmark sweep. For each value `x` in `x_values`, `build_model_for_x(x)` sets up a model
-    (with its data and instances) in the store and returns it; then `repetitions` no-cache passes and
-    `repetitions` cache (all-hits) passes are measured over it, and the raw per-pass measurements are
-    returned, each row tagged with the swept value under key "x".
+    (with its data and instances) in the store and returns it; then, for every cache-hit ratio in
+    `hit_ratios` (fractions in [0, 1]), `repetitions` passes over all instances are measured in which that
+    share of the instances hit the cache and the rest are recomputed.
 
-    The swept dimension is whatever `build_model_for_x` varies (number of instances, or number of steps of a
-    single instance). `x_name` is only used in log messages.
+    The ratio is established by priming every instance's cache once and then, before every pass, marking a
+    fixed subset of the instances stale: the first round(ratio * n) instances in IRI order hit, the rest
+    miss. Re-staling before *every* pass is required because a measured miss re-caches itself (validation
+    persists its result), which would otherwise turn the next pass into all hits. The cache-write cost of
+    the misses is intentionally part of the measurement.
+
+    Returns the raw per-pass measurements as one row per x value:
+    {"x": x, "runs": {"<hit percent>": [measurement, ...]}}. The swept dimension is whatever
+    `build_model_for_x` varies (number of instances, or number of steps of a single instance). `x_name` is
+    only used in log messages.
     """
     results: list[dict] = []
 
@@ -179,30 +194,31 @@ async def run_experiment(x_values: list[int], build_model_for_x, repetitions: in
         logging.info("Setting up experiment point %s=%s ...", x_name, x)
         model = await build_model_for_x(x)
 
-        # WITHOUT cache: validation now stores its result on a miss, so mark every instance stale before
-        # each pass to keep it a cold run
-        no_cache_runs = []
-        for rep in range(repetitions):
-            await mark_model_instances_stale(model)
-            instances = list((await reload_instances(model)).values())
-            measurement = await measure_validation_pass(model, instances)
-            no_cache_runs.append(measurement)
-            logging.info("[no-cache] %s=%s rep=%d latency=%.3fs cpu=%.3fs peak_rss=%.1fMiB",
-                         x_name, x, rep, measurement["latency_s"], measurement["cpu_s"],
-                         measurement["peak_rss_bytes"] / 1024 ** 2)
+        # Prime every instance once so hits are available; misses are then created by staling a subset.
+        # (After each measured pass all instances are cached again: hits were, misses re-cached themselves.)
+        all_instances = list((await reload_instances(model)).values())
+        await store_in_cache(all_instances)
+        instances_in_iri_order = sorted(all_instances, key=lambda instance: str(instance.iri))
 
-        # WITH cache: prime every instance once, then reload (cache fields present) before each all-hits pass
-        await store_in_cache(list((await reload_instances(model)).values()))
-        cache_runs = []
-        for rep in range(repetitions):
-            instances = list((await reload_instances(model)).values())
-            measurement = await measure_validation_pass(model, instances)
-            cache_runs.append(measurement)
-            logging.info("[cache]    %s=%s rep=%d latency=%.3fs cpu=%.3fs peak_rss=%.1fMiB",
-                         x_name, x, rep, measurement["latency_s"], measurement["cpu_s"],
-                         measurement["peak_rss_bytes"] / 1024 ** 2)
+        runs_per_ratio: dict[str, list[dict]] = {}
+        for ratio in hit_ratios:
+            ratio_key = f"{100 * ratio:g}"
+            n_hits = int(ratio * len(instances_in_iri_order) + 0.5)
+            miss_instances = instances_in_iri_order[n_hits:]
 
-        results.append({"x": x, "no_cache": no_cache_runs, "cache": cache_runs})
+            runs = []
+            for rep in range(repetitions):
+                await mark_instances_stale(miss_instances)
+                instances = list((await reload_instances(model)).values())
+                measurement = await measure_validation_pass(model, instances)
+                runs.append(measurement)
+                logging.info("[hits=%s%% (%d/%d cached)] %s=%s rep=%d latency=%.3fs cpu=%.3fs peak_rss=%.1fMiB",
+                             ratio_key, n_hits, len(instances_in_iri_order), x_name, x, rep,
+                             measurement["latency_s"], measurement["cpu_s"],
+                             measurement["peak_rss_bytes"] / 1024 ** 2)
+            runs_per_ratio[ratio_key] = runs
+
+        results.append({"x": x, "runs": runs_per_ratio})
 
     return results
 
@@ -216,100 +232,98 @@ def _mean_std(values: list[float]) -> tuple[float, float]:
 
 
 def aggregate(results: list[dict]) -> dict:
-    """Reduces the raw per-pass measurements to mean/std series ready for plotting."""
-    aggregated = {"x": [r["x"] for r in results]}
+    """
+    Reduces the raw per-pass measurements to mean/std series ready for plotting:
+    {"x": [...], "series": {"<hit percent>": {"<metric>_mean": [...], "<metric>_std": [...]}}}
+    """
+    aggregated = {"x": [r["x"] for r in results], "series": {}}
 
-    for regime in ("no_cache", "cache"):
-        for metric in ("latency_s", "cpu_s", "peak_rss_bytes"):
+    ratio_keys = list(results[0]["runs"].keys()) if results else []
+    for ratio_key in ratio_keys:
+        series = {}
+        for metric in METRICS:
             means, stds = [], []
             for r in results:
-                mean, std = _mean_std([run[metric] for run in r[regime]])
+                mean, std = _mean_std([run[metric] for run in r["runs"][ratio_key]])
                 means.append(mean)
                 stds.append(std)
-            aggregated[f"{regime}_{metric}_mean"] = means
-            aggregated[f"{regime}_{metric}_std"] = stds
+            series[f"{metric}_mean"] = means
+            series[f"{metric}_std"] = stds
+        aggregated["series"][ratio_key] = series
 
     return aggregated
 
 
-def save_latency_plot(aggregated: dict, path: str, x_label: str) -> None:
-    """Two lines (no-cache vs cache) of validation-status latency against the swept dimension."""
-    ns = aggregated["x"]
+def _hit_ratio_label(ratio_key: str) -> str:
+    """Legend label for a hit-ratio series, spelling out the two extremes."""
+    percent = float(ratio_key)
+    if percent == 0:
+        return "0% hits (recompute all)"
+    if percent == 100:
+        return "100% hits (all cached)"
+    return f"{ratio_key}% hits"
+
+
+def _save_series_plot(aggregated: dict, path: str, x_label: str,
+                      metric: str, y_label: str, title: str, y_scale: float = 1.0) -> None:
+    """
+    One errorbar line per cache-hit ratio of `metric` against the swept dimension. The hit ratio is
+    ordered, so the lines use a single-hue sequential ramp (light = few hits/expensive, dark = all hits)
+    plus distinct markers, rather than unrelated categorical colors. `y_scale` divides the raw values
+    (e.g. bytes -> MiB).
+    """
+    xs = aggregated["x"]
+    ratio_keys = sorted(aggregated["series"].keys(), key=float)
+    markers = ['o', 's', '^', 'D', 'v', 'P', 'X', '*']
+    colormap = plt.get_cmap("Blues")
 
     fig, ax = plt.subplots(figsize=(8, 5))
-    ax.errorbar(ns, aggregated["no_cache_latency_s_mean"], yerr=aggregated["no_cache_latency_s_std"],
-                marker='o', capsize=3, label="Without cache (recompute)")
-    ax.errorbar(ns, aggregated["cache_latency_s_mean"], yerr=aggregated["cache_latency_s_std"],
-                marker='s', capsize=3, label="With cache (all hits)")
+    for i, ratio_key in enumerate(ratio_keys):
+        series = aggregated["series"][ratio_key]
+        # Sample the ramp from mid-light to dark so the lightest line stays readable on white
+        color = colormap(0.35 + 0.6 * (i / max(1, len(ratio_keys) - 1)))
+        ax.errorbar(xs,
+                    [v / y_scale for v in series[f"{metric}_mean"]],
+                    yerr=[v / y_scale for v in series[f"{metric}_std"]],
+                    marker=markers[i % len(markers)], capsize=3, color=color,
+                    label=_hit_ratio_label(ratio_key))
+
     ax.set_xlabel(x_label)
     ax.set_yscale("log")
     # Plain numbers on the log y-axis (1, 10, 100, ...), and suppress minor-tick labels so narrow-range
     # plots (e.g. RSS spans ~1 decade) show clean decade labels instead of 2x10^3, 3x10^2, etc.
     ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
     ax.yaxis.set_minor_formatter(NullFormatter())
-    ax.set_ylabel("Validation-status latency (s)")
-    ax.set_title("Validation-status retrieval latency: cache vs no cache")
+    ax.set_ylabel(y_label)
+    ax.set_title(title)
     ax.grid(True, linestyle='--', alpha=0.4)
     ax.legend()
     fig.tight_layout()
     fig.savefig(path)
     plt.close(fig)
-    logging.info("Latency plot saved to: %s", path)
+    logging.info("Plot saved to: %s", path)
+
+
+def save_latency_plot(aggregated: dict, path: str, x_label: str) -> None:
+    """Validation-status latency against the swept dimension, one line per cache-hit ratio."""
+    _save_series_plot(aggregated, path, x_label, "latency_s",
+                      "Validation-status latency (s)",
+                      "Validation-status retrieval latency by cache-hit ratio")
 
 
 def save_cpu_plot(aggregated: dict, path: str, x_label: str) -> None:
-    """Two lines (no-cache vs cache) of total CPU-seconds against the swept dimension."""
-    ns = aggregated["x"]
-
-    fig, ax = plt.subplots(figsize=(8, 5))
-    ax.errorbar(ns, aggregated["no_cache_cpu_s_mean"], yerr=aggregated["no_cache_cpu_s_std"],
-                marker='o', capsize=3, label="Without cache (recompute)")
-    ax.errorbar(ns, aggregated["cache_cpu_s_mean"], yerr=aggregated["cache_cpu_s_std"],
-                marker='s', capsize=3, label="With cache (all hits)")
-    ax.set_xlabel(x_label)
-    ax.set_yscale("log")
-    # Plain numbers on the log y-axis (1, 10, 100, ...), and suppress minor-tick labels so narrow-range
-    # plots (e.g. RSS spans ~1 decade) show clean decade labels instead of 2x10^3, 3x10^2, etc.
-    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
-    ax.yaxis.set_minor_formatter(NullFormatter())
-    ax.set_ylabel("Total CPU time (s)")
-    ax.set_title("Validation-status compute cost (CPU-seconds): cache vs no cache")
-    ax.grid(True, linestyle='--', alpha=0.4)
-    ax.legend()
-    fig.tight_layout()
-    fig.savefig(path)
-    plt.close(fig)
-    logging.info("CPU-time plot saved to: %s", path)
+    """Total CPU-seconds against the swept dimension, one line per cache-hit ratio."""
+    _save_series_plot(aggregated, path, x_label, "cpu_s",
+                      "Total CPU time (s)",
+                      "Validation-status compute cost (CPU-seconds) by cache-hit ratio")
 
 
 def save_rss_plot(aggregated: dict, path: str, x_label: str) -> None:
-    """Two lines (no-cache vs cache) of peak resident memory against the swept dimension."""
-    ns = aggregated["x"]
-
-    no_cache_rss_mib = [v / 1024 ** 2 for v in aggregated["no_cache_peak_rss_bytes_mean"]]
-    cache_rss_mib = [v / 1024 ** 2 for v in aggregated["cache_peak_rss_bytes_mean"]]
-    no_cache_rss_std_mib = [v / 1024 ** 2 for v in aggregated["no_cache_peak_rss_bytes_std"]]
-    cache_rss_std_mib = [v / 1024 ** 2 for v in aggregated["cache_peak_rss_bytes_std"]]
-
-    fig, ax = plt.subplots(figsize=(8, 5))
-    ax.errorbar(ns, no_cache_rss_mib, yerr=no_cache_rss_std_mib,
-                marker='o', capsize=3, label="Without cache (recompute)")
-    ax.errorbar(ns, cache_rss_mib, yerr=cache_rss_std_mib,
-                marker='s', capsize=3, label="With cache (all hits)")
-    ax.set_xlabel(x_label)
-    ax.set_yscale("log")
-    # Plain numbers on the log y-axis (1, 10, 100, ...), and suppress minor-tick labels so narrow-range
-    # plots (e.g. RSS spans ~1 decade) show clean decade labels instead of 2x10^3, 3x10^2, etc.
-    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
-    ax.yaxis.set_minor_formatter(NullFormatter())
-    ax.set_ylabel("Peak resident memory (MiB)")
-    ax.set_title("Validation-status compute cost (peak RSS): cache vs no cache")
-    ax.grid(True, linestyle='--', alpha=0.4)
-    ax.legend()
-    fig.tight_layout()
-    fig.savefig(path)
-    plt.close(fig)
-    logging.info("Peak-RSS plot saved to: %s", path)
+    """Peak resident memory against the swept dimension, one line per cache-hit ratio."""
+    _save_series_plot(aggregated, path, x_label, "peak_rss_bytes",
+                      "Peak resident memory (MiB)",
+                      "Validation-status compute cost (peak RSS) by cache-hit ratio",
+                      y_scale=1024 ** 2)
 
 
 def save_experiment(raw_results: list[dict], output_dir: str, name_prefix: str, x_label: str,
@@ -336,32 +350,46 @@ def save_experiment(raw_results: list[dict], output_dir: str, name_prefix: str, 
 async def main(args) -> None:
     instance_counts = [int(n) for n in args.instance_counts.split(",") if n.strip()]
     step_counts = [int(n) for n in args.step_counts.split(",") if n.strip()]
+
+    # Hit percentages -> deduplicated fractions in [0, 1], keeping the given order
+    hit_ratio_percents: list[float] = []
+    for token in args.hit_ratios.split(","):
+        if not token.strip():
+            continue
+        percent = float(token)
+        if not 0 <= percent <= 100:
+            raise SystemExit(f"--hit_ratios values must be within 0..100, got: {token}")
+        if percent not in hit_ratio_percents:
+            hit_ratio_percents.append(percent)
+    hit_ratios = [percent / 100 for percent in hit_ratio_percents]
+
     os.makedirs(args.output_dir, exist_ok=True)
 
     # Experiment A: vary the number of instances per model, at a fixed step count (scaling with breadth)
     if args.experiments in ("both", "instances"):
-        logging.info("Experiment 'by_instances': instance_counts=%s, n_steps=%d, repetitions=%d",
-                     instance_counts, args.n_steps, args.repetitions)
+        logging.info("Experiment 'by_instances': instance_counts=%s, n_steps=%d, hit_ratios=%s%%, repetitions=%d",
+                     instance_counts, args.n_steps, hit_ratio_percents, args.repetitions)
         raw_results = await run_experiment(instance_counts,
                                            lambda n: _build_model(n, args.n_steps),
-                                           args.repetitions, x_name="instances")
+                                           args.repetitions, hit_ratios, x_name="instances")
         save_experiment(raw_results, args.output_dir, "by_instances",
                         "Number of instances per workflow model",
                         {"instance_counts": instance_counts, "n_steps": args.n_steps,
-                         "repetitions": args.repetitions},
+                         "hit_ratio_percents": hit_ratio_percents, "repetitions": args.repetitions},
                         args.skip_compute_plot)
 
-    # Experiment B: a single instance, vary the number of steps (scaling with workflow depth)
+    # Experiment B: a single instance, vary the number of steps (scaling with workflow depth).
+    # A hit ratio is all-or-nothing for one instance, so this always runs exactly 0% and 100%.
     if args.experiments in ("both", "steps"):
         logging.info("Experiment 'by_steps' (single instance): step_counts=%s, repetitions=%d",
                      step_counts, args.repetitions)
         raw_results = await run_experiment(step_counts,
                                            lambda s: _build_model(1, s),
-                                           args.repetitions, x_name="steps")
+                                           args.repetitions, [0.0, 1.0], x_name="steps")
         save_experiment(raw_results, args.output_dir, "by_steps",
                         "Number of steps per workflow model (single instance)",
                         {"step_counts": step_counts, "n_instances": 1,
-                         "repetitions": args.repetitions},
+                         "hit_ratio_percents": [0, 100], "repetitions": args.repetitions},
                         args.skip_compute_plot)
 
     logging.info("Cache performance test complete.")
@@ -391,6 +419,13 @@ if __name__ == "__main__":
         help="Fixed number of steps per model in the by_instances experiment"
     )
     parser.add_argument(
+        "--hit_ratios",
+        default=",".join(str(p) for p in DEFAULT_HIT_RATIO_PERCENTS),
+        help="Comma-separated cache-hit percentages (0..100) for the by_instances experiment; the plots "
+             "draw one line per percentage. The single-instance by_steps experiment always uses 0 and 100, "
+             "since its one instance either hits or misses as a whole"
+    )
+    parser.add_argument(
         "--repetitions",
         type=int,
         default=DEFAULT_REPETITIONS,
@@ -411,5 +446,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     asyncio.run(main(args))
-
-    logging.info("Cache performance test complete.")
