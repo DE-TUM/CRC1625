@@ -296,22 +296,19 @@ def _save_series_plot(aggregated: dict, path: str, x_label: str,
     xs = aggregated["x"]
     ratio_keys = sorted(aggregated["series"].keys(), key=float)
     markers = ['o', 's', '^', 'D', 'v', 'P', 'X', '*']
-    colormap = plt.get_cmap("Blues")
+    extreme_colors = {0.0: "#a50f15", 100.0: "#08519c"}  # dark red / dark blue
+    intermediate_colors = ["#e08214", "#41ab5d", "#807dba", "#c51b8a", "#35978f", "#8c6d31"]
 
     fig, ax = plt.subplots(figsize=(8, 5))
+    intermediate_index = 0
     for i, ratio_key in enumerate(ratio_keys):
         series = aggregated["series"][ratio_key]
         percent = float(ratio_key)
-        # The two reference regimes (0% = all-miss, 100% = all-hit) get the darkest shades;
-        # intermediate ratios sit a step lighter, ramped by their percentage. Everything stays
-        # dark enough to read on white; the markers and legend keep close shades apart.
-        if percent == 0:
-            shade = 0.95
-        elif percent == 100:
-            shade = 0.78
+        if percent in extreme_colors:
+            color = extreme_colors[percent]
         else:
-            shade = 0.5 + 0.2 * (percent / 100)
-        color = colormap(shade)
+            color = intermediate_colors[intermediate_index % len(intermediate_colors)]
+            intermediate_index += 1
         ax.errorbar(xs,
                     [v / y_scale for v in series[f"{metric}_mean"]],
                     yerr=[v / y_scale for v in series[f"{metric}_std"]],
