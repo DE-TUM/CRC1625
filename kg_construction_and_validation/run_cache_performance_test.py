@@ -14,6 +14,10 @@ the rest are recomputed (misses: full SHACL validation in a process pool, includ
 result back to the cache). 0% is the all-miss ("without cache") regime, 100% the all-hit regime, and
 anything in between models a partially warm cache, as after an edit or a partial invalidation.
 
+`--n_users` additionally simulates that many users loading the page at the same time: each pass validates
+that many independently loaded copies of every instance concurrently, all on one event loop, exactly like
+simultaneous users of the single-process web UI.
+
 Two kinds of metric are recorded, per number of instances:
 
   1. Speed (latency)  - wall-clock time of the gather, i.e. what the user waits for
@@ -48,6 +52,7 @@ import resource
 import sys
 import threading
 import time
+from datetime import datetime
 from statistics import fmean, pstdev
 
 import psutil
@@ -78,9 +83,9 @@ logging.basicConfig(
 module_dir = os.path.dirname(__file__)
 
 DEFAULT_N_STEPS = 5
-DEFAULT_INSTANCE_COUNTS = [1, 5, 10, 25, 50, 100]
-DEFAULT_STEP_COUNTS = [1, 5, 10, 25, 50]
-DEFAULT_HIT_RATIO_PERCENTS = [0, 50, 100]
+DEFAULT_INSTANCE_COUNTS = [1, 2, 5, 10, 25, 50, 100]
+DEFAULT_STEP_COUNTS = [1, 2, 5, 10, 25, 50, 100, 200]
+DEFAULT_HIT_RATIO_PERCENTS = [0, 10, 20, 50, 100]
 DEFAULT_REPETITIONS = 3
 
 METRICS = ("latency_s", "cpu_s", "peak_rss_bytes")
@@ -138,20 +143,28 @@ class _RssSampler(threading.Thread):
         return self.peak_rss
 
 
-async def measure_validation_pass(model: WorkflowModel, instances: list[WorkflowInstance]) -> dict:
+async def measure_validation_pass(model: WorkflowModel,
+                                  user_instance_sets: list[list[WorkflowInstance]]) -> dict:
     """
-    Validates the status of all instances at once (mirroring the Web UI's `asyncio.gather`) and records
-    the latency, CPU-seconds and peak RSS of that pass.
+    Validates the status of all instances at once for every simulated user, and records the latency,
+    CPU-seconds and peak RSS of the whole pass.
+
+    Each element of `user_instance_sets` is one simulated user: an independent page load doing the Web
+    UI's `asyncio.gather` over its own copies of the instances. All users run concurrently on this one
+    event loop, exactly like simultaneous users of the single-process web UI.
     """
+    async def validate_all(instances: list[WorkflowInstance]):
+        await asyncio.gather(*(
+            is_workflow_instance_valid(model, instance, return_individual_results=False)
+            for instance in instances
+        ))
+
     sampler = _RssSampler()
     sampler.start()
     cpu_before = _cpu_seconds()
     start = time.perf_counter()
 
-    await asyncio.gather(*(
-        is_workflow_instance_valid(model, instance, return_individual_results=False)
-        for instance in instances
-    ))
+    await asyncio.gather(*(validate_all(instances) for instances in user_instance_sets))
 
     latency = time.perf_counter() - start
     cpu_seconds = _cpu_seconds() - cpu_before
@@ -170,7 +183,7 @@ async def _build_model(n_instances: int, n_steps: int) -> WorkflowModel:
 
 
 async def run_experiment(x_values: list[int], build_model_for_x, repetitions: int,
-                         hit_ratios: list[float], x_name: str = "x") -> list[dict]:
+                         hit_ratios: list[float], x_name: str = "x", n_users: int = 1) -> list[dict]:
     """
     Generic cache benchmark sweep. For each value `x` in `x_values`, `build_model_for_x(x)` sets up a model
     (with its data and instances) in the store and returns it; then, for every cache-hit ratio in
@@ -182,6 +195,10 @@ async def run_experiment(x_values: list[int], build_model_for_x, repetitions: in
     miss. Re-staling before *every* pass is required because a measured miss re-caches itself (validation
     persists its result), which would otherwise turn the next pass into all hits. The cache-write cost of
     the misses is intentionally part of the measurement.
+
+    `n_users` simulates that many independent users loading the page at the same time: each pass validates
+    `n_users` freshly loaded copies of every instance concurrently on the shared event loop (like the
+    web UI).
 
     Returns the raw per-pass measurements as one row per x value:
     {"x": x, "runs": {"<hit percent>": [measurement, ...]}}. The swept dimension is whatever
@@ -209,11 +226,14 @@ async def run_experiment(x_values: list[int], build_model_for_x, repetitions: in
             runs = []
             for rep in range(repetitions):
                 await mark_instances_stale(miss_instances)
-                instances = list((await reload_instances(model)).values())
-                measurement = await measure_validation_pass(model, instances)
+                # One freshly loaded, independent copy of the instances per simulated user, like every
+                # browser tab loading the page for itself (kept outside the timed window)
+                user_instance_sets = [list((await reload_instances(model)).values())
+                                      for _ in range(n_users)]
+                measurement = await measure_validation_pass(model, user_instance_sets)
                 runs.append(measurement)
-                logging.info("[hits=%s%% (%d/%d cached)] %s=%s rep=%d latency=%.3fs cpu=%.3fs peak_rss=%.1fMiB",
-                             ratio_key, n_hits, len(instances_in_iri_order), x_name, x, rep,
+                logging.info("[hits=%s%% (%d/%d cached)] %s=%s users=%d rep=%d latency=%.3fs cpu=%.3fs peak_rss=%.1fMiB",
+                             ratio_key, n_hits, len(instances_in_iri_order), x_name, x, n_users, rep,
                              measurement["latency_s"], measurement["cpu_s"],
                              measurement["peak_rss_bytes"] / 1024 ** 2)
             runs_per_ratio[ratio_key] = runs
@@ -265,7 +285,8 @@ def _hit_ratio_label(ratio_key: str) -> str:
 
 
 def _save_series_plot(aggregated: dict, path: str, x_label: str,
-                      metric: str, y_label: str, title: str, y_scale: float = 1.0) -> None:
+                      metric: str, y_label: str, title: str, y_scale: float = 1.0,
+                      title_suffix: str = "") -> None:
     """
     One errorbar line per cache-hit ratio of `metric` against the swept dimension. The hit ratio is
     ordered, so the lines use a single-hue sequential ramp (light = few hits/expensive, dark = all hits)
@@ -280,8 +301,17 @@ def _save_series_plot(aggregated: dict, path: str, x_label: str,
     fig, ax = plt.subplots(figsize=(8, 5))
     for i, ratio_key in enumerate(ratio_keys):
         series = aggregated["series"][ratio_key]
-        # Sample the ramp from mid-light to dark so the lightest line stays readable on white
-        color = colormap(0.35 + 0.6 * (i / max(1, len(ratio_keys) - 1)))
+        percent = float(ratio_key)
+        # The two reference regimes (0% = all-miss, 100% = all-hit) get the darkest shades;
+        # intermediate ratios sit a step lighter, ramped by their percentage. Everything stays
+        # dark enough to read on white; the markers and legend keep close shades apart.
+        if percent == 0:
+            shade = 0.95
+        elif percent == 100:
+            shade = 0.78
+        else:
+            shade = 0.5 + 0.2 * (percent / 100)
+        color = colormap(shade)
         ax.errorbar(xs,
                     [v / y_scale for v in series[f"{metric}_mean"]],
                     yerr=[v / y_scale for v in series[f"{metric}_std"]],
@@ -295,7 +325,7 @@ def _save_series_plot(aggregated: dict, path: str, x_label: str,
     ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
     ax.yaxis.set_minor_formatter(NullFormatter())
     ax.set_ylabel(y_label)
-    ax.set_title(title)
+    ax.set_title(title + title_suffix)
     ax.grid(True, linestyle='--', alpha=0.4)
     ax.legend()
     fig.tight_layout()
@@ -304,47 +334,53 @@ def _save_series_plot(aggregated: dict, path: str, x_label: str,
     logging.info("Plot saved to: %s", path)
 
 
-def save_latency_plot(aggregated: dict, path: str, x_label: str) -> None:
+def save_latency_plot(aggregated: dict, path: str, x_label: str, title_suffix: str = "") -> None:
     """Validation-status latency against the swept dimension, one line per cache-hit ratio."""
     _save_series_plot(aggregated, path, x_label, "latency_s",
                       "Validation-status latency (s)",
-                      "Validation-status retrieval latency by cache-hit ratio")
+                      "Validation-status retrieval latency by cache-hit ratio",
+                      title_suffix=title_suffix)
 
 
-def save_cpu_plot(aggregated: dict, path: str, x_label: str) -> None:
+def save_cpu_plot(aggregated: dict, path: str, x_label: str, title_suffix: str = "") -> None:
     """Total CPU-seconds against the swept dimension, one line per cache-hit ratio."""
     _save_series_plot(aggregated, path, x_label, "cpu_s",
                       "Total CPU time (s)",
-                      "Validation-status compute cost (CPU-seconds) by cache-hit ratio")
+                      "Validation-status compute cost (CPU-seconds) by cache-hit ratio",
+                      title_suffix=title_suffix)
 
 
-def save_rss_plot(aggregated: dict, path: str, x_label: str) -> None:
+def save_rss_plot(aggregated: dict, path: str, x_label: str, title_suffix: str = "") -> None:
     """Peak resident memory against the swept dimension, one line per cache-hit ratio."""
     _save_series_plot(aggregated, path, x_label, "peak_rss_bytes",
                       "Peak resident memory (MiB)",
                       "Validation-status compute cost (peak RSS) by cache-hit ratio",
-                      y_scale=1024 ** 2)
+                      y_scale=1024 ** 2, title_suffix=title_suffix)
 
 
 def save_experiment(raw_results: list[dict], output_dir: str, name_prefix: str, x_label: str,
-                    config: dict, skip_compute_plot: bool) -> None:
+                    config: dict, skip_compute_plot: bool, n_users: int = 1,
+                    run_timestamp: str = "") -> None:
     """
     Aggregates one experiment's raw results, writes its results .json and its (one or three) plots. All
-    outputs are suffixed with `name_prefix` (e.g. "by_instances" / "by_steps"), and `x_label` is the text
-    written on the x-axis of each plot.
+    outputs are suffixed with `name_prefix` (e.g. "by_instances" / "by_steps") plus `run_timestamp`, so
+    repeated runs never overwrite earlier results. `x_label` is the text written on the x-axis of each
+    plot. With more than one simulated user, the plot titles say so.
     """
     aggregated = aggregate(raw_results)
+    file_suffix = f"{name_prefix}_{run_timestamp}" if run_timestamp else name_prefix
 
-    results_path = os.path.join(output_dir, f"cache_performance_results_{name_prefix}.json")
+    results_path = os.path.join(output_dir, f"cache_performance_results_{file_suffix}.json")
     with open(results_path, "w") as f:
         json.dump({"config": config, "x_label": x_label, "raw_results": raw_results, "aggregated": aggregated},
                   f, indent=4)
     logging.info("Results saved to: %s", results_path)
 
-    save_latency_plot(aggregated, os.path.join(output_dir, f"cache_latency_{name_prefix}.pdf"), x_label)
+    title_suffix = f" ({n_users} concurrent users)" if n_users > 1 else ""
+    save_latency_plot(aggregated, os.path.join(output_dir, f"cache_latency_{file_suffix}.pdf"), x_label, title_suffix)
     if not skip_compute_plot:
-        save_cpu_plot(aggregated, os.path.join(output_dir, f"cache_cpu_{name_prefix}.pdf"), x_label)
-        save_rss_plot(aggregated, os.path.join(output_dir, f"cache_rss_{name_prefix}.pdf"), x_label)
+        save_cpu_plot(aggregated, os.path.join(output_dir, f"cache_cpu_{file_suffix}.pdf"), x_label, title_suffix)
+        save_rss_plot(aggregated, os.path.join(output_dir, f"cache_rss_{file_suffix}.pdf"), x_label, title_suffix)
 
 
 async def main(args) -> None:
@@ -363,34 +399,45 @@ async def main(args) -> None:
             hit_ratio_percents.append(percent)
     hit_ratios = [percent / 100 for percent in hit_ratio_percents]
 
+    if args.n_users < 1:
+        raise SystemExit(f"--n_users must be at least 1, got: {args.n_users}")
+
     os.makedirs(args.output_dir, exist_ok=True)
+
+    # One timestamp per run, shared by both experiments, so outputs never overwrite earlier runs
+    # and the files of one run group together
+    run_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
     # Experiment A: vary the number of instances per model, at a fixed step count (scaling with breadth)
     if args.experiments in ("both", "instances"):
-        logging.info("Experiment 'by_instances': instance_counts=%s, n_steps=%d, hit_ratios=%s%%, repetitions=%d",
-                     instance_counts, args.n_steps, hit_ratio_percents, args.repetitions)
+        logging.info("Experiment 'by_instances': instance_counts=%s, n_steps=%d, hit_ratios=%s%%, repetitions=%d, n_users=%d",
+                     instance_counts, args.n_steps, hit_ratio_percents, args.repetitions, args.n_users)
         raw_results = await run_experiment(instance_counts,
                                            lambda n: _build_model(n, args.n_steps),
-                                           args.repetitions, hit_ratios, x_name="instances")
+                                           args.repetitions, hit_ratios, x_name="instances",
+                                           n_users=args.n_users)
         save_experiment(raw_results, args.output_dir, "by_instances",
                         "Number of instances per workflow model",
                         {"instance_counts": instance_counts, "n_steps": args.n_steps,
-                         "hit_ratio_percents": hit_ratio_percents, "repetitions": args.repetitions},
-                        args.skip_compute_plot)
+                         "hit_ratio_percents": hit_ratio_percents, "repetitions": args.repetitions,
+                         "n_users": args.n_users},
+                        args.skip_compute_plot, n_users=args.n_users, run_timestamp=run_timestamp)
 
     # Experiment B: a single instance, vary the number of steps (scaling with workflow depth).
     # A hit ratio is all-or-nothing for one instance, so this always runs exactly 0% and 100%.
     if args.experiments in ("both", "steps"):
-        logging.info("Experiment 'by_steps' (single instance): step_counts=%s, repetitions=%d",
-                     step_counts, args.repetitions)
+        logging.info("Experiment 'by_steps' (single instance): step_counts=%s, repetitions=%d, n_users=%d",
+                     step_counts, args.repetitions, args.n_users)
         raw_results = await run_experiment(step_counts,
                                            lambda s: _build_model(1, s),
-                                           args.repetitions, [0.0, 1.0], x_name="steps")
+                                           args.repetitions, [0.0, 1.0], x_name="steps",
+                                           n_users=args.n_users)
         save_experiment(raw_results, args.output_dir, "by_steps",
                         "Number of steps per workflow model (single instance)",
                         {"step_counts": step_counts, "n_instances": 1,
-                         "hit_ratio_percents": [0, 100], "repetitions": args.repetitions},
-                        args.skip_compute_plot)
+                         "hit_ratio_percents": [0, 100], "repetitions": args.repetitions,
+                         "n_users": args.n_users},
+                        args.skip_compute_plot, n_users=args.n_users, run_timestamp=run_timestamp)
 
     logging.info("Cache performance test complete.")
 
@@ -424,6 +471,15 @@ if __name__ == "__main__":
         help="Comma-separated cache-hit percentages (0..100) for the by_instances experiment; the plots "
              "draw one line per percentage. The single-instance by_steps experiment always uses 0 and 100, "
              "since its one instance either hits or misses as a whole"
+    )
+    parser.add_argument(
+        "--n_users",
+        type=int,
+        default=1,
+        help="Number of simulated concurrent users. Each user validates its own freshly loaded copy of "
+             "all instances at the same time on the shared event loop, mirroring several users opening "
+             "the workflows page simultaneously (the web UI serves all users from one process and event "
+             "loop). With misses, every user recomputes independently (no in-flight deduplication)"
     )
     parser.add_argument(
         "--repetitions",
