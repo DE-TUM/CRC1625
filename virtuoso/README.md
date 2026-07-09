@@ -26,7 +26,8 @@ docker run -d \
   - [Make virtuoso correctly treat untyped and typed xsd:string literals as the same during comparisons](https://github.com/openlink/virtuoso-opensource/issues/728#issuecomment-1937376203)
   - Add `/data` under `DirsAllowed` in the `virtuoso.ini` file
   - Increase `MaxVectorSize` in the `virtuoso.ini` file to, e.g., 4000000
-  - Set up proper SPARQL UPDATE and INSERT user permissions using conductor. An easy (but more unsafe) way to do this is to execute the following via ISQL:
+  - Set up proper SPARQL UPDATE and INSERT user permissions using conductor. 
+    An easy (but more unsafe) way to do this is to execute the following via ISQL:
 
 ```
 DB.DBA.RDF_DEFAULT_USER_PERMS_SET ('nobody', 7);
@@ -51,6 +52,7 @@ GRANT "SPARQL_UPDATE" TO "SPARQL";
 -- Finalize with a checkpoint
 checkpoint;
 ```
+  - If, even after running the above script, there are permission issues or strange errors when running materialization UPDATE/DELETE queries, the workaround mentioned in https://github.com/openlink/virtuoso-opensource/issues/1094 can be applied to remedy this.
 
 #### The following configuration tweaks are **recommended**:
   - General performance tweaks are also recommended, such as increasing its maximum allowed memory usage. 
