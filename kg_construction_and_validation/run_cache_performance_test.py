@@ -335,7 +335,7 @@ def save_latency_plot(aggregated: dict, path: str, x_label: str, title_suffix: s
     """Validation-status latency against the swept dimension, one line per cache-hit ratio."""
     _save_series_plot(aggregated, path, x_label, "latency_s",
                       "Validation-status latency (s)",
-                      "Validation-status retrieval latency by cache-hit ratio",
+                      "Latency",
                       title_suffix=title_suffix)
 
 
@@ -343,7 +343,7 @@ def save_cpu_plot(aggregated: dict, path: str, x_label: str, title_suffix: str =
     """Total CPU-seconds against the swept dimension, one line per cache-hit ratio."""
     _save_series_plot(aggregated, path, x_label, "cpu_s",
                       "Total CPU time (s)",
-                      "Validation-status compute cost (CPU-seconds) by cache-hit ratio",
+                      "CPU-Seconds",
                       title_suffix=title_suffix)
 
 
@@ -351,7 +351,7 @@ def save_rss_plot(aggregated: dict, path: str, x_label: str, title_suffix: str =
     """Peak resident memory against the swept dimension, one line per cache-hit ratio."""
     _save_series_plot(aggregated, path, x_label, "peak_rss_bytes",
                       "Peak resident memory (MiB)",
-                      "Validation-status compute cost (peak RSS) by cache-hit ratio",
+                      "Peak RSS",
                       y_scale=1024 ** 2, title_suffix=title_suffix)
 
 
