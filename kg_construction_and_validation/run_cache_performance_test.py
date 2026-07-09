@@ -26,7 +26,7 @@ Two kinds of metric are recorded, per number of instances:
                         spawns is invisible to wall-clock once work is parallelized, but its CPU and
                         memory cost still scale with the number of instances.
 
-Two sweeps are run, each writing its own results .json and three PDF plots (latency, CPU-seconds and peak
+Two sweeps are run, each writing its own results .json and three SVG plots (latency, CPU-seconds and peak
 RSS), with one line per cache-hit ratio and the swept dimension on the x-axis:
   - by_instances: a varying number of instances per model, at a fixed step count (scaling with breadth);
                   sweeps every ratio passed via --hit_ratios
@@ -374,10 +374,10 @@ def save_experiment(raw_results: list[dict], output_dir: str, name_prefix: str, 
     logging.info("Results saved to: %s", results_path)
 
     title_suffix = f" ({n_users} concurrent users)" if n_users > 1 else ""
-    save_latency_plot(aggregated, os.path.join(output_dir, f"cache_latency_{file_suffix}.pdf"), x_label, title_suffix)
+    save_latency_plot(aggregated, os.path.join(output_dir, f"cache_latency_{file_suffix}.svg"), x_label, title_suffix)
     if not skip_compute_plot:
-        save_cpu_plot(aggregated, os.path.join(output_dir, f"cache_cpu_{file_suffix}.pdf"), x_label, title_suffix)
-        save_rss_plot(aggregated, os.path.join(output_dir, f"cache_rss_{file_suffix}.pdf"), x_label, title_suffix)
+        save_cpu_plot(aggregated, os.path.join(output_dir, f"cache_cpu_{file_suffix}.svg"), x_label, title_suffix)
+        save_rss_plot(aggregated, os.path.join(output_dir, f"cache_rss_{file_suffix}.svg"), x_label, title_suffix)
 
 
 async def main(args) -> None:
