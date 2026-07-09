@@ -26,8 +26,10 @@ Two kinds of metric are recorded, per number of instances:
                         spawns is invisible to wall-clock once work is parallelized, but its CPU and
                         memory cost still scale with the number of instances.
 
-Two sweeps are run, each writing its own results .json and three SVG plots (latency, CPU-seconds and peak
-RSS), with one line per cache-hit ratio and the swept dimension on the x-axis:
+Two sweeps are run, each writing its own results .json and SVG plots (latency, CPU-seconds and peak RSS,
+each rendered with a logarithmic and with a linear y-axis), with one line per cache-hit ratio and the
+swept dimension on the x-axis. Filenames carry the experiment name, a "parallel" tag when --n_users > 1,
+the y-axis scale and the run timestamp:
   - by_instances: a varying number of instances per model, at a fixed step count (scaling with breadth);
                   sweeps every ratio passed via --hit_ratios
   - by_steps:     a single instance, at a varying number of steps (scaling with depth); always runs only
@@ -84,8 +86,8 @@ module_dir = os.path.dirname(__file__)
 
 DEFAULT_N_STEPS = 5
 DEFAULT_INSTANCE_COUNTS = [1, 2, 5, 10, 25, 50, 100]
-DEFAULT_STEP_COUNTS = [1, 2, 5, 10, 25, 50, 100, 200]
-DEFAULT_HIT_RATIO_PERCENTS = [0, 10, 20, 50, 100]
+DEFAULT_STEP_COUNTS = [1, 2, 5, 10, 25, 50, 75]
+DEFAULT_HIT_RATIO_PERCENTS = [0, 50, 75, 90, 100]
 DEFAULT_REPETITIONS = 3
 
 METRICS = ("latency_s", "cpu_s", "peak_rss_bytes")
@@ -286,12 +288,12 @@ def _hit_ratio_label(ratio_key: str) -> str:
 
 def _save_series_plot(aggregated: dict, path: str, x_label: str,
                       metric: str, y_label: str, title: str, y_scale: float = 1.0,
-                      title_suffix: str = "") -> None:
+                      title_suffix: str = "", y_log: bool = True) -> None:
     """
-    One errorbar line per cache-hit ratio of `metric` against the swept dimension. The hit ratio is
-    ordered, so the lines use a single-hue sequential ramp (light = few hits/expensive, dark = all hits)
-    plus distinct markers, rather than unrelated categorical colors. `y_scale` divides the raw values
-    (e.g. bytes -> MiB).
+    One errorbar line per cache-hit ratio of `metric` against the swept dimension. The two reference
+    regimes get dark anchor colors, intermediate ratios distinct medium-tone hues. `y_scale` divides the
+    raw values (e.g. bytes -> MiB). `y_log` selects a logarithmic y-axis (making the near-zero cache
+    lines visible) or a plain linear one.
     """
     xs = aggregated["x"]
     ratio_keys = sorted(aggregated["series"].keys(), key=float)
@@ -316,11 +318,12 @@ def _save_series_plot(aggregated: dict, path: str, x_label: str,
                     label=_hit_ratio_label(ratio_key))
 
     ax.set_xlabel(x_label)
-    ax.set_yscale("log")
-    # Plain numbers on the log y-axis (1, 10, 100, ...), and suppress minor-tick labels so narrow-range
-    # plots (e.g. RSS spans ~1 decade) show clean decade labels instead of 2x10^3, 3x10^2, etc.
-    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
-    ax.yaxis.set_minor_formatter(NullFormatter())
+    if y_log:
+        ax.set_yscale("log")
+        # Plain numbers on the log y-axis (1, 10, 100, ...), and suppress minor-tick labels so narrow-range
+        # plots (e.g. RSS spans ~1 decade) show clean decade labels instead of 2x10^3, 3x10^2, etc.
+        ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
+        ax.yaxis.set_minor_formatter(NullFormatter())
     ax.set_ylabel(y_label)
     ax.set_title(title + title_suffix)
     ax.grid(True, linestyle='--', alpha=0.4)
@@ -331,53 +334,70 @@ def _save_series_plot(aggregated: dict, path: str, x_label: str,
     logging.info("Plot saved to: %s", path)
 
 
-def save_latency_plot(aggregated: dict, path: str, x_label: str, title_suffix: str = "") -> None:
+def save_latency_plot(aggregated: dict, path: str, x_label: str, title_suffix: str = "",
+                      y_log: bool = True) -> None:
     """Validation-status latency against the swept dimension, one line per cache-hit ratio."""
     _save_series_plot(aggregated, path, x_label, "latency_s",
                       "Validation-status latency (s)",
                       "Latency",
-                      title_suffix=title_suffix)
+                      title_suffix=title_suffix, y_log=y_log)
 
 
-def save_cpu_plot(aggregated: dict, path: str, x_label: str, title_suffix: str = "") -> None:
+def save_cpu_plot(aggregated: dict, path: str, x_label: str, title_suffix: str = "",
+                  y_log: bool = True) -> None:
     """Total CPU-seconds against the swept dimension, one line per cache-hit ratio."""
     _save_series_plot(aggregated, path, x_label, "cpu_s",
                       "Total CPU time (s)",
                       "CPU-Seconds",
-                      title_suffix=title_suffix)
+                      title_suffix=title_suffix, y_log=y_log)
 
 
-def save_rss_plot(aggregated: dict, path: str, x_label: str, title_suffix: str = "") -> None:
+def save_rss_plot(aggregated: dict, path: str, x_label: str, title_suffix: str = "",
+                  y_log: bool = True) -> None:
     """Peak resident memory against the swept dimension, one line per cache-hit ratio."""
     _save_series_plot(aggregated, path, x_label, "peak_rss_bytes",
                       "Peak resident memory (MiB)",
                       "Peak RSS",
-                      y_scale=1024 ** 2, title_suffix=title_suffix)
+                      y_scale=1024 ** 2, title_suffix=title_suffix, y_log=y_log)
 
 
 def save_experiment(raw_results: list[dict], output_dir: str, name_prefix: str, x_label: str,
                     config: dict, skip_compute_plot: bool, n_users: int = 1,
                     run_timestamp: str = "") -> None:
     """
-    Aggregates one experiment's raw results, writes its results .json and its (one or three) plots. All
-    outputs are suffixed with `name_prefix` (e.g. "by_instances" / "by_steps") plus `run_timestamp`, so
-    repeated runs never overwrite earlier results. `x_label` is the text written on the x-axis of each
-    plot. With more than one simulated user, the plot titles say so.
+    Aggregates one experiment's raw results, writes its results .json and its plots. Every plot is
+    rendered twice, once with a logarithmic and once with a linear y-axis. The filenames are built from
+    `name_prefix` (e.g. "by_instances" / "by_steps"), a "parallel" tag when several concurrent users were
+    simulated, the y-axis scale ("log" / "linear") and `run_timestamp`, so files of different runs and
+    settings are distinguishable and never overwrite each other. `x_label` is the text written on the
+    x-axis of each plot. With more than one simulated user, the plot titles say so as well.
     """
     aggregated = aggregate(raw_results)
-    file_suffix = f"{name_prefix}_{run_timestamp}" if run_timestamp else name_prefix
+    parallel_tag = "_parallel" if n_users > 1 else ""
+    base_suffix = f"{name_prefix}{parallel_tag}"
+    if run_timestamp:
+        base_suffix += f"_{run_timestamp}"
 
-    results_path = os.path.join(output_dir, f"cache_performance_results_{file_suffix}.json")
+    results_path = os.path.join(output_dir, f"cache_performance_results_{base_suffix}.json")
     with open(results_path, "w") as f:
         json.dump({"config": config, "x_label": x_label, "raw_results": raw_results, "aggregated": aggregated},
                   f, indent=4)
     logging.info("Results saved to: %s", results_path)
 
     title_suffix = f" ({n_users} concurrent users)" if n_users > 1 else ""
-    save_latency_plot(aggregated, os.path.join(output_dir, f"cache_latency_{file_suffix}.svg"), x_label, title_suffix)
-    if not skip_compute_plot:
-        save_cpu_plot(aggregated, os.path.join(output_dir, f"cache_cpu_{file_suffix}.svg"), x_label, title_suffix)
-        save_rss_plot(aggregated, os.path.join(output_dir, f"cache_rss_{file_suffix}.svg"), x_label, title_suffix)
+
+    def plot_suffix(scale: str) -> str:
+        suffix = f"{name_prefix}{parallel_tag}_{scale}"
+        return f"{suffix}_{run_timestamp}" if run_timestamp else suffix
+
+    for scale, y_log in (("log", True), ("linear", False)):
+        save_latency_plot(aggregated, os.path.join(output_dir, f"cache_latency_{plot_suffix(scale)}.svg"),
+                          x_label, title_suffix, y_log=y_log)
+        if not skip_compute_plot:
+            save_cpu_plot(aggregated, os.path.join(output_dir, f"cache_cpu_{plot_suffix(scale)}.svg"),
+                          x_label, title_suffix, y_log=y_log)
+            save_rss_plot(aggregated, os.path.join(output_dir, f"cache_rss_{plot_suffix(scale)}.svg"),
+                          x_label, title_suffix, y_log=y_log)
 
 
 async def main(args) -> None:
