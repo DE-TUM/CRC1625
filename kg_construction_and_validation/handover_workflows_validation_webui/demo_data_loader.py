@@ -123,6 +123,34 @@ async def create_demo_workflow_1():
 
     await rdf_datastore_client.launch_update(workflow_instance.get_insert_query())
 
+    correct_instance_step_entities = [
+        (step_1, ["hnd_group_initial_work_for_Demo_ML"]),
+        (step_2, ["hnd_group_initial_work_for_Demo_ML"]),
+        (step_3, ["hnd_group_initial_work_for_Demo_ML"]),
+        (step_4, ["hnd_group_initial_work_for_Sample_Piece_1", "hnd_group_initial_work_for_Sample_Piece_2"]),
+        (step_5, ["hnd_group_initial_work_for_Sample_Piece_1", "hnd_group_initial_work_for_Sample_Piece_2"]),
+        (step_6, ["hnd_group_initial_work_for_Sample_Piece_1", "hnd_group_initial_work_for_Sample_Piece_2"]),
+    ]
+    for i in range(2, 11):
+        extra_instance = WorkflowInstance()
+        extra_instance.create_new_iri()
+        extra_instance.name = f"Correct workflow instance {i}"
+        extra_instance.description = "A workflow instance whose assignments perfectly match its workflow model"
+        extra_instance.workflow_model_iri = demo_workflow_model.iri
+        set_creator_user_id(extra_instance, -1)
+
+        extra_assignments = []
+        for step, entity_names in correct_instance_step_entities:
+            assignment = StepAssignment()
+            assignment.create_new_iri()
+            assignment.property_to_follow = dw_prefix.nextStep
+            assignment.assigned_entities = [crc_handover_prefix[name] for name in entity_names]
+            assignment.workflow_step_iri = step.iri
+            extra_assignments.append(assignment)
+
+        extra_instance.step_assignments = {sa.workflow_step_iri: sa for sa in extra_assignments}
+        await rdf_datastore_client.launch_update(extra_instance.get_insert_query())
+
 
 async def create_demo_workflow_2():
     demo_workflow_model = WorkflowModel()
