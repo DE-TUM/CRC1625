@@ -30,12 +30,20 @@ def workflow_model_and_instance_to_nodes_and_edges(workflow_model: WorkflowModel
 
     for step_iri, step in workflow_model.workflow_model_steps.items():
         crc_1625_step = CRC1625WorkflowModelStep.from_step(step)
+
+        assigned_objects_str = ""
+        for i, assigned_entity in enumerate(workflow_instance.step_assignments[step.iri].assigned_entities):
+            assigned_objects_str += f"{workflow_instance_page_state.hnd_group_iri_to_sample_object_id[assigned_entity]}"
+            if i < len(workflow_instance.step_assignments[step.iri].assigned_entities) - 1:
+                assigned_objects_str += "\n"
+
         nodes.append({
             'data': {
                 'id': step.name,
                 'label': step.name,
                 'projects': crc_1625_step.get_allowed_project_names(),
                 'activities': crc_1625_step.get_allowed_activity_names(),
+                'assigned_objects': assigned_objects_str,
                 'identifiers_for_coloring': crc_1625_step.get_allowed_activity_names()
             },
             'classes': [NodeType.node_type_step.value]})
@@ -44,34 +52,6 @@ def workflow_model_and_instance_to_nodes_and_edges(workflow_model: WorkflowModel
                 'data': {
                     'source': step.name,
                     'target': workflow_model.workflow_model_steps[next_step_iri].name
-                }
-            })
-
-    for assigned_step_iri, step_assignment in workflow_instance.step_assignments.items():
-        for assigned_entity in step_assignment.assigned_entities:
-            sample_object_id = str(workflow_instance_page_state.hnd_group_iri_to_sample_object_id[assigned_entity])
-            # We set as the node's ids for coloring a single list containing 'object'
-            if {
-                'data': {
-                    'id': f"ML / Sample {sample_object_id}",
-                    'label': f"ML / Sample {sample_object_id}",
-                    'identifiers_for_coloring': ['object']
-                },
-                'classes': [NodeType.node_type_step.value]
-            } not in nodes:
-                nodes.append({
-                    'data': {
-                        'id': f"ML / Sample {sample_object_id}",
-                        'label': f'ML / Sample {sample_object_id}',
-                        'identifiers_for_coloring': ['object']
-                    },
-                    'classes': [NodeType.node_type_object.value]
-                })
-
-            edges.append({
-                'data': {
-                    'source': workflow_model.workflow_model_steps[assigned_step_iri].name,
-                    'target': f"ML / Sample {sample_object_id}"
                 }
             })
 

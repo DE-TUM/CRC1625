@@ -51,18 +51,22 @@ export default {
             'label': (ele) => {
               const label = ele.data('label') || '';
               const activities = ele.data('activities') || [];
-
-              if (activities.length === 0) {
-                return label;
-              }
-
-              const activityText = '\n'+activities.join('\n');
-
               const projects = ele.data('projects') || "";
-              if (projects.length === 0) return `${label}\n${activityText}`;
-              if (projects.length === 1) return `${label}\n${activityText}\n\nProject ${projects[0]}`;
+              const assigned_objects = ele.data('assigned_objects') || "";
 
-              return `${label}\n${activityText}\n\nProjects\n${projects.join(',\n')}`;
+              var activityText = "";
+              if (activities.length === 0) activityText = 'No activities assigned';
+              if (activities.length > 0) activityText = '\n'+activities.join('\n');
+
+              var projectsText = "";
+              if (projects.length === 0) projectsText = 'No project assigned';
+              if (projects.length === 1) projectsText = `Project ${projects[0]}`;
+
+              var assignedObjectsText = "";
+              if (assigned_objects.length === 0) assignedObjectsText = 'Nothing assigned';
+              if (assigned_objects.length > 0) assignedObjectsText = assigned_objects;
+
+              return `${label}\n${activityText}\n\n${projectsText}\n\nAssigned MLs/Samples\n${assignedObjectsText}`;
             },
             'background-color': (ele) => ele.data('color') || '#0074D9',
             'color': '#000000',
