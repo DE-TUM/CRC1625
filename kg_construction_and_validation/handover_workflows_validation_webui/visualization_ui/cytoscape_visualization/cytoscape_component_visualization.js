@@ -1,6 +1,6 @@
 export default {
   template: `
-    <div style="position: relative; width: 100%; height: 500px;">
+    <div style="position: relative; width: 100%;  height: calc(100vh - 140px); min-height: 700px;">
       <div ref="cy" style="width: 100%; height: 100%; display: block; border: 1px solid #ddd; border-radius: 8px;"></div>
       <div v-if="hoverData" 
            :style="{ 
@@ -66,10 +66,13 @@ export default {
             },
             'background-color': (ele) => ele.data('color') || '#0074D9',
             'color': '#000000',
+            'text-wrap': 'wrap',
+            'text-max-width': '120px',
             'text-valign': 'bottom',
             'text-margin-y': '5px',
             'text-halign': 'center',
             'font-size': '12px',
+
             'padding': '10px',
             'text-wrap': 'wrap',
           }
@@ -170,16 +173,30 @@ export default {
             'source-arrow-color': '#37648f',
             'arrow-scale': 1.2,
           }
+        },
+        {
+          selector: 'edge.sequence-edge',
+          style: {
+            'curve-style': 'straight',
+            'target-arrow-shape': 'triangle',
+            'target-arrow-color': '#37648f',
+            'line-color': '#37648f'
+          }
+        },
+        {
+          selector: 'edge.branch-edge',
+          style: {
+            'curve-style': 'taxi',
+            'taxi-direction': 'downward',
+            'taxi-turn': '50%',
+            'target-arrow-shape': 'triangle',
+            'target-arrow-color': '#37648f',
+            'line-color': '#37648f'
+          }
         }
       ],
       layout: {
-        name: 'dagre',
-        fit: true,
-        padding: 10,
-        rankDir: 'LR',
-        //animate: true
-        rankSep: 100,
-        nodeSep: 125
+        name: 'preset'
       }
     });
 
@@ -215,7 +232,11 @@ export default {
       if (evt.target === this.cy) this.cy.elements().removeClass('selected');
     });
 
-    this.rerun_layout_and_fit();
+    this.$nextTick(() => {
+      requestAnimationFrame(() => {
+        this.rerun_layout_and_fit();
+      });
+    });
   },
 
   methods: {
@@ -225,10 +246,279 @@ export default {
     },
 
     rerun_layout_and_fit() {
-      // Fit to the graph elements with a small padding
-      this.cy.layout({ name: 'dagre', fit: true, padding: 10, rankDir: 'LR', animate: true, rankSep: 100, nodeSep: 125 }).run();
+      this.applyWorkflowGridLayout({
+        xGap: 180,
+        yGap: 200,
+        branchGap: 50,
+        padding: 80
+      });
+    },
+
+    applyWorkflowGridLayout(options = {}) {
+      const xGap = options.xGap ?? 180;
+      const yGap = options.yGap ?? 200;
+      const branchGap = options.branchGap ?? 50;
+      const padding = options.padding ?? 80;
+
+      const minNodeWidth = options.minNodeWidth ?? 90;
+      const minColumnWidth = options.minColumnWidth ?? xGap;
+
+      const hasKind = (node, kind) => {
+        const ids = node.data('identifiers_for_coloring') || [];
+        return ids.includes(kind);
+      };
+
+      const isHg = (node) => hasKind(node, 'ho_g');
+
+      const estimateNodeWidth = (node) => {
+        const label = node.data('label') || '';
+
+        // Rough label-width estimate.
+        // Increase 7 or minNodeWidth if labels still overlap.
+        return Math.min(
+          Math.max(label.length * 7, minNodeWidth),
+          420
+        );
+      };
+
+      const getNonSequenceChildren = (node) => {
+        return node.outgoers('edge')
+          .map(edge => edge.target())
+          .filter(target => {
+            // HG -> HG is the main horizontal workflow sequence.
+            // Everything else goes downward recursively.
+            return !(isHg(node) && isHg(target));
+          });
+      };
+
+      // Mark edge types for styling.
+      this.cy.edges().forEach(edge => {
+        edge.removeClass('sequence-edge');
+        edge.removeClass('branch-edge');
+
+        const sourceIsHg = isHg(edge.source());
+        const targetIsHg = isHg(edge.target());
+
+        if (sourceIsHg && targetIsHg) {
+          edge.addClass('sequence-edge');
+        } else {
+          edge.addClass('branch-edge');
+        }
+      });
+
+      const hgNodes = this.cy.nodes().filter(node => isHg(node));
+
+      if (hgNodes.length === 0) {
+        this.cy.resize();
+        this.cy.fit(this.cy.elements(), padding);
+        return;
+      }
+
+      // HG -> HG edges define the main horizontal chain.
+      const hgEdges = this.cy.edges().filter(edge => {
+        return isHg(edge.source()) && isHg(edge.target());
+      });
+
+      const hgTargets = new Set(hgEdges.map(edge => edge.target().id()));
+
+      // Root HG = HG node that is not target of another HG.
+      let root = hgNodes.find(node => !hgTargets.has(node.id()));
+
+      if (!root || root.empty()) {
+        root = hgNodes[0];
+      }
+
+      const orderedHg = [];
+      const visitedHg = new Set();
+      let current = root;
+
+      // Follow HG1 -> HG2 -> HG3 -> ...
+      while (current && current.length > 0 && !visitedHg.has(current.id())) {
+        orderedHg.push(current);
+        visitedHg.add(current.id());
+
+        const nextEdge = current.outgoers('edge').filter(edge => {
+          return isHg(edge.target());
+        })[0];
+
+        current = nextEdge ? nextEdge.target() : null;
+      }
+
+      // Add disconnected or missed HG nodes at the end.
+      hgNodes.forEach(node => {
+        if (!visitedHg.has(node.id())) {
+          orderedHg.push(node);
+        }
+      });
+
+      const subtreeWidthCache = new Map();
+
+      const calculateSubtreeWidth = (node, path = new Set()) => {
+        const nodeId = node.id();
+
+        // Cycle protection.
+        if (path.has(nodeId)) {
+          return estimateNodeWidth(node);
+        }
+
+        if (subtreeWidthCache.has(nodeId)) {
+          return subtreeWidthCache.get(nodeId);
+        }
+
+        const nextPath = new Set(path);
+        nextPath.add(nodeId);
+
+        const children = getNonSequenceChildren(node);
+
+        if (children.length === 0) {
+          const width = estimateNodeWidth(node);
+          subtreeWidthCache.set(nodeId, width);
+          return width;
+        }
+
+        const childrenWidth = children.reduce((sum, child, index) => {
+          const childWidth = calculateSubtreeWidth(child, nextPath);
+          const gap = index === 0 ? 0 : branchGap;
+          return sum + gap + childWidth;
+        }, 0);
+
+        const width = Math.max(
+          estimateNodeWidth(node),
+          childrenWidth
+        );
+
+        subtreeWidthCache.set(nodeId, width);
+        return width;
+      };
+
+      const positioned = new Set();
+
+      const positionSubtree = (node, centerX, level, path = new Set()) => {
+        const nodeId = node.id();
+
+        // Cycle protection.
+        if (path.has(nodeId)) {
+          return;
+        }
+
+        const nextPath = new Set(path);
+        nextPath.add(nodeId);
+
+        // If a node is reached twice, keep the first position.
+        // This avoids jumping in graphs with shared descendants.
+        if (!positioned.has(nodeId)) {
+          node.position({
+            x: centerX,
+            y: level * yGap
+          });
+
+          positioned.add(nodeId);
+        }
+
+        const children = getNonSequenceChildren(node);
+
+        if (children.length === 0) {
+          return;
+        }
+
+        const childWidths = children.map(child => {
+          return calculateSubtreeWidth(child, nextPath);
+        });
+
+        const totalChildrenWidth = childWidths.reduce((sum, width, index) => {
+          const gap = index === 0 ? 0 : branchGap;
+          return sum + gap + width;
+        }, 0);
+
+        let currentX = centerX - totalChildrenWidth / 2;
+
+        children.forEach((child, index) => {
+          const childWidth = childWidths[index];
+          const childCenterX = currentX + childWidth / 2;
+
+          positionSubtree(child, childCenterX, level + 1, nextPath);
+
+          currentX += childWidth + branchGap;
+        });
+      };
+
+      // Calculate width needed for each HG column.
+      const columnWidths = orderedHg.map(hg => {
+        const branchChildren = getNonSequenceChildren(hg);
+
+        if (branchChildren.length === 0) {
+          return Math.max(minColumnWidth, estimateNodeWidth(hg));
+        }
+
+        const branchWidths = branchChildren.map(child => {
+          return calculateSubtreeWidth(child);
+        });
+
+        const totalBranchWidth = branchWidths.reduce((sum, width, index) => {
+          const gap = index === 0 ? 0 : branchGap;
+          return sum + gap + width;
+        }, 0);
+
+        return Math.max(
+          minColumnWidth,
+          estimateNodeWidth(hg),
+          totalBranchWidth
+        );
+      });
+
+      // Position HG columns horizontally.
+      let currentColumnLeft = 0;
+
+      orderedHg.forEach((hg, index) => {
+        const columnWidth = columnWidths[index];
+        const hgCenterX = currentColumnLeft + columnWidth / 2;
+
+        // HG row.
+        hg.position({
+          x: hgCenterX,
+          y: 0
+        });
+
+        positioned.add(hg.id());
+
+        const branchChildren = getNonSequenceChildren(hg);
+
+        if (branchChildren.length > 0) {
+          const branchWidths = branchChildren.map(child => {
+            return calculateSubtreeWidth(child);
+          });
+
+          const totalBranchWidth = branchWidths.reduce((sum, width, childIndex) => {
+            const gap = childIndex === 0 ? 0 : branchGap;
+            return sum + gap + width;
+          }, 0);
+
+          let branchLeft = hgCenterX - totalBranchWidth / 2;
+
+          branchChildren.forEach((child, childIndex) => {
+            const childWidth = branchWidths[childIndex];
+            const childCenterX = branchLeft + childWidth / 2;
+
+            // Children start at level 1.
+            // Then recursion handles level 2, 3, 4, ...
+            positionSubtree(child, childCenterX, 1);
+
+            branchLeft += childWidth + branchGap;
+          });
+        }
+
+        currentColumnLeft += columnWidth + xGap;
+      });
+
       this.cy.resize();
-      this.cy.fit(this.cy.elements(), 10);
+
+      this.cy.layout({
+        name: 'preset',
+        fit: false,
+        animate: false
+      }).run();
+
+      this.cy.fit(this.cy.elements(), padding);
     },
 
     addEdge(source, target) {

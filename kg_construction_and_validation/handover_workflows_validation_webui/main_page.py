@@ -599,7 +599,7 @@ async def landing_page():
     #HERE IS THE MLEM CARD
     with ui.row().classes('w-full justify-center gap-8 p-8'):
         with ui.card().tight().classes('w-128 h-100 cursor-pointer hover:shadow-lg') \
-                .on('click', lambda: ui.navigate.to('/visualization_ui/%2D10')): #CHANGE THE '-10' FOR object_ID!!!
+                .on('click', lambda: ui.navigate.to('/visualization_ui/')): 
             ui.image('assets/workflows_validation_header.png').props('fit=scale-down').classes('h-90')
             with ui.column().classes('p-4 w-full bg-secondary'):
                 ui.label('Handover visualization').classes('text-h6')
