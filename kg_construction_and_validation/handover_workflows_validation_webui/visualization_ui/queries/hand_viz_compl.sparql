@@ -1,0 +1,67 @@
+SELECT DISTINCT ?MLOrSample ?source ?target ?source_kind ?target_kind
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+WHERE {
+
+  ?workflow_instance crc:input ?MLOrSample .
+  ?MLOrSample crc:internalID "{internalID}"^^xsd:integer .
+  ?workflow_instance crc:substep ?first_handover_group .
+
+  # All handover groups in the workflow
+  ?first_handover_group crc:nextStep* ?handover_group .
+
+  {
+    # Horizontal sequence:
+    # HG -> next HG
+    ?handover_group crc:nextStep ?nextGroup .
+
+    BIND(?handover_group AS ?source)
+    BIND(?nextGroup AS ?target)
+    BIND("ho_g" AS ?source_kind)
+    BIND("ho_g" AS ?target_kind)
+  }
+
+  UNION
+
+  {
+    # Vertical branch:
+    # HG -> HOG
+    ?handover_group crc:substep ?first_handover_of_group .
+    ?first_handover_of_group crc:nextStep* ?handover_of_group .
+
+    BIND(?handover_group AS ?source)
+    BIND(?handover_of_group AS ?target)
+    BIND("ho_g" AS ?source_kind)
+    BIND("ho_o_g" AS ?target_kind)
+  }
+
+  UNION
+
+  {
+    # Vertical branch:
+    # HOG -> Activity
+    ?handover_group crc:substep ?first_handover_of_group .
+    ?first_handover_of_group crc:nextStep* ?handover_of_group .
+    ?handover_of_group crc:substep ?activity .
+
+    BIND(?handover_of_group AS ?source)
+    BIND(?activity AS ?target)
+    BIND("ho_o_g" AS ?source_kind)
+    BIND("act" AS ?target_kind)
+  }
+
+  UNION
+
+  {
+    # Fourth layer:
+    # Activity -> Output
+    ?handover_group crc:substep ?first_handover_of_group .
+    ?first_handover_of_group crc:nextStep* ?handover_of_group .
+    ?handover_of_group crc:substep ?activity .
+    ?activity crc:output ?output .
+
+    BIND(?activity AS ?source)
+    BIND(?output AS ?target)
+    BIND("act" AS ?source_kind)
+    BIND("output" AS ?target_kind)
+  }
+}

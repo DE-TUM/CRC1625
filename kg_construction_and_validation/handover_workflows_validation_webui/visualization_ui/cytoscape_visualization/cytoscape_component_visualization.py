@@ -24,7 +24,7 @@ class NodeType(Enum):
     node_type_invisible = "invisible"
 
 
-class CytoscapeComponent(Element, component=os.path.join(os.path.dirname(__file__), 'cytoscape_component.js')):
+class CytoscapeComponent(Element, component=os.path.join(os.path.dirname(__file__), 'cytoscape_component_visualization.js')):
     """
     NiceGUI Element implementation for integrating Cytoscape as a custom Vue component
     """

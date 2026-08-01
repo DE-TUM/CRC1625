@@ -675,6 +675,10 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+virtuoso/virtuoso-db/virtuoso.trx-after-recov
+virtuoso/virtuoso-db/virtuoso.cpt-after-recov
+kg_construction_and_validation/materialization/mappings/final_RML_file.rml
+
 uv.lock
 kg_construction_and_validation/materialization/mappings/final_RML_file.rml
 virtuoso/virtuoso.zip

@@ -1,0 +1,6 @@
+{
+    "python.autoComplete.extraPaths": [
+        "./kg_construction_and_validation/handover_workflows_validation_webui/visualization_ui",
+        "./kg_construction_and_validation"
+    ]
+}

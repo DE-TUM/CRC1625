@@ -11,7 +11,7 @@
 # Note that we include DISTINCT in the SELECT clause: this avoids duplicate results if
 # (in this case) the ML/Sample had multiple handovers with XRD activities as part of the
 # same handover group
-SELECT DISTINCT ?MLOrSample ?handover_group ?handover_of_group ?activity ?nextGroup
+SELECT DISTINCT ?MLOrSample ?handover_group ?handover_of_group ?activity ?output ?nextGroup
 FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 WHERE {
   # We follow the handovers workflow from top-to-bottom,
@@ -50,7 +50,6 @@ WHERE {
 
   # And all activities
   ?handover_of_group crc:substep ?activity.
-
-  # And we want to get those ML/Samples that contain an XRD activity
- # ?activity a crc:XRDProcess.
+  ?activity crc:output ?output.
+  
 }
