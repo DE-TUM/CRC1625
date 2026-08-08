@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 import re
 
+#from prettytable.__main__ import row
+
 
 @dataclass(frozen=True)
 class EdgeSpec:
@@ -8,6 +10,8 @@ class EdgeSpec:
     target: str
     source_kind: str
     target_kind: str
+    source_label: str | None = None
+    target_label: str | None = None
 
 
 def extract_label_from_uri(uri: str) -> str:
@@ -167,6 +171,8 @@ def translate_rows_to_generic_edges(
         for spec in edge_specs:
             source = binding_value(row, spec.source)
             target = binding_value(row, spec.target)
+            source_label = binding_value(row, spec.source_label) if spec.source_label else None
+            target_label = binding_value(row, spec.target_label) if spec.target_label else None
 
             if not source or not target:
                 continue
@@ -184,12 +190,22 @@ def translate_rows_to_generic_edges(
             if edge_key in seen_edges:
                 continue
 
-            generic_rows.append({
+
+            generic_row = {
                 "source": make_binding(source),
                 "target": make_binding(target),
                 "source_kind": make_binding(spec.source_kind, "literal"),
                 "target_kind": make_binding(spec.target_kind, "literal"),
-            })
+            }
+
+            if source_label:
+                generic_row["source_label"] = make_binding(source_label, "literal")
+
+            if target_label:
+                generic_row["target_label"] = make_binding(target_label, "literal")
+
+
+            generic_rows.append(generic_row)
 
             seen_edges.add(edge_key)
 
@@ -288,32 +304,54 @@ def build_cytoscape_graph_from_generic_edges(
     node_class: str,
     use_sample_parent: bool = True,
 ):
-    """
-    Build Cytoscape nodes/edges from generic source/target rows.
-
-    node_class is passed in from the main file, for example:
-      NodeType.node_type_step.value
-
-    This keeps this helper independent from your UI imports.
-    """
     nodes = []
     edges = []
 
-    seen_nodes = set()
+    seen_nodes = {}
     seen_edges = set()
 
     sample_node_id = f"sample_{object_id}"
 
-    def add_node(node_id: str, kind: str = "generic", parent_id: str | None = None):
+    def add_node(
+        node_id: str,
+        kind: str = "generic",
+        parent_id: str | None = None,
+        label: str | None = None,
+    ):
         if not node_id:
             return
 
+        kind = normalize_kind(kind)
+        fallback_label = extract_label_from_uri(node_id)
+        clean_label = label or fallback_label
+
         if node_id in seen_nodes:
+            existing_node = seen_nodes[node_id]
+            existing_label = existing_node["data"].get("label")
+
+            # If the node was first created with URI fallback,
+            # but later appears with crc:objectName, update it.
+            if label and (
+                not existing_label
+                or existing_label == fallback_label
+            ):
+                existing_node["data"]["label"] = label
+
+            existing_ids = existing_node["data"].get("identifiers_for_coloring", [])
+            if kind not in existing_ids:
+                existing_ids.append(kind)
+
+            existing_node["data"]["identifiers_for_coloring"] = existing_ids
+
+            if not existing_node["data"].get("kind"):
+                existing_node["data"]["kind"] = kind
+
             return
 
         data = {
             "id": node_id,
-            "label": extract_label_from_uri(node_id),
+            "label": clean_label,
+            "kind": kind,
             "projects": [],
             "activities": [],
             "identifiers_for_coloring": [kind],
@@ -322,12 +360,13 @@ def build_cytoscape_graph_from_generic_edges(
         if parent_id:
             data["parent"] = parent_id
 
-        nodes.append({
+        node = {
             "data": data,
-            "classes": [node_class],
-        })
+            "classes": f"{node_class} {kind}",
+        }
 
-        seen_nodes.add(node_id)
+        nodes.append(node)
+        seen_nodes[node_id] = node
 
     def add_edge(source: str, target: str):
         if not source or not target:
@@ -354,18 +393,20 @@ def build_cytoscape_graph_from_generic_edges(
     parent_id = None
 
     if use_sample_parent:
-        nodes.append({
+        sample_node = {
             "data": {
                 "id": sample_node_id,
                 "label": f"Sample (ID: {object_id})",
+                "kind": "sample",
                 "projects": [],
                 "activities": [],
                 "identifiers_for_coloring": ["sample"],
             },
-            "classes": [node_class],
-        })
+            "classes": f"{node_class} sample",
+        }
 
-        seen_nodes.add(sample_node_id)
+        nodes.append(sample_node)
+        seen_nodes[sample_node_id] = sample_node
         parent_id = sample_node_id
 
     for row in generic_rows:
@@ -375,8 +416,12 @@ def build_cytoscape_graph_from_generic_edges(
         source_kind = normalize_kind(binding_value(row, "source_kind"))
         target_kind = normalize_kind(binding_value(row, "target_kind"))
 
-        add_node(source, source_kind, parent_id)
-        add_node(target, target_kind, parent_id)
+
+        source_label = binding_value(row, "source_label")
+        target_label = binding_value(row, "target_label")
+
+        add_node(source, source_kind, parent_id, source_label)
+        add_node(target, target_kind, parent_id, target_label)
         add_edge(source, target)
 
     return nodes, edges

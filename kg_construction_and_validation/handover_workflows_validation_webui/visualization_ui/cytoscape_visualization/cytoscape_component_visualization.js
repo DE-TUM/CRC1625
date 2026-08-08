@@ -64,8 +64,7 @@ export default {
 
               return `${label}\n${activityText}\n\nProjects\n${projects.join(',\n')}`;
             },
-            'background-color': (ele) => ele.data('color') || '#0074D9',
-            'color': '#000000',
+            'background-color': (ele) => this.getNodeBackgroundColor(ele),            'color': '#000000',
             'text-wrap': 'wrap',
             'text-max-width': '120px',
             'text-valign': 'bottom',
@@ -240,6 +239,26 @@ export default {
   },
 
   methods: {
+    nodeHasKind(node, kind) {
+      const rawIds = node.data('identifiers_for_coloring') || [];
+      const ids = Array.isArray(rawIds) ? rawIds : [rawIds];
+
+      return (
+        node.data('kind') === kind ||
+        ids.includes(kind) ||
+        node.hasClass(kind)
+      );
+    },
+
+    getNodeBackgroundColor(node) {
+      if (this.nodeHasKind(node, 'sample')) return '#efb0f2';
+      if (this.nodeHasKind(node, 'ho_g')) return '#55c990';
+      if (this.nodeHasKind(node, 'ho_o_g')) return '#ff8f85';
+      if (this.nodeHasKind(node, 'act')) return '#f4b1c4';
+      if (this.nodeHasKind(node, 'output')) return '#55c7ef';
+
+      return node.data('color') || '#0074D9';
+    },    
     updateTooltipPos(evt) {
       const pos = evt.renderedPosition;
       this.hoverPos = { x: pos.x, y: pos.y };
@@ -263,12 +282,7 @@ export default {
       const minNodeWidth = options.minNodeWidth ?? 90;
       const minColumnWidth = options.minColumnWidth ?? xGap;
 
-      const hasKind = (node, kind) => {
-        const ids = node.data('identifiers_for_coloring') || [];
-        return ids.includes(kind);
-      };
-
-      const isHg = (node) => hasKind(node, 'ho_g');
+      const isHg = (node) => this.nodeHasKind(node, 'ho_g');
 
       const estimateNodeWidth = (node) => {
         const label = node.data('label') || '';
@@ -321,35 +335,75 @@ export default {
 
       const hgTargets = new Set(hgEdges.map(edge => edge.target().id()));
 
-      // Root HG = HG node that is not target of another HG.
-      let root = hgNodes.find(node => !hgTargets.has(node.id()));
+      const hgNodeArray = hgNodes.toArray();
 
-      if (!root || root.empty()) {
-        root = hgNodes[0];
+      const labelOf = (node) => {
+        return (node.data('label') || node.id() || '').toLowerCase();
+      };
+
+      const rootSortScore = (node) => {
+        const label = labelOf(node);
+
+        // Prefer the actual initial-work chain as the first horizontal chain.
+        if (label.includes('initial_work')) return 0;
+        if (label.includes('_initial_')) return 0;
+
+        return 1;
+      };
+
+      const compareHgNodes = (a, b) => {
+        const scoreDiff = rootSortScore(a) - rootSortScore(b);
+
+        if (scoreDiff !== 0) {
+          return scoreDiff;
+        }
+
+        return labelOf(a).localeCompare(labelOf(b));
+      };
+
+      const getHgSuccessors = (node) => {
+        return node.outgoers('edge')
+          .map(edge => edge.target())
+          .filter(target => isHg(target))
+          .sort(compareHgNodes);
+      };
+
+      // Roots = HG nodes that are not target of another HG.
+      let rootHgNodes = hgNodeArray
+        .filter(node => !hgTargets.has(node.id()))
+        .sort(compareHgNodes);
+
+      // Fallback for cycles or weird data.
+      if (rootHgNodes.length === 0 && hgNodeArray.length > 0) {
+        rootHgNodes = [hgNodeArray.sort(compareHgNodes)[0]];
       }
 
       const orderedHg = [];
       const visitedHg = new Set();
-      let current = root;
 
-      // Follow HG1 -> HG2 -> HG3 -> ...
-      while (current && current.length > 0 && !visitedHg.has(current.id())) {
-        orderedHg.push(current);
-        visitedHg.add(current.id());
+      rootHgNodes.forEach(root => {
+        let current = root;
 
-        const nextEdge = current.outgoers('edge').filter(edge => {
-          return isHg(edge.target());
-        })[0];
+        while (current && !visitedHg.has(current.id())) {
+          orderedHg.push(current);
+          visitedHg.add(current.id());
 
-        current = nextEdge ? nextEdge.target() : null;
-      }
+          const nextHg = getHgSuccessors(current)
+            .find(node => !visitedHg.has(node.id()));
 
-      // Add disconnected or missed HG nodes at the end.
-      hgNodes.forEach(node => {
-        if (!visitedHg.has(node.id())) {
-          orderedHg.push(node);
+          current = nextHg || null;
         }
       });
+
+      // Add disconnected or missed HG nodes at the end.
+      hgNodeArray
+        .sort(compareHgNodes)
+        .forEach(node => {
+          if (!visitedHg.has(node.id())) {
+            orderedHg.push(node);
+            visitedHg.add(node.id());
+          }
+        });
 
       const subtreeWidthCache = new Map();
 

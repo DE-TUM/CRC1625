@@ -1,4 +1,3 @@
-#maybe we move this to a separate file for handling uris or sparql or smth
 from datastores.rdf import rdf_datastore_client
 from handover_workflows_validation_webui.visualization_ui.cytoscape_visualization.cytoscape_component_visualization import CytoscapeComponent, NodeType 
 from handover_workflows_validation_webui.main_page import WorkflowsPageState
@@ -93,12 +92,32 @@ async def visualization(object_ID:str):
 
     workflows_page_state.main_content = ui.column().classes('w-full')
 
-    with ui.header().classes('items-center p-2 h-14'):
+
+    with ui.header().classes('items-center p-2 h-18'):
             ui.label('This is a testing page, mlem!').classes('text-xl').style('color: #000000')
+            sample_input = ui.input(
+                            label='Sample internal ID',
+                            placeholder='Enter sample number',
+                        ).classes('w-48')
+            def open_visualization():
+                            sample_id = (sample_input.value or '').strip()
+                
+                            if not sample_id:
+                                ui.notify('Please enter a sample number.', color='warning')
+                                return
+                
+                            ui.navigate.to(f'/visualization_ui/{quote(sample_id)}')
+            ui.button(
+                            'Render workflow graph',
+                            color='info',
+                            on_click=open_visualization
+                        )
             ui.space()
             ui.label(f'Welcome, {app.storage.tab['user_name']} ({app.storage.tab['user_project']})').classes('text-xl').style('color: #000000')
             ui.button('Log out', color='negative', on_click=lambda: log_out()).props('size=m')
             ui.button('Return to the previous page', color='info', on_click=lambda: ui.navigate.to("/")).props('size=m')
+            
+    
 
     with ui.grid(columns=1).classes('w-full gap-8'):
         workflows_page_state.graph_component_column = ui.column().classes('w-full')
