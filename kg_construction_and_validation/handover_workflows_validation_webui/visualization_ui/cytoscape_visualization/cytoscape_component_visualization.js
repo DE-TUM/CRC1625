@@ -224,7 +224,12 @@ export default {
       const node = evt.target;
       this.cy.elements().removeClass('selected');
       node.addClass('selected');
-      this.$emit('nodeClick', { id: node.id(), label: node.data('label') });
+      this.$emit('nodeClick', {
+        id: node.id(),
+        label: node.data('label'),
+        kind: node.data('kind'),
+        identifiers_for_coloring: node.data('identifiers_for_coloring') || []
+      });
     });
 
     this.cy.on('tap', (evt) => {

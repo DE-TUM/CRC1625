@@ -1,0 +1,12 @@
+SELECT DISTINCT ?property ?value ?value_name
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+WHERE {
+  ?entity ?property ?value .
+
+  FILTER(STR(?entity) = {entityURI_LITERAL})
+
+  OPTIONAL {
+    ?value crc:objectName ?value_name .
+  }
+}
+ORDER BY ?property ?value
