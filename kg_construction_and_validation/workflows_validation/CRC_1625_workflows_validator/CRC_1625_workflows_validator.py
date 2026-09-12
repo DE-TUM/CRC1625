@@ -77,6 +77,8 @@ class CRC1625WorkflowModelStep(WorkflowModelStep):
         Casts a WorkflowModelStep to a CRC1625WorkflowModelStep
         """
         parent_data = asdict(parent_instance)
+        # asdict turns the nested Repetition into a plain dict, so the object is put back by hand
+        parent_data["repetition"] = parent_instance.repetition
 
         return cls(**parent_data)
 
@@ -125,6 +127,7 @@ class CRC1625WorkflowModelStep(WorkflowModelStep):
         workflow_model_step.step_templates = self.step_templates
         workflow_model_step.SHACL_shape = self.SHACL_shape
         workflow_model_step.provenance_records = self.provenance_records
+        workflow_model_step.repetition = self.repetition
 
         return workflow_model_step
 

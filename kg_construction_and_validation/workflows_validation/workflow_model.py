@@ -25,8 +25,15 @@ workflow_model_step_iri_to_config_key = {
     str(dw_prefix.nextStep): "next_steps",
     str(dw_prefix.hasTemplate): "step_templates",
     str(dw_prefix.assignedShape): "SHACL_shape",
+    str(dw_prefix.hasRepetition): "repetition",
 }
 workflow_model_step_config_key_to_iri = {v: k for k, v in workflow_model_step_iri_to_config_key.items()}
+
+workflow_model_step_repetition_iri_to_config_key = {
+    str(dw_prefix.minRepetitions): "min_repetitions",
+    str(dw_prefix.maxRepetitions): "max_repetitions",
+}
+workflow_model_step_repetition_config_key_to_iri = {v: k for k, v in workflow_model_step_repetition_iri_to_config_key.items()}
 
 # The templates don't have a dataclass nor provenance metadata,
 # they could be modeled as blank nodes or triple terms
@@ -36,6 +43,31 @@ workflow_model_step_template_iri_to_config_key = {
     str(dw_prefix.templateValue): "value",
 }
 workflow_model_step_template_config_key_to_iri = {v: k for k, v in workflow_model_step_template_iri_to_config_key.items()}
+
+
+@dataclass
+class Repetition(BaseWorkflowElement):
+    """
+    Marks the workflow model step it is attached to as repeatable, and bounds how often it may repeat
+
+    The model only gives the bounds. How often the step actually repeats is decided per workflow
+    instance, through the `repetition_count` of the StepAssignment that refers to the step. One model
+    can therefore serve several instances that repeat the same step a different number of times
+
+    The repetition is resolved before every validation run, by cloning the step as often as needed.
+    See `workflows_validation.rewriting`
+    """
+
+    """
+    Lowest number of repetitions an instance may ask for. A value of 0 lets an instance skip the step
+    """
+    min_repetitions: int = 1
+
+    """
+    Highest number of repetitions an instance may ask for. An unbounded number is not supported,
+    because the step has to be cloned a known number of times before the validation starts
+    """
+    max_repetitions: int = 1
 
 
 @dataclass
@@ -51,6 +83,22 @@ class WorkflowModelStep(BaseWorkflowElement):
     List of workflow model step IRIs that follow this one. Note that the system does not check for loops
     """
     next_steps: list[URIRef] = field(default_factory=list)
+
+    """
+    Bounds for how often this step may be repeated, if it may be repeated at all.
+    `None` means the step runs exactly once
+    """
+    repetition: Repetition | None = None
+
+    """
+    Step this one was cloned from while resolving a repetition, and which of its occurrences this
+    clone is. The first occurrence is the original step itself, with occurrence 0
+
+    Both fields are filled in memory before a validation run and are never stored in the KG. They
+    exist so that a validation result can be traced back to the step the user actually wrote
+    """
+    original_step_iri: URIRef | None = None
+    occurrence: int = 0
 
     """
     Key->value dict to replace in the step's SHACL shape, if any. The values can be either a list
@@ -135,6 +183,26 @@ class WorkflowModel(BaseWorkflowElement):
 
             # SHACL shape
             g.add((step.iri, URIRef(workflow_model_step_config_key_to_iri["SHACL_shape"]), Literal(step.SHACL_shape, datatype=XSD.string)))
+
+            # Repetition bounds. They live in their own node, so that a step without a repetition
+            # carries no repetition triples at all
+            if step.repetition is not None:
+                if not step.repetition.iri:
+                    step.repetition.create_new_iri()
+
+                g.add((step.iri, URIRef(workflow_model_step_config_key_to_iri["repetition"]), step.repetition.iri))
+                g.add((step.repetition.iri, rdf_prefix.type, dw_prefix.Repetition))
+                g.add((step.repetition.iri,
+                       URIRef(workflow_model_step_repetition_config_key_to_iri["min_repetitions"]),
+                       Literal(step.repetition.min_repetitions, datatype=XSD.integer)))
+                g.add((step.repetition.iri,
+                       URIRef(workflow_model_step_repetition_config_key_to_iri["max_repetitions"]),
+                       Literal(step.repetition.max_repetitions, datatype=XSD.integer)))
+
+                # User-defined metadata
+                for (p, objs) in step.repetition.provenance_records.items():
+                    for o in objs:
+                        g.add((step.repetition.iri, URIRef(p), o))
 
             # Templates
             for key, replacement in step.step_templates.items():

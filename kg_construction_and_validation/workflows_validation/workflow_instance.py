@@ -26,6 +26,7 @@ step_assignment_iri_to_config_key = {
     str(dw_prefix.assignedWorkflowModelStep): "workflow_step_iri",
     str(dw_prefix.assignedEntity): "assigned_entities",
     str(dw_prefix.propertyToFollow): "property_to_follow",
+    str(dw_prefix.repetitionCount): "repetition_count",
 }
 step_assignment_config_key_to_iri = {v: k for k, v in step_assignment_iri_to_config_key.items()}
 
@@ -47,10 +48,18 @@ class StepAssignment(BaseWorkflowElement):
 
     """
     Property through which we will get the next focus node corresponding to the previous
-    one, or the entity itself from this step assignment if it wasn't validated in the 
+    one, or the entity itself from this step assignment if it wasn't validated in the
     previous step
     """
     property_to_follow: URIRef = ""
+
+    """
+    How often the step this assignment refers to is validated in a row. A value of 0 skips the step
+
+    Any value other than 1 requires the workflow model step to carry a Repetition, and has to lie
+    within its bounds. The repetition is resolved before the validation starts, by cloning the step
+    """
+    repetition_count: int = 1
 
 
 @dataclass
@@ -138,6 +147,11 @@ class WorkflowInstance(BaseWorkflowElement):
 
             # Property to follow
             g.add((step_assignment.iri, URIRef(step_assignment_config_key_to_iri["property_to_follow"]), step_assignment.property_to_follow))
+
+            # Number of repetitions
+            g.add((step_assignment.iri,
+                   URIRef(step_assignment_config_key_to_iri["repetition_count"]),
+                   Literal(step_assignment.repetition_count, datatype=XSD.integer)))
 
             # User-defined metadata
             for (p, objs) in step_assignment.provenance_records.items():

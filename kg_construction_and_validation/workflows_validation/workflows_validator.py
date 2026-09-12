@@ -35,6 +35,7 @@ from rdflib.plugins.stores.sparqlstore import SPARQLStore
 from datastores.rdf import rdf_datastore_client
 from datastores.rdf.rdf_datastore_client import RDF_DATASTORE_API_ENDPOINT
 from workflows_validation.common import prefixes, dw_prefix
+from workflows_validation.rewriting import unroll_repetitions
 from workflows_validation.workflow_instance import WorkflowInstance
 from workflows_validation.workflow_model import WorkflowModelStep, WorkflowModel
 
@@ -386,27 +387,32 @@ def generate_validation_paths(workflow_model: WorkflowModel,
     validation_paths: dict[URIRef, list[list[ValidationJob]]] = dict()
 
     if workflow_model.initial_step_iri in validation_jobs:
-        initial_step_iri_to_validate = workflow_model.initial_step_iri
+        initial_step_iris_to_validate = [workflow_model.initial_step_iri]
     else:
-        # Look for the first step to validate by doing a DFS traversal
-        # (maybe we should forbid from having the initial step not assigned to any object)
-        def get_initial_step_iri_to_validate(current_iri: URIRef) -> URIRef | None:
+        # Look for the first steps to validate by doing a DFS traversal
+        #
+        # There can be more than one of them. If the initial step has no jobs and branches, then
+        # every branch starts a validation path of its own, and stopping at the first one found
+        # would silently drop all the others
+        def get_initial_step_iris_to_validate(current_iri: URIRef) -> list[URIRef]:
             if current_iri in validation_jobs:
-                return current_iri
+                return [current_iri]
 
+            found_steps: list[URIRef] = []
             step_data = workflow_model.workflow_model_steps.get(current_iri)
             if step_data:
                 for next_step_iri in step_data.next_steps:
-                    found_step = get_initial_step_iri_to_validate(next_step_iri)
-                    if found_step:
-                        return found_step
-            return None
+                    for found_step in get_initial_step_iris_to_validate(next_step_iri):
+                        if found_step not in found_steps:
+                            found_steps.append(found_step)
+            return found_steps
 
-        initial_step_iri_to_validate = get_initial_step_iri_to_validate(workflow_model.initial_step_iri)
+        initial_step_iris_to_validate = get_initial_step_iris_to_validate(workflow_model.initial_step_iri)
 
-    if initial_step_iri_to_validate is not None:
+    if initial_step_iris_to_validate:
         # List of (current_step_iri, active_paths_for_this_branch as a dict of Entity IRI -> list[(ValidationJob, is_active)]
-        visitor_stack: list[tuple[URIRef, dict[URIRef, tuple[list[ValidationJob], bool]]]] = [(initial_step_iri_to_validate, dict())]
+        visitor_stack: list[tuple[URIRef, dict[URIRef, tuple[list[ValidationJob], bool]]]] = [(initial_step_iri_to_validate, dict())
+                                                                                              for initial_step_iri_to_validate in initial_step_iris_to_validate]
 
         # Completed unique paths, prevents duplicates from overlapping traversals
         seen_paths: dict[URIRef, set[tuple[ValidationJob, ...]]] = dict()
@@ -518,6 +524,11 @@ async def is_workflow_instance_valid(workflow_model: WorkflowModel,
 
     The validation is split into individual jobs run in a process pool
     """
+    # Control flow operators are rewritten away before anything else happens, so that the rest of
+    # the validation only ever sees plain sequences of steps. This works on copies, so the model and
+    # the instance the caller passed in stay as they were
+    workflow_model, workflow_instance = unroll_repetitions(workflow_model, workflow_instance)
+
     validation_jobs = await generate_SHACL_shapes_for_workflow(workflow_model, workflow_instance)
     with ProcessPoolExecutor() as executor:
         # Get

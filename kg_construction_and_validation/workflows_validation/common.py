@@ -71,7 +71,27 @@ class BaseWorkflowElement:
         elif isinstance(attr, dict) and isinstance(v, dict):
             attr.update(v)
         else:
-            setattr(self, k, v)
+            setattr(self, k, coerce_to_type_of(attr, v))
+
+
+def coerce_to_type_of(current_value, new_value):
+    """
+    Values read from the KG always arrive as strings. Numeric and boolean fields would silently end
+    up holding a string, so the value is converted into the type the field currently holds
+
+    Note that `bool` has to be checked before `int`, because a bool is an int in Python
+    """
+    if not isinstance(new_value, str):
+        return new_value
+
+    if isinstance(current_value, bool):
+        return new_value.strip().lower() in ("true", "1")
+    elif isinstance(current_value, int):
+        return int(new_value)
+    elif isinstance(current_value, float):
+        return float(new_value)
+
+    return new_value
 
 
 base_workflow_element_iri_to_config_key = {

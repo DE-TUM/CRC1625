@@ -24,5 +24,12 @@ WHERE {
       <{workflow_model_iri}> crc:substep/crc:nextStep*/crc:hasTemplate ?s.
       ?s ?p ?o.
     }
+
+    # Handover workflow step repetitions
+    UNION
+    {
+      <{workflow_model_iri}> crc:substep/crc:nextStep*/crc:hasRepetition ?s.
+      ?s ?p ?o.
+    }
   }
 }

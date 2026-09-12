@@ -13,6 +13,7 @@ from handover_workflows_validation_webui.workflow_instance_ui.workflow_instance_
     create_workflow_instance_step_controls
 from workflows_validation.CRC_1625_workflows_validator.CRC_1625_workflows_validator import CRC1625WorkflowModelStep, get_creator_user_id, dw_prefix
 from workflows_validation.extra_functions import read_workflow_model, get_workflow_instances_assigned_to_model
+from workflows_validation.rewriting import RepetitionError, get_original_step, get_step_display_name
 from workflows_validation.workflows_validator import WorkflowModel, WorkflowInstance, is_workflow_instance_valid, generate_SHACL_shapes_for_workflow, \
     generate_validation_paths, ValidationJob
 
@@ -183,33 +184,56 @@ async def run_validation(workflow_instance_page_state: WorkflowInstancePageState
     # Remove the previous node colors
     workflow_instance_page_state.graph_component.clear_validation_results()
 
-    validation_results = await is_workflow_instance_valid(app.storage.tab['current_workflow_model'],
-                                                          app.storage.tab['current_workflow_instance'],
-                                                          return_individual_results=True)
+    workflow_model = app.storage.tab['current_workflow_model']
+
+    try:
+        validation_results = await is_workflow_instance_valid(workflow_model,
+                                                              app.storage.tab['current_workflow_instance'],
+                                                              return_individual_results=True)
+    except RepetitionError as error:
+        ui.notify(str(error), type='negative', multi_line=True, close_button=True)
+        return
 
     # TODOs:
     #  - Show prettified ML / Sample names
     #  - Make the table scrollable
 
     # Update the nodes in the Cytoscape view
-    colored_steps = set()
+    #
+    # A repeated step is validated once per repetition, but the graph only shows the step the user
+    # drew. The results of all its repetitions are therefore merged into the worst one
+    status_severity = {'invalid': 0, 'missing_data': 1, 'valid': 2}
+    worst_status_by_step_name: dict[str, tuple[str, str]] = {}
+
     for entity_iri, validation_paths in validation_results.items():
         for validation_path in validation_paths:
             for _, validation_results_for_step in validation_path.items():
                 for validation_result in validation_results_for_step:
-                    step_name = validation_result.validation_job.paired_step.workflow_model_step.name
-                    if validation_result.conforms:
-                        workflow_instance_page_state.graph_component.set_node_as_valid(step_name, "This step is valid")
-                    elif validation_result.is_missing_data:
-                        workflow_instance_page_state.graph_component.set_node_as_missing(step_name,"There is missing data for MLs / Samples assigned to this step")
-                    else:
-                        workflow_instance_page_state.graph_component.set_node_as_invalid(step_name, validation_result.pyshacl_output)
+                    step = validation_result.validation_job.paired_step.workflow_model_step
+                    step_name = get_original_step(step, workflow_model).name
 
-                    colored_steps.add(step_name)
+                    if validation_result.conforms:
+                        status, message = 'valid', "This step is valid"
+                    elif validation_result.is_missing_data:
+                        status, message = 'missing_data', "There is missing data for MLs / Samples assigned to this step"
+                    else:
+                        status, message = 'invalid', validation_result.pyshacl_output
+
+                    previous_status = worst_status_by_step_name.get(step_name)
+                    if previous_status is None or status_severity[status] < status_severity[previous_status[0]]:
+                        worst_status_by_step_name[step_name] = (status, message)
+
+    for step_name, (status, message) in worst_status_by_step_name.items():
+        if status == 'valid':
+            workflow_instance_page_state.graph_component.set_node_as_valid(step_name, message)
+        elif status == 'missing_data':
+            workflow_instance_page_state.graph_component.set_node_as_missing(step_name, message)
+        else:
+            workflow_instance_page_state.graph_component.set_node_as_invalid(step_name, message)
 
     # All remaining workflow model steps did not have any object assigned to them
-    for step in app.storage.tab['current_workflow_model'].workflow_model_steps.values():
-        if step.name not in colored_steps:
+    for step in workflow_model.workflow_model_steps.values():
+        if step.name not in worst_status_by_step_name:
             workflow_instance_page_state.graph_component.set_node_as_not_checked(step.name, "This step was not assigned to any ML/Sample")
 
     # Show the individual validation paths at the top
@@ -221,8 +245,10 @@ async def run_validation(workflow_instance_page_state: WorkflowInstancePageState
                 for validation_result in validation_results_for_step:
                     trace_message = f'\nTarget node: {validation_result.validation_job.target_node}' if not validation_result.is_missing_data else ''
 
+                    # Unlike the graph, the trace shows every repetition on its own, so that the
+                    # user can see which one of them failed
                     steps_data.append({
-                        'name': str(validation_result.validation_job.paired_step.workflow_model_step.name),
+                        'name': get_step_display_name(validation_result.validation_job.paired_step.workflow_model_step, workflow_model),
                         'status': 'valid' if validation_result.conforms else ('missing_data' if validation_result.is_missing_data else 'invalid'),
                         'tooltip': f'This step is valid{trace_message}' if validation_result.conforms else (f'This step could not be matched to a handover group{trace_message}' if validation_result.is_missing_data else f'{validation_result.pyshacl_output}{trace_message}'),
                     })

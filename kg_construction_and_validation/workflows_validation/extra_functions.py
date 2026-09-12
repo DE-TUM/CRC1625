@@ -6,13 +6,15 @@ from rfc3987 import match
 from workflows_validation.common import dw_prefix, prefixes
 from workflows_validation.workflow_instance import WorkflowInstance, workflow_instance_iri_to_config_key, StepAssignment, \
     step_assignment_iri_to_config_key
-from workflows_validation.workflow_model import WorkflowModel, workflow_model_iri_to_config_key, WorkflowModelStep, workflow_model_step_iri_to_config_key
+from workflows_validation.workflow_model import WorkflowModel, workflow_model_iri_to_config_key, WorkflowModelStep, workflow_model_step_iri_to_config_key, \
+    Repetition, workflow_model_step_repetition_iri_to_config_key
 
 module_dir = os.path.dirname(__file__)
 
 workflow_model_details_query = prefixes + open(os.path.join(module_dir, 'queries/workflow_model_details.sparql'), 'r').read()
 workflow_model_step_details_query = prefixes + open(os.path.join(module_dir, 'queries/workflow_model_step_details.sparql'), 'r').read()
 workflow_model_step_templates_query = prefixes + open(os.path.join(module_dir, 'queries/workflow_model_step_templates.sparql'), 'r').read()
+workflow_model_step_repetition_query = prefixes + open(os.path.join(module_dir, 'queries/workflow_model_step_repetition.sparql'), 'r').read()
 
 workflow_instance_details_query = prefixes + open(os.path.join(module_dir, 'queries/workflow_instance_details.sparql'), 'r').read()
 workflow_instance_step_details_query = prefixes + open(os.path.join(module_dir, 'queries/workflow_instance_step_details.sparql'), 'r').read()
@@ -154,7 +156,9 @@ async def _read_workflow_model_step_details(workflow_model: WorkflowModel,
             workflow_model_steps[workflow_model_step_iri].iri = workflow_model_step_iri
         workflow_model_step = workflow_model_steps[workflow_model_step_iri]
 
-        if p != str(dw_prefix.hasTemplate):  # We query the templates separately
+        # We query the templates and the repetition separately, because both of them live in their
+        # own node and this query only reads the triples of the step itself
+        if p not in (str(dw_prefix.hasTemplate), str(dw_prefix.hasRepetition)):
             if p in workflow_model_step_iri_to_config_key:
                 config_key = workflow_model_step_iri_to_config_key.get(p)
                 workflow_model_step.set_option(config_key, get_iri_or_string(o))
@@ -176,6 +180,23 @@ async def _read_workflow_model_step_details(workflow_model: WorkflowModel,
         for k, v in workflow_model_step.step_templates.items():
             if len(v) == 1:
                 workflow_model_step.step_templates[k] = v[0]
+
+    # Fetch the repetition bounds of each step, if it has any
+    for workflow_model_step in workflow_model.workflow_model_steps.values():
+        result = await query_fn(workflow_model_step_repetition_query.replace("{entity_iri}", workflow_model_step.iri), *args, **kwargs)
+        for binding in result["results"]["bindings"]:
+            if workflow_model_step.repetition is None:
+                workflow_model_step.repetition = Repetition()
+                workflow_model_step.repetition.iri = URIRef(binding["repetition"]["value"])
+
+            p = binding["p"]["value"]
+            o = binding["o"]["value"]
+
+            if p in workflow_model_step_repetition_iri_to_config_key:
+                config_key = workflow_model_step_repetition_iri_to_config_key.get(p)
+                workflow_model_step.repetition.set_option(config_key, o)
+            else:  # Add it to provenance records
+                workflow_model_step.repetition.set_option("provenance_records", (p, get_iri_or_literal(o)))
 
     return workflow_model
 

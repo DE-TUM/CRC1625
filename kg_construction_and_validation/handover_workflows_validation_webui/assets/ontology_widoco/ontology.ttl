@@ -162,6 +162,14 @@ The elements themselves are CheBI entities that can be individually accessed for
                                                        rdfs:label "Has assignment" .
 
 
+###  https://crc1625.mdi.ruhr-uni-bochum.de/hasRepetition
+<https://crc1625.mdi.ruhr-uni-bochum.de/hasRepetition> rdf:type owl:ObjectProperty ;
+                                                       rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep> ;
+                                                       rdfs:range <https://crc1625.mdi.ruhr-uni-bochum.de/Repetition> ;
+                                                       rdfs:comment "Indicates that the WorkflowModelStep may be validated several times in a row, within the bounds given by the target Repetition. A step without this property is validated exactly once." ;
+                                                       rdfs:label "Has repetition" .
+
+
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/hasTemplate
 <https://crc1625.mdi.ruhr-uni-bochum.de/hasTemplate> rdf:type owl:ObjectProperty ;
                                                      rdfs:subPropertyOf <https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo> ;
@@ -314,8 +322,34 @@ More specifically, in a handover workflow, this is employed by Handover Groups t
                                                     rdfs:range xsd:integer .
 
 
+###  https://crc1625.mdi.ruhr-uni-bochum.de/maxRepetitions
+<https://crc1625.mdi.ruhr-uni-bochum.de/maxRepetitions> rdf:type owl:DatatypeProperty ;
+                                                        rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/Repetition> ;
+                                                        rdfs:range xsd:nonNegativeInteger ;
+                                                        rdfs:comment "The highest number of repetitions a WorkflowModelInstance may ask for on the repeatable step. An unbounded number of repetitions is not supported." ;
+                                                        rdfs:label "Maximum repetitions" .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/minRepetitions
+<https://crc1625.mdi.ruhr-uni-bochum.de/minRepetitions> rdf:type owl:DatatypeProperty ;
+                                                        rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/Repetition> ;
+                                                        rdfs:range xsd:nonNegativeInteger ;
+                                                        rdfs:comment "The lowest number of repetitions a WorkflowModelInstance may ask for on the repeatable step. A value of 0 allows an instance to skip the step." ;
+                                                        rdfs:label "Minimum repetitions" .
+
+
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/percentage
 <https://crc1625.mdi.ruhr-uni-bochum.de/percentage> rdf:type owl:DatatypeProperty .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/repetitionCount
+<https://crc1625.mdi.ruhr-uni-bochum.de/repetitionCount> rdf:type owl:DatatypeProperty ;
+                                                         rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStepAssignment> ;
+                                                         rdfs:range xsd:nonNegativeInteger ;
+                                                         rdfs:comment """How often the assigned WorkflowModelStep is validated in a row for this WorkflowModelInstance. A value of 0 skips the step.
+
+Any value other than 1 requires the WorkflowModelStep to carry a Repetition, and has to lie within its bounds. The value applies to every entity assigned to the step.""" ;
+                                                         rdfs:label "Repetition count" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/resistance
@@ -590,6 +624,16 @@ An instance of this entity will contain a three-layer hierarchy of consecutive H
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/Publication
 <https://crc1625.mdi.ruhr-uni-bochum.de/Publication> rdf:type owl:Class ;
                                                      rdfs:subClassOf <https://w3id.org/pmd/co/Document> .
+
+
+###  https://crc1625.mdi.ruhr-uni-bochum.de/Repetition
+<https://crc1625.mdi.ruhr-uni-bochum.de/Repetition> rdf:type owl:Class ;
+                                                    rdfs:comment """Bounds for how often the WorkflowModelStep that points at this entity through hasRepetition may be validated in a row.
+
+The bounds belong to the workflow model. How often the step actually repeats is decided per workflow instance, through the repetitionCount of the WorkflowModelStepAssignment that refers to the step. One workflow model can therefore serve several instances that repeat the same step a different number of times.
+
+The repetition is resolved before a validation run by cloning the step as often as the instance asks for, so the validation itself only ever sees a sequence of steps.""" ;
+                                                    rdfs:label "Repetition" .
 
 
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/ReportProcess
