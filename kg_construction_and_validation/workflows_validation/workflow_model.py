@@ -1,4 +1,5 @@
 import os
+from collections.abc import Iterable
 from copy import deepcopy
 from dataclasses import dataclass, field
 
@@ -32,6 +33,7 @@ workflow_model_step_config_key_to_iri = {v: k for k, v in workflow_model_step_ir
 workflow_model_step_repetition_iri_to_config_key = {
     str(dw_prefix.minRepetitions): "min_repetitions",
     str(dw_prefix.maxRepetitions): "max_repetitions",
+    str(dw_prefix.repeatsUntil): "repeats_until",
 }
 workflow_model_step_repetition_config_key_to_iri = {v: k for k, v in workflow_model_step_repetition_iri_to_config_key.items()}
 
@@ -69,6 +71,15 @@ class Repetition(BaseWorkflowElement):
     """
     max_repetitions: int = 1
 
+    """
+    Last step of the repeated sequence. Everything from the step this repetition hangs on up to
+    this one is repeated together
+
+    `None` repeats only the step this repetition hangs on. The sequence has to be linear, because
+    it needs exactly one step to continue from after the last repetition
+    """
+    repeats_until: URIRef | None = None
+
 
 @dataclass
 class WorkflowModelStep(BaseWorkflowElement):
@@ -91,14 +102,16 @@ class WorkflowModelStep(BaseWorkflowElement):
     repetition: Repetition | None = None
 
     """
-    Step this one was cloned from while resolving a repetition, and which of its occurrences this
-    clone is. The first occurrence is the original step itself, with occurrence 0
+    Step this one was cloned from while resolving a repetition, and which occurrence of it this
+    step is. There is one number per repetition the step sits in, outermost first, so a step in a
+    repeated sequence inside another repeated sequence carries two of them. An empty list means the
+    step was not part of any repetition
 
     Both fields are filled in memory before a validation run and are never stored in the KG. They
     exist so that a validation result can be traced back to the step the user actually wrote
     """
     original_step_iri: URIRef | None = None
-    occurrence: int = 0
+    occurrences: list[int] = field(default_factory=list)
 
     """
     Key->value dict to replace in the step's SHACL shape, if any. The values can be either a list
@@ -115,6 +128,25 @@ class WorkflowModelStep(BaseWorkflowElement):
     target node from the assigned entities to this step.
     """
     SHACL_shape: str = ""
+
+
+def remap_step_iris(workflow_model_steps: Iterable[WorkflowModelStep],
+                    step_iri_mapping: dict[URIRef, URIRef]) -> None:
+    """
+    Replaces the IRIs of the given steps according to the mapping, everywhere a step IRI is
+    referenced. Steps and references that the mapping does not cover keep the IRI they have
+
+    A step IRI is referenced in three places, and forgetting any of them leaves a workflow model
+    that still points at the steps it was built from
+    """
+    for workflow_model_step in workflow_model_steps:
+        workflow_model_step.iri = step_iri_mapping.get(workflow_model_step.iri, workflow_model_step.iri)
+        workflow_model_step.next_steps = [step_iri_mapping.get(next_step_iri, next_step_iri)
+                                          for next_step_iri in workflow_model_step.next_steps]
+
+        if workflow_model_step.repetition is not None and workflow_model_step.repetition.repeats_until:
+            workflow_model_step.repetition.repeats_until = step_iri_mapping.get(workflow_model_step.repetition.repeats_until,
+                                                                                workflow_model_step.repetition.repeats_until)
 
 
 @dataclass
@@ -143,8 +175,21 @@ class WorkflowModel(BaseWorkflowElement):
         workflow_model_copy.create_new_iri()
         workflow_model_copy.name = "Copy of " + self.name
 
+        # Giving the steps new IRIs is not enough. Everything that refers to a step has to follow,
+        # or the copy keeps pointing at the steps of the model it was copied from
+        step_iri_mapping = {step_iri: dw_prefix[generate_unique_identifier()]
+                            for step_iri in workflow_model_copy.workflow_model_steps}
+        remap_step_iris(workflow_model_copy.workflow_model_steps.values(), step_iri_mapping)
+
+        workflow_model_copy.initial_step_iri = step_iri_mapping.get(workflow_model_copy.initial_step_iri,
+                                                                    workflow_model_copy.initial_step_iri)
+        workflow_model_copy.workflow_model_steps = {workflow_model_step.iri: workflow_model_step
+                                                    for workflow_model_step in workflow_model_copy.workflow_model_steps.values()}
+
+        # A repetition is part of the step it hangs on, so the copy needs its own
         for workflow_model_step in workflow_model_copy.workflow_model_steps.values():
-            workflow_model_step.create_new_iri()
+            if workflow_model_step.repetition is not None:
+                workflow_model_step.repetition.create_new_iri()
 
         return workflow_model_copy
 
@@ -198,6 +243,12 @@ class WorkflowModel(BaseWorkflowElement):
                 g.add((step.repetition.iri,
                        URIRef(workflow_model_step_repetition_config_key_to_iri["max_repetitions"]),
                        Literal(step.repetition.max_repetitions, datatype=XSD.integer)))
+
+                # Absent when only the step the repetition hangs on is repeated
+                if step.repetition.repeats_until:
+                    g.add((step.repetition.iri,
+                           URIRef(workflow_model_step_repetition_config_key_to_iri["repeats_until"]),
+                           step.repetition.repeats_until))
 
                 # User-defined metadata
                 for (p, objs) in step.repetition.provenance_records.items():

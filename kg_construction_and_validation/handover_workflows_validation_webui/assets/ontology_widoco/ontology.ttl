@@ -170,6 +170,16 @@ The elements themselves are CheBI entities that can be individually accessed for
                                                        rdfs:label "Has repetition" .
 
 
+###  https://crc1625.mdi.ruhr-uni-bochum.de/repeatsUntil
+<https://crc1625.mdi.ruhr-uni-bochum.de/repeatsUntil> rdf:type owl:ObjectProperty ;
+                                                      rdfs:domain <https://crc1625.mdi.ruhr-uni-bochum.de/Repetition> ;
+                                                      rdfs:range <https://crc1625.mdi.ruhr-uni-bochum.de/WorkflowModelStep> ;
+                                                      rdfs:comment """Last WorkflowModelStep of the repeated sequence. Everything from the step the Repetition is attached to up to this one is repeated together.
+
+If this property is absent, only the step the Repetition is attached to is repeated. The sequence has to be linear, because the workflow continues from a single step after the last repetition. Only its last step may have several successors.""" ;
+                                                      rdfs:label "Repeats until" .
+
+
 ###  https://crc1625.mdi.ruhr-uni-bochum.de/hasTemplate
 <https://crc1625.mdi.ruhr-uni-bochum.de/hasTemplate> rdf:type owl:ObjectProperty ;
                                                      rdfs:subPropertyOf <https://crc1625.mdi.ruhr-uni-bochum.de/assignedTo> ;

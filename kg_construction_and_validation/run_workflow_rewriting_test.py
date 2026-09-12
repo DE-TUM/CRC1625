@@ -10,7 +10,7 @@ import sys
 from rdflib import URIRef
 
 from workflows_validation.common import dw_prefix
-from workflows_validation.rewriting import RepetitionError, check_repetitions, get_step_display_name, unroll_repetitions
+from workflows_validation.rewriting import RepetitionError, get_step_display_name, unroll_repetitions
 from workflows_validation.workflow_instance import StepAssignment, WorkflowInstance
 from workflows_validation.workflow_model import Repetition, WorkflowModel, WorkflowModelStep
 
@@ -62,13 +62,19 @@ def set_repetition(workflow_model: WorkflowModel,
                    step_name: str,
                    minimum: int,
                    maximum: int,
-                   repetition_count: int) -> None:
+                   repetition_count: int,
+                   until_step_name: str | None = None) -> None:
     """
     Marks the named step as repeatable in the model, and sets how often the instance repeats it
+
+    `until_step_name` extends the repetition to a whole sequence ending at that step. Without it,
+    only the named step is repeated
     """
     step_iri = dw_prefix[step_name]
-    workflow_model.workflow_model_steps[step_iri].repetition = Repetition(min_repetitions=minimum,
-                                                                          max_repetitions=maximum)
+    workflow_model.workflow_model_steps[step_iri].repetition = Repetition(
+        min_repetitions=minimum,
+        max_repetitions=maximum,
+        repeats_until=dw_prefix[until_step_name] if until_step_name else None)
     workflow_instance.step_assignments[step_iri].repetition_count = repetition_count
 
 
@@ -92,8 +98,12 @@ def get_step_names_in_order(workflow_model: WorkflowModel) -> list[str]:
 
 
 def expect_repetition_error(description: str, workflow_model: WorkflowModel, workflow_instance: WorkflowInstance):
+    """
+    The whole rewriting is run, not just one of the checks, so that the test also covers the case
+    where a problem is caught somewhere other than where it is expected
+    """
     try:
-        check_repetitions(workflow_model, workflow_instance)
+        unroll_repetitions(workflow_model, workflow_instance)
     except RepetitionError as error:
         logging.info(f"Rejected as expected ({description}): {error}")
         return
@@ -117,7 +127,7 @@ def test_a_repeated_step_is_cloned():
 
     rewritten_model, rewritten_instance = unroll_repetitions(workflow_model, workflow_instance)
 
-    assert get_step_names_in_order(rewritten_model) == ["a", "b", "b#rep1", "b#rep2", "c"]
+    assert get_step_names_in_order(rewritten_model) == ["a", "b", "b_rep1", "b_rep2", "c"]
 
     # Every clone needs an assignment of its own, or the validation would skip it
     for step_iri in rewritten_model.workflow_model_steps:
@@ -127,7 +137,7 @@ def test_a_repeated_step_is_cloned():
     # All three occurrences point back at the step the user wrote
     occurrences = [step for step in rewritten_model.workflow_model_steps.values()
                    if step.original_step_iri == dw_prefix["b"]]
-    assert sorted(step.occurrence for step in occurrences) == [0, 1, 2]
+    assert sorted(step.occurrences for step in occurrences) == [[0], [1], [2]]
 
     # The original step keeps its IRI, so a report about it needs no translation
     assert dw_prefix["b"] in rewritten_model.workflow_model_steps
@@ -140,7 +150,7 @@ def test_the_repeated_step_can_be_the_last_one():
 
     rewritten_model, _ = unroll_repetitions(workflow_model, workflow_instance)
 
-    assert get_step_names_in_order(rewritten_model) == ["a", "b", "b#rep1"]
+    assert get_step_names_in_order(rewritten_model) == ["a", "b", "b_rep1"]
     logging.info("Repetition of the last step passed")
 
 
@@ -151,7 +161,7 @@ def test_several_steps_can_be_repeated():
 
     rewritten_model, _ = unroll_repetitions(workflow_model, workflow_instance)
 
-    assert get_step_names_in_order(rewritten_model) == ["a", "a#rep1", "b", "c", "c#rep1", "c#rep2"]
+    assert get_step_names_in_order(rewritten_model) == ["a", "a_rep1", "b", "c", "c_rep1", "c_rep2"]
     logging.info("Several repeated steps passed")
 
 
@@ -260,7 +270,7 @@ def test_clones_get_a_readable_name_for_reports():
     original = rewritten_model.workflow_model_steps[dw_prefix["a"]]
     assert get_step_display_name(original, workflow_model) == "Characterization (repetition 1)"
 
-    clone = rewritten_model.workflow_model_steps[URIRef(f"{dw_prefix['a']}#rep1")]
+    clone = rewritten_model.workflow_model_steps[URIRef(f"{dw_prefix['a']}_rep1")]
     assert get_step_display_name(clone, workflow_model) == "Characterization (repetition 2)"
 
     # A step that was never repeatable keeps its plain name
@@ -301,6 +311,165 @@ def test_wrong_repetitions_are_rejected():
     logging.info("Rejection tests passed")
 
 
+def test_a_repeated_sequence_is_copied_as_a_whole():
+    workflow_model, workflow_instance = build_workflow({"a": ["b"], "b": ["c"], "c": ["d"], "d": []}, "a")
+    set_repetition(workflow_model, workflow_instance, "b", minimum=1, maximum=4, repetition_count=3, until_step_name="c")
+
+    rewritten_model, rewritten_instance = unroll_repetitions(workflow_model, workflow_instance)
+
+    assert get_step_names_in_order(rewritten_model) == ["a", "b", "c", "b_rep1", "c_rep1", "b_rep2", "c_rep2", "d"]
+
+    for step_iri in rewritten_model.workflow_model_steps:
+        assert step_iri in rewritten_instance.step_assignments
+    logging.info("Repeated sequence test passed")
+
+
+def test_a_repeated_sequence_can_end_the_model():
+    workflow_model, workflow_instance = build_workflow({"a": ["b"], "b": ["c"], "c": []}, "a")
+    set_repetition(workflow_model, workflow_instance, "b", minimum=1, maximum=3, repetition_count=2, until_step_name="c")
+
+    rewritten_model, _ = unroll_repetitions(workflow_model, workflow_instance)
+
+    assert get_step_names_in_order(rewritten_model) == ["a", "b", "c", "b_rep1", "c_rep1"]
+    logging.info("Repeated sequence at the end of the model passed")
+
+
+def test_a_sequence_inside_a_sequence_runs_in_every_outer_occurrence():
+    workflow_model, workflow_instance = build_workflow({"a": ["b"], "b": ["c"], "c": ["d"], "d": []}, "a")
+    set_repetition(workflow_model, workflow_instance, "b", minimum=1, maximum=3, repetition_count=2, until_step_name="c")
+    set_repetition(workflow_model, workflow_instance, "c", minimum=1, maximum=3, repetition_count=2)
+
+    rewritten_model, _ = unroll_repetitions(workflow_model, workflow_instance)
+
+    # The inner step runs twice within each of the two outer occurrences. The whole chain of
+    # repetitions goes into a copied name, so the two copies of "c" cannot collide
+    assert get_step_names_in_order(rewritten_model) == ["a",
+                                                        "b", "c", "c_rep0.1",
+                                                        "b_rep1", "c_rep1", "c_rep1.1",
+                                                        "d"]
+    logging.info("Nested sequences test passed")
+
+
+def test_nested_sequences_may_end_at_the_same_step():
+    # This is the case that forces the outer sequence to be written out first. Doing the inner one
+    # first would push its copies past "d", which is where the outer one ends
+    workflow_model, workflow_instance = build_workflow({"a": ["b"], "b": ["c"], "c": ["d"], "d": ["e"], "e": []}, "a")
+    set_repetition(workflow_model, workflow_instance, "b", minimum=1, maximum=3, repetition_count=2, until_step_name="d")
+    set_repetition(workflow_model, workflow_instance, "c", minimum=1, maximum=3, repetition_count=2, until_step_name="d")
+
+    rewritten_model, _ = unroll_repetitions(workflow_model, workflow_instance)
+
+    assert get_step_names_in_order(rewritten_model) == ["a",
+                                                        "b", "c", "d", "c_rep0.1", "d_rep0.1",
+                                                        "b_rep1", "c_rep1", "d_rep1", "c_rep1.1", "d_rep1.1",
+                                                        "e"]
+    logging.info("Nested sequences with a shared last step passed")
+
+
+def test_occurrences_are_numbered_from_the_outside_in():
+    workflow_model, workflow_instance = build_workflow({"a": ["b"], "b": ["c"], "c": []}, "a")
+    workflow_model.workflow_model_steps[dw_prefix["b"]].name = "Synthesis"
+    workflow_model.workflow_model_steps[dw_prefix["c"]].name = "Characterization"
+    set_repetition(workflow_model, workflow_instance, "b", minimum=1, maximum=3, repetition_count=2, until_step_name="c")
+    set_repetition(workflow_model, workflow_instance, "c", minimum=1, maximum=3, repetition_count=2)
+
+    rewritten_model, _ = unroll_repetitions(workflow_model, workflow_instance)
+
+    display_names = [get_step_display_name(rewritten_model.workflow_model_steps[step_iri], workflow_model)
+                     for step_iri in [dw_prefix["a"],
+                                      dw_prefix["b"],
+                                      dw_prefix["c"],
+                                      URIRef(f"{dw_prefix['c']}_rep0.1"),
+                                      URIRef(f"{dw_prefix['b']}_rep1"),
+                                      URIRef(f"{dw_prefix['c']}_rep1"),
+                                      URIRef(f"{dw_prefix['c']}_rep1.1")]]
+
+    # A step that sits in two repeated sequences gets one number per sequence, outermost first
+    assert display_names == ["a",
+                             "Synthesis (repetition 1)",
+                             "Characterization (repetition 1.1)",
+                             "Characterization (repetition 1.2)",
+                             "Synthesis (repetition 2)",
+                             "Characterization (repetition 2.1)",
+                             "Characterization (repetition 2.2)"]
+    logging.info("Nested occurrence numbering passed")
+
+
+def test_a_skipped_sequence_is_removed():
+    workflow_model, workflow_instance = build_workflow({"a": ["b"], "b": ["c"], "c": ["d"], "d": []}, "a")
+    set_repetition(workflow_model, workflow_instance, "b", minimum=0, maximum=3, repetition_count=0, until_step_name="c")
+
+    rewritten_model, rewritten_instance = unroll_repetitions(workflow_model, workflow_instance)
+
+    assert get_step_names_in_order(rewritten_model) == ["a", "d"]
+    for step_name in ["b", "c"]:
+        assert dw_prefix[step_name] not in rewritten_model.workflow_model_steps
+        assert dw_prefix[step_name] not in rewritten_instance.step_assignments
+    logging.info("Skipped sequence test passed")
+
+
+def test_a_skipped_sequence_at_the_start_keeps_only_the_entry_point():
+    workflow_model, workflow_instance = build_workflow({"a": ["b"], "b": ["c"], "c": []}, "a")
+    set_repetition(workflow_model, workflow_instance, "a", minimum=0, maximum=3, repetition_count=0, until_step_name="b")
+
+    rewritten_model, rewritten_instance = unroll_repetitions(workflow_model, workflow_instance)
+
+    # The model names exactly one entry point, so the first step stays and is emptied instead
+    assert rewritten_model.initial_step_iri == dw_prefix["a"]
+    assert get_step_names_in_order(rewritten_model) == ["a", "c"]
+    assert dw_prefix["b"] not in rewritten_model.workflow_model_steps
+    assert rewritten_instance.step_assignments[dw_prefix["a"]].assigned_entities == []
+    assert rewritten_instance.step_assignments[dw_prefix["c"]].assigned_entities == [entity_iri]
+    logging.info("Skipped sequence at the entry point passed")
+
+
+def test_broken_sequences_are_rejected():
+    workflow_model, workflow_instance = build_workflow({"a": ["b"], "b": ["c", "d"], "c": ["e"], "d": [], "e": []}, "a")
+    set_repetition(workflow_model, workflow_instance, "b", minimum=1, maximum=3, repetition_count=2, until_step_name="e")
+    expect_repetition_error("a step inside the sequence branches", workflow_model, workflow_instance)
+
+    workflow_model, workflow_instance = build_workflow({"a": ["b"], "b": []}, "a")
+    set_repetition(workflow_model, workflow_instance, "a", minimum=1, maximum=3, repetition_count=2, until_step_name="b")
+    workflow_model.workflow_model_steps[dw_prefix["a"]].repetition.repeats_until = dw_prefix["not_a_step"]
+    expect_repetition_error("the sequence ends outside the model", workflow_model, workflow_instance)
+
+    # [b, c] and [c, d] share c without either containing the other
+    workflow_model, workflow_instance = build_workflow({"a": ["b"], "b": ["c"], "c": ["d"], "d": []}, "a")
+    set_repetition(workflow_model, workflow_instance, "b", minimum=1, maximum=3, repetition_count=2, until_step_name="c")
+    set_repetition(workflow_model, workflow_instance, "c", minimum=1, maximum=3, repetition_count=2, until_step_name="d")
+    expect_repetition_error("two sequences overlap", workflow_model, workflow_instance)
+
+    logging.info("Broken sequence rejection tests passed")
+
+
+def test_a_copied_workflow_model_is_independent():
+    workflow_model, workflow_instance = build_workflow({"a": ["b"], "b": ["c"], "c": []}, "a")
+    set_repetition(workflow_model, workflow_instance, "a", minimum=1, maximum=3, repetition_count=2, until_step_name="b")
+
+    workflow_model_copy = workflow_model.create_copy()
+
+    original_step_iris = set(workflow_model.workflow_model_steps.keys())
+    copied_step_iris = set(workflow_model_copy.workflow_model_steps.keys())
+
+    # Nothing in the copy may still point at a step of the model it was copied from
+    assert not (original_step_iris & copied_step_iris)
+    assert workflow_model_copy.initial_step_iri in copied_step_iris
+
+    for copied_step in workflow_model_copy.workflow_model_steps.values():
+        assert copied_step.iri in copied_step_iris
+        for next_step_iri in copied_step.next_steps:
+            assert next_step_iri in copied_step_iris
+        if copied_step.repetition is not None:
+            assert copied_step.repetition.repeats_until in copied_step_iris
+
+    copied_repetition = workflow_model_copy.workflow_model_steps[workflow_model_copy.initial_step_iri].repetition
+    assert copied_repetition.iri != workflow_model.workflow_model_steps[dw_prefix["a"]].repetition.iri
+
+    # The copy has to stay readable, which it is not if a reference was missed
+    assert get_step_names_in_order(workflow_model_copy) == ["a", "b", "c"]
+    logging.info("Independent copy test passed")
+
+
 test_a_step_without_a_repetition_is_left_alone()
 test_a_repeated_step_is_cloned()
 test_the_repeated_step_can_be_the_last_one()
@@ -314,5 +483,14 @@ test_a_repetition_of_a_clone_is_never_resolved_again()
 test_the_originals_are_left_untouched()
 test_clones_get_a_readable_name_for_reports()
 test_wrong_repetitions_are_rejected()
+test_a_repeated_sequence_is_copied_as_a_whole()
+test_a_repeated_sequence_can_end_the_model()
+test_a_sequence_inside_a_sequence_runs_in_every_outer_occurrence()
+test_nested_sequences_may_end_at_the_same_step()
+test_occurrences_are_numbered_from_the_outside_in()
+test_a_skipped_sequence_is_removed()
+test_a_skipped_sequence_at_the_start_keeps_only_the_entry_point()
+test_broken_sequences_are_rejected()
+test_a_copied_workflow_model_is_independent()
 
 logging.info("All rewriting tests passed")

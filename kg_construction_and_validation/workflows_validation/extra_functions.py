@@ -194,7 +194,9 @@ async def _read_workflow_model_step_details(workflow_model: WorkflowModel,
 
             if p in workflow_model_step_repetition_iri_to_config_key:
                 config_key = workflow_model_step_repetition_iri_to_config_key.get(p)
-                workflow_model_step.repetition.set_option(config_key, o)
+                # The bounds are numbers and the end of the sequence is a step IRI, so both forms
+                # have to be told apart here. set_option converts the numbers afterwards
+                workflow_model_step.repetition.set_option(config_key, get_iri_or_string(o))
             else:  # Add it to provenance records
                 workflow_model_step.repetition.set_option("provenance_records", (p, get_iri_or_literal(o)))
 

@@ -466,7 +466,7 @@ def test_repeated_step_workflows():
             Please check the logging trace above for more information
             """)
 
-        occurrences = sorted(result.validation_job.paired_step.workflow_model_step.occurrence
+        occurrences = sorted(result.validation_job.paired_step.workflow_model_step.occurrences[-1]
                              for result in all_validation_results
                              if result.validation_job.paired_step.workflow_model_step.original_step_iri == repeated_step_iri)
         if occurrences != list(range(repetition_count)):
@@ -571,17 +571,150 @@ def test_invalid_repetition_workflows():
             """)
 
         failed_step = next(iter(failed_steps.values()))
-        if failed_step.original_step_iri != repeated_step_iri or failed_step.occurrence != invalidated_occurrence:
+        if failed_step.original_step_iri != repeated_step_iri or failed_step.occurrences != [invalidated_occurrence]:
             print_validation_results(validation_results)
             raise ValueError(f"""
             The wrong repetition was reported as invalid
             Expected repetition {invalidated_occurrence} of {repeated_step_iri}
-            Got repetition {failed_step.occurrence} of {failed_step.original_step_iri}
+            Got repetition {failed_step.occurrences} of {failed_step.original_step_iri}
             Please check the logging trace above for more information
             """)
 
         logging.info(f"Invalid workflow test of {n_steps} steps, failing in repetition "
                      f"{invalidated_occurrence + 1} of {repetition_count}, passed")
+
+
+def test_repeated_sequence_workflows():
+    """
+    A workflow model whose steps at a random position form a repeated sequence, validated against a
+    data workflow that repeats the matching handover groups just as often
+    """
+    for n_steps, sequence_length, repetition_count in [(5, 2, 2), (5, 3, 2), (10, 2, 3)]:
+        asyncio.run(rdf_datastore_client.clear_triples())
+        asyncio.run(rdf_datastore_client.clear_triples(WORKFLOWS_GRAPH_IRI))
+
+        model_definition = generate_handover_group_definition(n_steps)
+        first_step_idx = random.randrange(n_steps - sequence_length + 1)
+        repeated_sequence = model_definition[first_step_idx:first_step_idx + sequence_length]
+
+        data_definition = list(model_definition)
+        data_definition[first_step_idx:first_step_idx + sequence_length] = [deepcopy(entry)
+                                                                            for _ in range(repetition_count)
+                                                                            for entry in repeated_sequence]
+
+        g, entity_IRI = generate_handover_group_triples(data_definition)
+        workflow_model, workflow_instance = generate_workflow_model_and_instance_for_handover_group_definition(model_definition, entity_IRI)
+
+        ordered_step_iris = get_ordered_step_iris(workflow_model)
+        first_step_iri = ordered_step_iris[first_step_idx]
+        last_step_iri = ordered_step_iris[first_step_idx + sequence_length - 1]
+
+        workflow_model.workflow_model_steps[first_step_iri].repetition = Repetition(min_repetitions=1,
+                                                                                    max_repetitions=repetition_count,
+                                                                                    repeats_until=last_step_iri)
+        workflow_instance.step_assignments[first_step_iri].repetition_count = repetition_count
+
+        validation_results, all_validation_results = upload_and_validate(g, workflow_model, workflow_instance)
+
+        if len(all_validation_results) != len(data_definition):
+            print_validation_results(validation_results)
+            raise ValueError(f"""
+            Incorrect number of validated steps
+            Expected {len(data_definition)}, got {len(all_validation_results)}
+            Please check the logging trace above for more information
+            """)
+
+        # Every step of the sequence has to report one result per repetition
+        for sequence_position in range(sequence_length):
+            repeated_step_iri = ordered_step_iris[first_step_idx + sequence_position]
+            occurrences = sorted(result.validation_job.paired_step.workflow_model_step.occurrences
+                                 for result in all_validation_results
+                                 if result.validation_job.paired_step.workflow_model_step.original_step_iri == repeated_step_iri)
+
+            if occurrences != [[occurrence] for occurrence in range(repetition_count)]:
+                print_validation_results(validation_results)
+                raise ValueError(f"""
+                The repetitions of step {sequence_position} of the sequence were not traced back correctly
+                Expected {[[o] for o in range(repetition_count)]}, got {occurrences}
+                Please check the logging trace above for more information
+                """)
+
+        if all(result.conforms for result in all_validation_results) and \
+                all(not result.is_missing_data for result in all_validation_results):
+            logging.info(f"Valid workflow test of {n_steps} steps with a sequence of {sequence_length} steps "
+                         f"repeated {repetition_count} times passed")
+        else:
+            print_validation_results(validation_results)
+            raise ValueError("The validation was not successful as expected. Please check the logging trace for more information")
+
+
+def test_nested_repetition_workflows():
+    """
+    A repeated step inside a repeated sequence. The inner step runs its own number of times within
+    every run of the sequence around it
+    """
+    n_steps = 5
+    first_step_idx = 1
+    outer_count = 2
+    inner_count = 2
+
+    asyncio.run(rdf_datastore_client.clear_triples())
+    asyncio.run(rdf_datastore_client.clear_triples(WORKFLOWS_GRAPH_IRI))
+
+    model_definition = generate_handover_group_definition(n_steps)
+    one_run_of_the_sequence = [model_definition[first_step_idx]] + [model_definition[first_step_idx + 1]] * inner_count
+
+    data_definition = (list(model_definition[:first_step_idx])
+                       + [deepcopy(entry) for _ in range(outer_count) for entry in one_run_of_the_sequence]
+                       + list(model_definition[first_step_idx + 2:]))
+
+    g, entity_IRI = generate_handover_group_triples(data_definition)
+    workflow_model, workflow_instance = generate_workflow_model_and_instance_for_handover_group_definition(model_definition, entity_IRI)
+
+    ordered_step_iris = get_ordered_step_iris(workflow_model)
+    outer_step_iri = ordered_step_iris[first_step_idx]
+    inner_step_iri = ordered_step_iris[first_step_idx + 1]
+
+    workflow_model.workflow_model_steps[outer_step_iri].repetition = Repetition(min_repetitions=1,
+                                                                                max_repetitions=outer_count,
+                                                                                repeats_until=inner_step_iri)
+    workflow_instance.step_assignments[outer_step_iri].repetition_count = outer_count
+
+    workflow_model.workflow_model_steps[inner_step_iri].repetition = Repetition(min_repetitions=1,
+                                                                                max_repetitions=inner_count)
+    workflow_instance.step_assignments[inner_step_iri].repetition_count = inner_count
+
+    validation_results, all_validation_results = upload_and_validate(g, workflow_model, workflow_instance)
+
+    if len(all_validation_results) != len(data_definition):
+        print_validation_results(validation_results)
+        raise ValueError(f"""
+        Incorrect number of validated steps
+        Expected {len(data_definition)}, got {len(all_validation_results)}
+        Please check the logging trace above for more information
+        """)
+
+    # The inner step carries one number per sequence it sits in, outermost first
+    inner_occurrences = sorted(result.validation_job.paired_step.workflow_model_step.occurrences
+                               for result in all_validation_results
+                               if result.validation_job.paired_step.workflow_model_step.original_step_iri == inner_step_iri)
+    expected_occurrences = [[outer, inner] for outer in range(outer_count) for inner in range(inner_count)]
+
+    if inner_occurrences != expected_occurrences:
+        print_validation_results(validation_results)
+        raise ValueError(f"""
+        The nested repetitions were not traced back correctly
+        Expected {expected_occurrences}, got {inner_occurrences}
+        Please check the logging trace above for more information
+        """)
+
+    if all(result.conforms for result in all_validation_results) and \
+            all(not result.is_missing_data for result in all_validation_results):
+        logging.info(f"Valid workflow test with a step repeated {inner_count} times inside a sequence "
+                     f"repeated {outer_count} times passed")
+    else:
+        print_validation_results(validation_results)
+        raise ValueError("The validation was not successful as expected. Please check the logging trace for more information")
 
 
 def test_repetitions_survive_a_round_trip_through_the_kg():
@@ -596,7 +729,10 @@ def test_repetitions_survive_a_round_trip_through_the_kg():
     workflow_model, workflow_instance = generate_workflow_model_and_instance_for_handover_group_definition(handover_group_definition, entity_IRI)
 
     repeated_step_iri = get_ordered_step_iris(workflow_model)[2]
-    workflow_model.workflow_model_steps[repeated_step_iri].repetition = Repetition(min_repetitions=2, max_repetitions=7)
+    last_step_of_the_sequence_iri = get_ordered_step_iris(workflow_model)[3]
+    workflow_model.workflow_model_steps[repeated_step_iri].repetition = Repetition(min_repetitions=2,
+                                                                                   max_repetitions=7,
+                                                                                   repeats_until=last_step_of_the_sequence_iri)
     workflow_instance.step_assignments[repeated_step_iri].repetition_count = 4
 
     asyncio.run(rdf_datastore_client.launch_update(workflow_model.get_insert_query()))
@@ -612,6 +748,16 @@ def test_repetitions_survive_a_round_trip_through_the_kg():
         The repetition bounds changed when the workflow model was stored
         Expected (2, 7), got ({stored_repetition.min_repetitions}, {stored_repetition.max_repetitions})
         """)
+
+    # The bounds are numbers and the end of the sequence is a step IRI, so the read path has to
+    # tell the two forms apart
+    if stored_repetition.repeats_until != last_step_of_the_sequence_iri:
+        raise ValueError(f"""
+        The end of the repeated sequence changed when the workflow model was stored
+        Expected {last_step_of_the_sequence_iri}, got {stored_repetition.repeats_until}
+        """)
+    if not isinstance(stored_repetition.repeats_until, URIRef):
+        raise ValueError("The end of the repeated sequence was read back as a plain string instead of an IRI")
 
     # Every other step runs exactly once and must not come back with a repetition of its own
     steps_with_an_unexpected_repetition = [step.name for step_iri, step in stored_workflow_model.workflow_model_steps.items()
@@ -658,4 +804,6 @@ test_valid_workflows(break_in_half=True)
 test_repeated_step_workflows()
 test_skipped_step_workflows()
 test_invalid_repetition_workflows()
+test_repeated_sequence_workflows()
+test_nested_repetition_workflows()
 test_repetitions_survive_a_round_trip_through_the_kg()
