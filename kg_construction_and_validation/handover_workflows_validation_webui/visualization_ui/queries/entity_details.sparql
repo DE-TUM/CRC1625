@@ -6,7 +6,7 @@ WHERE {
   FILTER(STR(?entity) = {entityURI_LITERAL})
 
   OPTIONAL {
-    ?value crc:objectName ?value_name .
+    ?value rdf:label ?value_name .
   }
 }
 ORDER BY ?property ?value

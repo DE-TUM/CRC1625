@@ -34,6 +34,8 @@ handover_viz_query = (
     + open(os.path.join(module_dir, 'queries/handover_visualisation.sparql'), 'r').read()
 )
 
+
+# Helper function section
 entity_details_query = (
     prefixes.rstrip()
     + "\n\n"
@@ -162,12 +164,12 @@ def get_kind_from_event_args(args: dict) -> str:
     return "generic"
 
 
-def filter_detail_rows(rows: list[dict], kind: str) -> list[tuple[str, str]]:
+def filter_detail_rows(rows: list[dict], kind: str) -> list[dict]:
     allowed_properties = DETAIL_PROPERTIES_BY_KIND.get(kind)
 
     result = []
 
-    for row in rows:
+    for index, row in enumerate(rows):
         prop_uri = row["property"]["value"]
         prop_name = property_name(prop_uri)
 
@@ -179,10 +181,41 @@ def filter_detail_rows(rows: list[dict], kind: str) -> list[tuple[str, str]]:
             row.get("value_name"),
         )
 
-        result.append((prop_name, value))
+        result.append({"row_id": index,
+                       "property": prop_name, 
+                       "value": value,
+                       "property_uri": prop_uri})
 
     return result
+def truncate_text(value: str, max_length: int = 20) -> str:
+    if not value:
+        return ""
 
+    if len(value) <= max_length:
+        return value
+
+    return value[:max_length].rstrip() + "..."
+
+
+def render_entity_title(entity_label: str, max_length: int = 20):
+    short_label = truncate_text(entity_label, max_length)
+
+    label = ui.label(short_label).classes(
+        "text-lg font-bold w-full cursor-help"
+    ).style(
+        """
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        line-height: 1.25;
+        max-width: 100%;
+        """
+    )
+
+    if entity_label and entity_label != short_label:
+        label.tooltip(entity_label)
+
+    
 
 @ui.page('/visualization_ui')
 @matinf_or_demo_login_required
@@ -238,7 +271,7 @@ async def visualization(object_ID:str):
     
     result = await rdf_datastore_client.launch_query(query)
     results = result["results"]["bindings"]
-    #print(results)
+
 
 
     workflows_page_state.main_content = ui.column().classes('w-full')
@@ -269,9 +302,11 @@ async def visualization(object_ID:str):
             ui.button('Return to the previous page', color='info', on_click=lambda: ui.navigate.to("/")).props('size=m')
             
     #drawer for entity details
-    details_drawer = ui.right_drawer(value=False).classes("p-4")
+    details_drawer = ui.right_drawer(value=False).classes("p-4 bg-white").props("width=400px bordered")
     with details_drawer:
-        ui.label("Entity details").classes("text-xl font-bold")
+        with ui.row().classes("w-full items-center justify-between"):
+            ui.label("Entity details").classes("text-xl font-bold")
+            ui.button(icon="close", on_click=lambda: setattr(details_drawer, "value", False)).props("flat round dense")
         details_content = ui.column().classes("w-full gap-2")
 
     #handler for said drawer on click
@@ -294,7 +329,7 @@ async def visualization(object_ID:str):
         details_content.clear()
 
         with details_content:
-            ui.label(entity_label).classes("text-lg font-bold")
+            render_entity_title(entity_label)
             ui.label(entity_kind).classes("text-sm text-gray-500")
             ui.separator()
             ui.spinner(size="md")
@@ -312,7 +347,7 @@ async def visualization(object_ID:str):
             details_content.clear()
 
             with details_content:
-                ui.label(entity_label).classes("text-lg font-bold")
+                render_entity_title(entity_label)
                 ui.label(entity_kind).classes("text-sm text-gray-500")
                 ui.separator()
                 ui.label("Could not load entity details.").classes("text-negative")
@@ -325,7 +360,7 @@ async def visualization(object_ID:str):
         details_content.clear()
 
         with details_content:
-            ui.label(entity_label).classes("text-lg font-bold")
+            render_entity_title(entity_label)
             ui.label(entity_kind).classes("text-sm text-gray-500")
             ui.separator()
 
@@ -333,10 +368,61 @@ async def visualization(object_ID:str):
                 ui.label("No selected details found for this entity.")
                 return
 
-            for prop, value in detail_rows:
-                with ui.row().classes("w-full items-start gap-2"):
-                    ui.label(prop).classes("font-bold w-40")
-                    ui.label(value).classes("break-all")
+            columns = [
+                {
+                    "name": "property",
+                    "label": "Property",
+                    "field": "property",
+                    "align": "left",
+                    "sortable": True,
+                },
+                {
+                    "name": "value",
+                    "label": "Value",
+                    "field": "value",
+                    "align": "left",
+                    "sortable": False,
+                },
+            ]
+
+            details_table = ui.table(
+                columns=columns,
+                rows=detail_rows,
+                row_key="row_id",
+            ).classes("w-full").props("flat bordered dense wrap-cells")
+
+            details_table.add_slot(
+                "body-cell-property",
+                """
+                <q-td :props="props" style="width: 130px; max-width: 130px; vertical-align: top;">
+                    <span class="text-weight-bold cursor-help">
+                        {{ props.row.property }}
+                        <q-tooltip anchor="top middle" self="bottom middle">
+                            {{ props.row.property_iri }}
+                        </q-tooltip>
+                    </span>
+                </q-td>
+                """
+            )
+
+            details_table.add_slot(
+                "body-cell-value",
+                """
+                <q-td :props="props" style="vertical-align: top; max-width: 320px;">
+                    <div
+                        style="
+                            max-width: 320px;
+                            white-space: pre-wrap;
+                            overflow-wrap: anywhere;
+                            word-break: break-word;
+                            line-height: 1.35;
+                        "
+                    >
+                        {{ props.row.value }}
+                    </div>
+                </q-td>
+                """
+            )
 
 
 
