@@ -273,7 +273,7 @@ def translate_sparql_results_to_generic_edges(
     """
     Universal adapter.
 
-    1. If rows already contain source/target, return them.
+    1. If rows contain direct source/target edge format, return valid direct edges.
     2. If explicit EdgeSpec mapping is provided, use it.
     3. If rows contain level_0/level_1/... variables, convert as path.
     4. Otherwise return empty list.
@@ -281,10 +281,37 @@ def translate_sparql_results_to_generic_edges(
     if not results:
         return []
 
-    first_row = results[0]
+    looks_like_direct_edges = any(
+        any(key in row for key in ["source", "target", "source_kind", "target_kind"])
+        for row in results
+    )
 
-    if "source" in first_row and "target" in first_row:
-        return results
+    if looks_like_direct_edges:
+        valid_rows = []
+
+        for row in results:
+            source = binding_value(row, "source")
+            target = binding_value(row, "target")
+
+            if not source or not target:
+                continue
+
+            if source == target:
+                continue
+
+            valid_rows.append(row)
+
+        skipped = len(results) - len(valid_rows)
+
+        if skipped:
+            print(
+                f"WARNING: skipped {skipped} malformed direct edge rows "
+                f"without source/target."
+            )
+
+        return valid_rows
+
+    first_row = results[0]
 
     if edge_specs:
         return translate_rows_to_generic_edges(results, edge_specs)
@@ -296,7 +323,6 @@ def translate_sparql_results_to_generic_edges(
     print("Available columns:", list(first_row.keys()))
 
     return []
-
 
 def build_cytoscape_graph_from_generic_edges(
     generic_rows: list[dict],

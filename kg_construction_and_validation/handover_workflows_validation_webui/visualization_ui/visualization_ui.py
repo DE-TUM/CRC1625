@@ -8,10 +8,6 @@ from handover_workflows_validation_webui.visualization_ui.sparql_graph_adapter i
     build_cytoscape_graph_from_generic_edges,
 )
 
-from handover_workflows_validation_webui.visualization_ui.graph_specs import (
-    HANDOVER_WORKFLOW_EDGE_SPECS,
-)
-
 import asyncio
 import os
 from copy import copy
@@ -26,22 +22,33 @@ from nicegui.elements.drawer import RightDrawer
 from nicegui.elements.input import Input
 from nicegui.elements.select import Select
 
+# queries and all
 module_dir = os.path.dirname(__file__)
+# prefixes 
 prefixes: str = open(os.path.join(module_dir, '../queries/prefixes.sparql')).read()
+
+# main workflow query
 handover_viz_query = (
     prefixes.rstrip()
     + "\n\n"
     + open(os.path.join(module_dir, 'queries/handover_visualisation.sparql'), 'r').read()
 )
 
-
-# Helper function section
+# entity details query
 entity_details_query = (
     prefixes.rstrip()
     + "\n\n"
     + open(os.path.join(module_dir, 'queries/entity_details.sparql'), 'r').read()
 )
 
+# sample relations query
+sample_relations_query = (
+    prefixes.rstrip()
+    + "\n\n"
+    + open(os.path.join(module_dir, 'queries/sample_relations.sparql'), 'r').read()
+)
+
+# Helper function section
 
 DETAIL_PROPERTIES_BY_KIND = {
     "ho_g": [
@@ -184,10 +191,11 @@ def filter_detail_rows(rows: list[dict], kind: str) -> list[dict]:
         result.append({"row_id": index,
                        "property": prop_name, 
                        "value": value,
-                       "property_uri": prop_uri})
+                       "property_iri": prop_uri})
 
     return result
-def truncate_text(value: str, max_length: int = 20) -> str:
+
+def truncate_text(value: str, max_length: int = 30) -> str:
     if not value:
         return ""
 
@@ -197,7 +205,7 @@ def truncate_text(value: str, max_length: int = 20) -> str:
     return value[:max_length].rstrip() + "..."
 
 
-def render_entity_title(entity_label: str, max_length: int = 20):
+def render_entity_title(entity_label: str, max_length: int = 30):
     short_label = truncate_text(entity_label, max_length)
 
     label = ui.label(short_label).classes(
@@ -215,8 +223,45 @@ def render_entity_title(entity_label: str, max_length: int = 20):
     if entity_label and entity_label != short_label:
         label.tooltip(entity_label)
 
-    
 
+async def get_internal_id_for_entity(entity_uri: str) -> str | None:
+    query = entity_details_query.replace(
+        "{entityURI_LITERAL}",
+        sparql_string_literal(entity_uri),
+    )
+
+    result = await rdf_datastore_client.launch_query(query)
+    rows = result["results"]["bindings"]
+
+    for row in rows:
+        prop_uri = row["property"]["value"]
+        prop_name = property_name(prop_uri)
+
+        if prop_name == "internalID":
+            return row["value"]["value"]
+
+    return None
+
+def make_sample_relation_rows(rows: list[dict]) -> list[dict]:
+    result = []
+
+    for index, row in enumerate(rows):
+        related_sample_iri = row.get("related_sample", {}).get("value", "")
+        related_internal_id = row.get("related_internal_id", {}).get("value", "")
+        related_name = row.get("related_name", {}).get("value") or short_uri(related_sample_iri)
+        relation_label = row.get("relation_label", {}).get("value", "")
+
+        result.append({
+            "row_id": index,
+            "relation": relation_label,
+            "sample_id": str(related_internal_id),
+            "name": related_name,
+            "iri": related_sample_iri,
+        })
+
+    return result
+
+# page implementation section
 @ui.page('/visualization_ui')
 @matinf_or_demo_login_required
 async def visualization_launcher():
@@ -271,6 +316,16 @@ async def visualization(object_ID:str):
     
     result = await rdf_datastore_client.launch_query(query)
     results = result["results"]["bindings"]
+
+    sample_relations_result = await rdf_datastore_client.launch_query(
+    sample_relations_query.replace("{internalID}", object_ID)
+)
+
+    sample_relation_rows = make_sample_relation_rows(
+        sample_relations_result["results"]["bindings"]
+    )
+
+    
 
 
 
@@ -424,16 +479,56 @@ async def visualization(object_ID:str):
                 """
             )
 
+    async def handle_graph_action(event, page_state: WorkflowsPageState = workflows_page_state):
+        args = get_event_args(event)
+
+        action = args.get("action")
+        target_type = args.get("target_type")
+        entity_uri = args.get("id")
+        entity_kind = get_kind_from_event_args(args)
+
+        if action != "open_details_page":
+            ui.notify(f"Unknown graph action: {action}", color="warning")
+            return
+
+        if target_type != "node":
+            ui.notify("This action is only available for nodes.", color="warning")
+            return
+
+        if not entity_uri:
+            ui.notify("No entity URI found.", color="warning")
+            return
+
+        # Sample parent node is artificial: z.B. sample_36557.
+        # It does not have a real CRC URI, but its internalID is the current object_ID.
+        if entity_kind == "sample" or entity_uri == f"sample_{object_ID}":
+            internal_id = object_ID
+        else:
+            if not entity_uri.startswith("https://crc1625.mdi.ruhr-uni-bochum.de/"):
+                ui.notify("Invalid entity URI.", color="negative")
+                return
+
+            try:
+                internal_id = await get_internal_id_for_entity(entity_uri)
+            except Exception as error:
+                ui.notify(f"Could not load internalID: {error}", color="negative")
+                return
+
+        if not internal_id:
+            ui.notify("No crc:internalID found for this entity.", color="warning")
+            return
+
+        target_url = f"https://crc1625.mdi.ruhr-uni-bochum.de/object/id/{quote(str(internal_id), safe='')}"
+
+        ui.navigate.to(target_url, new_tab=True)
+
 
 
     with ui.grid(columns=1).classes('w-full gap-8'):
         workflows_page_state.graph_component_column = ui.column().classes('w-full')
 
         with workflows_page_state.graph_component_column:
-            generic_rows = translate_sparql_results_to_generic_edges(
-                results,
-                edge_specs=HANDOVER_WORKFLOW_EDGE_SPECS,
-            )
+            generic_rows = translate_sparql_results_to_generic_edges(results)
 
             nodes, edges = build_cytoscape_graph_from_generic_edges(
                 generic_rows,
@@ -445,9 +540,91 @@ async def visualization(object_ID:str):
             workflows_page_state.graph_component = CytoscapeComponent(
                 nodes,
                 edges,
-                show_entity_details,
-                None,
+                on_node_click=show_entity_details,
+                page_state=workflows_page_state,
+                on_graph_action=handle_graph_action,
             )
+
+            ui.separator()
+
+            ui.label(f"Associated samples: {len(sample_relation_rows)}").classes("text-xl font-bold mt-4")
+
+            
+
+            if not sample_relation_rows:
+                ui.label("No incoming or outgoing composedOf sample relations found.")
+            else:
+                columns = [
+                    {
+                        "name": "relation",
+                        "label": "Relation",
+                        "field": "relation",
+                        "align": "left",
+                        "sortable": True,
+                    },
+                    {
+                        "name": "sample_id",
+                        "label": "Sample ID",
+                        "field": "sample_id",
+                        "align": "left",
+                        "sortable": True,
+                    },
+                    {
+                        "name": "name",
+                        "label": "Object name",
+                        "field": "name",
+                        "align": "left",
+                        "sortable": True,
+                    },
+                    {
+                        "name": "action",
+                        "label": "",
+                        "field": "action",
+                        "align": "right",
+                    },
+                ]
+
+                sample_table = ui.table(
+                    columns=columns,
+                    rows=sample_relation_rows,
+                    row_key="row_id",
+                ).classes("w-full").props("flat bordered dense wrap-cells hide-pagination")
+
+                sample_table.add_slot(
+                    "body-cell-name",
+                    """
+                    <q-td :props="props" style="vertical-align: top;">
+                        <div style="
+                            white-space: normal;
+                            overflow-wrap: anywhere;
+                            word-break: break-word;
+                            line-height: 1.35;
+                        ">
+                            {{ props.row.name }}
+                            <q-tooltip anchor="top middle" self="bottom middle">
+                                {{ props.row.iri }}
+                            </q-tooltip>
+                        </div>
+                    </q-td>
+                    """
+                )
+
+                sample_table.add_slot(
+                    "body-cell-action",
+                    """
+                    <q-td :props="props" style="text-align: right;">
+                        <q-btn
+                            unelevated
+                            rounded
+                            color="info"
+                            icon-right="open_in_new"
+                            label="Visualize"
+                            no-caps
+                            :href="'/visualization_ui/' + encodeURIComponent(props.row.sample_id)"
+                        />
+                    </q-td>
+                    """
+                )
 
           
 

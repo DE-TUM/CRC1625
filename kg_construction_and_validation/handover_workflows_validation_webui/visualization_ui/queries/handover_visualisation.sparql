@@ -1,21 +1,11 @@
 SELECT DISTINCT
-  ?MLOrSample
-  ?MLOrSample_name
+  ?source
+  ?source_label
+  ?source_kind
 
-  ?handover_group
-  ?handover_group_name
-
-  ?handover_of_group
-  ?handover_of_group_name
-
-  ?activity
-  ?activity_name
-
-  ?output
-  ?output_name
-
-  ?nextGroup
-  ?nextGroup_name
+  ?target
+  ?target_label
+  ?target_kind
 
 FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
 WHERE {
@@ -25,21 +15,118 @@ WHERE {
 
   ?first_handover_group crc:nextStep* ?handover_group .
 
+  ?handover_group crc:substep ?first_handover_of_group .
+
   OPTIONAL {
     ?handover_group crc:nextStep ?nextGroup .
-    OPTIONAL { ?nextGroup crc:objectName ?nextGroup_name . }
+    ?nextGroup crc:substep ?first_handover_of_next_group .
   }
 
-  ?handover_group crc:substep ?handover_of_group .
+  ?first_handover_of_group crc:nextStep* ?handover_of_group .
+
+  FILTER (
+    !BOUND(?first_handover_of_next_group)
+    ||
+    NOT EXISTS {
+      ?first_handover_of_next_group crc:nextStep* ?handover_of_group .
+    }
+  )
+
   ?handover_of_group crc:substep ?activity .
 
   OPTIONAL {
     ?activity crc:output ?output .
-    OPTIONAL { ?output crc:objectName ?output_name . }
   }
 
-  OPTIONAL { ?MLOrSample crc:objectName ?MLOrSample_name . }
-  OPTIONAL { ?handover_group crc:objectName ?handover_group_name . }
-  OPTIONAL { ?handover_of_group crc:objectName ?handover_of_group_name . }
-  OPTIONAL { ?activity crc:objectName ?activity_name . }
+  VALUES ?edge_type {
+    "group_handover"
+    "handover_activity"
+    "activity_output"
+    "group_next_group"
+  }
+
+  FILTER (
+    ?edge_type != "group_next_group"
+    ||
+    EXISTS {
+      ?nextGroup crc:substep ?ng_first_handover .
+      ?ng_first_handover crc:nextStep* ?ng_handover .
+      ?ng_handover crc:substep ?ng_activity .
+    }
+  )
+
+  BIND(
+    IF(
+      ?edge_type = "group_handover",
+      ?handover_group,
+      IF(
+        ?edge_type = "handover_activity",
+        ?handover_of_group,
+        IF(
+          ?edge_type = "activity_output",
+          ?activity,
+          ?handover_group
+        )
+      )
+    )
+    AS ?source
+  )
+
+  BIND(
+    IF(
+      ?edge_type = "group_handover",
+      ?handover_of_group,
+      IF(
+        ?edge_type = "handover_activity",
+        ?activity,
+        IF(
+          ?edge_type = "activity_output",
+          ?output,
+          ?nextGroup
+        )
+      )
+    )
+    AS ?target
+  )
+
+  BIND(
+    IF(
+      ?edge_type = "group_handover",
+      "ho_g",
+      IF(
+        ?edge_type = "handover_activity",
+        "ho_o_g",
+        IF(
+          ?edge_type = "activity_output",
+          "act",
+          "ho_g"
+        )
+      )
+    )
+    AS ?source_kind
+  )
+
+  BIND(
+    IF(
+      ?edge_type = "group_handover",
+      "ho_o_g",
+      IF(
+        ?edge_type = "handover_activity",
+        "act",
+        IF(
+          ?edge_type = "activity_output",
+          "output",
+          "ho_g"
+        )
+      )
+    )
+    AS ?target_kind
+  )
+
+  FILTER(BOUND(?source))
+  FILTER(BOUND(?target))
+  FILTER(?source != ?target)
+
+  OPTIONAL { ?source crc:objectName ?source_label . }
+  OPTIONAL { ?target crc:objectName ?target_label . }
 }

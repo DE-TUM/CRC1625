@@ -63,7 +63,8 @@ class CytoscapeComponent(Element, component=os.path.join(os.path.dirname(__file_
                  edges: List[Dict],
                  # Node click callable and page state to pass to it
                  on_node_click: Optional[Callable] = None,
-                 page_state = None) -> None:
+                 page_state = None,
+                 on_graph_action: Optional[Callable] = None) -> None:
         super().__init__()
 
         self.name_to_id = {node['data']['label']: node['data']['id'] for node in nodes}
@@ -76,6 +77,9 @@ class CytoscapeComponent(Element, component=os.path.join(os.path.dirname(__file_
         # Register event listeners
         if on_node_click is not None:
             self.on('nodeClick', lambda e: on_node_click(e.args, page_state))
+
+        if on_graph_action is not None:
+            self.on('graphAction', lambda e: on_graph_action(e.args, page_state))
 
         self._rerun_layout_and_fit()
 

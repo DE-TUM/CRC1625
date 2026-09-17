@@ -1,25 +1,58 @@
 export default {
   template: `
-    <div style="position: relative; width: 100%;  height: calc(100vh - 140px); min-height: 700px;">
-      <div ref="cy" style="width: 100%; height: 100%; display: block; border: 1px solid #ddd; border-radius: 8px;"></div>
-      <div v-if="hoverData" 
-           :style="{ 
-             position: 'absolute', 
-             top: hoverPos.y + 'px', 
-             left: hoverPos.x + 'px', 
-             background: '#333', 
-             color: '#fff', 
-             padding: '8px', 
-             borderRadius: '4px', 
-             fontSize: '12px', 
-             zIndex: 10, 
-             pointerEvents: 'none',
-             transform: 'translate(-50%, -120%)',
-             whiteSpace: 'pre-wrap'
-           }">
+    <div style="position: relative; width: 100%; height: calc(100vh - 250px); min-height: 100px;">
+      <div
+        ref="cy"
+        style="width: 100%; height: 100%; display: block; border: 1px solid #ddd; border-radius: 8px;"
+      ></div>
+
+      <div
+        v-if="hoverData"
+        :style="{
+          position: 'absolute',
+          top: hoverPos.y + 'px',
+          left: hoverPos.x + 'px',
+          background: '#333',
+          color: '#fff',
+          padding: '8px',
+          borderRadius: '4px',
+          fontSize: '12px',
+          zIndex: 10,
+          pointerEvents: 'none',
+          transform: 'translate(-50%, -120%)',
+          whiteSpace: 'pre-wrap'
+        }"
+      >
         <strong>Validation result:</strong> {{ hoverData }}
       </div>
-    </div>
+
+      <q-menu
+        ref="graphContextMenu"
+        touch-position
+        no-parent-event
+      >
+        <q-list dense style="min-width: 220px">
+          <q-item-label
+            header
+            style="max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+          >
+            {{ contextMenu.label || 'Selected entity' }}
+          </q-item-label>
+
+          <q-separator />
+
+          <q-item
+            v-if="contextMenu.target_type === 'node'"
+            clickable
+            v-close-popup
+            @click="emitGraphAction('open_details_page')"
+          >
+            <q-item-section>
+              Open in RDMS
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-menu>
   `,
 
   props: {
@@ -30,7 +63,15 @@ export default {
   data() {
     return {
       hoverData: null,
-      hoverPos: { x: 0, y: 0 }
+      hoverPos: { x: 0, y: 0 },
+      contextMenu: {
+        target_type: null,
+        id: null,
+        label: null,
+        kind: null,
+        identifiers_for_coloring: [],
+        graph_position: null,
+      },
     };
   },
 
@@ -219,19 +260,33 @@ export default {
       this.hoverData = null;
     });
 
-    // Selection listeners
+    // NEW Selection listeners
+    // Left Click on a node selects it and emits a nodeClick event with its details
     this.cy.on('tap', 'node', (evt) => {
       const node = evt.target;
+
       this.cy.elements().removeClass('selected');
       node.addClass('selected');
+
       this.$emit('nodeClick', {
         id: node.id(),
         label: node.data('label'),
         kind: node.data('kind'),
-        identifiers_for_coloring: node.data('identifiers_for_coloring') || []
+        identifiers_for_coloring: node.data('identifiers_for_coloring') || [],
       });
     });
+    
+    //Right Click on a node selects it and opens the context menu
+    this.cy.on('cxttap', 'node', (evt) => {
+      const node = evt.target;
 
+      this.cy.elements().removeClass('selected');
+      node.addClass('selected');
+
+      this.openNodeContextMenu(evt);
+    });
+    
+    // Left Click on the background deselects all nodes
     this.cy.on('tap', (evt) => {
       if (evt.target === this.cy) this.cy.elements().removeClass('selected');
     });
@@ -244,6 +299,43 @@ export default {
   },
 
   methods: {
+
+    openNodeContextMenu(evt) {
+      const node = evt.target;
+      const originalEvent = evt.originalEvent || {};
+
+      if (originalEvent.preventDefault) {
+        originalEvent.preventDefault();
+      }
+
+      this.contextMenu = {
+        target_type: 'node',
+        id: node.id(),
+        label: node.data('label'),
+        kind: node.data('kind'),
+        identifiers_for_coloring: node.data('identifiers_for_coloring') || [],
+        graph_position: evt.position || null,
+      };
+
+      this.$nextTick(() => {
+        if (this.$refs.graphContextMenu) {
+          this.$refs.graphContextMenu.show(originalEvent);
+        }
+      });
+    },
+
+    emitGraphAction(action) {
+      this.$emit('graphAction', {
+        action: action,
+        target_type: this.contextMenu.target_type,
+        id: this.contextMenu.id,
+        label: this.contextMenu.label,
+        kind: this.contextMenu.kind,
+        identifiers_for_coloring: this.contextMenu.identifiers_for_coloring || [],
+        graph_position: this.contextMenu.graph_position,
+      });
+    },
+
     nodeHasKind(node, kind) {
       const rawIds = node.data('identifiers_for_coloring') || [];
       const ids = Array.isArray(rawIds) ? rawIds : [rawIds];

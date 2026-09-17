@@ -1,0 +1,32 @@
+SELECT DISTINCT
+  ?relation_type
+  ?relation_label
+  ?related_sample
+  ?related_internal_id
+  ?related_name
+
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+WHERE {
+  ?current_sample crc:internalID "{internalID}"^^xsd:integer .
+
+  {
+    ?current_sample crc:composedOf ?related_sample .
+    BIND("outgoing" AS ?relation_type)
+    BIND("Child / component sample" AS ?relation_label)
+  }
+
+  UNION
+
+  {
+    ?related_sample crc:composedOf ?current_sample .
+    BIND("incoming_parent" AS ?relation_type)
+    BIND("Parent sample" AS ?relation_label)
+  }
+
+  ?related_sample crc:internalID ?related_internal_id .
+
+  OPTIONAL {
+    ?related_sample crc:objectName ?related_name .
+  }
+}
+ORDER BY ?relation_type ?related_internal_id
