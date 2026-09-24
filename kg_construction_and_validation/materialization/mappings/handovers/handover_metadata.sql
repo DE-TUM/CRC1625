@@ -8,3 +8,4 @@ ObjectName,
 ObjectDescription
 FROM vro.vroHandover
 JOIN vro.vroObjectInfo ON HandoverId = ObjectId
+WHERE DestinationUserId IS NOT NULL /* Fix for handovers directed at bobby tables */

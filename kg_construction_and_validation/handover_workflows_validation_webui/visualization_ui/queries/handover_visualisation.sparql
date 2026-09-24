@@ -1,132 +1,129 @@
 SELECT DISTINCT
   ?source
-  ?source_label
   ?source_kind
-
+  ?source_label
   ?target
-  ?target_label
   ?target_kind
+  ?target_label
+  ?edge_kind
 
 FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+
 WHERE {
-  ?workflow_instance crc:input ?MLOrSample .
-  ?MLOrSample crc:internalID "{internalID}"^^xsd:integer .
-  ?workflow_instance crc:substep ?first_handover_group .
+  {
+    # HG -> HG
+    ?MLOrSample crc:internalID "{internalID}"^^xsd:integer .
+    ?workflow_instance crc:input ?MLOrSample .
+    ?workflow_instance crc:substep/crc:nextStep* ?source .
 
-  ?first_handover_group crc:nextStep* ?handover_group .
-
-  ?handover_group crc:substep ?first_handover_of_group .
-
-  OPTIONAL {
-    ?handover_group crc:nextStep ?nextGroup .
-    ?nextGroup crc:substep ?first_handover_of_next_group .
-  }
-
-  ?first_handover_of_group crc:nextStep* ?handover_of_group .
-
-  FILTER (
-    !BOUND(?first_handover_of_next_group)
-    ||
-    NOT EXISTS {
-      ?first_handover_of_next_group crc:nextStep* ?handover_of_group .
+    OPTIONAL {
+      ?source crc:nextStep ?target .
+      OPTIONAL {
+        ?target crc:objectName ?target_label .
+      }
     }
-  )
 
-  ?handover_of_group crc:substep ?activity .
-
-  OPTIONAL {
-    ?activity crc:output ?output .
-  }
-
-  VALUES ?edge_type {
-    "group_handover"
-    "handover_activity"
-    "activity_output"
-    "group_next_group"
-  }
-
-  FILTER (
-    ?edge_type != "group_next_group"
-    ||
-    EXISTS {
-      ?nextGroup crc:substep ?ng_first_handover .
-      ?ng_first_handover crc:nextStep* ?ng_handover .
-      ?ng_handover crc:substep ?ng_activity .
+    OPTIONAL {
+      ?source crc:objectName ?source_label .
     }
-  )
 
-  BIND(
-    IF(
-      ?edge_type = "group_handover",
-      ?handover_group,
-      IF(
-        ?edge_type = "handover_activity",
-        ?handover_of_group,
-        IF(
-          ?edge_type = "activity_output",
-          ?activity,
-          ?handover_group
-        )
-      )
-    )
-    AS ?source
-  )
+    BIND("ho_g" AS ?source_kind)
+    BIND("ho_g" AS ?target_kind)
+    BIND("structural" AS ?edge_kind)
+  }
 
-  BIND(
-    IF(
-      ?edge_type = "group_handover",
-      ?handover_of_group,
-      IF(
-        ?edge_type = "handover_activity",
-        ?activity,
-        IF(
-          ?edge_type = "activity_output",
-          ?output,
-          ?nextGroup
-        )
-      )
-    )
-    AS ?target
-  )
+  UNION
 
-  BIND(
-    IF(
-      ?edge_type = "group_handover",
-      "ho_g",
-      IF(
-        ?edge_type = "handover_activity",
-        "ho_o_g",
-        IF(
-          ?edge_type = "activity_output",
-          "act",
-          "ho_g"
-        )
-      )
-    )
-    AS ?source_kind
-  )
+  {
+    # HG -> HOG
+    ?MLOrSample crc:internalID "{internalID}"^^xsd:integer .
+    ?workflow_instance crc:input ?MLOrSample .
+    ?workflow_instance crc:substep/crc:nextStep* ?source .
 
-  BIND(
-    IF(
-      ?edge_type = "group_handover",
-      "ho_o_g",
-      IF(
-        ?edge_type = "handover_activity",
-        "act",
-        IF(
-          ?edge_type = "activity_output",
-          "output",
-          "ho_g"
-        )
-      )
-    )
-    AS ?target_kind
-  )
+    OPTIONAL {
+      ?source crc:substep ?target .
+      OPTIONAL {
+        ?target crc:objectName ?target_label .
+      }
+    }
 
-  FILTER(BOUND(?source))
-  FILTER(BOUND(?target))
-  FILTER(?source != ?target)
+    OPTIONAL {
+      ?source crc:objectName ?source_label .
+    }
 
-  OPTIONAL { ?source crc:objectName ?source_label . }
-  OPTIONAL { ?target crc:objectName ?target_label . }
+    BIND("ho_g" AS ?source_kind)
+    BIND("ho_o_g" AS ?target_kind)
+    BIND("structural" AS ?edge_kind)
+  }
+
+  UNION
+
+  {
+    # HOG -> HOG
+    ?MLOrSample crc:internalID "{internalID}"^^xsd:integer .
+    ?workflow_instance crc:input ?MLOrSample .
+    ?workflow_instance crc:substep/crc:nextStep*/crc:substep/crc:nextStep* ?source .
+
+    OPTIONAL {
+      ?source crc:nextStep ?target .
+      OPTIONAL {
+        ?target crc:objectName ?target_label .
+      }
+    }
+
+    OPTIONAL {
+      ?source crc:objectName ?source_label .
+    }
+
+    BIND("ho_o_g" AS ?source_kind)
+    BIND("ho_o_g" AS ?target_kind)
+    BIND("secondary_sequence" AS ?edge_kind)
+  }
+
+  UNION
+
+  {
+    # HOG -> Activity
+    ?MLOrSample crc:internalID "{internalID}"^^xsd:integer .
+    ?workflow_instance crc:input ?MLOrSample .
+    ?workflow_instance crc:substep/crc:nextStep*/crc:substep/crc:nextStep* ?source .
+
+    OPTIONAL {
+      ?source crc:substep ?target .
+      OPTIONAL {
+        ?target crc:objectName ?target_label .
+      }
+    }
+
+    OPTIONAL {
+      ?source crc:objectName ?source_label .
+    }
+
+    BIND("ho_o_g" AS ?source_kind)
+    BIND("act" AS ?target_kind)
+    BIND("structural" AS ?edge_kind)
+  }
+
+  UNION
+
+  {
+    # Activity -> Output
+    ?MLOrSample crc:internalID "{internalID}"^^xsd:integer .
+    ?workflow_instance crc:input ?MLOrSample .
+    ?workflow_instance crc:substep/crc:nextStep*/crc:substep/crc:nextStep* ?handover_of_group .
+    ?handover_of_group crc:substep ?source .
+    ?source crc:output ?target .
+
+    OPTIONAL {
+      ?source crc:objectName ?source_label .
+    }
+
+    OPTIONAL {
+      ?target crc:objectName ?target_label .
+    }
+
+    BIND("act" AS ?source_kind)
+    BIND("output" AS ?target_kind)
+    BIND("structural" AS ?edge_kind)
+  }
 }

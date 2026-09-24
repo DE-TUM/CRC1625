@@ -20,6 +20,8 @@ def extract_label_from_uri(uri: str) -> str:
     if not uri:
         return ""
 
+    uri = str(uri).rstrip("/#")
+
     if "#" in uri:
         return uri.split("#")[-1]
 
@@ -270,14 +272,6 @@ def translate_sparql_results_to_generic_edges(
     results: list[dict],
     edge_specs: list[EdgeSpec] | None = None,
 ) -> list[dict]:
-    """
-    Universal adapter.
-
-    1. If rows contain direct source/target edge format, return valid direct edges.
-    2. If explicit EdgeSpec mapping is provided, use it.
-    3. If rows contain level_0/level_1/... variables, convert as path.
-    4. Otherwise return empty list.
-    """
     if not results:
         return []
 
@@ -288,26 +282,77 @@ def translate_sparql_results_to_generic_edges(
 
     if looks_like_direct_edges:
         valid_rows = []
+        source_only_rows = 0
+        self_loop_rows = 0
+        seen_rows = set()
 
         for row in results:
             source = binding_value(row, "source")
             target = binding_value(row, "target")
 
-            if not source or not target:
+            if not source:
+                continue
+
+            source_kind = normalize_kind(binding_value(row, "source_kind"))
+            target_kind = normalize_kind(binding_value(row, "target_kind"))
+            edge_kind = binding_value(row, "edge_kind")
+
+            if not edge_kind:
+                if source_kind == "ho_o_g" and target_kind == "ho_o_g":
+                    edge_kind = "secondary_sequence"
+                else:
+                    edge_kind = "structural"
+
+            # Source-only row: keep the node, but do not create an edge.
+            if not target:
+                row_key = ("node_only", source, source_kind)
+
+                if row_key in seen_rows:
+                    continue
+
+                seen_rows.add(row_key)
+
+                row = dict(row)
+                row["_node_only"] = True
+
+                if "source_label" not in row or not binding_value(row, "source_label"):
+                    row["source_label"] = {"value": extract_label_from_uri(source)}
+
+                valid_rows.append(row)
+                source_only_rows += 1
                 continue
 
             if source == target:
+                self_loop_rows += 1
                 continue
+
+            row_key = (source, target, source_kind, target_kind, edge_kind)
+
+            if row_key in seen_rows:
+                continue
+
+            seen_rows.add(row_key)
+
+            row = dict(row)
+
+            if "source_label" not in row or not binding_value(row, "source_label"):
+                row["source_label"] = {"value": extract_label_from_uri(source)}
+
+            if "target_label" not in row or not binding_value(row, "target_label"):
+                row["target_label"] = {"value": extract_label_from_uri(target)}
+
+            if "edge_kind" not in row or not binding_value(row, "edge_kind"):
+                row["edge_kind"] = {"value": edge_kind}
 
             valid_rows.append(row)
 
-        skipped = len(results) - len(valid_rows)
+        if source_only_rows:
+            print(f"INFO: kept {source_only_rows} source-only direct rows as nodes without edges.")
 
-        if skipped:
-            print(
-                f"WARNING: skipped {skipped} malformed direct edge rows "
-                f"without source/target."
-            )
+        if self_loop_rows:
+            print(f"INFO: ignored {self_loop_rows} self-loop direct rows.")
+
+        print(f"INFO: direct graph rows after adapter filtering: {len(valid_rows)}")
 
         return valid_rows
 
@@ -321,7 +366,6 @@ def translate_sparql_results_to_generic_edges(
 
     print("WARNING: Could not translate SPARQL results into generic graph edges.")
     print("Available columns:", list(first_row.keys()))
-
     return []
 
 def build_cytoscape_graph_from_generic_edges(
@@ -394,14 +438,15 @@ def build_cytoscape_graph_from_generic_edges(
         nodes.append(node)
         seen_nodes[node_id] = node
 
-    def add_edge(source: str, target: str):
+    def add_edge(source: str, target: str, edge_kind: str = "structural"):
         if not source or not target:
             return
 
         if source == target:
             return
 
-        edge_key = (source, target)
+        edge_kind = edge_kind or "structural"
+        edge_key = (source, target, edge_kind)
 
         if edge_key in seen_edges:
             return
@@ -411,7 +456,9 @@ def build_cytoscape_graph_from_generic_edges(
                 "id": f"edge_{len(edges)}",
                 "source": source,
                 "target": target,
-            }
+                "edge_kind": edge_kind,
+            },
+            "classes": edge_kind,
         })
 
         seen_edges.add(edge_key)
@@ -438,16 +485,18 @@ def build_cytoscape_graph_from_generic_edges(
     for row in generic_rows:
         source = binding_value(row, "source")
         target = binding_value(row, "target")
-
         source_kind = normalize_kind(binding_value(row, "source_kind"))
         target_kind = normalize_kind(binding_value(row, "target_kind"))
 
 
         source_label = binding_value(row, "source_label")
         target_label = binding_value(row, "target_label")
+        edge_kind = binding_value(row, "edge_kind", "structural")
 
         add_node(source, source_kind, parent_id, source_label)
-        add_node(target, target_kind, parent_id, target_label)
-        add_edge(source, target)
+
+        if target:
+            add_node(target, target_kind, parent_id, target_label)
+            add_edge(source, target, edge_kind)
 
     return nodes, edges

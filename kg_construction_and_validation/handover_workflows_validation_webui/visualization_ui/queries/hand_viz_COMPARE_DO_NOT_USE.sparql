@@ -1,0 +1,72 @@
+SELECT ?source ?source_kind ?source_label ?target ?target_kind ?target_label
+FROM <https://crc1625.mdi.ruhr-uni-bochum.de/graph>
+WHERE {
+  {
+    ?MLOrSample crc:internalID "{internalID}"^^xsd:integer .
+    ?workflow_instance crc:input ?MLOrSample .
+    ?workflow_instance crc:substep/crc:nextStep* ?source . # Handover group
+    OPTIONAL {
+      ?source crc:nextStep ?target .
+      ?target crc:objectName ?target_label .
+    }
+    ?source crc:objectName ?source_label .
+
+    BIND ("ho_g" AS ?source_kind)
+    BIND ("ho_g" AS ?target_kind)
+  }
+  UNION
+  {
+    ?MLOrSample crc:internalID "{internalID}"^^xsd:integer .
+    ?workflow_instance crc:input ?MLOrSample .
+    ?workflow_instance crc:substep/crc:nextStep* ?source . # Handover group
+    OPTIONAL {
+      ?source crc:substep ?target .
+      ?target crc:objectName ?target_label .
+    }
+    ?source crc:objectName ?source_label .
+
+    BIND ("ho_g" AS ?source_kind)
+    BIND ("ho_o_g" AS ?target_kind)
+  }
+  UNION
+  {
+    ?MLOrSample crc:internalID "{internalID}"^^xsd:integer .
+    ?workflow_instance crc:input ?MLOrSample .
+    ?workflow_instance crc:substep/crc:nextStep*/crc:substep/crc:nextStep* ?source . # Handover
+    OPTIONAL {
+      ?source crc:nextStep ?target .
+      ?target crc:objectName ?target_label .
+    }
+    ?source crc:objectName ?source_label .
+
+    BIND ("ho_o_g" AS ?source_kind)
+    BIND ("ho_o_g" AS ?target_kind)
+  }
+  UNION
+  {
+    ?MLOrSample crc:internalID "{internalID}"^^xsd:integer .
+    ?workflow_instance crc:input ?MLOrSample .
+    ?workflow_instance crc:substep/crc:nextStep*/crc:substep/crc:nextStep* ?source . # Handover
+    OPTIONAL {
+      ?source crc:substep ?target .
+      ?target crc:objectName ?target_label .
+    }
+    ?source crc:objectName ?source_label .
+
+    BIND ("ho_o_g" AS ?source_kind)
+    BIND ("act" AS ?target_kind)
+  }
+  UNION
+  {
+    # Activity -> Output
+    ?MLOrSample crc:internalID "36557"^^xsd:integer .
+    ?workflow_instance crc:substep/crc:nextStep+/crc:substep/crc:nextStep+ ?handover_of_group .
+    ?handover_of_group crc:substep ?source .
+    ?source crc:output ?target .
+
+    BIND("act" AS ?source_kind)
+    BIND("output" AS ?target_kind)
+    BIND("structural" AS ?edge_kind)
+  }
+  
+}

@@ -224,6 +224,16 @@ export default {
           }
         },
         {
+          selector: 'edge.secondary_sequence',
+          style: {
+            'line-style': 'dashed',
+            'width': 1.5,
+            'opacity': 0.55,
+            'target-arrow-shape': 'triangle',
+            'curve-style': 'bezier'
+          }
+        },
+        {
           selector: 'edge.branch-edge',
           style: {
             'curve-style': 'taxi',
@@ -392,12 +402,15 @@ export default {
         );
       };
 
+      const isSecondarySequenceEdge = (edge) => {
+        return edge.data('edge_kind') === 'secondary_sequence' || edge.hasClass('secondary_sequence');
+      };
+
       const getNonSequenceChildren = (node) => {
         return node.outgoers('edge')
+          .filter(edge => !isSecondarySequenceEdge(edge))
           .map(edge => edge.target())
           .filter(target => {
-            // HG -> HG is the main horizontal workflow sequence.
-            // Everything else goes downward recursively.
             return !(isHg(node) && isHg(target));
           });
       };
@@ -406,6 +419,13 @@ export default {
       this.cy.edges().forEach(edge => {
         edge.removeClass('sequence-edge');
         edge.removeClass('branch-edge');
+
+        // Secondary HOG -> HOG edges are styled separately.
+        // Do not also mark them as branch-edge, because branch-edge styling
+        // would override parts of secondary_sequence styling.
+        if (isSecondarySequenceEdge(edge)) {
+          return;
+        }
 
         const sourceIsHg = isHg(edge.source());
         const targetIsHg = isHg(edge.target());
@@ -456,6 +476,24 @@ export default {
         }
 
         return labelOf(a).localeCompare(labelOf(b));
+      };
+
+      const compareNodesByLabel = (a, b) => {
+        return labelOf(a).localeCompare(labelOf(b));
+      };
+
+      const getSecondarySuccessors = (node) => {
+        return node.outgoers('edge')
+          .filter(edge => isSecondarySequenceEdge(edge))
+          .map(edge => edge.target())
+          .sort(compareNodesByLabel);
+      };
+
+      const getSecondaryPredecessors = (node) => {
+        return node.incomers('edge')
+          .filter(edge => isSecondarySequenceEdge(edge))
+          .map(edge => edge.source())
+          .sort(compareNodesByLabel);
       };
 
       const getHgSuccessors = (node) => {
@@ -660,6 +698,86 @@ export default {
 
         currentColumnLeft += columnWidth + xGap;
       });
+
+      // Fallback 1:
+      // Position HOGs that were not reached through structural HG -> HOG edges,
+      // but do have a secondary HOG -> HOG predecessor that is already positioned.
+      let placedSomething = true;
+      let fallbackIterations = 0;
+      const maxFallbackIterations = this.cy.nodes().length + 5;
+
+      while (placedSomething && fallbackIterations < maxFallbackIterations) {
+        fallbackIterations += 1;
+        placedSomething = false;
+
+        const unpositionedNodes = this.cy.nodes()
+          .filter(node => !positioned.has(node.id()))
+          .toArray()
+          .sort(compareNodesByLabel);
+
+        unpositionedNodes.forEach(node => {
+          if (positioned.has(node.id())) {
+            return;
+          }
+
+          const positionedSecondaryPredecessor = getSecondaryPredecessors(node)
+            .find(pred => positioned.has(pred.id()));
+
+          if (!positionedSecondaryPredecessor) {
+            return;
+          }
+
+          const beforeSize = positioned.size;
+
+          const predPos = positionedSecondaryPredecessor.position();
+          const predWidth = estimateNodeWidth(positionedSecondaryPredecessor);
+          const nodeWidth = estimateNodeWidth(node);
+
+          const nodeCenterX = predPos.x + predWidth / 2 + branchGap + nodeWidth / 2;
+          const nodeLevel = Math.max(1, Math.round(predPos.y / yGap));
+
+          positionSubtree(node, nodeCenterX, nodeLevel);
+
+          if (positioned.size > beforeSize) {
+            placedSomething = true;
+          }
+        });
+      }
+
+      if (fallbackIterations >= maxFallbackIterations) {
+        console.warn(
+          'Workflow layout fallback stopped after too many iterations.',
+          {
+            fallbackIterations,
+            nodeCount: this.cy.nodes().length,
+            positionedCount: positioned.size,
+          }
+        );
+      }
+      // Fallback 2:
+      // Anything still unpositioned gets its own small detached column.
+      // This prevents upper-left clumping and makes missing ownership visible.
+      const stillUnpositioned = this.cy.nodes()
+        .filter(node => !positioned.has(node.id()))
+        .toArray()
+        .sort(compareNodesByLabel);
+
+      if (stillUnpositioned.length > 0) {
+        let detachedLeft = currentColumnLeft + xGap;
+
+        stillUnpositioned.forEach(node => {
+          if (positioned.has(node.id())) {
+            return;
+          }
+
+          const width = calculateSubtreeWidth(node);
+          const centerX = detachedLeft + width / 2;
+
+          positionSubtree(node, centerX, 1);
+
+          detachedLeft += width + xGap;
+        });
+      }
 
       this.cy.resize();
 
