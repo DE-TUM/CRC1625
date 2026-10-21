@@ -1,8 +1,18 @@
 from dataclasses import dataclass
 import re
 
-#from prettytable.__main__ import row
+"""
+This file contains utility functions and classes for adapting SPARQL query results into a generic graph 
+representation. As we might use different SPARQL queries with different variable names and structures, 
+these functions help us normalize the results into a consistent format that can be used for graph visualization.
 
+The main concept is to translate SPARQL results into a list of generic edges, where each edge has a source,
+a target, and associated kinds/types for both the source and target nodes. This allows us to build a graph 
+structure that can be visualized using libraries like Cytoscape.js, while maintaining the relationships 
+and hierarchy defined in the original SPARQL results. The utility functions also handle various edge cases,
+such as missing variables, self-loops, and source-only nodes, ensuring that the resulting graph is both 
+accurate and visually coherent.
+"""
 
 @dataclass(frozen=True)
 class EdgeSpec:
@@ -15,7 +25,10 @@ class EdgeSpec:
 
 
 def extract_label_from_uri(uri: str) -> str:
-    """Extract readable label from URI or return string as-is."""
+    """Extract readable label from URI or return string as-is.
+        Sometimes we don't find a label, thus we use the original URI to create a label. 
+        This is not ideal, but it is better than having gibberish for label.    
+    """
     
     if not uri:
         return ""

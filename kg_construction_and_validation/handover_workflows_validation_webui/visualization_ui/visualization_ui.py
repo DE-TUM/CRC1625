@@ -1,26 +1,16 @@
 from datastores.rdf import rdf_datastore_client
+
 from handover_workflows_validation_webui.visualization_ui.cytoscape_visualization.cytoscape_component_visualization import CytoscapeComponent, NodeType 
 from handover_workflows_validation_webui.main_page import WorkflowsPageState
 from handover_workflows_validation_webui.middleware import log_out, matinf_or_demo_login_required
-
 from handover_workflows_validation_webui.visualization_ui.sparql_graph_adapter import (
     translate_sparql_results_to_generic_edges,
     build_cytoscape_graph_from_generic_edges,
 )
 
-import asyncio
 import os
-from copy import copy
-from dataclasses import dataclass, field
 from urllib.parse import quote
-
-
 from nicegui import ui, app
-from nicegui.elements.button import Button
-from nicegui.elements.column import Column
-from nicegui.elements.drawer import RightDrawer
-from nicegui.elements.input import Input
-from nicegui.elements.select import Select
 
 # queries and all
 module_dir = os.path.dirname(__file__)
@@ -552,7 +542,7 @@ async def visualization(object_ID:str):
             
 
             if not sample_relation_rows:
-                ui.label("No incoming or outgoing composedOf sample relations found.")
+                ui.label("No incoming or outgoing relations found.")
             else:
                 columns = [
                     {

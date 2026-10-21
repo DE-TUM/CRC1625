@@ -1,3 +1,15 @@
+/**
+ * This file contains the Vue.js component definition for the CytoscapeComponent used in the NiceGUI framework.
+ * It provides a visualization of nodes and edges using the Cytoscape.js library, with support for various node types,
+ * validation results, tooltips, context menus, and layout management.
+ *
+ * The component accepts `nodes` and `edges` as props, which are arrays of objects representing the graph structure.
+ * It also emits events for node clicks and graph actions, allowing interaction with the graph.
+ * 
+ * The component also provides default styles for the graphs and allows for customization of node colors based
+ * on their identifiers.
+ */
+
 export default {
   template: `
     <div style="position: relative; width: 100%; height: calc(100vh - 250px); min-height: 100px;">
@@ -74,6 +86,15 @@ export default {
       },
     };
   },
+
+/**
+ * mounted() initializes the cytoscape instance with the provided nodes and edges, 
+ * sets up styles for nodes and edges, and attaches event listeners for tooltips, 
+ * node selection, and context menu interactions. It also triggers the layout and fitting
+ * of the graph after the component is mounted.
+ * 
+ * It also includes style information for different node types.
+ */
 
   mounted() {
     this.cy = cytoscape({
@@ -308,6 +329,12 @@ export default {
     });
   },
 
+  /**
+   * methods provide (surprise!) methods for different actions on the graph and how to handle them. 
+   * This includes opening the context menu, emitting graph actions, checking node kinds, getting node colors,
+   *  updating tooltip positions, rerunning layouts, adding/removing nodes and edges, 
+   * and managing validation results.
+   */
   methods: {
 
     openNodeContextMenu(evt) {
@@ -358,7 +385,7 @@ export default {
     },
 
     getNodeBackgroundColor(node) {
-      if (this.nodeHasKind(node, 'sample')) return '#efb0f2';
+      if (this.nodeHasKind(node, 'sample')) return '#f8f8f8';
       if (this.nodeHasKind(node, 'ho_g')) return '#55c990';
       if (this.nodeHasKind(node, 'ho_o_g')) return '#ff8f85';
       if (this.nodeHasKind(node, 'act')) return '#f4b1c4';

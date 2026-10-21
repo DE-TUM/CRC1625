@@ -5,6 +5,13 @@ from typing import List, Dict, Callable, Optional
 from nicegui import ui
 from nicegui.element import Element
 
+"""
+This file contains the CytoscapeComponent class, which is a custom NiceGUI Element 
+that integrates the Cytoscape.js library for graph visualization. It provides methods for adding, 
+removing, and modifying nodes and edges, as well as handling events such as node clicks and graph actions. 
+The component also manages node colors based on their identifiers to ensure consistent coloring across the graph.
+"""
+
 
 def load_cytoscape_js_libs():
     """
@@ -18,12 +25,22 @@ def load_cytoscape_js_libs():
         <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>
     ''', shared=True)
 
+"""
+This class defines the types of nodes that can be used in the CytoscapeComponent visualization.
+The reason for using node types is to differentiate between different kinds of nodes ("entities") in the graph
+and help us maintaing the desired layout and styling of the graph. For example, we may want to treat
+ "invisible" nodes differently from "object" or "step" nodes in terms of layout, visibility, or interaction
+ The goal is to have a hierarchical layout akin to a 2D array/tree.
+"""
 class NodeType(Enum):
     node_type_object = "object"
     node_type_step = "step"
     node_type_invisible = "invisible"
+ 
 
-
+"""
+This class is the actual implementation of the Cytoscape wrapper as a NiceGui element.
+"""
 class CytoscapeComponent(Element, component=os.path.join(os.path.dirname(__file__), 'cytoscape_component_visualization.js')):
     """
     NiceGUI Element implementation for integrating Cytoscape as a custom Vue component
