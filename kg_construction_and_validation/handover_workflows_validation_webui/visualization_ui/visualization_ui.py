@@ -349,10 +349,28 @@ async def visualization(object_ID:str):
     #drawer for entity details
     details_drawer = ui.right_drawer(value=False).classes("p-4 bg-white").props("width=400px bordered")
     with details_drawer:
-        with ui.row().classes("w-full items-center justify-between"):
-            ui.label("Entity details").classes("text-xl font-bold")
-            ui.button(icon="close", on_click=lambda: setattr(details_drawer, "value", False)).props("flat round dense")
-        details_content = ui.column().classes("w-full gap-2")
+        with ui.column().classes("w-full gap-2"):
+
+            # Header with close button
+            with ui.row().classes("w-full items-center justify-between"):
+                ui.label("Entity details").classes("text-xl font-bold")
+                ui.button(
+                    icon="close",
+                    on_click=lambda: setattr(details_drawer, "value", False)
+                ).props("flat round dense")
+
+            # Entity URI section
+            with ui.column().classes("w-full gap-1"):
+                ui.label("Entity URI").classes(
+                    "text-xs font-bold text-gray-500"
+                )
+
+                entity_uri_container = ui.column().classes("w-full")
+
+            ui.separator()
+
+            # Other entity details
+            details_content = ui.column().classes("w-full gap-2")
 
     #handler for said drawer on click
     async def show_entity_details(event, page_state: WorkflowsPageState = workflows_page_state):
@@ -371,6 +389,14 @@ async def visualization(object_ID:str):
             return
 
         details_drawer.value = True
+        entity_uri_container.clear()
+
+        with entity_uri_container:
+            ui.link(
+                text=entity_uri,
+                target=entity_uri,
+                new_tab=True,
+            ).classes("w-full text-xs break-all text-blue-600 underline")
         details_content.clear()
 
         with details_content:

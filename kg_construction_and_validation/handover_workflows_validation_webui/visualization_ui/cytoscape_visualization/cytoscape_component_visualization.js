@@ -323,10 +323,52 @@ export default {
     });
 
     this.$nextTick(() => {
-      requestAnimationFrame(() => {
-        this.rerun_layout_and_fit();
+      this.$nextTick(() => {
+        requestAnimationFrame(() => {
+
+          // Initial layout: use our custom workflow tree
+          this.cy.resize();
+          this.rerun_layout_and_fit(false);
+
+          // Resize viewport without changing node positions
+          const handleResize = () => {
+            clearTimeout(this._resizeTimer);
+
+            this._resizeTimer = setTimeout(() => {
+              if (!this.cy || this.cy.destroyed()) return;
+
+              this.cy.resize();
+              this.cy.fit(this.cy.elements(), 80);
+            }, 100);
+          };
+
+          if (typeof ResizeObserver !== 'undefined') {
+            this._resizeObserver = new ResizeObserver(handleResize);
+            this._resizeObserver.observe(this.$refs.cy);
+          } else {
+            this._onResize = handleResize;
+            window.addEventListener('resize', this._onResize);
+          }
+
+        });
       });
-    });
+  });
+  },
+
+  beforeUnmount() {
+    if (this._resizeObserver) {
+      this._resizeObserver.disconnect();
+    }
+
+    if (this._onResize) {
+      window.removeEventListener('resize', this._onResize);
+    }
+
+    clearTimeout(this._resizeTimer);
+
+    if (this.cy) {
+      this.cy.destroy();
+    }
   },
 
   /**
@@ -398,11 +440,13 @@ export default {
       this.hoverPos = { x: pos.x, y: pos.y };
     },
 
-    rerun_layout_and_fit() {
+    rerun_layout_and_fit(animate = true) {
+      if (!this.cy || this.cy.destroyed()) return;
+
       this.applyWorkflowGridLayout({
-        xGap: 180,
-        yGap: 200,
-        branchGap: 50,
+        xGap: 260,
+        yGap: 220,
+        branchGap: 120,
         padding: 80
       });
     },
