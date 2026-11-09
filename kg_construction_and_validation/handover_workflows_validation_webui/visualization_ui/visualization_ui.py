@@ -1,41 +1,49 @@
 from datastores.rdf import rdf_datastore_client
-
+from pathlib import Path
 from handover_workflows_validation_webui.visualization_ui.cytoscape_visualization.cytoscape_component_visualization import CytoscapeComponent, NodeType 
 from handover_workflows_validation_webui.main_page import WorkflowsPageState
 from handover_workflows_validation_webui.middleware import log_out, matinf_or_demo_login_required
 from handover_workflows_validation_webui.visualization_ui.sparql_graph_adapter import (
     translate_sparql_results_to_generic_edges,
     build_cytoscape_graph_from_generic_edges,
+    extract_label_from_uri as short_uri,
+
 )
 
 import os
 from urllib.parse import quote
 from nicegui import ui, app
 
-# queries and all
-module_dir = os.path.dirname(__file__)
-# prefixes 
-prefixes: str = open(os.path.join(module_dir, '../queries/prefixes.sparql')).read()
+#importing stuff, like folders to take queries from, and the queries themselves
+
+
+module_dir = Path(__file__).resolve().parent
+
+prefixes = (
+    module_dir / "../queries/prefixes.sparql"
+).read_text(encoding="utf-8").rstrip()
+
+
+def load_sparql_query(filename: str) -> str:
+    query = (
+        module_dir / "queries" / filename
+    ).read_text(encoding="utf-8")
+
+    return f"{prefixes}\n\n{query}"
 
 # main workflow query
 handover_viz_query = (
-    prefixes.rstrip()
-    + "\n\n"
-    + open(os.path.join(module_dir, 'queries/handover_visualisation.sparql'), 'r').read()
+    load_sparql_query('handover_visualisation.sparql')
 )
 
 # entity details query
 entity_details_query = (
-    prefixes.rstrip()
-    + "\n\n"
-    + open(os.path.join(module_dir, 'queries/entity_details.sparql'), 'r').read()
+    load_sparql_query('entity_details.sparql')
 )
 
 # sample relations query
 sample_relations_query = (
-    prefixes.rstrip()
-    + "\n\n"
-    + open(os.path.join(module_dir, 'queries/sample_relations.sparql'), 'r').read()
+    load_sparql_query('sample_relations.sparql')
 )
 
 # Helper function section
@@ -77,18 +85,6 @@ DETAIL_PROPERTIES_BY_KIND = {
 }
 
 
-def short_uri(value: str) -> str:
-    if not value:
-        return ""
-
-    if "#" in value:
-        return value.split("#")[-1]
-
-    if "/" in value:
-        return value.split("/")[-1]
-
-    return value
-
 def sparql_string_literal(value: str) -> str:
     """
     Safely turn a Python string into a SPARQL string literal.
@@ -107,10 +103,6 @@ def sparql_string_literal(value: str) -> str:
     )
 
     return f'"{escaped}"'
-
-def property_name(property_uri: str) -> str:
-    return short_uri(property_uri)
-
 
 def display_value(value_binding: dict, value_name_binding: dict | None = None) -> str:
     if value_name_binding and value_name_binding.get("value"):
@@ -168,7 +160,7 @@ def filter_detail_rows(rows: list[dict], kind: str) -> list[dict]:
 
     for index, row in enumerate(rows):
         prop_uri = row["property"]["value"]
-        prop_name = property_name(prop_uri)
+        prop_name = short_uri(prop_uri)
 
         if allowed_properties and prop_name not in allowed_properties:
             continue
@@ -213,6 +205,10 @@ def render_entity_title(entity_label: str, max_length: int = 30):
     if entity_label and entity_label != short_label:
         label.tooltip(entity_label)
 
+def render_details_heading(entity_label: str, entity_kind: str):
+    render_entity_title(entity_label)
+    ui.label(entity_kind).classes("text-sm text-gray-500")
+    ui.separator()
 
 async def get_internal_id_for_entity(entity_uri: str) -> str | None:
     query = entity_details_query.replace(
@@ -225,7 +221,7 @@ async def get_internal_id_for_entity(entity_uri: str) -> str | None:
 
     for row in rows:
         prop_uri = row["property"]["value"]
-        prop_name = property_name(prop_uri)
+        prop_name = short_uri(prop_uri)
 
         if prop_name == "internalID":
             return row["value"]["value"]
@@ -251,6 +247,18 @@ def make_sample_relation_rows(rows: list[dict]) -> list[dict]:
 
     return result
 
+def open_sample_visualization(sample_id: str):
+    sample_id = str(sample_id or "").strip()
+
+    if not sample_id:
+        ui.notify("Please enter a sample number.", color="warning")
+        return
+
+    ui.navigate.to(
+        f"/visualization_ui/{quote(sample_id, safe='')}"
+    )
+
+
 # page implementation section
 @ui.page('/visualization_ui')
 @matinf_or_demo_login_required
@@ -274,19 +282,10 @@ async def visualization_launcher():
             placeholder='Enter sample number',
         ).classes('w-96')
 
-        def open_visualization():
-            sample_id = (sample_input.value or '').strip()
-
-            if not sample_id:
-                ui.notify('Please enter a sample number.', color='warning')
-                return
-
-            ui.navigate.to(f'/visualization_ui/{quote(sample_id)}')
-
         ui.button(
             'Render workflow graph',
             color='info',
-            on_click=open_visualization,
+            on_click=lambda: open_sample_visualization(sample_input.value),
         )
 
     with ui.footer().classes('items-center p-2 h-11'):
@@ -314,11 +313,6 @@ async def visualization(object_ID:str):
     sample_relation_rows = make_sample_relation_rows(
         sample_relations_result["results"]["bindings"]
     )
-
-    
-
-
-
     workflows_page_state.main_content = ui.column().classes('w-full')
 
 
@@ -328,18 +322,11 @@ async def visualization(object_ID:str):
                             label='Sample internal ID',
                             placeholder='Enter sample number',
                         ).classes('w-48')
-            def open_visualization():
-                            sample_id = (sample_input.value or '').strip()
-                
-                            if not sample_id:
-                                ui.notify('Please enter a sample number.', color='warning')
-                                return
-                
-                            ui.navigate.to(f'/visualization_ui/{quote(sample_id)}')
+        
             ui.button(
                             'Render workflow graph',
                             color='info',
-                            on_click=open_visualization
+                            on_click=lambda: open_sample_visualization(sample_input.value),
                         )
             ui.space()
             ui.label(f'Welcome, {app.storage.tab['user_name']} ({app.storage.tab['user_project']})').classes('text-xl').style('color: #000000')
@@ -384,6 +371,11 @@ async def visualization(object_ID:str):
             ui.notify("No entity URI found.", color="warning")
             return
 
+        # The main sample node is a synthetic Cytoscape container,
+        # not an RDF entity. It has no valid RDF URI.
+        if entity_kind == "sample" or entity_uri == f"sample_{object_ID}":
+            return
+
         if not entity_uri.startswith("https://crc1625.mdi.ruhr-uni-bochum.de/"):
             ui.notify("Invalid entity URI.", color="negative")
             return
@@ -400,9 +392,7 @@ async def visualization(object_ID:str):
         details_content.clear()
 
         with details_content:
-            render_entity_title(entity_label)
-            ui.label(entity_kind).classes("text-sm text-gray-500")
-            ui.separator()
+            render_details_heading(entity_label, entity_kind)
             ui.spinner(size="md")
             ui.label("Loading entity details...")
 
@@ -418,9 +408,7 @@ async def visualization(object_ID:str):
             details_content.clear()
 
             with details_content:
-                render_entity_title(entity_label)
-                ui.label(entity_kind).classes("text-sm text-gray-500")
-                ui.separator()
+                render_details_heading(entity_label, entity_kind)
                 ui.label("Could not load entity details.").classes("text-negative")
                 ui.label(str(error)).classes("break-all text-xs")
 
@@ -431,9 +419,7 @@ async def visualization(object_ID:str):
         details_content.clear()
 
         with details_content:
-            render_entity_title(entity_label)
-            ui.label(entity_kind).classes("text-sm text-gray-500")
-            ui.separator()
+            render_details_heading(entity_label, entity_kind)
 
             if not detail_rows:
                 ui.label("No selected details found for this entity.")

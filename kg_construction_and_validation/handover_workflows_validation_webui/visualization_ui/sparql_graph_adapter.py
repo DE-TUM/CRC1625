@@ -22,6 +22,7 @@ class EdgeSpec:
     target_kind: str
     source_label: str | None = None
     target_label: str | None = None
+    edge_kind: str = "structural"  # default edge kind if not specified
 
 
 def extract_label_from_uri(uri: str) -> str:
@@ -200,6 +201,7 @@ def translate_rows_to_generic_edges(
                 target,
                 spec.source_kind,
                 spec.target_kind,
+                spec.edge_kind,
             )
 
             if edge_key in seen_edges:
@@ -211,6 +213,7 @@ def translate_rows_to_generic_edges(
                 "target": make_binding(target),
                 "source_kind": make_binding(spec.source_kind, "literal"),
                 "target_kind": make_binding(spec.target_kind, "literal"),
+                "edge_kind": make_binding(spec.edge_kind, "literal"),
             }
 
             if source_label:
@@ -285,6 +288,12 @@ def translate_sparql_results_to_generic_edges(
     results: list[dict],
     edge_specs: list[EdgeSpec] | None = None,
 ) -> list[dict]:
+    """
+    Convert SPARQL query results into a list of generic graph edges. It does not creathe the graph, only prepares the data for graph creation.
+    The input is a dictionary of SPARQL query results, and the output is a list of dictionaries representing edges in a generic graph format.
+    For a detailed elaboration, see README.md in the handover_workflows_validation_webui folder.
+
+    """
     if not results:
         return []
 
@@ -387,6 +396,12 @@ def build_cytoscape_graph_from_generic_edges(
     node_class: str,
     use_sample_parent: bool = True,
 ):
+    """
+    Convert generic graph edges into Cytoscape.js graph format.
+    The input is a list of dictionaries representing edges in a generic graph format, and the output
+    is a tuple containing two lists: one for nodes and one for edges, both in Cytoscape.js format.
+    For a detailed elaboration, see README.md in the handover_workflows_validation_webui folder.
+    """
     nodes = []
     edges = []
 
