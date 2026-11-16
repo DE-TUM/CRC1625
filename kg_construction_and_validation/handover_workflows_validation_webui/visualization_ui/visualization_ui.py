@@ -165,14 +165,20 @@ def filter_detail_rows(rows: list[dict], kind: str) -> list[dict]:
         if allowed_properties and prop_name not in allowed_properties:
             continue
 
+        prop_label = (
+            row.get("property_label", {}).get("value")
+            or prop_name
+        )
+
         value = display_value(
             row["value"],
             row.get("value_name"),
         )
 
         result.append({"row_id": index,
-                       "property": prop_name, 
+                       "property": prop_label, 
                        "value": value,
+                       "property_label": prop_label,
                        "property_iri": prop_uri})
 
     return result
@@ -210,20 +216,24 @@ def render_details_heading(entity_label: str, entity_kind: str):
     ui.label(entity_kind).classes("text-sm text-gray-500")
     ui.separator()
 
-async def get_internal_id_for_entity(entity_uri: str) -> str | None:
-    query = entity_details_query.replace(
-        "{entityURI_LITERAL}",
-        sparql_string_literal(entity_uri),
-    )
+async def get_internal_id_for_entity(
+    entity_uri: str,
+    rows: list[dict] | None = None,
+) -> str | None:
 
-    result = await rdf_datastore_client.launch_query(query)
-    rows = result["results"]["bindings"]
+    if rows is None:
+        query = entity_details_query.replace(
+            "{entityURI_LITERAL}",
+            sparql_string_literal(entity_uri),
+        )
+
+        result = await rdf_datastore_client.launch_query(query)
+        rows = result["results"]["bindings"]
 
     for row in rows:
         prop_uri = row["property"]["value"]
-        prop_name = short_uri(prop_uri)
 
-        if prop_name == "internalID":
+        if short_uri(prop_uri) == "internalID":
             return row["value"]["value"]
 
     return None
@@ -234,12 +244,17 @@ def make_sample_relation_rows(rows: list[dict]) -> list[dict]:
     for index, row in enumerate(rows):
         related_sample_iri = row.get("related_sample", {}).get("value", "")
         related_internal_id = row.get("related_internal_id", {}).get("value", "")
-        related_name = row.get("related_name", {}).get("value") or short_uri(related_sample_iri)
+        related_name = (
+            row.get("related_name", {}).get("value")
+            or short_uri(related_sample_iri)
+        )
         relation_label = row.get("relation_label", {}).get("value", "")
+        relation_type = row.get("relation_type", {}).get("value", "")
 
         result.append({
             "row_id": index,
             "relation": relation_label,
+            "relation_type": relation_type,
             "sample_id": str(related_internal_id),
             "name": related_name,
             "iri": related_sample_iri,
@@ -313,6 +328,18 @@ async def visualization(object_ID:str):
     sample_relation_rows = make_sample_relation_rows(
         sample_relations_result["results"]["bindings"]
     )
+
+    parent_rows = [
+        row for row in sample_relation_rows
+        if row["relation_type"] == "incoming_parent"
+    ]
+
+    child_rows = [
+        row for row in sample_relation_rows
+        if row["relation_type"] == "outgoing"
+    ]
+
+
     workflows_page_state.main_content = ui.column().classes('w-full')
 
 
@@ -413,6 +440,23 @@ async def visualization(object_ID:str):
                 ui.label(str(error)).classes("break-all text-xs")
 
             return
+
+        internal_id = await get_internal_id_for_entity(entity_uri, rows)
+        # Display RDMS button only if the entity has an internal ID
+        if internal_id:
+            with entity_uri_container:
+                ui.button(
+                    "Open in RDMS",
+                    icon="open_in_new",
+                    on_click=lambda id=internal_id: ui.navigate.to(
+                        f"https://crc1625.mdi.ruhr-uni-bochum.de/object/id/{quote(str(id), safe='')}",
+                        new_tab=True,
+                    ),
+                    color="blue",
+                ).props("unelevated no-caps").classes(
+                    "font-bold mt-2"
+                )
+                #.classes("font-bold text-base px-2 py-1 shadow-md text-black")
 
         detail_rows = filter_detail_rows(rows, entity_kind)
 
@@ -549,12 +593,25 @@ async def visualization(object_ID:str):
 
             ui.separator()
 
-            ui.label(f"Associated samples: {len(sample_relation_rows)}").classes("text-xl font-bold mt-4")
+            # Parent navigation
+            if parent_rows:
+                with ui.row().classes("w-full justify-start mt-4"):
+                    for parent in parent_rows:
+                        ui.button(
+                            f"← Back to parent: {parent['name']} "
+                            f"(ID: {parent['sample_id']})",
+                            on_click=lambda sample_id=parent["sample_id"]:
+                                open_sample_visualization(sample_id),
+                        ).props("unelevated no-caps size=md").classes("font-bold text-base px-2 py-1 shadow-md text-black")
 
+            # Child samples
+            ui.label(
+                f"Child samples: {len(child_rows)}"
+            ).classes("text-xl font-bold mt-4")
             
 
-            if not sample_relation_rows:
-                ui.label("No incoming or outgoing relations found.")
+            if not child_rows:
+                ui.label("No child samples found.")
             else:
                 columns = [
                     {
@@ -588,14 +645,14 @@ async def visualization(object_ID:str):
 
                 sample_table = ui.table(
                     columns=columns,
-                    rows=sample_relation_rows,
+                    rows=child_rows,
                     row_key="row_id",
                 ).classes("w-full").props("flat bordered dense wrap-cells hide-pagination")
 
                 sample_table.add_slot(
                     "body-cell-name",
                     """
-                    <q-td :props="props" style="vertical-align: top;">
+                    <q-td :props="props" style="vertical-align: middle;">
                         <div style="
                             white-space: normal;
                             overflow-wrap: anywhere;
